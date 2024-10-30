@@ -119,11 +119,83 @@ dfx =
                              mutate(n = n())%>%
                              filter(n>1)%>% 
                              ungroup()%>%
-                             dplyr::select(-n)))%>%
-  mutate(comm = purrr::map(comm, ~{.}%>%
-                             mutate(Region = ifelse(Region == "CH_Calanda2", "CH_Calanda", Region))))%>%
-  mutate(Region = case_when(Region == "CH_Calanda2"~"CH_Calanda",
-                            .default = Region))
+                             dplyr::select(-n)))
+pools = dfx %>% 
+  dplyr::select(Region, originSiteID, destSiteID, comm) %>%
+  mutate(low = purrr::map(comm, ~{.} %>% #species pool at low site controls across all years
+                            dplyr::select(ODT, SpeciesName) %>% 
+                            filter(ODT == "destControls") %>%
+                            distinct(.$SpeciesName) %>% 
+                            flatten_chr(.)),
+         high = purrr::map(comm, ~{.} %>% #species pool of high site controls across all years
+                             dplyr::select(ODT, SpeciesName) %>% 
+                             filter(ODT =="originControls") %>%
+                             distinct(.$SpeciesName) %>% 
+                             flatten_chr(.)),
+         warmed = purrr::map(comm, ~{.} %>% #species pool of transplanted turfs across all years
+                               dplyr::select(ODT, SpeciesName) %>% 
+                               filter(ODT =="warmed") %>%
+                               distinct(.$SpeciesName) %>% 
+                               flatten_chr(.)),
+         high_unique = map2(high, low, ~setdiff(.x, intersect(.x,.y))), #strictly high elevation species pool
+         total = map2(high, low, ~unique(c(.x,.y))), #total
+         overlap = map2(high, low, ~intersect(.x, .y)), # overlapping species pool
+         resident = map2(high_unique, overlap, ~unique(c(.x,.y))), #high species pool and overlap for transplanted turfs
+         non_resident = map2(warmed, resident, ~setdiff(.x, intersect(.x,.y))),
+         colonizer = map2(non_resident, low, ~intersect(.x, .y)),
+         outsider = map2(non_resident, low, ~setdiff(.x, intersect(.x,.y))),
+         warmed_overlap = map2(overlap, warmed, ~intersect(.x, .y)), 
+         warmed_high_unique = map2(high_unique, warmed, ~intersect(.x, .y)),
+         warmed_colonizer = map2(colonizer, warmed, ~intersect(.x, .y)))
+
+pools.destination = 
+  pools %>%
+  mutate(comm_pool = pmap(list(comm, low), .f=function(comm, low){
+    comm %>%
+      mutate(pool = case_when(
+        SpeciesName %in% unique(low) ~ "low"
+      ))}))%>%
+  mutate(comm_pool = purrr::map(comm_pool, ~{.}%>% 
+                                  dplyr::select(SpeciesName, pool)))%>%
+  dplyr::select(Region, originSiteID, destSiteID, comm_pool)%>%
+  unnest(comm_pool)%>%
+  dplyr::select(Region, originSiteID, destSiteID, SpeciesName, pool)%>%
+  distinct()
+
+pools.origin = 
+  pools %>%
+  mutate(comm_pool = pmap(list(comm, high), .f=function(comm, high){
+    comm %>%
+      mutate(pool = case_when(
+        SpeciesName %in% unique(high) ~ "high"
+      ))}))%>%
+  mutate(comm_pool = purrr::map(comm_pool, ~{.}%>% 
+                                  dplyr::select(SpeciesName, pool)))%>%
+  dplyr::select(Region, originSiteID, destSiteID, comm_pool)%>%
+  unnest(comm_pool)%>%
+  dplyr::select(Region, originSiteID, destSiteID, SpeciesName, pool)%>%
+  distinct()
+
+pools = 
+  pools %>%
+  mutate(comm_pool = pmap(list(comm, colonizer, overlap, high_unique, outsider), .f=function(comm, colonizer, overlap, high_unique, outsider){
+    comm %>%
+      mutate(pool = case_when(
+        SpeciesName %in% unique(colonizer) ~ "colonizing",
+        SpeciesName %in% unique(overlap) ~ "overlapping",
+        SpeciesName %in% unique(high_unique) ~ "strictly_high_elevation",
+        SpeciesName %in% unique(outsider) ~ "outsider"
+      ))}))
+
+pools = pools %>%
+  mutate(comm_pool = purrr::map(comm_pool, ~{.}%>% 
+                                  dplyr::select(SpeciesName, pool)))%>%
+  dplyr::select(Region, originSiteID, destSiteID, comm_pool)%>%
+  unnest(comm_pool)%>%
+  dplyr::select(Region, originSiteID, destSiteID, SpeciesName, pool)%>%
+  distinct()%>%
+  mutate(pool=ifelse(is.na(pool), "low", pool))%>%
+  distinct()
 
 dfx = dfx %>% 
   mutate(comm = purrr::map(comm, ~{
@@ -142,3 +214,86 @@ dfx = dfx %>%
                    values_to = "Rel_Cover")%>%
       mutate(UniqueID = paste0(Year, "_", destPlotID))
   })) 
+
+trait = 
+  read_csv("data/trait.csv")%>%
+  as_tibble()%>%
+  group_by(taxon, species, Trait)%>%
+  mutate(lower_bound = quantile(Value, 0.025),
+         upper_bound = quantile(Value, 0.975))%>%
+  mutate(outlier = Value >= lower_bound & Value <= upper_bound)%>%
+  filter(outlier)
+
+traitx = 
+  trait %>%
+  group_by(Trait, species)%>%
+  summarize(value = median(Value, na.rm = TRUE))%>%
+  ungroup()%>%
+  pivot_wider(names_from = Trait, values_from = value)
+
+# Organize climate data
+sites = dfx %>%
+  mutate(comm = purrr::map(comm, ~{.} %>%
+                             dplyr::select(Year) %>% distinct()))%>%
+  unnest(comm)
+
+clim = get.clim(sites, climdata)
+
+# Organize ranges data
+ranges = 
+  ranges %>%
+  dplyr::select(species, aoo_2, mean_mat_sub, median_mat_sub, mean_ap_sub, median_ap_sub)%>%
+  mutate(mean_mat_sub = (mean_mat_sub*0.1) -273.15,
+         median_mat_sub = (median_mat_sub*0.1) -273.15,
+         mean_ap_sub = (mean_ap_sub*0.1),
+         median_ap_sub = (median_ap_sub*0.1)
+         )
+
+# I decided to taket the median for now
+ggplot(ranges, aes(mean_mat_sub, median_mat_sub))+
+  geom_abline(slope = 1, intercept = 0)+
+  geom_point()+
+  stat_cor()
+
+ggplot(ranges, aes(mean_ap_sub, median_ap_sub))+
+  geom_abline(slope = 1, intercept = 0)+
+  geom_point()+
+  stat_cor()
+
+sp_list_TNRS = read_csv("~/Desktop/TransPlant_clean_trait/data/sp.list_TNRS.csv")
+
+sp.list = 
+  sp_list_TNRS %>%
+  dplyr::select(Name_submitted, Accepted_name, Accepted_species)%>%
+  distinct()
+
+# Calculate traits per experiment per pool
+pools.origin = 
+pools.origin %>%
+  rename(species = SpeciesName) %>%
+  left_join(traitx)%>%
+  dplyr::select(-C_percent, -LA, - N_percent, -seed_mass)%>%
+  filter(!is.na(word(species, 2)))%>% 
+  filter(!is.na(pool))%>%
+  mutate(LDMC = log(LDMC*10),
+         vegetative_height = log(vegetative_height*10),
+         SLA = log(SLA*10))%>%
+  group_by(Region, originSiteID, destSiteID)%>%
+  summarize(across(LDMC:vegetative_height, ~mean(., na.rm = TRUE)))%>%
+  rename(ori_LDMC = LDMC, ori_SLA = SLA, ori_vegetative_height = vegetative_height)
+  
+pools.destination = 
+  pools.destination %>%
+  rename(species = SpeciesName) %>%
+  left_join(traitx)%>%
+  dplyr::select(-C_percent, -LA, - N_percent, -seed_mass)%>%
+  filter(!is.na(word(species, 2)))%>% 
+  filter(!is.na(pool))%>%
+  mutate(LDMC = log(LDMC*10),
+         vegetative_height = log(vegetative_height*10),
+         SLA = log(SLA*10))%>%
+  group_by(Region, originSiteID, destSiteID)%>%
+  summarize(across(LDMC:vegetative_height, ~mean(., na.rm = TRUE)))%>%
+  rename(dest_LDMC = LDMC, dest_SLA = SLA, dest_vegetative_height = vegetative_height)
+
+pools.traits = left_join(pools.destination, pools.origin)
