@@ -1,7 +1,7 @@
 field,value
-recorded_at_utc,2026-09-09 16:17:24 UTC
+recorded_at_utc,2026-09-09 16:18:28 UTC
 git_branch,refactor/canonical-targets
-git_commit,987bb86f08062efaa96820a6ed9ed30b529bccc5
+git_commit,1ed0261e6a98eed88afae0de1fa3996a8b1d888b
 git_worktree_dirty,TRUE
 r_version,R version 4.6.1 (2026-06-24)
 r_platform,aarch64-apple-darwin23
