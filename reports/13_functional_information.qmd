@@ -50,7 +50,7 @@ knitr::kable(mask_audit)
 knitr::kable(assignment_gate)
 knitr::kable(source_audit)
 knitr::kable(dplyr::bind_rows(fit_gate, comparison_gate, cr1_gate))
-knitr::include_graphics(woodiness_figure_file)
+knitr::include_graphics(woodiness_figure_file, rel_path = FALSE)
 ```
 
 ## Interpretation boundary

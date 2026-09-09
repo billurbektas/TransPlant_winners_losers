@@ -13,6 +13,25 @@ canonical_analysis_targets <- function() {
       transition_reference,
       readRDS(transition_reference_fixture_file)
     ),
+    tar_target(
+      reference_artifacts_config_file,
+      file.path(config$root, "config", "reference_artifacts.csv"),
+      format = "file"
+    ),
+    tar_target(
+      reference_artifact_ledger,
+      read_csv_canonical(reference_artifacts_config_file)
+    ),
+    tar_target(
+      reference_file_artifacts,
+      file.path(
+        config$root,
+        reference_artifact_ledger$path[
+          reference_artifact_ledger$checksum_method == "file_sha256"
+        ]
+      ),
+      format = "file"
+    ),
 
     # Compute the downstream boundary from active upstream file targets. The
     # explicit CSV round trip is part of the anchored Step 22 interface: it
@@ -90,6 +109,10 @@ canonical_analysis_targets <- function() {
         canonical_downstream_settings
       )
     ),
+    tar_target(
+      downstream_covariance_validation,
+      downstream_covariance_release_check(downstream_scope_526$V_validation)
+    ),
 
     tar_target(mboth_526_model, transition_reference$mboth_model_signature),
     tar_target(
@@ -128,8 +151,16 @@ canonical_analysis_targets <- function() {
       mboth_variance_profiles_526,
       dplyr::bind_rows(mboth_variance_profile_component) |>
         dplyr::mutate(
-          warnings = dplyr::na_if(.data$warnings, ""),
-          error = dplyr::na_if(.data$error, "")
+          warnings = if (all(is.na(.data$warnings) | .data$warnings == "")) {
+            rep(NA, dplyr::n())
+          } else {
+            dplyr::na_if(as.character(.data$warnings), "")
+          },
+          error = if (all(is.na(.data$error) | .data$error == "")) {
+            rep(NA, dplyr::n())
+          } else {
+            dplyr::na_if(as.character(.data$error), "")
+          }
         )
     ),
     tar_target(
@@ -921,11 +952,34 @@ canonical_analysis_targets <- function() {
     ),
     tar_target(
       phylogeny_reference_artifact_validation,
-      verify_reference_artifacts(config$root)
+      {
+        reference_file_artifacts
+        phylogeny_package_installation_files
+        verify_reference_artifacts(
+          config$root, references = reference_artifact_ledger
+        )
+      }
+    ),
+    tar_target(
+      phylogeny_package_installation_files,
+      {
+        package_root <- find.package("V.PhyloMaker2")
+        file.path(
+          package_root,
+          c(
+            "DESCRIPTION", "R/V.PhyloMaker2.rdb", "R/V.PhyloMaker2.rdx",
+            "data/Rdata.rdb", "data/Rdata.rds", "data/Rdata.rdx"
+          )
+        )
+      },
+      format = "file"
     ),
     tar_target(
       phylogeny_package_source_provenance,
-      phylogeny_package_provenance()
+      {
+        phylogeny_package_installation_files
+        phylogeny_package_provenance()
+      }
     ),
     tar_target(
       phylogeny_package_validation,
@@ -1235,6 +1289,39 @@ canonical_analysis_targets <- function() {
       format = "file"
     ),
     tar_target(
+      canonical_phylogeny_newick_file,
+      write_text_atomic(
+        ape::write.tree(resident_phylogeny_candidate),
+        file.path(
+          canonical_downstream_settings$canonical_output$models,
+          "resident_phylogeny_526.newick"
+        )
+      ),
+      format = "file"
+    ),
+    tar_target(
+      canonical_phylogenetic_distance_file,
+      write_rds_atomic(
+        phylogenetic_distance,
+        file.path(
+          canonical_downstream_settings$canonical_output$data,
+          "phylogenetic_distance_matrix_526.rds"
+        )
+      ),
+      format = "file"
+    ),
+    tar_target(
+      canonical_zero_distance_audit_file,
+      write_csv_atomic(
+        zero_distance_audit,
+        file.path(
+          canonical_downstream_settings$canonical_output$audits,
+          "zero_distance_pair_audit_526.csv"
+        )
+      ),
+      format = "file"
+    ),
+    tar_target(
       canonical_ldmc_model_file,
       write_rds_atomic(
         ldmc_model_sequence_526$fits$full_REML$fit,
@@ -1436,7 +1523,7 @@ canonical_analysis_targets <- function() {
         upstream_winner_loser = winner_loser_validation,
         temporal_flows = flow_validation,
         downstream_inputs = downstream_input_equivalence,
-        downstream_covariance = downstream_scope_526$V_validation,
+        downstream_covariance = downstream_covariance_validation,
         downstream_consistency = downstream_scope_526$consistency_checks,
         mboth_fit = mboth_526_refit_equivalence,
         mboth_profiles = mboth_variance_profile_equivalence,
@@ -1495,7 +1582,8 @@ canonical_analysis_targets <- function() {
       canonical_run_provenance,
       build_canonical_run_provenance(
         config$root, numerical_release_validation
-      )
+      ),
+      cue = tar_cue(mode = "always")
     ),
     tar_target(
       canonical_run_provenance_file,
@@ -1529,6 +1617,9 @@ canonical_analysis_targets <- function() {
         canonical_pev_scores_file = canonical_pev_scores_file,
         canonical_pev_scaling_file = canonical_pev_scaling_file,
         canonical_phylogeny_file = canonical_phylogeny_file,
+        canonical_phylogeny_newick_file = canonical_phylogeny_newick_file,
+        canonical_phylogenetic_distance_file = canonical_phylogenetic_distance_file,
+        canonical_zero_distance_audit_file = canonical_zero_distance_audit_file,
         canonical_pcoa_eigen_file = canonical_pcoa_eigen_file,
         canonical_ldmc_model_file = canonical_ldmc_model_file,
         canonical_lma_model_file = canonical_lma_model_file,

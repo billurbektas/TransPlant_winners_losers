@@ -131,6 +131,10 @@ test_that("the candidate phylogeny is rebuilt rather than adopted from Step 19",
     "build_phylogeny_from_placement_decisions",
     fixed = TRUE
   )
+  expect_match(source_text, "reference_file_artifacts", fixed = TRUE)
+  expect_match(
+    source_text, "phylogeny_package_installation_files", fixed = TRUE
+  )
 })
 
 test_that("canonical command-line entry points do not source historical runners", {

@@ -1,0 +1,16 @@
+field,value
+recorded_at_utc,2026-09-09 16:12:27 UTC
+git_branch,refactor/canonical-targets
+git_commit,5251205aeed6283ddea5b80c0f0861bd07932509
+git_worktree_dirty,TRUE
+r_version,R version 4.6.1 (2026-06-24)
+r_platform,aarch64-apple-darwin23
+operating_system,Darwin 25.6.0 arm64
+targets_version,1.12.0
+tarchetypes_version,0.14.1
+quarto_r_package_version,1.5.1
+v_phylomaker2_version,0.1.0
+renv_lock_sha256,a0049226384305e222e9a148eaa822a2405bf1137db5cffaa85ba124245449f9
+targets_script_sha256,77caaed8c43d189c53b6c69c59b523b50520da61331fe474a9f1782443dc6ec0
+step22_reference_sha256,8d5d7544a6e6bcb757827263763ffae95115fa10b52b187669eaa5627af6931f
+transition_reference_sha256,6aa52701c604bf23f7366970fbf80e4e3b05f7253ae1961e1f7251ff08c962e6

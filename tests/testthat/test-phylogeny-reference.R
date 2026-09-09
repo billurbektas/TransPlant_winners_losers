@@ -37,10 +37,9 @@ test_that("the external-source ledger records the pinned phylogeny commit", {
 
 test_that("the current PEV orientation follows the documented convention", {
   path <- project_path(
-    "output", "step_by_step_modeling", "resident_phylogeny_pcoa",
-    "species_pev_scores.csv"
+    "output", "data", "species_pev_scores_526.csv"
   )
-  skip_if_not(file.exists(path))
+  expect_true(file.exists(path), info = "Build canonical_pev_scores_file")
   scores <- readr::read_csv(path, show_col_types = FALSE)
   oriented <- orient_pev_axes(scores)
   expect_gt(oriented$PEV1[oriented$species_id == "Poa trivialis"], 0)
@@ -50,12 +49,16 @@ test_that("the current PEV orientation follows the documented convention", {
 })
 
 test_that("the current zero-distance pairs are intentional", {
-  directory <- project_path(
-    "output", "step_by_step_modeling", "resident_phylogeny_pcoa"
+  distance_path <- project_path(
+    "output", "data", "phylogenetic_distance_matrix_526.rds"
   )
-  distance_path <- file.path(directory, "phylogenetic_distance_matrix.rds")
-  audit_path <- file.path(directory, "zero_distance_pair_audit.csv")
-  skip_if_not(all(file.exists(c(distance_path, audit_path))))
+  audit_path <- project_path(
+    "output", "audits", "zero_distance_pair_audit_526.csv"
+  )
+  expect_true(
+    all(file.exists(c(distance_path, audit_path))),
+    info = "Build canonical phylogenetic-distance audit files"
+  )
   checks <- validate_zero_distance_placements(
     readRDS(distance_path),
     readr::read_csv(audit_path, show_col_types = FALSE)

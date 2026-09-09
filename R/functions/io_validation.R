@@ -29,3 +29,18 @@ copy_file_atomic_verified <- function(input, output) {
   }
   output
 }
+
+write_text_atomic <- function(text, path) {
+  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+  temporary <- tempfile(
+    pattern = paste0(basename(path), "-"),
+    tmpdir = dirname(path),
+    fileext = ".tmp"
+  )
+  on.exit(if (file.exists(temporary)) unlink(temporary), add = TRUE)
+  writeLines(enc2utf8(as.character(text)), temporary, useBytes = TRUE)
+  if (!file.rename(temporary, path)) {
+    stop("Could not publish staged text file: ", path, call. = FALSE)
+  }
+  path
+}

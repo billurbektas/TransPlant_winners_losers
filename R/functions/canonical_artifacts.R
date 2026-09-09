@@ -73,8 +73,30 @@ validate_downstream_scope_artifacts <- function(auc_data, V_auc, checks, config)
   )
 }
 
+downstream_covariance_release_check <- function(validation) {
+  if (!is.data.frame(validation) || !"valid" %in% names(validation) ||
+      nrow(validation) != 1L) {
+    stop("Downstream covariance validation must contain one valid row.",
+         call. = FALSE)
+  }
+  tibble::tibble(
+    check = "validated downstream sampling covariance",
+    pass = as.logical(validation$valid),
+    detail = paste(
+      "dimensions", validation$dimensions_valid,
+      "order", validation$order_valid,
+      "minimum eigenvalue", format(validation$minimum_eigenvalue, digits = 8)
+    )
+  )
+}
+
 step22_data_validation_component <- function(scope) {
-  scope[c("effects", "species", "experiments", "V_validation", "consistency_checks")]
+  result <- scope[
+    c("effects", "species", "experiments", "V_validation", "consistency_checks")
+  ]
+  result$consistency_checks <- result$consistency_checks |>
+    dplyr::mutate(check_number = as.integer(.data$check_number))
+  result
 }
 
 validated_step22_metadata <- function(config) {

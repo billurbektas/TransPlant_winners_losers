@@ -37,6 +37,10 @@ canonical_publication_targets <- function() {
       }
     ),
     tar_target(
+      retained_figure_validation,
+      retained_figure_release_check(retained_figure_copy_audit)
+    ),
+    tar_target(
       retained_figure_copy_audit_file,
       write_csv_atomic(
         retained_figure_copy_audit,
@@ -121,7 +125,7 @@ canonical_publication_targets <- function() {
       release_validation,
       assert_release_validation(assemble_release_validation(list(
         numerical = numerical_release_validation,
-        retained_figures = retained_figure_copy_audit
+        retained_figures = retained_figure_validation
       )))
     ),
     tar_target(
@@ -134,67 +138,67 @@ canonical_publication_targets <- function() {
     ),
     tarchetypes::tar_quarto(
       report_01_inputs_and_scope, "reports/01_inputs_and_scope.qmd",
-      output_file = "01_inputs_and_scope.html"
+      output_file = "01_inputs_and_scope.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_02_community_cleaning, "reports/02_community_cleaning.qmd",
-      output_file = "02_community_cleaning.html"
+      output_file = "02_community_cleaning.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_03_taxonomy, "reports/03_taxonomy.qmd",
-      output_file = "03_taxonomy.html"
+      output_file = "03_taxonomy.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_04_climate, "reports/04_climate.qmd",
-      output_file = "04_climate.html"
+      output_file = "04_climate.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_05_trait_preparation, "reports/05_trait_preparation.qmd",
-      output_file = "05_trait_preparation.html"
+      output_file = "05_trait_preparation.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_06_auc_validation, "reports/06_auc_validation.qmd",
-      output_file = "06_auc_validation.html"
+      output_file = "06_auc_validation.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_07_temporal_winner_loser, "reports/07_temporal_winner_loser.qmd",
-      output_file = "07_temporal_winner_loser.html"
+      output_file = "07_temporal_winner_loser.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_08_downstream_scope_526, "reports/08_downstream_scope_526.qmd",
-      output_file = "08_downstream_scope_526.html"
+      output_file = "08_downstream_scope_526.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_09_mboth_526, "reports/09_mboth_526.qmd",
-      output_file = "09_mboth_526.html"
+      output_file = "09_mboth_526.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_10_species_context, "reports/10_species_context.qmd",
-      output_file = "10_species_context.html"
+      output_file = "10_species_context.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_11_family_resolution, "reports/11_family_resolution.qmd",
-      output_file = "11_family_resolution.html"
+      output_file = "11_family_resolution.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_12_trait_information, "reports/12_trait_information.qmd",
-      output_file = "12_trait_information.html"
+      output_file = "12_trait_information.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_13_functional_information, "reports/13_functional_information.qmd",
-      output_file = "13_functional_information.html"
+      output_file = "13_functional_information.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_14_phylogeny, "reports/14_phylogeny.qmd",
-      output_file = "14_phylogeny.html"
+      output_file = "14_phylogeny.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_15_heterogeneity_synthesis, "reports/15_heterogeneity_synthesis.qmd",
-      output_file = "15_heterogeneity_synthesis.html"
+      output_file = "15_heterogeneity_synthesis.html", working_directory = "."
     ),
     tarchetypes::tar_quarto(
       report_16_reference_and_release, "reports/16_reference_and_release.qmd",
-      output_file = "16_reference_and_release.html"
+      output_file = "16_reference_and_release.html", working_directory = "."
     ),
     tar_target(
       published_report_01_inputs_and_scope,

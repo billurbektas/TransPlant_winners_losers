@@ -44,6 +44,29 @@ compare_reference_node <- function(candidate, reference, path = character()) {
   location <- if (length(path)) paste(path, collapse = "/") else "<root>"
   failures <- character()
 
+  # CSV import guesses an all-missing diagnostic column as logical, whereas
+  # an equivalent in-memory model table retains it as character. Compare the
+  # semantic diagnostic values so that NA_character_ and NA are equivalent,
+  # while preserving exact matching for every non-missing warning/error.
+  diagnostic_name <- length(path) && grepl(
+    "(warning|error)s?$", tail(path, 1L), ignore.case = TRUE
+  )
+  diagnostic_types <- (is.character(candidate) || is.logical(candidate)) &&
+    (is.character(reference) || is.logical(reference))
+  if (diagnostic_name && diagnostic_types) {
+    normalize_diagnostic <- function(x) {
+      value <- as.character(x)
+      value[is.na(x) | value == ""] <- NA_character_
+      value
+    }
+    if (identical(
+      normalize_diagnostic(candidate), normalize_diagnostic(reference)
+    )) {
+      return(character())
+    }
+    return(paste0(location, ": exact diagnostic values differ"))
+  }
+
   if (is.data.frame(reference)) {
     if (!is.data.frame(candidate)) return(paste0(location, ": expected data frame"))
     if (!identical(names(candidate), names(reference))) {

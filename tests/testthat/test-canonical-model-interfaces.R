@@ -38,10 +38,10 @@ test_that("unique-species predictor scaling is response-independent", {
 
 test_that("callout species and their selection rules remain explicit", {
   path <- project_path(
-    "output", "step_by_step_modeling", "downstream_526", "tables",
+    "output", "tables",
     "species_minmax_classification_526.csv"
   )
-  skip_if_not(file.exists(path))
+  expect_true(file.exists(path), info = "Build canonical_species_classification_file")
   classification <- readr::read_csv(path, show_col_types = FALSE)
   examples <- select_species_callout_examples(classification)
   expect_identical(examples$species_id, canonical_callout_species())
@@ -110,10 +110,10 @@ test_that("family covariance comparison requires exact order and close values", 
 
 test_that("compact model signatures preserve every fitted regression check", {
   path <- project_path(
-    "output", "step_by_step_modeling", "downstream_526", "models",
+    "output", "models",
     "M_both_526.rds"
   )
-  skip_if_not(file.exists(path))
+  expect_true(file.exists(path), info = "Build canonical_mboth_model_file")
   model <- readRDS(path)
   signature <- canonical_model_signature(model)
   expect_s3_class(signature, "canonical_model_signature")

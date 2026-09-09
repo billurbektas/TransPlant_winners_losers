@@ -226,6 +226,16 @@ or:
 Rscript scripts/run_pipeline.R
 ```
 
+The wrapper itself is a clean R process and therefore runs `targets` without
+spawning an additional nested R session.
+
+On hosts where local worker processes are restricted, run the same graph
+sequentially without changing any target definitions:
+
+```sh
+TRANSPLANT_USE_CREW=false Rscript scripts/run_pipeline.R
+```
+
 Useful scoped gates are:
 
 ```r

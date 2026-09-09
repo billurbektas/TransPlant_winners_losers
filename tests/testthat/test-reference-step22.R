@@ -14,6 +14,36 @@ test_that("the frozen Step 22 fixture has the required schema and scope", {
   expect_true(all(reference$data_validation$consistency_checks$pass))
 })
 
+test_that("the Step 22 data-validation adapter preserves integer check IDs", {
+  source(project_path("R", "functions", "canonical_artifacts.R"))
+  scope <- list(
+    effects = 1L,
+    species = 1L,
+    experiments = 1L,
+    V_validation = tibble::tibble(valid = TRUE),
+    consistency_checks = tibble::tibble(
+      check_number = c(1, 2), check = c("a", "b"), pass = TRUE
+    )
+  )
+  adapted <- step22_data_validation_component(scope)
+  expect_type(adapted$consistency_checks$check_number, "integer")
+})
+
+test_that("the downstream covariance check exposes the release-gate interface", {
+  source(project_path("R", "functions", "canonical_artifacts.R"))
+  validation <- tibble::tibble(
+    dimensions_valid = TRUE,
+    order_valid = TRUE,
+    maximum_symmetry_error = 0,
+    minimum_eigenvalue = 0,
+    maximum_diagonal_se_error = 0,
+    valid = TRUE
+  )
+  gate <- downstream_covariance_release_check(validation)
+  expect_identical(gate$pass, TRUE)
+  expect_match(gate$detail, "minimum eigenvalue")
+})
+
 test_that("the Step 22 comparator passes identical objects and rejects drift", {
   reference <- readRDS(project_path("tests", "fixtures", "step22_reference_results.rds"))
   expect_true(all(validate_step22_reference(reference, reference)$pass))
@@ -31,6 +61,26 @@ test_that("the Step 22 comparator passes identical objects and rejects drift", {
   count_validation <- validate_step22_reference(changed_count, reference)
   expect_false(count_validation$pass[[2]])
   expect_match(count_validation$detail[[2]], "data_validation/effects")
+})
+
+test_that("empty warning and error columns compare semantically", {
+  candidate <- tibble::tibble(
+    component = c("a", "b"),
+    contrast_warnings = c(NA_character_, ""),
+    error = c(NA_character_, NA_character_)
+  )
+  reference <- tibble::tibble(
+    component = c("a", "b"),
+    contrast_warnings = c(NA, NA),
+    error = c(NA, NA)
+  )
+  expect_length(compare_reference_node(candidate, reference), 0L)
+
+  candidate$contrast_warnings[[2]] <- "optimizer warning"
+  expect_match(
+    compare_reference_node(candidate, reference),
+    "exact diagnostic values differ"
+  )
 })
 
 test_that("the tolerance registry matches the frozen release policy", {

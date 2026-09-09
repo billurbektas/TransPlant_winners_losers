@@ -6,8 +6,8 @@
 # is current and fully passing. This script moves files; it never deletes data.
 
 args <- commandArgs(trailingOnly = TRUE)
-apply <- identical(args, "--apply")
-if (length(args) && !apply) {
+do_apply <- identical(args, "--apply")
+if (length(args) && !do_apply) {
   stop("Usage: Rscript scripts/archive_validated_history.R [--apply]",
        call. = FALSE)
 }
@@ -201,7 +201,7 @@ hash_file <- function(path) {
 }
 moves$sha256 <- vapply(file.path(root, moves$original_path), hash_file, character(1))
 moves$archive_date <- as.character(Sys.Date())
-moves$status <- if (apply) "ARCHIVED_HASH_VERIFIED" else "PLANNED"
+moves$status <- if (do_apply) "ARCHIVED_HASH_VERIFIED" else "PLANNED"
 moves <- moves[, c(
   "original_path", "destination_path", "category", "sha256", "producer",
   "dependencies", "reason", "archive_date", "status"
@@ -210,7 +210,7 @@ moves <- moves[, c(
 cat(nrow(moves), "files eligible for archive migration.\n")
 print(table(moves$category))
 cat("Total bytes:", sum(file.info(file.path(root, moves$original_path))$size), "\n")
-if (!apply) {
+if (!do_apply) {
   cat("Dry run only. Re-run with --apply after reviewing the release gate.\n")
   quit(status = 0)
 }

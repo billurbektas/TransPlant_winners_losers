@@ -402,6 +402,24 @@ audit_retained_figure_copies <- function(
   result
 }
 
+retained_figure_release_check <- function(audit) {
+  required <- c(
+    "source_path", "destination_path", "source_matches_expected",
+    "copy_matches_source"
+  )
+  if (!is.data.frame(audit) || !all(required %in% names(audit))) {
+    stop("Retained-figure audit lacks its checksum validation columns.",
+         call. = FALSE)
+  }
+  tibble::tibble(
+    check = paste0("retained figure: ", audit$source_path),
+    pass = as.logical(
+      audit$source_matches_expected & audit$copy_matches_source
+    ),
+    detail = paste(audit$source_path, "->", audit$destination_path)
+  )
+}
+
 copy_retained_figures_verified <- function(
     root = getwd(), retained_config = "config/retained_figures.csv") {
   retained <- read.csv(
@@ -495,8 +513,15 @@ build_scientific_source_inventory <- function(paths, root = getwd()) {
   )
 }
 
-verify_reference_artifacts <- function(root = getwd(), config_path = "config/reference_artifacts.csv") {
-  references <- read.csv(file.path(root, config_path), stringsAsFactors = FALSE, check.names = FALSE)
+verify_reference_artifacts <- function(
+    root = getwd(), references = NULL,
+    config_path = "config/reference_artifacts.csv") {
+  if (is.null(references)) {
+    references <- read.csv(
+      file.path(root, config_path), stringsAsFactors = FALSE,
+      check.names = FALSE
+    )
+  }
   installed_phylo <- requireNamespace("V.PhyloMaker2", quietly = TRUE)
 
   observed <- vapply(seq_len(nrow(references)), function(index) {

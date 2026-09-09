@@ -27,6 +27,9 @@ test_that("all eleven retained figure copies match their approved sources", {
   expect_identical(nrow(audit), 11L)
   expect_true(all(audit$source_matches_expected))
   expect_true(all(audit$copy_matches_source))
+  release <- retained_figure_release_check(audit)
+  expect_identical(nrow(release), 11L)
+  expect_true(all(release$pass))
 })
 
 test_that("figure provenance exposes source and duplicate relationships", {
@@ -66,4 +69,12 @@ test_that("regeneratable upstream figures use canonical candidate paths", {
       "implemented target; not generated"
     )
   ))
+})
+
+test_that("the destination-climate renderer drops inherited grouping", {
+  source(project_path("R", "functions", "climate_display_figure.R"))
+  body_text <- paste(
+    deparse(body(plot_destination_climate_warming_gradient)), collapse = "\n"
+  )
+  expect_match(body_text, "dplyr::ungroup(data)", fixed = TRUE)
 })

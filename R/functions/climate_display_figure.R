@@ -22,6 +22,7 @@ destination_climate_display_context <- function(experiment_id, grid_context) {
 
 plot_destination_climate_warming_gradient <- function(data, climate_contexts, path) {
   plot_data <- data |>
+    dplyr::ungroup() |>
     dplyr::distinct(
       .data$experiment_id, .data$origin_T_JJA, .data$destination_T_JJA,
       .data$destination_P_JJA, .data$diff_T_JJA, .data$climate_summary_status
