@@ -100,6 +100,7 @@ test_that("canonical exports are independent of the late validation object", {
                        fixed = TRUE)[[1]]
   manifest_block <- paste(source_text[manifest_start:manifest_end], collapse = "\n")
   expect_false(grepl("candidate_step22_results", manifest_block, fixed = TRUE))
+  expect_match(manifest_block, "vapply(unname(paths), sha256_file", fixed = TRUE)
 })
 
 test_that("functional assignments use the active source plus the explicit ledger", {

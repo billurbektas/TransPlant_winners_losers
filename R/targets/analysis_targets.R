@@ -1595,7 +1595,8 @@ canonical_analysis_targets <- function() {
     ),
     tar_target(
       canonical_numerical_export_files,
-      c(
+      {
+        paths <- c(
         canonical_downstream_data_file = canonical_downstream_data_file,
         canonical_downstream_V_file = canonical_downstream_V_file,
         canonical_mboth_model_file = canonical_mboth_model_file,
@@ -1643,12 +1644,20 @@ canonical_analysis_targets <- function() {
         canonical_run_provenance_file = canonical_run_provenance_file,
         canonical_scientific_source_inventory_file =
           canonical_scientific_source_inventory_file
-      )
+        )
+        list(
+          paths = paths,
+          sha256 = stats::setNames(
+            vapply(unname(paths), sha256_file, character(1)),
+            names(paths)
+          )
+        )
+      }
     ),
     tar_target(
       canonical_output_manifest,
       build_artifact_manifest(
-        canonical_numerical_export_files,
+        canonical_numerical_export_files$paths,
         config$root,
         "canonical targets; Step 22 numerically validated"
       )
