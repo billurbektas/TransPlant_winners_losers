@@ -47,3 +47,26 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Reproducible pipeline state and machine-specific libraries
+_targets/
+renv/library/
+renv/staging/
+
+# Large/reconstructable source data and caches
+data/try_47163.txt
+data/cache/
+
+# Reconstructable milestone data (documented in README)
+output/intermediate/
+output/models/
+
+# Interrupted atomic writes
+*.tmp
+
+# Local receipts used to distinguish regenerated figures from legacy files
+*.pdf.generated
+*.png.generated
+
+# Legacy whole-session snapshots are not pipeline inputs
+Environment_Save_*.RData

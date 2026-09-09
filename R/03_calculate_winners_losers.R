@@ -141,7 +141,6 @@ wlc %>%
        y = "Winning/losing strength calculated from \nsquare root of relative abundances")
 dev.off()
 
-pdf(file = "plot/transient_winning_losing_strength.pdf", width = 8, height = 6)
 wlt=
 wlc %>%
   filter(rel_abund == "auc.trap")%>%
@@ -213,41 +212,6 @@ wl.sel =
   filter(rel_abund == "auc.trap")%>%
   filter(step == "max")
 
-gf = c(
-  "Achillea" = "forb", "Agrostis" = "grass", "Alchemilla" = "forb", "Alopecurus" = "grass", 
-  "Amaranthus" = "forb", "Androsace" = "forb", "Anthoxanthum" = "grass", "Anthyllis" = "forb", 
-  "Arrhenatherum" = "grass", "Aster" = "forb", "Astragalus" = "forb", "Avenella" = "grass", 
-  "Bistorta" = "forb", "Bouteloua" = "grass", "Brachypodium" = "grass", "Bromus" = "grass", 
-  "Calamagrostis" = "grass", "Campanula" = "forb", "Carex" = "grass", "Chaerophyllum" = "forb", 
-  "Crocus" = "forb", "Cyananthus" = "forb", "Dactylis" = "grass", "Deschampsia" = "grass", 
-  "Deyeuxia" = "grass", "Dryas" = "forb", "Drymaria" = "forb", "Elymus" = "grass", 
-  "Elyna" = "forb", "Equisetum" = "forb", "Erigeron" = "forb", "Eritrichium" = "forb", 
-  "Eurybia" = "forb", "Festuca" = "grass", "Fragaria" = "forb", "Galium" = "forb", 
-  "Geranium" = "forb", "Glechoma" = "forb", "Hedysarum" = "forb", "Helianthella" = "forb", 
-  "Helianthemum" = "forb", "Helictochloa" = "grass", "Helictotrichon" = "grass", 
-  "Heracleum" = "forb", "Hieracium" = "forb", "Hippocrepis" = "forb", "Homogyne" = "forb", 
-  "Hymenoxys" = "forb", "Hypericum" = "forb", "Knautia" = "forb", "Kobresia" = "grass", 
-  "Lancea" = "forb", "Laserpitium" = "forb", "Leontodon" = "forb", "Leontopodium" = "forb", 
-  "Ligusticum" = "forb", "Lolium" = "grass", "Lotus" = "forb", "Lupinus" = "forb", 
-  "Luzula" = "forb", "Microula" = "forb", "Minuartia" = "forb", "Muhlenbergia" = "grass", 
-  "Nardus" = "grass", "Papaver" = "forb", "Pedicularis" = "forb", "Persicaria" = "forb", 
-  "Phleum" = "grass", "Pimpinella" = "forb", "Plantago" = "forb", "Poa" = "grass", 
-  "Polygonum" = "forb", "Potentilla" = "forb", "Primula" = "forb", "Prunella" = "forb", 
-  "Pulsatilla" = "forb", "Pyrethrum" = "forb", "Ranunculus" = "forb", "Rosa" = "forb", 
-  "Salix" = "forb", "Saussurea" = "forb", "Scorzoneroides" = "forb", "Sedum" = "forb", 
-  "Senecio" = "forb", "Sesleria" = "grass", "Sibbaldia" = "forb", "Silene" = "forb", 
-  "Solidago" = "forb", "Stipa" = "grass", "Taraxacum" = "forb", "Thalictrum" = "forb", 
-  "Thymus" = "forb", "Trifolium" = "forb", "Trisetum" = "grass", "Trollius" = "forb", 
-  "Vaccinium" = "forb", "Veronica" = "forb", "Vicia" = "forb", "Viola" = "forb", 
-  "Youngia" = "forb", "Ligusticopsis" = "forb", "Pilosella" = "forb", "Tanacetum" = "forb", 
-  "Dasiphora" = "forb", "Sibbaldianthe" = "forb"
-)
-
-
-gf = as_tibble(gf) %>%
-  rename(functional_group = value)%>%
-  mutate(genus = names(gf))
-
 cat.sel =
   wl.sel %>%
   left_join(pools)%>%
@@ -264,82 +228,6 @@ cat.sel =
   filter(!is.na(Accepted_name))%>%
   rename(species = Accepted_name)%>%
   dplyr::select(-Accepted_species, -Name_submitted)
-
-per.sp = 
-  cat.sel %>%
-  filter(!is.na(word(species, 2)))%>%
-  dplyr::select(Region, originSiteID, destSiteID, species, cat)%>%
-  mutate(genus = word(species, 1))%>%
-  distinct()%>%
-  filter(cat != "nc")%>%
-  group_by(genus)%>%
-  mutate(total = n())%>%
-  group_by(genus, total, cat)%>%
-  summarize(count = n())%>%
-  mutate(percent = (count/total)*100)%>%
-  left_join(gf)%>%
-  mutate(gg_name = paste0(genus, " (", total, ")"))%>%
-  mutate(functional_group = case_when(functional_group == "grass" ~ "Grasses",
-                                      functional_group == "forb" ~ "Forbs"))%>%
-  mutate(cat = factor(cat, levels = c("loser", "winner", "colonizing_winner")))%>%
-  ungroup()%>%
-  arrange(functional_group, percent, cat) %>%
-  mutate(genus = factor(genus, levels = unique(genus)),
-         gg_name = factor(gg_name, levels = unique(gg_name)))
-
-grayscale_color = 
-  per.sp %>%
-  mutate(
-    # Normalize 'total' to a range of 0 to 1
-    grayscale = rescale(total, to = c(0.7, 0)),
-    # Map normalized values to grayscale hex codes
-    grayscale_color = grey(grayscale)
-  )%>%
-  dplyr::select(gg_name, grayscale_color)%>%
-  distinct()
-
-label_data = data.frame(
-  x = c(seq(1, 76, length.out = 100), seq(77, 100, length.out = 100)),
-  y = c(rep(-10, 100), rep(-10, 100)),
-  label = rep(c("Forbs", "Grasses"), each = 100)
-)
-
-pdf(file = "plot/winner_loser_genus.pdf", width =13, height = 10)
-ggplot(per.sp, aes(x = gg_name, y = percent, fill = cat)) +
-  theme_bw()+
-  geom_bar(stat = "identity", position = "stack") +
-  scale_fill_manual(values = cat.colors)+
-  coord_radial(start = 0.25 * pi, end = 1.75 * pi, inner.radius = 0.5) +
-  guides(
-    theta = guide_axis_theta(angle = 90),
-    r     = guide_axis(angle = 90)
-  )+
-  geom_textpath(data = label_data, aes(x = x, y = y, label = label),
-                inherit.aes = FALSE, size = 5, color = "black", text_smoothing = 50) +
-  theme(axis.text.x = element_text(color = grayscale_color$grayscale_color),
-        panel.border = element_blank(),
-        legend.position = "bottom")+
-  labs(x = "", y = "", fill = "")
-dev.off()  
-
-pdf(file = "plot/winner_loser_boxplot.pdf", width =5, height = 6)
-cat.sel %>%
-  filter(!is.na(word(species, 2)))%>% 
-  filter(cat != "nc")%>%
-  mutate(cat = factor(cat, levels = c("loser", "winner", "colonizing_winner")))%>%
-  ggplot(aes(cat, estimate, fill = cat, color = cat))+
-  TP_theme()+
-  geom_hline(yintercept = 0, color = "grey50")+
-  geom_boxplot(alpha = 0.5, outliers = FALSE)+
-  geom_jitter()+
-  geom_text(aes(label = after_stat(sprintf("%.2f", y))), 
-            stat = "summary", fun = "median", vjust = -3, hjust = -0.1, size = 7) +
-  scale_fill_manual(values = cat.colors)+
-  scale_color_manual(values = cat.colors)+
-  guides(color = "none", fill = "none")+
-  labs(x = "", y = "Winning/losing strength")+
-  theme(axis.text.x = element_blank())
-dev.off()  
 
 # Here getting the AUC per treatment
 wl.em = 
@@ -420,16 +308,6 @@ reg =
                 range, 
                 dist_T, dist_P
                 )%>% distinct()
-
-pdf(file = "plot/predictor_distributions.pdf", height = 10, width = 10)
-reg %>%
-  dplyr::select(Region, originSiteID, destSiteID, species, SLA:dist_P)%>%
-  distinct()%>%
-  pivot_longer(cols = SLA:dist_P)%>%
-  ggplot(aes(value))+
-  facet_wrap(~name, scales = "free")+
-  geom_histogram()
-dev.off()
 
 reg = 
   reg %>%

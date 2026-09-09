@@ -1,0 +1,155 @@
+---
+title: "Resident Continuous-AUC Pre-Model Data Audit"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_float: true
+    theme: readable
+    highlight: tango
+params:
+  output_dir: null
+  root: null
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, dpi = 160)
+output_dir <- params$output_dir
+read_output <- function(...) {
+  readr::read_csv(file.path(output_dir, ...), show_col_types = FALSE)
+}
+audit <- read_output("tables", "data_audit.csv")
+column_map <- read_output("tables", "column_map.csv")
+missingness <- read_output("tables", "missingness.csv")
+replication <- read_output("tables", "species_replication.csv")
+trait_coverage <- read_output("audit", "trait_coverage.csv")
+experiments <- read_output("audit", "experiment_audit.csv")
+validation <- read_output("audit", "pre_model_validation.csv")
+metric <- function(horizon, name) {
+  value <- audit$value[audit$horizon == horizon & audit$metric == name]
+  if (length(value) != 1L) NA_real_ else value[[1]]
+}
+fmt <- function(x, digits = 3) {
+  if (digits == 0) {
+    format(round(x), scientific = FALSE, big.mark = ",", trim = TRUE)
+  } else {
+    formatC(x, digits = digits, format = "fg", big.mark = ",")
+  }
+}
+embed_png <- function(path, alt) {
+  knitr::asis_output(sprintf(
+    '<img src="%s" alt="%s" style="width:100%%;height:auto;"/>',
+    knitr::image_uri(path), alt
+  ))
+}
+```
+
+<style>
+.audit-note {border-left: 5px solid #0072B2; background: #eef7fb; padding: 0.8rem 1rem; margin: 1rem 0;}
+.audit-ok {border-left: 5px solid #009E73; background: #eef8f4; padding: 0.8rem 1rem; margin: 1rem 0;}
+table {font-size: 0.92em;}
+</style>
+
+<div class="audit-ok">
+This checkpoint was written before covariance reconstruction or hierarchical model fitting. All `r nrow(validation)` blocking validation checks passed. Trait gaps and partial reviewed climate-context coverage are documented but were not treated as fatal errors.
+</div>
+
+# Audit overview
+
+The inferential response is the continuous raw warmed-minus-origin AUC contrast. It was not defined or filtered using winner/loser labels or statistical-significance categories.
+
+| Audit quantity | Maximum duration | First 3 years |
+|:--|--:|--:|
+| Effect rows | `r fmt(metric("max", "total_effect_rows"), 0)` | `r fmt(metric("3", "total_effect_rows"), 0)` |
+| Unique species × experiment combinations | `r fmt(metric("max", "species_experiment_combinations"), 0)` | `r fmt(metric("3", "species_experiment_combinations"), 0)` |
+| Unique species | `r fmt(metric("max", "unique_species"), 0)` | `r fmt(metric("3", "unique_species"), 0)` |
+| Experiments | `r fmt(metric("max", "experiments"), 0)` | `r fmt(metric("3", "experiments"), 0)` |
+| Gradients/studies | `r fmt(metric("max", "gradients_studies"), 0)` | `r fmt(metric("3", "gradients_studies"), 0)` |
+| Positive finite SEs | `r fmt(metric("max", "positive_finite_SE"), 0)` | `r fmt(metric("3", "positive_finite_SE"), 0)` |
+
+```{r audit-effect-figure, results='asis'}
+embed_png(
+  file.path(output_dir, "audit", "figures", "effect_and_biological_coverage.png"),
+  "Response direction, repeated-species frequency, and trait coverage before model fitting."
+)
+```
+
+*Response direction, repeated-species frequency, and trait coverage before model fitting.*
+
+# Response and uncertainty
+
+| Quantity | Maximum duration | First 3 years |
+|:--|--:|--:|
+| AUC minimum | `r fmt(metric("max", "auc_effect_minimum"))` | `r fmt(metric("3", "auc_effect_minimum"))` |
+| AUC median | `r fmt(metric("max", "auc_effect_median"))` | `r fmt(metric("3", "auc_effect_median"))` |
+| AUC maximum | `r fmt(metric("max", "auc_effect_maximum"))` | `r fmt(metric("3", "auc_effect_maximum"))` |
+| Negative / zero / positive | `r paste(fmt(metric("max", "negative_auc_effects"), 0), fmt(metric("max", "zero_auc_effects"), 0), fmt(metric("max", "positive_auc_effects"), 0), sep=" / ")` | `r paste(fmt(metric("3", "negative_auc_effects"), 0), fmt(metric("3", "zero_auc_effects"), 0), fmt(metric("3", "positive_auc_effects"), 0), sep=" / ")` |
+| SE minimum–maximum | `r paste(fmt(metric("max", "auc_se_minimum")), fmt(metric("max", "auc_se_maximum")), sep=" – ")` | `r paste(fmt(metric("3", "auc_se_minimum")), fmt(metric("3", "auc_se_maximum")), sep=" – ")` |
+
+# Experiment and design coverage
+
+Climate and design summaries give each distinct experiment equal weight. Precipitation is displayed in its raw source units here; the model uses its natural logarithm.
+
+```{r audit-experiment-figure, results='asis'}
+embed_png(
+  file.path(output_dir, "audit", "figures", "experiment_and_design_coverage.png"),
+  "Observed climate, duration, area, and plot replication at the experiment level."
+)
+```
+
+*Observed climate, duration, area, and plot replication at the experiment level.*
+
+```{r experiment-ranges}
+range_rows <- audit |>
+  dplyr::filter(
+    .data$horizon == "max",
+    .data$metric %in% c(
+      "T_minimum", "T_maximum", "P_raw_minimum", "P_raw_maximum",
+      "W_minimum", "W_maximum", "duration_minimum", "duration_maximum",
+      "integration_span_minimum", "integration_span_maximum",
+      "plot_area_minimum", "plot_area_maximum",
+      "origin_plots_minimum", "origin_plots_maximum",
+      "warmed_plots_minimum", "warmed_plots_maximum"
+    )
+  ) |>
+  dplyr::mutate(value = signif(.data$value, 5))
+knitr::kable(range_rows[, c("metric", "value")], col.names = c("Primary-horizon range component", "Value"))
+```
+
+# Missingness and trait coverage
+
+```{r audit-missingness-figure, results='asis'}
+embed_png(
+  file.path(output_dir, "audit", "figures", "inferential_field_missingness.png"),
+  "Missingness across all inferential fields; focal traits have incomplete coverage."
+)
+```
+
+*Missingness across all inferential fields. Core response, uncertainty, identifiers, climate, and design fields are complete; focal traits have incomplete coverage.*
+
+```{r trait-coverage-table}
+trait_display <- trait_coverage |>
+  dplyr::filter(.data$horizon == "max") |>
+  dplyr::mutate(
+    effect_coverage = scales::percent(.data$effect_coverage, accuracy = 0.1),
+    species_coverage = scales::percent(.data$species_coverage, accuracy = 0.1)
+  )
+knitr::kable(trait_display, caption = "Primary-horizon trait coverage.")
+```
+
+# Columns actually used
+
+```{r column-map}
+knitr::kable(column_map, caption = "Source-to-analysis column contract.")
+```
+
+# Validation record
+
+```{r validation-table}
+knitr::kable(validation, caption = "Blocking checks completed before model fitting.")
+```
+
+<div class="audit-note">
+This audit describes residents only. Colonizer and nonresident inference remains deferred by design.
+</div>
