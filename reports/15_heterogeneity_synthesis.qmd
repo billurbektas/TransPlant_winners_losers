@@ -1,0 +1,49 @@
+---
+title: "15 — Heterogeneity synthesis"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Question
+
+How much overall, warming, context, and total response-scale species heterogeneity is reduced by each information source?
+
+## Dataset and sample size
+
+Each information source uses the matched data and covariance from its own validated predictor sequence.
+
+## Exact model specification
+
+Response-scale components are calculated from each full REML random covariance and compared with its matched climate-only baseline.
+
+## Assumptions
+
+Overall, warming, context, and total components retain the Step 22 definitions; negative reductions are not truncated.
+
+## Convergence and covariance diagnostics
+
+This synthesis inherits each predictor branch's fit diagnostics and additionally requires exact component/reduction regression.
+
+## Main numerical results
+
+```{r}
+components <- targets::tar_read(heterogeneity_components)
+synthesis <- targets::tar_read(heterogeneity_synthesis)
+component_gate <- targets::tar_read(heterogeneity_components_equivalence)
+synthesis_gate <- targets::tar_read(heterogeneity_synthesis_equivalence)
+knitr::kable(components)
+knitr::kable(synthesis)
+knitr::kable(dplyr::bind_rows(component_gate, synthesis_gate))
+```
+
+## Interpretation boundary
+
+Model support and heterogeneity resolution are distinct; negative reductions are retained.
+
+## Canonical objects
+
+`heterogeneity_components` and `heterogeneity_synthesis`.
+
+## PASS/FAIL
+
+Every component and reduction must pass the Step 22 numerical tolerances.

@@ -1,0 +1,41 @@
+---
+title: "08 — Downstream scope: 526 species"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Purpose
+
+Validate the six downstream-only exclusions and exact model universe.
+
+## Inputs
+
+Maximum-duration resident AUC effects, climate context, taxonomy, and full sampling covariance.
+
+## Decisions and exclusions
+
+Exactly the six configured taxa are removed here and nowhere upstream.
+
+## Before/after counts and validation checks
+
+```{r}
+scope <- targets::tar_read(downstream_scope_526)
+settings <- targets::tar_read(canonical_downstream_settings)
+knitr::kable(data.frame(
+  effects = scope$effects, species = scope$species, experiments = scope$experiments
+))
+knitr::kable(data.frame(excluded_downstream_only = settings$exclusions))
+knitr::kable(scope$V_validation)
+```
+
+## Problems flagged
+
+Any count, identity, covariance, ordering, or required-consistency mismatch stops this branch.
+
+## Canonical outputs
+
+`downstream_auc_data`, `downstream_V_auc`, and `downstream_scope_526`.
+
+## PASS/FAIL
+
+The target stops unless the scope is exactly 1,604 effects, 526 species, and 42 experiments.

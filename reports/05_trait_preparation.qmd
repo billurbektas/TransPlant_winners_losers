@@ -1,0 +1,40 @@
+---
+title: "05 — Trait preparation"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Purpose
+
+Summarize TRY filtering, range checks, and species-level trait availability.
+
+## Inputs
+
+TRY source data, trait dictionary, TNRS mapping, range rules, and climate-zone filters.
+
+## Decisions and exclusions
+
+Approved traits, units, taxonomic matches, and biological ranges are applied before species summaries.
+
+## Before/after counts and validation checks
+
+```{r}
+filter_audit <- targets::tar_read(try_climate_filtered)$audit
+range_validation <- targets::tar_read(try_range_validation)
+traits <- targets::tar_read(try_trait_outputs)$summary
+knitr::kable(filter_audit)
+knitr::kable(range_validation)
+knitr::kable(data.frame(species_trait_rows = nrow(traits)))
+```
+
+## Problems flagged
+
+Rejected units, out-of-range observations, taxonomic gaps, and missing species summaries remain in audit targets.
+
+## Canonical outputs
+
+`try_cleaned`, `try_range_validation`, and `try_trait_outputs`.
+
+## PASS/FAIL
+
+Trait summaries are built only from approved traits, units, taxonomy, and climate zones.

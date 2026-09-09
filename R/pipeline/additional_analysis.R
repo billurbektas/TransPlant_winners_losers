@@ -9,7 +9,8 @@ tnrs_family_lookup <- function(accepted_names) {
     dplyr::distinct(.data$accepted_name, .keep_all = TRUE)
 }
 
-derive_functional_groups <- function(taxonomy_family, overrides) {
+derive_functional_groups <- function(taxonomy_family, overrides,
+                                     downstream_species_overrides = NULL) {
   graminoid_families <- c("Poaceae", "Cyperaceae", "Juncaceae")
   fern_families <- c(
     "Aspleniaceae", "Athyriaceae", "Blechnaceae", "Cystopteridaceae", "Dennstaedtiaceae",
@@ -48,14 +49,75 @@ derive_functional_groups <- function(taxonomy_family, overrides) {
       paste(invalid_woody, collapse = ", "), call. = FALSE
     )
   }
-  taxonomy_family |>
+  taxonomy_augmented <- taxonomy_family
+  if (!is.null(downstream_species_overrides)) {
+    required_species_override_columns <- c(
+      "species_id", "family_id", "graminoid_status", "woodiness",
+      "decision_basis"
+    )
+    missing_species_override_columns <- setdiff(
+      required_species_override_columns, names(downstream_species_overrides)
+    )
+    if (length(missing_species_override_columns)) {
+      stop(
+        "Downstream species overrides are missing: ",
+        paste(missing_species_override_columns, collapse = ", "),
+        call. = FALSE
+      )
+    }
+    species_overrides <- downstream_species_overrides |>
+      dplyr::transmute(
+        accepted_name = as.character(.data$species_id),
+        family_species_override = as.character(.data$family_id),
+        graminoid_species_override = as.character(.data$graminoid_status),
+        woody_species_override = as.character(.data$woodiness),
+        species_override_basis = as.character(.data$decision_basis)
+      )
+    invalid_species_override <-
+      anyDuplicated(species_overrides$accepted_name) ||
+      anyNA(species_overrides) ||
+      any(!nzchar(trimws(species_overrides$accepted_name))) ||
+      any(!nzchar(trimws(species_overrides$family_species_override))) ||
+      any(!species_overrides$graminoid_species_override %in%
+            c("graminoid", "non_graminoid")) ||
+      any(!species_overrides$woody_species_override %in%
+            c("woody", "non_woody"))
+    if (invalid_species_override) {
+      stop(
+        "Downstream species overrides are incomplete, invalid, or non-unique.",
+        call. = FALSE
+      )
+    }
+    taxonomy_augmented <- dplyr::full_join(
+      taxonomy_augmented, species_overrides, by = "accepted_name"
+    ) |>
+      dplyr::mutate(
+        family = dplyr::coalesce(
+          .data$family_species_override, as.character(.data$family)
+        )
+      )
+  } else {
+    taxonomy_augmented <- taxonomy_augmented |>
+      dplyr::mutate(
+        family_species_override = NA_character_,
+        graminoid_species_override = NA_character_,
+        woody_species_override = NA_character_,
+        species_override_basis = NA_character_
+      )
+  }
+  taxonomy_augmented |>
     dplyr::mutate(genus = stringr::word(.data$accepted_name, 1)) |>
     dplyr::left_join(overrides, by = "accepted_name", suffix = c("", "_override")) |>
     dplyr::mutate(
-      graminoid_override_supplied = !is.na(.data$graminoid_status) &
-        nzchar(trimws(.data$graminoid_status)),
-      woody_override_supplied = !is.na(.data$woody_status) &
-        nzchar(trimws(.data$woody_status)),
+      graminoid_override_supplied =
+        (!is.na(.data$graminoid_species_override) &
+           nzchar(trimws(.data$graminoid_species_override))) |
+        (!is.na(.data$graminoid_status) &
+           nzchar(trimws(.data$graminoid_status))),
+      woody_override_supplied =
+        (!is.na(.data$woody_species_override) &
+           nzchar(trimws(.data$woody_species_override))) |
+        (!is.na(.data$woody_status) & nzchar(trimws(.data$woody_status))),
       graminoid_status_auto = dplyr::case_when(
         is.na(.data$family) | is.na(.data$accepted_name) ~ NA_character_,
         .data$family %in% graminoid_families ~ "graminoid",
@@ -67,12 +129,18 @@ derive_functional_groups <- function(taxonomy_family, overrides) {
         TRUE ~ "non_woody"
       ),
       graminoid_status = dplyr::coalesce(
-        .data$graminoid_status, .data$graminoid_status_auto
+        .data$graminoid_species_override,
+        .data$graminoid_status,
+        .data$graminoid_status_auto
       ),
       woody_status = dplyr::coalesce(
-        .data$woody_status, .data$woody_status_auto
+        .data$woody_species_override,
+        .data$woody_status,
+        .data$woody_status_auto
       ),
       graminoid_review_basis = dplyr::case_when(
+        !is.na(.data$graminoid_species_override) ~
+          paste0("downstream species ledger: ", .data$species_override_basis),
         .data$graminoid_override_supplied ~
           paste0("override: ", .data$note),
         .data$family %in% graminoid_families ~
@@ -81,6 +149,8 @@ derive_functional_groups <- function(taxonomy_family, overrides) {
         TRUE ~ "unresolved family"
       ),
       woody_review_basis = dplyr::case_when(
+        !is.na(.data$woody_species_override) ~
+          paste0("downstream species ledger: ", .data$species_override_basis),
         .data$woody_override_supplied ~
           paste0("override: ", .data$note),
         .data$genus %in% woody_genera ~ "reviewed woody-genus rule",
@@ -98,6 +168,8 @@ derive_functional_groups <- function(taxonomy_family, overrides) {
         TRUE ~ "forb"
       ),
       review_basis = dplyr::case_when(
+        !is.na(.data$species_override_basis) ~
+          paste0("downstream species ledger: ", .data$species_override_basis),
         !is.na(.data$note) ~ paste0("override: ", .data$note),
         .data$family %in% graminoid_families ~ "reviewed graminoid-family rule",
         .data$family %in% fern_families ~ "fern-family exclusion",

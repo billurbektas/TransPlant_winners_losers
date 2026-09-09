@@ -1,0 +1,63 @@
+---
+title: "11 — Family resolution"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Question
+
+How does response classification change after reconstructing plot-cover family AUCs?
+
+## Dataset and sample size
+
+Family effects are reconstructed from the retained resident community for the same 42 experiments; exact effects and families appear in the diagnostics.
+
+## Exact model specification
+
+The fixed and random structures mirror `M_both`, replacing species with family after raw-cover aggregation and full family-AUC covariance reconstruction.
+
+## Assumptions
+
+Family identities follow validated taxonomy plus the single explicit `Viola palustris` → `Violaceae` decision.
+
+## Convergence and covariance diagnostics
+
+Optimizer, positive-definiteness, identifiability, covariance, support, and classification gates are shown below.
+
+## Main numerical results
+
+```{r}
+model <- targets::tar_read(family_model_summary)
+summary <- targets::tar_read(family_classification_summary)
+classification <- targets::tar_read(family_classification_526)
+validation <- targets::tar_read(family_bundle_validation)
+comparison <- targets::tar_read(species_family_resolution_comparison)
+data_gate <- targets::tar_read(family_auc_data_equivalence)
+V_gate <- targets::tar_read(family_V_equivalence)
+fit_gate <- targets::tar_read(family_model_equivalence)
+class_gate <- targets::tar_read(family_classification_equivalence)
+summary_gate <- targets::tar_read(family_model_summary_equivalence)
+override <- targets::tar_read(canonical_family_override_table)
+knitr::kable(model)
+knitr::kable(summary)
+knitr::kable(validation)
+knitr::kable(comparison)
+knitr::kable(dplyr::bind_rows(data_gate, V_gate, fit_gate, class_gate, summary_gate))
+knitr::kable(override)
+knitr::kable(head(classification, 20))
+```
+
+## Interpretation boundary
+
+Species effects are not averaged; family AUC and its full covariance are
+reconstructed from plot cover. The `Viola palustris` family value is the
+explicit `Violaceae` decision validated in the Step 19, Step 20, and anchored
+Step 22 lineages and stored in the shared downstream override ledger.
+
+## Canonical objects
+
+`family_auc_bundle_526`, `family_model_bundle_526`, `family_support_526`, and `family_classification_526`.
+
+## PASS/FAIL
+
+Cover reconstruction, data, covariance, fitted model, support, random coefficients, classification, and summary must all reproduce the frozen reference.

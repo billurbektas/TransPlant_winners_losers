@@ -1,0 +1,68 @@
+---
+title: "13 — Functional information"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Question
+
+Do independently defined Graminoid status and Woodiness explain response structure?
+
+## Dataset and sample size
+
+Both predictors use the complete 1,604-effect, 526-species downstream universe; group coverage is shown below.
+
+## Exact model specification
+
+Each predictor is fitted separately as climate-only `M0`, additive-status `M1`, and full status-by-`T_z * P_z * W_z` interaction model.
+
+## Assumptions
+
+Graminoid and Woodiness assignments remain independent binary variables and
+share the exact ordered `V_auc`. TNRS-derived family rows supply 525 retained
+taxa; the shared downstream override ledger augments the active functional
+target with the validated non-graminoid/non-woody assignment for *Viola
+palustris*.
+
+## Convergence and covariance diagnostics
+
+Branch-specific ML, CR1, assignment, source-coverage, and observed-support checks are shown below.
+
+## Main numerical results
+
+```{r}
+tables <- targets::tar_read(functional_model_tables_526)
+mask <- targets::tar_read(woodiness_support_mask_specification)
+mask_audit <- targets::tar_read(woodiness_support_mask_audit)
+woodiness_figure_file <- targets::tar_read(woodiness_figure_file)
+coverage <- targets::tar_read(functional_climate_coverage_526)
+assignment_gate <- targets::tar_read(functional_species_equivalence)
+source_audit <- targets::tar_read(functional_source_coverage_audit)
+fit_gate <- targets::tar_read(functional_model_fit_equivalence)
+comparison_gate <- targets::tar_read(functional_model_comparisons_equivalence)
+cr1_gate <- targets::tar_read(functional_model_CR1_equivalence)
+knitr::kable(tables$fit_statistics)
+knitr::kable(tables$comparisons)
+knitr::kable(tables$CR1)
+knitr::kable(as.data.frame(mask[c("status", "needs_group_specific_observed_climate_support_mask", "model_refit_permitted")]))
+knitr::kable(coverage)
+knitr::kable(mask_audit)
+knitr::kable(assignment_gate)
+knitr::kable(source_audit)
+knitr::kable(dplyr::bind_rows(fit_gate, comparison_gate, cr1_gate))
+knitr::include_graphics(woodiness_figure_file)
+```
+
+## Interpretation boundary
+
+The Woodiness support mask is calculated independently within the observed climate support of each group. It is a plotting-only refinement and cannot change the fitted model.
+
+## Canonical objects
+
+`functional_species_526`, `graminoid_model_sequence_526`,
+`woodiness_model_sequence_526`, `woodiness_support_mask`, and
+`woodiness_figure_file`.
+
+## PASS/FAIL
+
+Assignments, source coverage, model tables, CR1 rows, and group-specific support construction must pass.

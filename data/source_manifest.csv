@@ -1,0 +1,5 @@
+path,role,storage,sha256,tracked
+data/TransPlantNetwork_060824.RData,current network vegetation source,local immutable input,9b7b0cc80537e1267fbb22740ab8fc08855c3cbfe90d1f732e89d3682f0f6a13,FALSE
+data/try_47163.txt,current TRY export,local immutable large input,4871db4c7c593771b92277ba40657c735afdf931d96dbacdcbdd4a5527c955a3,FALSE
+data/cache/chelsa_monthly/,resumable CHELSA monthly cache,local external cache,,FALSE
+config/external_sources.csv,Git source provenance,tracked configuration,d80ff87b05a48c0dba79b47c505bcf2a5df5f29ca07f5ba753ebbb518f4a649e,TRUE

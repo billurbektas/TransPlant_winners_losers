@@ -1,0 +1,51 @@
+---
+title: "10 — Species context classification"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Question
+
+Which eligible species are consistently positive, consistently negative, or cross zero across their own observed climate support?
+
+## Dataset and sample size
+
+Eligible units are drawn from 526 modeled species; exact eligible counts and class counts are shown below.
+
+## Exact model specification
+
+Conditional coefficients come from anchored `M_both`. Extrema are evaluated within each species' observed destination T-P hull at the anchored median warming context.
+
+## Assumptions
+
+Eligibility requires at least four experiments and a full-rank within-species
+climate design. Classification is evaluated only inside each eligible species'
+observed climate support.
+
+## Convergence and covariance diagnostics
+
+This step fits no model; it inherits the Step 09 convergence and covariance gates.
+
+## Main numerical results
+
+```{r}
+summary <- targets::tar_read(species_classification_summary)
+classification <- targets::tar_read(species_classification_526)
+examples <- targets::tar_read(species_callout_examples_526)
+knitr::kable(summary)
+knitr::kable(examples[, c("species_id", "fitted_class", "selection_rank_within_class", "selection_rule")])
+knitr::kable(head(classification[order(classification$fitted_class, classification$species_id), ], 20))
+```
+
+## PASS/FAIL
+
+Eligibility requires at least four experiments and a full-rank within-species climate design.
+The four callout species are selected by the documented within-class rules and are not chosen during rendering.
+
+## Interpretation boundary
+
+Classes summarize fitted response over observed support; they are not significance-based upstream winner/loser labels.
+
+## Canonical objects
+
+`species_context_bundle_526`, `species_classification_526`, and `species_callout_examples_526`.

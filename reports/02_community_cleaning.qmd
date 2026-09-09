@@ -1,0 +1,42 @@
+---
+title: "02 — Community cleaning"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Purpose
+
+Summarize the network adapter, reviewed local mapping, and canonical community.
+
+## Inputs
+
+Network community objects, site/experiment metadata, and reviewed species mapping decisions.
+
+## Decisions and exclusions
+
+Only reviewed mapping rules are applied. No six-species downstream exclusion occurs here.
+
+## Before/after counts and validation checks
+
+```{r}
+sites <- targets::tar_read(sites)
+experiments <- targets::tar_read(experiments)
+community <- targets::tar_read(community)
+mapping_review <- targets::tar_read(species_mapping_review)
+knitr::kable(data.frame(
+  object = c("sites", "experiments", "community rows", "mapped species keys"),
+  n = c(nrow(sites), nrow(experiments), nrow(community), nrow(mapping_review))
+))
+```
+
+## Problems flagged
+
+Non-unique mappings, missing identifiers, or failed community-interface checks stop construction.
+
+## Canonical outputs
+
+`sites`, `experiments`, `species_mapping`, and `community`.
+
+## PASS/FAIL
+
+Canonical construction and mapping-review validation must complete before rendering.

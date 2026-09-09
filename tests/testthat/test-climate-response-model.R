@@ -249,7 +249,17 @@ testthat::test_that("leave-one-experiment-out covers both models and all experim
 })
 
 testthat::test_that("maintained target graph and figure inventory use the explicit allowlist", {
-  target_text <- paste(readLines(file.path(PROJECT_ROOT, "_targets.R")), collapse = "\n")
+  target_files <- c(
+    file.path(PROJECT_ROOT, "_targets.R"),
+    list.files(
+      file.path(PROJECT_ROOT, "R", "targets"),
+      pattern = "[.]R$", full.names = TRUE
+    )
+  )
+  target_text <- paste(
+    unlist(lapply(target_files, readLines, warn = FALSE), use.names = FALSE),
+    collapse = "\n"
+  )
   testthat::expect_false(stringr::str_detect(
     target_text, "climate_response_omnibus_table"
   ))
@@ -272,6 +282,9 @@ testthat::test_that("maintained target graph and figure inventory use the explic
   figure_target_names <- stringr::str_match_all(
     target_text, "tar_target\\(\\s*(figure_[A-Za-z0-9_]+)"
   )[[1]][, 2]
+  figure_target_names <- setdiff(
+    figure_target_names, c("figure_provenance_file", "figure_provenance")
+  )
   testthat::expect_setequal(
     figure_target_names,
     c(
@@ -325,7 +338,23 @@ testthat::test_that("maintained target graph and figure inventory use the explic
   )))
 
   manifest <- figure_manifest(PROJECT_ROOT)
-  expected_manifest <- file.path(PROJECT_ROOT, "plot", expected_relative)
+  canonical_target_figures <- c(
+    "compare_rel.abund_vs.sqrt.rel.abund.pdf",
+    "destination_climate_warming_gradient.pdf",
+    "repeated_species_consistency.pdf",
+    "temporal_category_flows.pdf",
+    "temporal_transition_matrices.pdf",
+    "transient_winning_losing_strength.pdf"
+  )
+  expected_manifest <- c(
+    file.path(
+      PROJECT_ROOT, "figures", "manuscript", canonical_target_figures
+    ),
+    file.path(
+      PROJECT_ROOT, "plot",
+      setdiff(expected_relative, canonical_target_figures)
+    )
+  )
   testthat::expect_setequal(manifest$filename, expected_manifest)
 
   actual_relative <- list.files(

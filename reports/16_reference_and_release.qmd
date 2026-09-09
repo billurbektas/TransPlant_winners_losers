@@ -1,0 +1,46 @@
+---
+title: "16 — Reference and release validation"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Purpose
+
+Release gate for the immutable Step 22 numerical authority and Step 19 phylogenetic lineage.
+
+```{r}
+step22 <- targets::tar_read(step22_reference_validation)
+phylogeny <- targets::tar_read(phylogeny_reproduction_validation)
+figures <- targets::tar_read(retained_figure_copy_audit)
+release <- targets::tar_read(release_validation)
+run_provenance <- targets::tar_read(canonical_run_provenance)
+family <- dplyr::bind_rows(
+  targets::tar_read(family_auc_data_equivalence),
+  targets::tar_read(family_V_equivalence),
+  targets::tar_read(family_model_equivalence),
+  targets::tar_read(family_support_equivalence),
+  targets::tar_read(family_random_equivalence),
+  targets::tar_read(family_classification_equivalence),
+  targets::tar_read(family_model_summary_equivalence)
+)
+models <- dplyr::bind_rows(
+  targets::tar_read(mboth_526_refit_equivalence),
+  targets::tar_read(mboth_variance_profile_equivalence),
+  targets::tar_read(predictor_model_fit_equivalence),
+  targets::tar_read(predictor_model_comparisons_equivalence),
+  targets::tar_read(predictor_CR1_equivalence),
+  targets::tar_read(heterogeneity_components_equivalence),
+  targets::tar_read(heterogeneity_synthesis_equivalence)
+)
+knitr::kable(step22)
+knitr::kable(phylogeny)
+knitr::kable(family)
+knitr::kable(models)
+knitr::kable(figures)
+knitr::kable(release)
+knitr::kable(run_provenance)
+```
+
+## PASS/FAIL
+
+All numerical, structural, phylogenetic, and retained-copy checks must pass. Regenerated figure pixels and file hashes are intentionally outside the numerical regression contract.

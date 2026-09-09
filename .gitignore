@@ -56,10 +56,32 @@ renv/staging/
 # Large/reconstructable source data and caches
 data/try_47163.txt
 data/cache/
+data/*
+!data/README.md
+!data/source_manifest.csv
 
 # Reconstructable milestone data (documented in README)
 output/intermediate/
 output/models/
+output/*
+!output/manifests/
+!output/manifests/**
+
+# Historical/generated plot trees stay local. Verified retained originals are
+# copied into figures/retained and tracked there.
+plot/
+figures/candidates/
+figures/manuscript/
+reports/rendered/
+reports/*.html
+reports/*_files/
+reports/.quarto/
+reports/reports/
+
+# Checksum-recorded generated history remains present in the in-repository
+# archive but is not added to Git. Scientific source snapshots and archive
+# manifests remain trackable.
+archive/**/output/
 
 # Interrupted atomic writes
 *.tmp

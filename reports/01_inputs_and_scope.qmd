@@ -1,0 +1,50 @@
+---
+title: "01 — Inputs and scope"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Purpose
+
+Document configured sources, experiment scope, and canonical snapshot checks.
+
+## Inputs
+
+`config/analysis.R`, the configured network source, and the experiment registry.
+
+## Decisions and exclusions
+
+This step inventories sources and defines scope; it makes no downstream species exclusions.
+
+## Before/after counts and validation checks
+
+```{r}
+cfg <- targets::tar_read(config)
+inventory <- targets::tar_read(input_inventory)
+sources <- targets::tar_read(canonical_scientific_source_inventory)
+validation <- targets::tar_read(canonical_validation)
+experiments <- targets::tar_read(experiments)
+cat("Configured network input:", cfg$input_rdata, "\n\n")
+cat("Analysis experiments:", nrow(experiments), "\n\n")
+knitr::kable(inventory)
+knitr::kable(validation)
+knitr::kable(
+  sources |>
+    dplyr::count(.data$source_role, name = "files") |>
+    dplyr::arrange(.data$source_role)
+)
+knitr::kable(sources)
+```
+
+## Problems flagged
+
+Missing sources, invalid experiment identifiers, or failed canonical snapshot checks stop the target.
+
+## Canonical outputs
+
+`input_inventory`, `experiments`, `canonical_validation`, and
+`canonical_scientific_source_inventory`.
+
+## PASS/FAIL
+
+The report is produced only after the canonical input and experiment targets succeed.

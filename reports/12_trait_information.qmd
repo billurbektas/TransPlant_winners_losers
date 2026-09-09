@@ -1,0 +1,56 @@
+---
+title: "12 — Trait information"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Question
+
+Do LDMC, LMA, or vegetative height explain systematic response or residual species heterogeneity?
+
+## Dataset and sample size
+
+Each trait uses its own complete-case species/effect subset; the scaling table records all sample sizes.
+
+## Exact model specification
+
+For each trait, compare climate-only `M0`, additive-trait `M1`, and full `Trait_z * T_z * P_z * W_z` models on identical rows and covariance.
+
+## Assumptions
+
+Positive species medians are natural-log transformed and standardized over unique trait-complete species before row expansion. Missing traits are not imputed.
+
+## Convergence and covariance diagnostics
+
+Matched-row/V checks and branch-specific numerical regression gates accompany the ML and full REML results.
+
+## Main numerical results
+
+```{r}
+scaling <- targets::tar_read(trait_scaling_526)
+tables <- targets::tar_read(trait_model_tables_526)
+trait_gate <- targets::tar_read(trait_species_equivalence)
+scaling_gate <- targets::tar_read(trait_scaling_equivalence)
+fit_gate <- targets::tar_read(trait_model_fit_equivalence)
+comparison_gate <- targets::tar_read(trait_model_comparisons_equivalence)
+cr1_gate <- targets::tar_read(trait_model_CR1_equivalence)
+knitr::kable(scaling)
+knitr::kable(tables$fit_statistics)
+knitr::kable(tables$comparisons)
+knitr::kable(tables$CR1)
+knitr::kable(dplyr::bind_rows(
+  trait_gate, scaling_gate, fit_gate, comparison_gate, cr1_gate
+))
+```
+
+## Interpretation boundary
+
+Each trait is fitted separately after log unique-species scaling; missing values are not imputed.
+
+## Canonical objects
+
+`prepared_ldmc_526`, `prepared_lma_526`, `prepared_height_526`, and `trait_model_tables_526`.
+
+## PASS/FAIL
+
+Trait values, scaling, ML fits/comparisons, and full-REML CR1 rows must pass their Step 22 comparisons.

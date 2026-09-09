@@ -1,0 +1,39 @@
+---
+title: "06 — AUC validation"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+## Purpose
+
+Report plot-level AUC construction, contrast output, and covariance/classification checks.
+
+## Inputs
+
+Canonical community cover, experiment durations, and the reviewed analysis configuration.
+
+## Decisions and exclusions
+
+The response is raw relative-cover maximum-duration AUC; no downstream-only species exclusion is applied here.
+
+## Before/after counts and validation checks
+
+```{r}
+auc <- targets::tar_read(auc_inputs)$auc
+contrasts <- targets::tar_read(auc_contrasts)
+validation <- targets::tar_read(winner_loser_validation)
+knitr::kable(data.frame(auc_rows = nrow(auc), contrast_rows = nrow(contrasts)))
+knitr::kable(validation)
+```
+
+## Problems flagged
+
+Non-finite effects, invalid contrast covariance, order mismatches, and legacy-regression failures stop this branch.
+
+## Canonical outputs
+
+`auc_inputs`, `auc_contrasts`, and `winner_loser_validation`.
+
+## PASS/FAIL
+
+Maximum-duration raw relative-cover AUC remains the downstream response authority.

@@ -286,8 +286,16 @@ test_that("contrast seeds are stable and group-specific", {
   expect_true(first > 0L)
 })
 
-test_that("the full formula contains all nine trait-climate interactions", {
-  text <- model_formula_text(FALSE)
-  expect_equal(stringr::str_count(text, ":"), 9L)
-  expect_equal(stringr::str_count(model_formula_text(TRUE), ":"), 3L)
+test_that("canonical predictor formulas retain the settled interaction structures", {
+  formulas <- canonical_predictor_formulas()
+  continuous_terms <- attr(stats::terms(formulas$continuous_full), "term.labels")
+  phylogeny_terms <- attr(stats::terms(formulas$Phylogeny_full), "term.labels")
+
+  expect_true("Trait_z:T_z:P_z:W_z" %in% continuous_terms)
+  expect_true(all(c(
+    "W_z:PEV1_z", "W_z:PEV2_z", "W_z:PEV3_z",
+    "T_z:PEV1_z", "T_z:PEV2_z", "T_z:PEV3_z",
+    "P_z:PEV1_z", "P_z:PEV2_z", "P_z:PEV3_z",
+    "PEV1_z:TP_z", "PEV2_z:TP_z", "PEV3_z:TP_z"
+  ) %in% phylogeny_terms))
 })
