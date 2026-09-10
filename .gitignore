@@ -81,6 +81,8 @@ figures/manuscript/*
 !figures/manuscript/appendix_temporal_winning_losing_strength_correlations.pdf
 !figures/manuscript/appendix_temporal_winning_losing_strength_correlations.png
 !figures/manuscript/appendix_repeated_species_consistency.pdf
+!figures/manuscript/appendix_destination_climate_warming_gradient.pdf
+!figures/manuscript/appendix_destination_climate_warming_gradient.png
 reports/rendered/
 reports/*.html
 reports/*_files/

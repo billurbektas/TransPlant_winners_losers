@@ -55,6 +55,8 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
   canonical_names <- c(
     "compare_rel.abund_vs.sqrt.rel.abund.pdf",
     "destination_climate_warming_gradient.pdf",
+    "appendix_destination_climate_warming_gradient.pdf",
+    "appendix_destination_climate_warming_gradient.png",
     "repeated_species_consistency.pdf",
     "fig02_temporal_category_flows.pdf",
     "fig02_temporal_category_flows.png",
@@ -82,4 +84,18 @@ test_that("the destination-climate renderer drops inherited grouping", {
     deparse(body(plot_destination_climate_warming_gradient)), collapse = "\n"
   )
   expect_match(body_text, "dplyr::ungroup(data)", fixed = TRUE)
+})
+
+test_that("the destination-climate appendix uses continuous axes without cutoffs", {
+  body_text <- paste(
+    deparse(body(plot_destination_climate_warming_gradient_continuous)),
+    collapse = "\n"
+  )
+  expect_match(body_text, "dplyr::ungroup(data)", fixed = TRUE)
+  expect_false(grepl("geom_rect", body_text, fixed = TRUE))
+  expect_false(grepl("geom_vline", body_text, fixed = TRUE))
+  expect_false(grepl("geom_hline", body_text, fixed = TRUE))
+  expect_false(grepl("temperature_context", body_text, fixed = TRUE))
+  expect_false(grepl("precipitation_context", body_text, fixed = TRUE))
+  expect_match(body_text, 'legend.position = "bottom"', fixed = TRUE)
 })

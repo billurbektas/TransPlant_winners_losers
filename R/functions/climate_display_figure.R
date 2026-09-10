@@ -281,6 +281,124 @@ plot_destination_climate_warming_gradient <- function(data, climate_contexts, pa
   save_plot_atomic(plot, path, 18, 12)
 }
 
+plot_destination_climate_warming_gradient_continuous <- function(
+    data,
+    path,
+    base_size = 25,
+    experiment_label_size = 5.0,
+    axis_title_size = 25,
+    axis_text_size = 22,
+    legend_title_size = 23,
+    legend_text_size = 21,
+    width = 18,
+    height = 12) {
+  plot_data <- data |>
+    dplyr::ungroup() |>
+    dplyr::distinct(
+      .data$experiment_id, .data$origin_T_JJA, .data$destination_T_JJA,
+      .data$destination_P_JJA, .data$diff_T_JJA, .data$climate_summary_status
+    ) |>
+    dplyr::filter(
+      is.finite(.data$origin_T_JJA),
+      is.finite(.data$destination_T_JJA),
+      is.finite(.data$destination_P_JJA),
+      is.finite(.data$diff_T_JJA)
+    ) |>
+    dplyr::mutate(
+      experiment_label = dplyr::if_else(
+        .data$climate_summary_status == "partial",
+        paste0(.data$experiment_id, "*"),
+        .data$experiment_id
+      ),
+      experiment_label = sub(
+        "^([^:]+)::([^:]+)::(.+)$", "\\1\n\\2 -> \\3", .data$experiment_label
+      ),
+      experiment_label = clean_figure_label(.data$experiment_label)
+    )
+  if (!nrow(plot_data)) {
+    stop("The destination-climate figure has no finite experiment rows.", call. = FALSE)
+  }
+  if (anyDuplicated(plot_data$experiment_id)) {
+    stop("The destination-climate figure requires one row per experiment.", call. = FALSE)
+  }
+  if (!isTRUE(all.equal(
+    plot_data$diff_T_JJA,
+    plot_data$destination_T_JJA - plot_data$origin_T_JJA,
+    tolerance = 1e-10
+  ))) {
+    stop("diff_T_JJA must equal destination_T_JJA - origin_T_JJA.", call. = FALSE)
+  }
+
+  warming_colours <- c("#8C6D00", "#D8A600", "#F16913", "#BD0026", "#67000D")
+  plot <- ggplot2::ggplot(
+    plot_data,
+    ggplot2::aes(.data$destination_T_JJA, .data$destination_P_JJA)
+  ) +
+    ggplot2::geom_point(
+      ggplot2::aes(fill = .data$diff_T_JJA),
+      shape = 21, size = 5.6, stroke = 0.7, colour = "white"
+    ) +
+    ggrepel::geom_text_repel(
+      ggplot2::aes(
+        label = .data$experiment_label,
+        colour = .data$diff_T_JJA
+      ),
+      size = experiment_label_size,
+      max.overlaps = Inf,
+      min.segment.length = 0,
+      box.padding = 0.6,
+      point.padding = 0.35,
+      seed = 20260827,
+      force = 4,
+      force_pull = 0.15,
+      max.time = 10,
+      max.iter = 200000,
+      segment.colour = "grey55",
+      segment.size = 0.4
+    ) +
+    ggplot2::scale_fill_gradientn(
+      colours = warming_colours,
+      name = "JJA warming (destination - origin, °C)",
+      guide = ggplot2::guide_colourbar(
+        title.position = "top",
+        title.hjust = 0.5,
+        direction = "horizontal",
+        barwidth = grid::unit(16, "cm"),
+        barheight = grid::unit(0.75, "cm")
+      )
+    ) +
+    ggplot2::scale_colour_gradientn(colours = warming_colours, guide = "none") +
+    ggplot2::scale_x_continuous(
+      breaks = scales::breaks_pretty(n = 7),
+      labels = scales::label_number(accuracy = 0.1, big.mark = ""),
+      expand = ggplot2::expansion(mult = 0.035)
+    ) +
+    ggplot2::scale_y_continuous(
+      breaks = scales::breaks_pretty(n = 7),
+      labels = scales::label_number(accuracy = 1, big.mark = ""),
+      expand = ggplot2::expansion(mult = 0.04)
+    ) +
+    transplant_figure_theme(base_size = base_size) +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_line(colour = "grey88", linewidth = 0.4),
+      axis.title = ggplot2::element_text(size = axis_title_size),
+      axis.text = ggplot2::element_text(size = axis_text_size),
+      legend.position = "bottom",
+      legend.direction = "horizontal",
+      legend.title = ggplot2::element_text(size = legend_title_size),
+      legend.text = ggplot2::element_text(size = legend_text_size),
+      legend.margin = ggplot2::margin(t = 8),
+      plot.margin = ggplot2::margin(12, 18, 8, 18)
+    ) +
+    ggplot2::labs(
+      x = "Destination JJA mean temperature (°C)",
+      y = "Destination JJA precipitation (mm)"
+    )
+
+  save_plot_atomic(plot, path, width, height, bg = "white")
+}
+
 # Additional audited data helpers retained for climate-display tests and provenance.
 
 category_density_data_xy <- function(data, x_column, y_column, grid_size = 120L) {

@@ -166,6 +166,12 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/appendix_repeated_species_consistency[.]pdf$", path)) {
     script <- "R/functions/retained_figure_helpers.R"
     target <- "appendix_repeated_species_consistency_file"
+  } else if (grepl("^figures/manuscript/appendix_destination_climate_warming_gradient[.]pdf$", path)) {
+    script <- "R/functions/climate_display_figure.R"
+    target <- "appendix_destination_climate_warming_gradient_file"
+  } else if (grepl("^figures/manuscript/appendix_destination_climate_warming_gradient[.]png$", path)) {
+    script <- "R/functions/climate_display_figure.R"
+    target <- "appendix_destination_climate_warming_gradient_png"
   }
 
   data.frame(generating_script_if_known = script, target_if_known = target)
@@ -177,7 +183,8 @@ default_figure_status <- function(path) {
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
       "fig02_temporal_category_flows[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
-      "appendix_repeated_species_consistency[.]pdf)$"
+      "appendix_repeated_species_consistency[.]pdf|",
+      "appendix_destination_climate_warming_gradient[.](pdf|png))$"
     ),
     path
   )) {
@@ -201,7 +208,8 @@ figure_analysis_generation <- function(path) {
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
       "fig02_temporal_category_flows[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
-      "appendix_repeated_species_consistency[.]pdf)$"
+      "appendix_repeated_species_consistency[.]pdf|",
+      "appendix_destination_climate_warming_gradient[.](pdf|png))$"
     ),
     path
   )) {

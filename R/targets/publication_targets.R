@@ -122,6 +122,44 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
+      appendix_destination_climate_warming_gradient_file,
+      plot_destination_climate_warming_gradient_continuous(
+        analysis_data,
+        file.path(
+          config$root, "figures", "manuscript",
+          "appendix_destination_climate_warming_gradient.pdf"
+        ),
+        base_size = 25,
+        experiment_label_size = 5.0,
+        axis_title_size = 25,
+        axis_text_size = 22,
+        legend_title_size = 23,
+        legend_text_size = 21,
+        width = 18,
+        height = 12
+      ),
+      format = "file"
+    ),
+    tar_target(
+      appendix_destination_climate_warming_gradient_png,
+      plot_destination_climate_warming_gradient_continuous(
+        analysis_data,
+        file.path(
+          config$root, "figures", "manuscript",
+          "appendix_destination_climate_warming_gradient.png"
+        ),
+        base_size = 25,
+        experiment_label_size = 5.0,
+        axis_title_size = 25,
+        axis_text_size = 22,
+        legend_title_size = 23,
+        legend_text_size = 21,
+        width = 18,
+        height = 12
+      ),
+      format = "file"
+    ),
+    tar_target(
       species_context_figure,
       build_species_context_callout_figure(
         mboth_526_refit$fit,
@@ -200,6 +238,8 @@ canonical_publication_targets <- function() {
         appendix_temporal_winning_losing_strength_correlations_file
         appendix_temporal_winning_losing_strength_correlations_png
         appendix_repeated_species_consistency_file
+        appendix_destination_climate_warming_gradient_file
+        appendix_destination_climate_warming_gradient_png
         species_context_figure_file
         woodiness_figure_file
         retained_figure_files
