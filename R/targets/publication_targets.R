@@ -195,19 +195,44 @@ canonical_publication_targets <- function() {
         species_classification_526,
         species_context_bundle_526$random_coefficients,
         downstream_climate_scaling_526,
-        species_callout_examples_526
+        species_callout_examples_526,
+        classification_base_size = 14,
+        classification_label_size = 4.8,
+        inset_base_size = 14
       )
     ),
     tar_target(
-      species_context_figure_file,
-      write_vector_figure(
+      figure04_species_minmax_classification_pdf,
+      {
+        path <- write_vector_figure(
+          species_context_figure,
+          file.path(
+            config$root, "figures", "manuscript",
+            "fig04_species_minmax_classification_526.pdf"
+          ),
+          width = 16,
+          height = 12.5
+        )
+        writeLines(
+          format(Sys.time(), tz = "UTC", usetz = TRUE),
+          paste0(path, ".generated")
+        )
+        path
+      },
+      format = "file"
+    ),
+    tar_target(
+      figure04_species_minmax_classification_png,
+      save_plot_atomic(
         species_context_figure,
         file.path(
           config$root, "figures", "manuscript",
-          "species_minmax_classification_526.pdf"
+          "fig04_species_minmax_classification_526.png"
         ),
         width = 16,
-        height = 12.5
+        height = 12.5,
+        dpi = 300,
+        bg = "white"
       ),
       format = "file"
     ),
@@ -277,6 +302,8 @@ canonical_publication_targets <- function() {
         appendix_destination_climate_warming_gradient_png
         appendix_temporal_transition_matrices_file
         appendix_temporal_transition_matrices_png
+        figure04_species_minmax_classification_pdf
+        figure04_species_minmax_classification_png
         woodiness_figure_file
         retained_figure_files
         build_figure_provenance(config$root)

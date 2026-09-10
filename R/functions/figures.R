@@ -229,7 +229,8 @@ species_callout_surface <- function(fit, data, random_coefficients,
 
 build_species_context_callout_figure <- function(
     fit, data, classification, random_coefficients, scaling, selection,
-    grid_points = 81L) {
+    grid_points = 81L, classification_base_size = 14,
+    classification_label_size = 4.8, inset_base_size = 14) {
   requested_species <- canonical_callout_species()
   if (!identical(as.character(selection$species_id), requested_species)) {
     stop("Callout examples are not in the canonical display order.", call. = FALSE)
@@ -250,9 +251,7 @@ build_species_context_callout_figure <- function(
     W_C = as.numeric(stats::quantile(warming_experiments$W, c(0.25, 0.75)))
   ) |>
     dplyr::mutate(
-      warming_panel = paste0(
-        .data$warming_name, "\nDelta T = ", sprintf("%.2f", .data$W_C), " °C"
-      )
+      warming_panel = .data$warming_name
     )
   panel_levels <- warming_lookup$warming_panel
   surface_sets <- stats::setNames(
@@ -313,7 +312,9 @@ build_species_context_callout_figure <- function(
     "Potentilla erecta" = c(x = 0.763, y = 0.535, width = 0.225, height = 0.39),
     "Plantago lanceolata" = c(x = 0.763, y = 0.075, width = 0.225, height = 0.39)
   )
-  panel_box <- c(left = 0.294, right = 0.734, bottom = 0.231, top = 0.843)
+  # Canvas coordinates of the classification plot's data panel after the
+  # enlarged manuscript axes and legend are laid out.
+  panel_box <- c(left = 0.317, right = 0.734, bottom = 0.290, top = 0.843)
   callout_centres_y <- vapply(
     inset_boxes, function(box) box[["y"]] + box[["height"]] / 2, numeric(1)
   )
@@ -399,39 +400,52 @@ build_species_context_callout_figure <- function(
       y = y_limits[[1]] + 0.09 * diff(y_limits),
       label = paste0("CONSISTENT LOSER\nn = ", class_n("Consistent loser")),
       colour = class_colours[["Consistent loser"]], fontface = "bold",
-      size = 3.1, hjust = 0
+      size = classification_label_size, hjust = 0
     ) +
     ggplot2::annotate(
       "text", x = x_limits[[1]] + 0.05 * diff(x_limits),
       y = y_limits[[2]] - 0.07 * diff(y_limits),
       label = paste0("CONTEXT-DEPENDENT\nn = ", class_n("Context-dependent")),
       colour = class_colours[["Context-dependent"]], fontface = "bold",
-      size = 3.1, hjust = 0
+      size = classification_label_size, hjust = 0
     ) +
     ggplot2::annotate(
       "text", x = x_limits[[2]] - 0.04 * diff(x_limits),
       y = y_limits[[2]] - 0.07 * diff(y_limits),
       label = paste0("CONSISTENT WINNER\nn = ", class_n("Consistent winner")),
       colour = class_colours[["Consistent winner"]], fontface = "bold",
-      size = 3.1, hjust = 1
+      size = classification_label_size, hjust = 1
     ) +
     ggplot2::scale_colour_manual(values = class_colours, drop = FALSE, guide = "none") +
     ggplot2::scale_fill_gradient2(
       low = "#E66101", mid = "white", high = "#1B9E77", midpoint = 0,
       limits = c(-warming_limit, warming_limit),
-      name = "Species random W\nslope deviation"
+      name = "Random warming slope deviation",
+      guide = ggplot2::guide_colourbar(
+        title.position = "top", direction = "horizontal",
+        barwidth = grid::unit(50, "mm"), barheight = grid::unit(4, "mm")
+      )
     ) +
     ggplot2::coord_cartesian(
       xlim = x_limits, ylim = y_limits, expand = FALSE, clip = "off"
     ) +
-    ggplot2::theme_bw(base_size = 9) +
+    ggplot2::theme_bw(base_size = classification_base_size) +
     ggplot2::theme(
       panel.grid.minor = ggplot2::element_blank(),
       legend.position = "bottom", legend.box = "vertical",
+      axis.title = ggplot2::element_text(size = classification_base_size + 2),
+      axis.text = ggplot2::element_text(size = classification_base_size - 1.5),
+      legend.title = ggplot2::element_text(
+        size = classification_base_size + 2, hjust = 0.5
+      ),
+      legend.text = ggplot2::element_text(size = classification_base_size + 1),
+      legend.justification = "center",
+      legend.box.just = "center",
       plot.margin = ggplot2::margin(2, 2, 2, 2)
     ) +
     ggplot2::labs(
-      x = "Minimum fitted Delta AUC", y = "Maximum fitted Delta AUC",
+      x = "Minimum fitted winning-losing strength",
+      y = "Maximum fitted winning-losing strength",
       colour = NULL
     )
 
@@ -468,37 +482,45 @@ build_species_context_callout_figure <- function(
         limits = c(-surface_limit, surface_limit),
         guide = ggplot2::guide_colourbar(
           title.position = "top", direction = "horizontal",
-          barwidth = grid::unit(35, "mm"), barheight = grid::unit(3, "mm")
+          barwidth = grid::unit(50, "mm"), barheight = grid::unit(4, "mm")
         )
       ) +
       ggplot2::scale_x_continuous(labels = raw_T_labels) +
       ggplot2::scale_y_continuous(labels = raw_P_labels) +
-      ggplot2::theme_bw(base_size = 7.1) +
+      ggplot2::theme_bw(base_size = inset_base_size) +
       ggplot2::theme(
         panel.grid.minor = ggplot2::element_blank(),
-        strip.text.y = ggplot2::element_text(face = "bold", size = 6.5),
+        strip.text.y = ggplot2::element_text(
+          face = "bold", size = inset_base_size - 1
+        ),
         plot.title = ggplot2::element_text(
-          face = "bold.italic", size = 9, colour = neutral_colour, hjust = 0.5
+          face = "bold.italic", size = inset_base_size,
+          colour = neutral_colour, hjust = 0.5, lineheight = 0.9
         ),
         plot.background = ggplot2::element_rect(
           colour = neutral_colour, linewidth = 1, fill = "white"
         ),
         plot.margin = ggplot2::margin(4, 4, 3, 4),
-        axis.title = ggplot2::element_text(size = 6.7),
-        axis.text = ggplot2::element_text(size = 6.1),
+        axis.title = ggplot2::element_text(size = inset_base_size + 2),
+        axis.text = ggplot2::element_text(size = inset_base_size - 1.3),
         legend.position = "bottom",
-        legend.title = ggplot2::element_text(size = 6.7),
-        legend.text = ggplot2::element_text(size = 6.1),
+        legend.title = ggplot2::element_text(
+          size = inset_base_size + 2, hjust = 0.5
+        ),
+        legend.text = ggplot2::element_text(size = inset_base_size - 1.5),
+        legend.justification = "center",
+        legend.box.just = "center",
         legend.margin = ggplot2::margin(-2, 0, -2, 0)
       ) +
       ggplot2::labs(
         title = paste0(
-          species_name, " (",
+          species_name, "\n(",
           dplyr::filter(selection, .data$species_id == .env$species_name)$n_experiments,
           " experiments)"
         ),
         x = "Destination temperature (°C)",
-        y = "Destination precipitation", fill = "Fitted AUC change"
+        y = "Destination precipitation (mm)",
+        fill = "Fitted winning/losing strength"
       )
   }
   mini_plots <- stats::setNames(

@@ -64,6 +64,8 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "fig02_temporal_category_flows.png",
     "fig03_repeated_species_consistency.pdf",
     "fig03_repeated_species_consistency.png",
+    "fig04_species_minmax_classification_526.pdf",
+    "fig04_species_minmax_classification_526.png",
     "appendix_temporal_winning_losing_strength_correlations.pdf",
     "appendix_temporal_winning_losing_strength_correlations.png",
     "appendix_temporal_transition_matrices.pdf",
@@ -79,6 +81,27 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
       "implemented target; not generated"
     )
   ))
+})
+
+test_that("Figure 4 uses enlarged typography and manuscript labels", {
+  expect_gte(formals(build_species_context_callout_figure)$classification_base_size, 14)
+  expect_gte(formals(build_species_context_callout_figure)$classification_label_size, 4.8)
+  expect_gte(formals(build_species_context_callout_figure)$inset_base_size, 14)
+  body_text <- paste(
+    deparse(body(build_species_context_callout_figure)), collapse = "\n"
+  )
+  expect_true(grepl(
+    "classification_base_size[[:space:]]*[+][[:space:]]*2", body_text
+  ))
+  expect_true(grepl(
+    "inset_base_size[[:space:]]*[+][[:space:]]*2", body_text
+  ))
+  expect_false(grepl("Delta T =", body_text, fixed = TRUE))
+  expect_match(body_text, "Minimum fitted winning-losing strength", fixed = TRUE)
+  expect_match(body_text, "Maximum fitted winning-losing strength", fixed = TRUE)
+  expect_match(body_text, "Random warming slope deviation", fixed = TRUE)
+  expect_match(body_text, "Destination precipitation (mm)", fixed = TRUE)
+  expect_match(body_text, "Fitted winning/losing strength", fixed = TRUE)
 })
 
 test_that("the destination-climate renderer drops inherited grouping", {

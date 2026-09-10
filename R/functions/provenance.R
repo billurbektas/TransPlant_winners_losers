@@ -137,9 +137,12 @@ known_figure_producer <- function(path) {
     script <- unname(historical_script_map[[filename]])
   }
 
-  if (grepl("^figures/manuscript/species_minmax_classification_526[.]pdf$", path)) {
+  if (grepl("^figures/manuscript/fig04_species_minmax_classification_526[.]pdf$", path)) {
     script <- "R/functions/figures.R"
-    target <- "species_context_figure_file"
+    target <- "figure04_species_minmax_classification_pdf"
+  } else if (grepl("^figures/manuscript/fig04_species_minmax_classification_526[.]png$", path)) {
+    script <- "R/functions/figures.R"
+    target <- "figure04_species_minmax_classification_png"
   } else if (grepl("^figures/manuscript/woodiness_response_surfaces_526[.]pdf$", path)) {
     script <- "R/functions/figures.R"
     target <- "woodiness_figure_file"
@@ -190,6 +193,7 @@ default_figure_status <- function(path) {
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
       "fig02_temporal_category_flows[.](pdf|png)|",
       "fig03_repeated_species_consistency[.](pdf|png)|",
+      "fig04_species_minmax_classification_526[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
       "appendix_destination_climate_warming_gradient[.](pdf|png)|",
       "appendix_temporal_transition_matrices[.](pdf|png))$"
@@ -216,6 +220,7 @@ figure_analysis_generation <- function(path) {
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
       "fig02_temporal_category_flows[.](pdf|png)|",
       "fig03_repeated_species_consistency[.](pdf|png)|",
+      "fig04_species_minmax_classification_526[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
       "appendix_destination_climate_warming_gradient[.](pdf|png)|",
       "appendix_temporal_transition_matrices[.](pdf|png))$"
