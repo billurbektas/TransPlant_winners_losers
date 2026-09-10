@@ -101,7 +101,7 @@ test_that("Figure 4 uses enlarged typography and manuscript labels", {
   expect_false(grepl("Delta T =", body_text, fixed = TRUE))
   expect_match(body_text, "Minimum fitted winning-losing strength", fixed = TRUE)
   expect_match(body_text, "Maximum fitted winning-losing strength", fixed = TRUE)
-  expect_match(body_text, "Random warming slope deviation", fixed = TRUE)
+  expect_match(body_text, "Shift with stronger warming", fixed = TRUE)
   expect_match(body_text, "Destination precipitation (mm)", fixed = TRUE)
   expect_match(body_text, "Fitted winning/losing strength", fixed = TRUE)
 })

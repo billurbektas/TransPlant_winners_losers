@@ -420,7 +420,7 @@ build_species_context_callout_figure <- function(
     ggplot2::scale_fill_gradient2(
       low = "#E66101", mid = "white", high = "#1B9E77", midpoint = 0,
       limits = c(-warming_limit, warming_limit),
-      name = "Random warming slope deviation",
+      name = "Shift with stronger warming",
       guide = ggplot2::guide_colourbar(
         title.position = "top", direction = "horizontal",
         barwidth = grid::unit(50, "mm"), barheight = grid::unit(4, "mm")
