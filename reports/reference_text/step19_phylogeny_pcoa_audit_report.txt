@@ -1,0 +1,266 @@
+RESIDENT PHYLOGENY AND RESPONSE-INDEPENDENT PCoA AUDIT
+======================================================
+
+1. ANALYSIS SPECIES SET
+-----------------------
+Updated downstream resident species set: 526
+Excluded before phylogeny/downstream modeling: 6 (Gymnocarpium dryopteris; Athyrium spinulosum; Botrychium lunaria; Equisetum arvense; Selaginella selaginoides; Juniperus communis)
+The excluded taxa remain in upstream community and winner/loser calculations.
+Species represented in final tree: 526
+All phylogeny species exactly match updated ecological analysis: TRUE
+No AUC response was retained, modeled, inspected, or used to select axes.
+The existing TNRS accepted name, genus, and family remain canonical.
+
+2. TAXONOMY AND PLACEMENT
+-------------------------
+V.PhyloMaker2 version: 0.1.0
+Backbone: GBOTB.extended.LCVP with nodes.info.1.LCVP
+Placement: deterministic scenario 3 (S3)
+Verified call: V.PhyloMaker2::phylo.maker(sp.list, tree = GBOTB.extended.LCVP, nodes = nodes.info.1.LCVP, output.sp.list = TRUE, output.tree = FALSE, scenarios = "S3")
+Exact species matches: 353 (67.1%)
+Synonym/backbone-name matches: 12 (2.3%)
+Infraspecific -> parent species placements: 10 (1.9%)
+Grafted within genus: 138 (26.2%)
+Grafted within family: 13 (2.5%)
+Unresolved: 0 (0.0%)
+TNRS/backbone genus disagreements: 22
+TNRS/backbone family disagreements: 0
+Genus/family disagreements detected: 22
+Resolved with recorded decision/reason: 22
+Outstanding disagreements: 0
+TNRS ecological identifiers were retained; placement decisions are recorded in taxonomy_disagreement_resolution.csv.
+Ecological taxa initially mapping to duplicated backbone taxa: 10
+Duplicated backbone mappings were never silently merged; see the crosswalk.
+Newick convention encodes spaces as underscores; phylogeny_species_order.csv maps every Newick tip back to species_id.
+V.PhyloMaker2 warnings captured: 0
+
+Canonical-taxonomy audit
+Duplicated species_id values: 0
+Duplicated TNRS accepted names: 0
+Missing genera: 0
+Missing families: 0
+Infraspecific names: 16
+Authorship/formatting artifacts: 0
+Names not straightforward binomials: 16
+
+Infraspecific placement audit
+Parent species tip present in GBOTB.extended.LCVP: Yes = 10; No = 6.
+Absence from GBOTB.extended.LCVP indicates absence from the phylogenetic backbone and does not imply that the taxon is unrecognized by current LCVP/WCVP-based taxonomic resources.
+# A tibble: 16 × 7
+   `ecological species_id`                   
+   <chr>                                     
+ 1 Agrostis rupestris subsp. rupestris       
+ 2 Anthyllis vulneraria subsp. alpestris     
+ 3 Centaurea phrygia subsp. pseudophrygia    
+ 4 Empetrum nigrum subsp. nigrum             
+ 5 Gentiana prostrata var. crenulatotruncata 
+ 6 Gentiana prostrata var. pudica            
+ 7 Helianthemum oelandicum subsp. alpestre   
+ 8 Helictochloa pratensis subsp. pratensis   
+ 9 Hieracium nigrescens subsp. graciliusculum
+10 Leontodon hispidus subsp. hispidus        
+11 Pedicularis mussotii var. lophocentra     
+12 Prunella vulgaris subsp. hispida          
+13 Ranunculus brotherusii var. tanguticus    
+14 Rhinanthus major var. major               
+15 Thymus praecox subsp. polytrichus         
+16 Viola biflora var. rockiana               
+   `full TNRS name`                           `parent binomial`      
+   <chr>                                      <chr>                  
+ 1 Agrostis rupestris subsp. rupestris        Agrostis rupestris     
+ 2 Anthyllis vulneraria subsp. alpestris      Anthyllis vulneraria   
+ 3 Centaurea phrygia subsp. pseudophrygia     Centaurea phrygia      
+ 4 Empetrum nigrum subsp. nigrum              Empetrum nigrum        
+ 5 Gentiana prostrata var. crenulatotruncata  Gentiana prostrata     
+ 6 Gentiana prostrata var. pudica             Gentiana prostrata     
+ 7 Helianthemum oelandicum subsp. alpestre    Helianthemum oelandicum
+ 8 Helictochloa pratensis subsp. pratensis    Helictochloa pratensis 
+ 9 Hieracium nigrescens subsp. graciliusculum Hieracium nigrescens   
+10 Leontodon hispidus subsp. hispidus         Leontodon hispidus     
+11 Pedicularis mussotii var. lophocentra      Pedicularis mussotii   
+12 Prunella vulgaris subsp. hispida           Prunella vulgaris      
+13 Ranunculus brotherusii var. tanguticus     Ranunculus brotherusii 
+14 Rhinanthus major var. major                Rhinanthus major       
+15 Thymus praecox subsp. polytrichus          Thymus praecox         
+16 Viola biflora var. rockiana                Viola biflora          
+   `Parent species tip present in GBOTB.extended.LCVP?` `LCVP synonym found?`
+   <chr>                                                <chr>                
+ 1 No                                                   No                   
+ 2 Yes                                                  No                   
+ 3 Yes                                                  No                   
+ 4 Yes                                                  No                   
+ 5 No                                                   No                   
+ 6 No                                                   No                   
+ 7 Yes                                                  No                   
+ 8 Yes                                                  No                   
+ 9 No                                                   No                   
+10 Yes                                                  No                   
+11 Yes                                                  No                   
+12 Yes                                                  No                   
+13 Yes                                                  No                   
+14 No                                                   No                   
+15 No                                                   No                   
+16 Yes                                                  No                   
+   `final phylogenetic placement`  
+   <chr>                           
+ 1 S3 graft within genus Agrostis  
+ 2 Anthyllis vulneraria            
+ 3 Centaurea phrygia               
+ 4 Empetrum nigrum                 
+ 5 S3 graft within genus Gentiana  
+ 6 S3 graft within genus Gentiana  
+ 7 Helianthemum oelandicum         
+ 8 Helictochloa pratensis          
+ 9 S3 graft within genus Hieracium 
+10 Leontodon hispidus              
+11 Pedicularis mussotii            
+12 Prunella vulgaris               
+13 Ranunculus brotherusii          
+14 S3 graft within genus Rhinanthus
+15 S3 graft within genus Thymus    
+16 Viola biflora                   
+   reason                                                                       
+   <chr>                                                                        
+ 1 Full name and parent binomial are absent as backbone tips; deterministic S3 …
+ 2 Parent binomial Anthyllis vulneraria is a backbone tip; no infraspecific div…
+ 3 Parent binomial Centaurea phrygia is a backbone tip; no infraspecific diverg…
+ 4 Parent binomial Empetrum nigrum is a backbone tip; no infraspecific divergen…
+ 5 Full name and parent binomial are absent as backbone tips; deterministic S3 …
+ 6 Full name and parent binomial are absent as backbone tips; deterministic S3 …
+ 7 Parent binomial Helianthemum oelandicum is a backbone tip; no infraspecific …
+ 8 Parent binomial Helictochloa pratensis is a backbone tip; no infraspecific d…
+ 9 Full name and parent binomial are absent as backbone tips; deterministic S3 …
+10 Parent binomial Leontodon hispidus is a backbone tip; no infraspecific diver…
+11 Parent binomial Pedicularis mussotii is a backbone tip; no infraspecific div…
+12 Parent binomial Prunella vulgaris is a backbone tip; no infraspecific diverg…
+13 Parent binomial Ranunculus brotherusii is a backbone tip; no infraspecific d…
+14 Full name and parent binomial are absent as backbone tips; deterministic S3 …
+15 Full name and parent binomial are absent as backbone tips; deterministic S3 …
+16 Parent binomial Viola biflora is a backbone tip; no infraspecific divergence…
+
+3. TREE DIAGNOSTICS
+-------------------
+Rooted: TRUE
+Ultrametric: TRUE
+Negative branch lengths: 0
+Non-finite branch lengths: 0
+Zero-length branches: 10
+Minimum branch length: 0e+00
+Maximum branch length: 1.288614e+02
+Minimum root-to-tip distance: 135.758064
+Maximum root-to-tip distance: 135.758065
+Maximum root-to-tip discrepancy: 1.0005e-06
+
+Distance-matrix validation
+square: TRUE
+unique_taxa: TRUE
+row_column_names_identical: TRUE
+row_order_matches_tree: TRUE
+symmetric: TRUE
+negligible_diagonal: TRUE
+complete: TRUE
+
+4. PCoA DIAGNOSTICS
+-------------------
+Uncorrected negative eigenvalues: 0
+Most negative uncorrected eigenvalue: 0e+00
+Total negative magnitude / positive variation: 0e+00
+Meaningful-negative threshold: 1e-06
+Meaningful negative eigenvalues present: FALSE
+Correction applied: none
+PCoA solution used for inspection PEVs: uncorrected
+Positive PCoA axes retained: 520
+PEV1 positive variation (%): 23.8959
+PEV1-2 cumulative positive variation (%): 35.4852
+PEV1-3 cumulative positive variation (%): 43.2784
+PEV1-5 cumulative positive variation (%): 55.0483
+PEV1-10 cumulative positive variation (%): 72.0139
+Axes exceeding descriptive broken-stick expectation: PEV1, PEV2, PEV3, PEV4, PEV5, PEV6, PEV7, PEV8, PEV9, PEV10, PEV11, PEV12, PEV13, PEV14, PEV15, PEV16, PEV17, PEV18, PEV19, PEV20
+This is a response-independent description of eigenstructure and is not used as an axis-retention rule for ecological modeling.
+
+5. AXIS LEVERAGE AUDIT
+----------------------
+PEV1 top 10 absolute scores:
+  Poa trivialis | Poaceae | score=156.548 | abs=156.548 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Poa supina | Poaceae | score=156.548 | abs=156.548 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Poa reflexa | Poaceae | score=156.548 | abs=156.548 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Poa pratensis | Poaceae | score=156.548 | abs=156.548 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Poa interior | Poaceae | score=156.548 | abs=156.548 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Poa alpina | Poaceae | score=156.548 | abs=156.548 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Alopecurus pratensis | Poaceae | score=156.539 | abs=156.539 | exact species match | infra=FALSE | disagreement=FALSE
+  Alopecurus gerardii | Poaceae | score=156.539 | abs=156.539 | exact species match | infra=FALSE | disagreement=FALSE
+  Alopecurus aequalis | Poaceae | score=156.538 | abs=156.538 | exact species match | infra=FALSE | disagreement=FALSE
+  Phleum pratense | Poaceae | score=156.530 | abs=156.530 | exact species match | infra=FALSE | disagreement=FALSE
+PEV2 top 10 absolute scores:
+  Erigeron formosissimus | Asteraceae | score=-96.2507 | abs=96.2507 | exact species match | infra=FALSE | disagreement=FALSE
+  Erigeron speciosus | Asteraceae | score=-96.2507 | abs=96.2507 | exact species match | infra=FALSE | disagreement=FALSE
+  Erigeron uniflorus | Asteraceae | score=-96.2507 | abs=96.2507 | exact species match | infra=FALSE | disagreement=FALSE
+  Erigeron divergens | Asteraceae | score=-96.2506 | abs=96.2506 | exact species match | infra=FALSE | disagreement=FALSE
+  Erigeron coulteri | Asteraceae | score=-96.2506 | abs=96.2506 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Erigeron neglectus | Asteraceae | score=-96.2506 | abs=96.2506 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Symphyotrichum campestre | Asteraceae | score=-96.2466 | abs=96.2466 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Symphyotrichum ascendens | Asteraceae | score=-96.2466 | abs=96.2466 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Eurybia conspicua | Asteraceae | score=-96.2462 | abs=96.2462 | exact species match | infra=FALSE | disagreement=FALSE
+  Solidago virgaurea | Asteraceae | score=-96.2454 | abs=96.2454 | exact species match | infra=FALSE | disagreement=FALSE
+PEV3 top 10 absolute scores:
+  Euphrasia minima | Orobanchaceae | score=114.208 | abs=114.208 | exact species match | infra=FALSE | disagreement=FALSE
+  Euphrasia regelii | Orobanchaceae | score=114.208 | abs=114.208 | exact species match | infra=FALSE | disagreement=FALSE
+  Euphrasia hirtella | Orobanchaceae | score=114.208 | abs=114.208 | exact species match | infra=FALSE | disagreement=FALSE
+  Euphrasia officinalis | Orobanchaceae | score=114.208 | abs=114.208 | exact species match | infra=FALSE | disagreement=FALSE
+  Euphrasia salisburgensis | Orobanchaceae | score=114.196 | abs=114.196 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Euphrasia frigida | Orobanchaceae | score=114.196 | abs=114.196 | grafted within genus | infra=FALSE | disagreement=FALSE
+  Bartsia alpina | Orobanchaceae | score=113.959 | abs=113.959 | exact species match | infra=FALSE | disagreement=FALSE
+  Rhinanthus minor | Orobanchaceae | score=113.924 | abs=113.924 | exact species match | infra=FALSE | disagreement=FALSE
+  Rhinanthus major var. major | Orobanchaceae | score=113.924 | abs=113.924 | grafted within genus | infra=TRUE | disagreement=FALSE
+  Pedicularis kansuensis | Orobanchaceae | score=113.771 | abs=113.771 | exact species match | infra=FALSE | disagreement=FALSE
+Distinct grafted/disagreement taxa among the 30 axis-extreme rows: 13
+
+6. INTERPRETIVE BOUNDARY
+------------------------
+PEV orientation is arbitrary. These axes summarize phylogenetic distances only and are not interpreted relative to Delta AUC. No choice has been made about which, if any, PEVs should enter an ecological model.
+Higher-order PEVs increasingly represent fine phylogenetic structure, some of which depends on deterministic grafting of taxa absent from the backbone.
+
+Saved outputs
+1. output/step_by_step_modeling/resident_phylogeny_pcoa/tnrs_taxonomy_audit.csv
+2. output/step_by_step_modeling/resident_phylogeny_pcoa/tnrs_backbone_crosswalk.csv
+3. output/step_by_step_modeling/resident_phylogeny_pcoa/infraspecific_placement_audit.csv
+4. output/step_by_step_modeling/resident_phylogeny_pcoa/taxonomy_disagreement_resolution.csv
+5. output/step_by_step_modeling/resident_phylogeny_pcoa/unresolved_problematic_taxa.csv
+6. output/step_by_step_modeling/resident_phylogeny_pcoa/resident_phylogeny.rds
+7. output/step_by_step_modeling/resident_phylogeny_pcoa/resident_phylogeny.newick
+8. output/step_by_step_modeling/resident_phylogeny_pcoa/phylogenetic_distance_matrix.rds
+9. output/step_by_step_modeling/resident_phylogeny_pcoa/phylogeny_species_order.csv
+10. output/step_by_step_modeling/resident_phylogeny_pcoa/pcoa_eigenvalue_summary.csv
+11. output/step_by_step_modeling/resident_phylogeny_pcoa/species_pev_scores.csv
+12. output/step_by_step_modeling/resident_phylogeny_pcoa/pcoa_axis_extreme_species.csv
+13. output/step_by_step_modeling/resident_phylogeny_pcoa/resident_phylogenetic_tree.pdf
+14. output/step_by_step_modeling/resident_phylogeny_pcoa/pcoa_scree_broken_stick.pdf
+15. output/step_by_step_modeling/resident_phylogeny_pcoa/pcoa_cumulative_variation.pdf
+16. output/step_by_step_modeling/resident_phylogeny_pcoa/pev1_vs_pev2.pdf
+17. output/step_by_step_modeling/resident_phylogeny_pcoa/pev1_vs_pev3.pdf
+18. output/step_by_step_modeling/resident_phylogeny_pcoa/phylogeny_pcoa_audit_report.txt
+
+
+7. FINAL MODEL-READINESS AUDIT
+------------------------------
+Zero-distance ecological taxon pairs: 5
+Intentional shared placements: 5
+Unexpected zero-distance pairs: 0
+
+Zero-length tree edges: 10
+Explained by documented placements: 10 (intentional shared placement = 10; other documented V.PhyloMaker2 placements = 0)
+Unexplained zero-length edges: 0
+
+Family-level grafts among PEV1 top 10: 0
+Family-level grafts among PEV2 top 10: 0
+Family-level grafts among PEV3 top 10: 0
+Any leading PEV disproportionately driven by family-level grafts: FALSE
+
+PEV dataset contains exactly 526 unique resident taxa: TRUE
+PEV1-PEV3 complete and finite for all taxa: TRUE
+PEV/tree/species-order sets agree: TRUE
+Accidental duplicate PEV columns absent: TRUE
+Downstream-excluded taxa absent: TRUE
+PEVs remain unstandardized; scaling is deferred to ecological modeling.
+
+Final phylogeny/PEV dataset ready for downstream ecological modeling: TRUE

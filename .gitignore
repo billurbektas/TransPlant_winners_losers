@@ -64,6 +64,8 @@ data/*
 output/intermediate/
 output/models/
 output/*
+!output/reference/
+!output/reference/canonical_reference_results.rds
 !output/manifests/
 !output/manifests/**
 

@@ -22,7 +22,7 @@ test_that("the Woodiness figure fails closed without a group-specific mask", {
   expect_match(function_text, "canonical_predictor_formulas()$Woodiness_full", fixed = TRUE)
 })
 
-test_that("all eleven retained figure copies match their approved sources", {
+test_that("all eleven retained figures match their approved checksums", {
   audit <- audit_retained_figure_copies(project_path())
   expect_identical(nrow(audit), 11L)
   expect_true(all(audit$source_matches_expected))
@@ -43,10 +43,10 @@ test_that("figure provenance exposes source and duplicate relationships", {
   approved <- readr::read_csv(
     project_path("config", "retained_figures.csv"), show_col_types = FALSE
   )
-  original_rows <- manifest$figure_path %in% approved$figure_path
-  expect_identical(sum(original_rows), 11L)
+  retained_rows <- manifest$figure_path %in% approved$figure_path
+  expect_identical(sum(retained_rows), 11L)
   expect_true(all(
-    manifest$proposed_status[original_rows] == "KEEP_FOR_MANUSCRIPT"
+    manifest$proposed_status[retained_rows] == "KEEP_FOR_MANUSCRIPT"
   ))
 })
 

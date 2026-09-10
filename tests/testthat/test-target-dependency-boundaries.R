@@ -162,6 +162,8 @@ test_that("the target graph loads an explicit canonical module list", {
   )
   expect_match(target_text, "canonical_pipeline_source_files()", fixed = TRUE)
   expect_false(grepl("list.files(\"R/pipeline\"", target_text, fixed = TRUE))
+  expect_false(dir.exists(project_path("R", "pipeline")))
+  expect_false(dir.exists(project_path("R", "reporting")))
   expect_false(grepl("additional_analysis.R", config_text, fixed = TRUE))
   expect_false(grepl("frequentist_hierarchical_auc.R", config_text, fixed = TRUE))
   expect_false(grepl('"figures.R"', config_text, fixed = TRUE))
@@ -175,12 +177,12 @@ test_that("the target graph loads an explicit canonical module list", {
 })
 
 test_that("active modules define each top-level function exactly once", {
-  files <- c(
+  files <- unique(c(
     canonical_pipeline_source_files(PROJECT_ROOT),
     list.files(
       project_path("R", "functions"), pattern = "[.]R$", full.names = TRUE
     )
-  )
+  ))
   definitions <- unlist(lapply(files, function(path) {
     expressions <- parse(path)
     names <- vapply(expressions, function(expression) {

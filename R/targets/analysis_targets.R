@@ -99,14 +99,9 @@ canonical_analysis_targets <- function() {
       )
     ),
     tar_target(
-      downstream_consistency_checks,
-      transition_reference$downstream_consistency_checks
-    ),
-    tar_target(
       downstream_scope_526,
       validate_downstream_scope_artifacts(
-        downstream_auc_data, downstream_V_auc, downstream_consistency_checks,
-        canonical_downstream_settings
+        downstream_auc_data, downstream_V_auc, canonical_downstream_settings
       )
     ),
     tar_target(
@@ -661,6 +656,41 @@ canonical_analysis_targets <- function() {
         mboth_526_refit
       )
     ),
+    # Validation-only historical refit. This branch deliberately consumes the
+    # frozen transition PEV values, but no active scientific model depends on it.
+    tar_target(
+      historical_standardized_pev_species_reference_526,
+      standardize_unique_species_predictors(
+        resident_pev_scores_reference |>
+          dplyr::select("species_id", "PEV1", "PEV2", "PEV3"),
+        c("PEV1", "PEV2", "PEV3")
+      )
+    ),
+    tar_target(
+      historical_phylogeny_auc_data_reference_526,
+      downstream_auc_data |>
+        dplyr::left_join(
+          historical_standardized_pev_species_reference_526$data |>
+            dplyr::select("species_id", "PEV1_z", "PEV2_z", "PEV3_z"),
+          by = "species_id"
+        )
+    ),
+    tar_target(
+      historical_phylogeny_predictor_specification_reference_526,
+      canonical_phylogeny_predictor_specification(
+        historical_phylogeny_auc_data_reference_526,
+        downstream_V_auc
+      )
+    ),
+    tar_target(
+      historical_phylogeny_model_sequence_reference_526,
+      fit_predictor_sequence(
+        historical_phylogeny_predictor_specification_reference_526,
+        canonical_downstream_settings$climate_formula,
+        full_526_M0_ML,
+        mboth_526_refit
+      )
+    ),
     tar_target(
       predictor_sequence_tables_526,
       assemble_predictor_sequence_tables(
@@ -704,14 +734,14 @@ canonical_analysis_targets <- function() {
     tar_target(predictor_CR1, predictor_sequence_tables_526$CR1),
     tar_target(
       predictor_model_fit_equivalence,
-      assert_reference_table(
+      validate_reference_table(
         predictor_model_fit, predictor_model_fit_reference,
         "predictor ML fit statistics"
       )
     ),
     tar_target(
       predictor_model_comparisons_equivalence,
-      assert_reference_table(
+      validate_reference_table(
         predictor_model_comparisons,
         predictor_model_comparisons_reference,
         "predictor ML nested comparisons"
@@ -719,7 +749,7 @@ canonical_analysis_targets <- function() {
     ),
     tar_target(
       predictor_CR1_equivalence,
-      assert_reference_table(
+      validate_reference_table(
         predictor_CR1, predictor_CR1_reference,
         "predictor full REML CR1"
       )
@@ -792,7 +822,7 @@ canonical_analysis_targets <- function() {
     ),
     tar_target(
       phylogeny_model_fit_equivalence,
-      assert_reference_table(
+      validate_reference_table(
         phylogeny_model_tables_526$fit_statistics,
         dplyr::filter(
           predictor_model_fit_reference,
@@ -803,7 +833,7 @@ canonical_analysis_targets <- function() {
     ),
     tar_target(
       phylogeny_model_comparisons_equivalence,
-      assert_reference_table(
+      validate_reference_table(
         phylogeny_model_tables_526$comparisons,
         dplyr::filter(
           predictor_model_comparisons_reference,
@@ -814,7 +844,7 @@ canonical_analysis_targets <- function() {
     ),
     tar_target(
       phylogeny_model_CR1_equivalence,
-      assert_reference_table(
+      validate_reference_table(
         phylogeny_model_tables_526$CR1,
         dplyr::filter(
           predictor_CR1_reference,
@@ -852,15 +882,62 @@ canonical_analysis_targets <- function() {
       heterogeneity_bundle_526$synthesis
     ),
     tar_target(
+      historical_heterogeneity_bundle_reference_526,
+      assemble_heterogeneity_synthesis(
+        ldmc_model_sequence_526,
+        lma_model_sequence_526,
+        height_model_sequence_526,
+        graminoid_model_sequence_526,
+        woodiness_model_sequence_526,
+        historical_phylogeny_model_sequence_reference_526
+      )
+    ),
+    tar_target(
+      phylogeny_migration_equivalence,
+      build_phylogeny_migration_equivalence(
+        resident_pev_scores_oriented,
+        resident_pev_scores_reference,
+        phylogeny_model_sequence_526,
+        historical_phylogeny_model_sequence_reference_526,
+        heterogeneity_bundle_526,
+        historical_heterogeneity_bundle_reference_526
+      )
+    ),
+    tar_target(
+      phylogeny_migration_release_validation,
+      phylogeny_migration_release_check(phylogeny_migration_equivalence)
+    ),
+    tar_target(
+      downstream_consistency_checks,
+      build_canonical_downstream_consistency_checks(
+        downstream_auc_data,
+        downstream_V_auc,
+        canonical_winner_loser_input,
+        canonical_analysis_data_input,
+        canonical_downstream_settings,
+        family_resident_membership_526,
+        family_plot_auc_bundle_526$cover_audit,
+        downstream_climate_scaling_526,
+        prepared_trait_models_526,
+        standardized_pev_species_526,
+        phylogeny_auc_data_526,
+        predictor_specifications_526,
+        predictor_specification_validation,
+        functional_species_526,
+        heterogeneity_synthesis,
+        species_classification_526
+      )
+    ),
+    tar_target(
       heterogeneity_components_equivalence,
-      assert_reference_table(
+      validate_reference_table(
         heterogeneity_components, heterogeneity_components_reference,
         "response-scale heterogeneity components"
       )
     ),
     tar_target(
       heterogeneity_synthesis_equivalence,
-      assert_reference_table(
+      validate_reference_table(
         heterogeneity_synthesis, heterogeneity_synthesis_reference,
         "heterogeneity synthesis"
       )
@@ -891,21 +968,32 @@ canonical_analysis_targets <- function() {
       )
     ),
     tar_target(
-      resident_phylogeny_newick,
+      resident_phylogeny_newick_reference,
       transition_reference$phylogeny$tree_newick
     ),
     tar_target(
-      phylogeny_species_order,
+      phylogeny_species_order_reference,
       transition_reference$phylogeny$species_order
     ),
     tar_target(
-      resident_phylogeny_newick_candidate,
-      restore_phylogeny_tip_labels(resident_phylogeny_newick, phylogeny_species_order)
+      resident_phylogeny_newick_reference_restored,
+      restore_phylogeny_tip_labels(
+        resident_phylogeny_newick_reference,
+        phylogeny_species_order_reference
+      )
     ),
     # The canonical tree is rebuilt from the tracked placement-decision ledger
     # and the pinned V.PhyloMaker2 backbone. The old RDS and Newick remain
     # independent regression authorities until this gate passes.
     tar_target(resident_phylogeny_candidate, resident_phylogeny_rebuild$tree),
+    tar_target(
+      phylogeny_species_order,
+      build_phylogeny_species_order(
+        resident_phylogeny_candidate,
+        phylogeny_placement_decisions,
+        downstream_model_data_526$species_id
+      )
+    ),
     tar_target(
       resident_pev_scores_reference,
       transition_reference$phylogeny$pev_scores
@@ -914,24 +1002,18 @@ canonical_analysis_targets <- function() {
       resident_pcoa_candidate,
       recompute_phylogenetic_pcoa(
         resident_phylogeny_candidate,
-        resident_pev_scores_reference,
-        phylogeny_species_order$species_id
+        metadata = NULL,
+        tip_order = phylogeny_species_order$species_id
       )
     ),
     tar_target(
       resident_pev_scores_recomputed,
-      resident_pcoa_candidate$scores
-    ),
-    tar_target(
-      pev_modeling_interface_526,
-      build_anchored_pev_modeling_interface(
-        resident_pev_scores_recomputed,
-        resident_pev_scores_reference
-      )
+      resident_pcoa_candidate$scores |>
+        dplyr::select("species_id", "PEV1", "PEV2", "PEV3")
     ),
     tar_target(
       resident_pev_scores_oriented,
-      pev_modeling_interface_526$data
+      resident_pev_scores_recomputed
     ),
     tar_target(
       pcoa_eigen_summary,
@@ -948,6 +1030,13 @@ canonical_analysis_targets <- function() {
     tar_target(phylogenetic_distance, resident_pcoa_candidate$distance),
     tar_target(
       zero_distance_audit,
+      build_zero_distance_audit(
+        phylogenetic_distance,
+        phylogeny_placement_decisions
+      )
+    ),
+    tar_target(
+      zero_distance_audit_reference,
       transition_reference$phylogeny$zero_distance_audit
     ),
     tar_target(
@@ -994,11 +1083,13 @@ canonical_analysis_targets <- function() {
         phylogeny_package_validation,
         compare_phylogeny(
           resident_phylogeny_candidate, resident_phylogeny_reference,
-          phylogeny_species_order, phylogeny_species_order
+          phylogeny_species_order, phylogeny_species_order_reference
         ),
         compare_phylogeny(
-          resident_phylogeny_newick_candidate, resident_phylogeny_reference,
-          phylogeny_species_order, phylogeny_species_order
+          resident_phylogeny_newick_reference_restored,
+          resident_phylogeny_reference,
+          phylogeny_species_order_reference,
+          phylogeny_species_order_reference
         ),
         compare_phylogenetic_distance(
           phylogenetic_distance, phylogenetic_distance_reference
@@ -1011,12 +1102,30 @@ canonical_analysis_targets <- function() {
           pcoa_eigen_summary, pcoa_eigen_summary_reference
         ),
         validate_zero_distance_placements(phylogenetic_distance, zero_distance_audit),
+        compare_zero_distance_audit(
+          zero_distance_audit,
+          zero_distance_audit_reference
+        ),
         tibble::tibble(
           check = "reference artifact hashes",
           pass = all(phylogeny_reference_artifact_validation$hash_matches),
           detail = paste(nrow(phylogeny_reference_artifact_validation),
                          "configured artifacts")
         )
+      )
+    ),
+    tar_target(
+      active_downstream_release_validation,
+      active_downstream_release_checks(
+        downstream_scope_526,
+        downstream_consistency_checks,
+        predictor_specification_validation,
+        predictor_sequence_tables_526,
+        family_model_summary,
+        resident_phylogeny_rebuild$audit,
+        zero_distance_audit,
+        heterogeneity_components,
+        heterogeneity_synthesis
       )
     ),
     tar_target(
@@ -1047,14 +1156,24 @@ canonical_analysis_targets <- function() {
       format = "file"
     ),
     tar_target(
-      pev_modeling_interface_audit_file,
+      phylogeny_migration_equivalence_file,
       write_csv_atomic(
-        pev_modeling_interface_526$audit,
-        file.path(config$output_dir, "audits", "pev_modeling_interface_audit.csv")
+        phylogeny_migration_equivalence,
+        file.path(config$output_dir, "audits", "phylogeny_migration_equivalence.csv")
       ),
       format = "file"
     ),
-
+    tar_target(
+      phylogeny_migration_equivalence_report_file,
+      write_text_atomic(
+        format_phylogeny_migration_report(phylogeny_migration_equivalence),
+        file.path(
+          config$root, "reports", "rendered",
+          "phylogeny_migration_equivalence.txt"
+        )
+      ),
+      format = "file"
+    ),
     # Canonical exports are deliberately scoped to their immediate scientific
     # objects. None depends on the late Step 22 validation assembly.
     tar_target(
@@ -1478,10 +1597,13 @@ canonical_analysis_targets <- function() {
 
     # Late assembly only: no ordinary analysis/report/figure depends on this.
     tar_target(
-      candidate_step22_results,
+      canonical_reference_results,
       assemble_step22_candidate(
-        metadata = validated_step22_metadata(canonical_downstream_settings),
-        data_validation = step22_data_validation_component(downstream_scope_526),
+        metadata = canonical_reference_metadata(canonical_downstream_settings),
+        data_validation = step22_data_validation_component(
+          downstream_scope_526,
+          downstream_consistency_checks
+        ),
         scaling = list(
           climate = downstream_climate_scaling_526,
           traits = trait_scaling_526,
@@ -1502,6 +1624,25 @@ canonical_analysis_targets <- function() {
           phylogenetic_positive_variation_PEV1_PEV3
       )
     ),
+    tar_target(candidate_step22_results, canonical_reference_results),
+    tar_target(
+      canonical_reference_results_file,
+      write_canonical_reference_once(
+        canonical_reference_results,
+        file.path(
+          config$root, "output", "reference",
+          "canonical_reference_results.rds"
+        )
+      ),
+      format = "file"
+    ),
+    tar_target(
+      canonical_reference_validation,
+      validate_frozen_canonical_reference(
+        canonical_reference_results,
+        canonical_reference_results_file
+      )
+    ),
     tar_target(
       step22_reference_fixture_file,
       canonical_downstream_settings$fixture_path,
@@ -1510,9 +1651,7 @@ canonical_analysis_targets <- function() {
     tar_target(step22_reference_results, readRDS(step22_reference_fixture_file)),
     tar_target(
       step22_reference_validation,
-      assert_step22_reference(
-        validate_step22_reference(candidate_step22_results, step22_reference_results)
-      )
+      validate_step22_reference(candidate_step22_results, step22_reference_results)
     ),
     tar_target(
       numerical_release_validation,
@@ -1524,7 +1663,7 @@ canonical_analysis_targets <- function() {
         temporal_flows = flow_validation,
         downstream_inputs = downstream_input_equivalence,
         downstream_covariance = downstream_covariance_validation,
-        downstream_consistency = downstream_scope_526$consistency_checks,
+        downstream_consistency = downstream_consistency_checks,
         mboth_fit = mboth_526_refit_equivalence,
         mboth_profiles = mboth_variance_profile_equivalence,
         species_classification = species_classification_equivalence,
@@ -1550,16 +1689,10 @@ canonical_analysis_targets <- function() {
         functional_model_fit = functional_model_fit_equivalence,
         functional_model_comparisons = functional_model_comparisons_equivalence,
         functional_model_CR1 = functional_model_CR1_equivalence,
-        phylogeny_model_fit = phylogeny_model_fit_equivalence,
-        phylogeny_model_comparisons = phylogeny_model_comparisons_equivalence,
-        phylogeny_model_CR1 = phylogeny_model_CR1_equivalence,
-        all_predictor_fit = predictor_model_fit_equivalence,
-        all_predictor_comparisons = predictor_model_comparisons_equivalence,
-        all_predictor_CR1 = predictor_CR1_equivalence,
-        heterogeneity_components = heterogeneity_components_equivalence,
-        heterogeneity_synthesis = heterogeneity_synthesis_equivalence,
         phylogeny_reproduction = phylogeny_reproduction_validation,
-        step22 = step22_reference_validation
+        phylogeny_migration = phylogeny_migration_release_validation,
+        active_downstream_release = active_downstream_release_validation,
+        canonical_reference = canonical_reference_validation
       )))
     ),
     tar_target(
@@ -1597,6 +1730,9 @@ canonical_analysis_targets <- function() {
       canonical_numerical_export_files,
       {
         paths <- c(
+        canonical_community_file = community_file,
+        canonical_try_individual_file = try_individual_file,
+        canonical_auc_by_plot_file = auc_file,
         canonical_downstream_data_file = canonical_downstream_data_file,
         canonical_downstream_V_file = canonical_downstream_V_file,
         canonical_mboth_model_file = canonical_mboth_model_file,
@@ -1638,7 +1774,11 @@ canonical_analysis_targets <- function() {
         phylogeny_package_provenance_file = phylogeny_package_provenance_file,
         phylogeny_reference_artifact_validation_file = phylogeny_reference_artifact_validation_file,
         phylogeny_reproduction_validation_file = phylogeny_reproduction_validation_file,
-        pev_modeling_interface_audit_file = pev_modeling_interface_audit_file,
+        phylogeny_migration_equivalence_file =
+          phylogeny_migration_equivalence_file,
+        phylogeny_migration_equivalence_report_file =
+          phylogeny_migration_equivalence_report_file,
+        canonical_reference_results_file = canonical_reference_results_file,
         numerical_release_validation_file = numerical_release_validation_file,
         step22_reference_validation_file = step22_reference_validation_file,
         canonical_run_provenance_file = canonical_run_provenance_file,

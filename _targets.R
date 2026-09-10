@@ -7,7 +7,11 @@ if (any(!file.exists(active_pipeline_files))) {
   stop("One or more canonical upstream pipeline modules are missing.")
 }
 purrr::walk(active_pipeline_files, source)
-purrr::walk(list.files("R/functions", pattern = "[.]R$", full.names = TRUE), source)
+canonical_function_files <- setdiff(
+  list.files("R/functions", pattern = "[.]R$", full.names = TRUE),
+  active_pipeline_files
+)
+purrr::walk(canonical_function_files, source)
 source("R/targets/data_targets.R")
 source("R/targets/analysis_targets.R")
 source("R/targets/publication_targets.R")

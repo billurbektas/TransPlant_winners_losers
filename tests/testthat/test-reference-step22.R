@@ -102,15 +102,9 @@ test_that("the tolerance registry matches the frozen release policy", {
   )
 })
 
-test_that("the immutable project reference and fixture are byte-identical", {
-  project_reference <- project_path(
-    "output", "step_by_step_modeling", "downstream_526",
-    "downstream_526_reference_results.rds"
-  )
+test_that("the immutable Step 22 fixture retains its frozen checksum", {
   fixture <- project_path("tests", "fixtures", "step22_reference_results.rds")
-  skip_if_not(file.exists(project_reference))
   expected <- "8d5d7544a6e6bcb757827263763ffae95115fa10b52b187669eaa5627af6931f"
-  expect_identical(sha256_file(project_reference), expected)
   expect_identical(sha256_file(fixture), expected)
 })
 
@@ -136,10 +130,15 @@ test_that("run provenance is separate, complete, and release-gated", {
     "r_version", "r_platform", "targets_version", "tarchetypes_version",
     "quarto_r_package_version", "v_phylomaker2_version",
     "renv_lock_sha256", "targets_script_sha256",
-    "step22_reference_sha256", "transition_reference_sha256"
+    "canonical_reference_sha256", "step22_reference_sha256",
+    "transition_reference_sha256"
   )
   expect_true(all(required %in% provenance$field))
   values <- stats::setNames(provenance$value, provenance$field)
+  expect_identical(
+    values[["canonical_reference_sha256"]],
+    "75f5659904616f3a1d8c2046f356ddbd363506bd21d55398af7b73995eb94792"
+  )
   expect_identical(
     values[["step22_reference_sha256"]],
     "8d5d7544a6e6bcb757827263763ffae95115fa10b52b187669eaa5627af6931f"

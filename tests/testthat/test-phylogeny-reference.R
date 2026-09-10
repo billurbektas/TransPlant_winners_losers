@@ -66,7 +66,7 @@ test_that("the current zero-distance pairs are intentional", {
   expect_true(all(checks$pass))
 })
 
-test_that("the PEV modeling interface validates before preserving anchored bytes", {
+test_that("the PEV modeling interface validates while retaining reconstructed values", {
   reference <- tibble::tibble(
     species_id = c(
       "Poa trivialis", "Erigeron formosissimus", "Euphrasia minima"
@@ -78,7 +78,8 @@ test_that("the PEV modeling interface validates before preserving anchored bytes
   recomputed <- reference
   recomputed$PEV1 <- recomputed$PEV1 + c(1e-14, 0, -1e-14)
   interface <- build_anchored_pev_modeling_interface(recomputed, reference)
-  expect_identical(interface$data, reference)
+  expect_identical(interface$data, recomputed)
+  expect_false(interface$audit$exact_reference_values_used_for_step22_modeling)
   expect_true(all(interface$audit$pass))
 
   drifted <- recomputed

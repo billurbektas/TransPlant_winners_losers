@@ -11,13 +11,11 @@ and the phylogeny/PCoA reference interface. It excludes fitted-model
 environments, raw source data, caches, figures, and reports. Its SHA-256 is
 `6aa52701c604bf23f7366970fbf80e4e3b05f7253ae1961e1f7251ff08c962e6`.
 
-The transition fixture can be recreated before legacy outputs are archived by
-running:
+`legacy_wl_determined.rds` is the byte-identical upstream winner/loser
+comparator formerly stored at `output/wl.determined.rds`. Its SHA-256 is
+`49892851a71a6ac1df15fef0213d8f25f5265aec5cfd53499724aa526b40b399`.
 
-```sh
-Rscript scripts/freeze_transition_reference.R --write
-```
-
-Replacing either fixture requires explicit review and a corresponding update
-to `config/reference_artifacts.csv`; ordinary pipeline execution never writes
-these paths.
+The one-time transition-freezing utility and original scientific artifacts are
+preserved under `archive/`. Replacing any fixture requires explicit review and
+a corresponding update to `config/reference_artifacts.csv` where applicable;
+ordinary pipeline execution never writes these paths.

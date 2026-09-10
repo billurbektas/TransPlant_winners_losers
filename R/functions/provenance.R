@@ -59,8 +59,11 @@ build_canonical_run_provenance <- function(root = getwd(), release_gate = NULL) 
     v_phylomaker2_version = package_version_or_na("V.PhyloMaker2"),
     renv_lock_sha256 = artifact("renv.lock"),
     targets_script_sha256 = artifact("_targets.R"),
+    canonical_reference_sha256 = artifact(
+      "output/reference/canonical_reference_results.rds"
+    ),
     step22_reference_sha256 = artifact(
-      "output/step_by_step_modeling/downstream_526/downstream_526_reference_results.rds"
+      "tests/fixtures/step22_reference_results.rds"
     ),
     transition_reference_sha256 = artifact(
       "tests/fixtures/canonical_transition_reference.rds"
@@ -114,10 +117,6 @@ known_figure_producer <- function(path) {
   script <- NA_character_
   target <- NA_character_
 
-  available_source <- function(active, archived) {
-    if (file.exists(active)) active else if (file.exists(archived)) archived else active
-  }
-
   target_map <- c(
     "compare_rel.abund_vs.sqrt.rel.abund.pdf" = "figure_sensitivity",
     "destination_climate_warming_gradient.pdf" = "figure_destination_climate_warming_gradient",
@@ -140,150 +139,40 @@ known_figure_producer <- function(path) {
     )
   }
 
-  script_map <- c(
-    "eg.sp.1.pdf" = available_source(
-      "R/03_calculate_winners_losers.R",
-      "archive/pretargets_workflow_history/R/03_calculate_winners_losers.R"
-    ),
-    "eg.sp.2.pdf" = available_source(
-      "R/03_calculate_winners_losers.R",
-      "archive/pretargets_workflow_history/R/03_calculate_winners_losers.R"
-    ),
-    "winners_losers.pdf" = available_source(
-      "R/03_calculate_winners_losers.R",
-      "archive/pretargets_workflow_history/R/03_calculate_winners_losers.R"
-    ),
-    "trait_categories_with_overall.pdf" = available_source(
-      "R/07_climate_faceted_descriptive_review.R",
-      "archive/legacy_modeling_v1/R/07_climate_faceted_descriptive_review.R"
-    ),
-    "response_to_family_alluvial.pdf" = available_source(
-      "R/10_response_grouping_flows_gradients_review.R",
-      "archive/legacy_modeling_v1/R/10_response_grouping_flows_gradients_review.R"
-    ),
-    "response_to_climate_alluvial.pdf" = available_source(
-      "R/10_response_grouping_flows_gradients_review.R",
-      "archive/legacy_modeling_v1/R/10_response_grouping_flows_gradients_review.R"
-    ),
-    "response_by_climate_percentages.pdf" = available_source(
-      "R/10_response_grouping_flows_gradients_review.R",
-      "archive/legacy_modeling_v1/R/10_response_grouping_flows_gradients_review.R"
-    ),
-    "response_by_climate_percentages_response_axis.pdf" = available_source(
-      "R/10_response_grouping_flows_gradients_review.R",
-      "archive/legacy_modeling_v1/R/10_response_grouping_flows_gradients_review.R"
-    )
-  )
-  if (filename %in% names(script_map)) {
-    script <- unname(script_map[[filename]])
-  }
-
-  if (grepl("downstream_526/figures/", path, fixed = TRUE)) {
-    script <- if (grepl("species_minmax_classification_526\\.(pdf|png)$", path)) {
-      available_source(
-        "R/35_step_23_downstream_526_species_callout_figure.R",
-        "archive/canonical_source_snapshots/R/35_step_23_downstream_526_species_callout_figure.R"
-      )
-    } else {
-      available_source(
-        "R/34_step_22_downstream_526_models.R",
-        "archive/canonical_source_snapshots/R/34_step_22_downstream_526_models.R"
-      )
-    }
-  } else if (grepl("^figures/manuscript/species_minmax_classification_526[.]pdf$", path)) {
+  if (grepl("^figures/manuscript/species_minmax_classification_526[.]pdf$", path)) {
     script <- "R/functions/figures.R"
     target <- "species_context_figure_file"
   } else if (grepl("^figures/manuscript/woodiness_response_surfaces_526[.]pdf$", path)) {
     script <- "R/functions/figures.R"
     target <- "woodiness_figure_file"
-  } else if (grepl("resident_phylogeny_pcoa", path, fixed = TRUE)) {
-    script <- available_source(
-      "R/31_step_19_resident_phylogeny_pcoa.R",
-      "archive/canonical_source_snapshots/R/31_step_19_resident_phylogeny_pcoa.R"
-    )
-  } else if (grepl("trait_data_audit", path, fixed = TRUE)) {
-    script <- available_source(
-      "R/33_step_21_trait_data_audit.R",
-      "archive/canonical_source_snapshots/R/33_step_21_trait_data_audit.R"
-    )
-  } else if (grepl("family_aggregated_auc", path, fixed = TRUE)) {
-    script <- available_source(
-      "R/30_step_18_family_aggregated_auc.R",
-      "archive/canonical_source_snapshots/R/30_step_18_family_aggregated_auc.R"
-    )
-  } else if (grepl("species_information_heterogeneity", path, fixed = TRUE)) {
-    script <- available_source(
-      "R/29_step_17_species_information_heterogeneity.R",
-      "archive/stepwise_model_development/R/29_step_17_species_information_heterogeneity.R"
-    )
   }
 
   data.frame(generating_script_if_known = script, target_if_known = target)
 }
 
 default_figure_status <- function(path) {
-  if (grepl("^archive/", path)) {
-    return("KEEP_HISTORICAL")
-  }
   if (grepl("^figures/retained/", path)) {
     return("KEEP_FOR_MANUSCRIPT")
   }
   if (grepl("^figures/manuscript/", path)) {
     return("CURRENT_CANONICAL_ANALYSIS_FIGURE")
   }
-  if (grepl("output/step_by_step_modeling/downstream_526/figures/", path, fixed = TRUE)) {
-    return("CURRENT_CANONICAL_ANALYSIS_FIGURE")
-  }
-  if (grepl("/audit/figures/|resident_phylogeny_pcoa|trait_data_audit", path)) {
-    return("REGENERATABLE_AUDIT")
-  }
-  if (grepl("output/frequentist_hierarchical_auc/figures/step_", path, fixed = TRUE) ||
-      grepl("output/step_by_step_modeling/", path, fixed = TRUE)) {
-    return("KEEP_HISTORICAL")
-  }
-  if (grepl("plot/figures_presentation/", path, fixed = TRUE)) {
-    return("KEEP_HISTORICAL")
-  }
   "UNKNOWN_DO_NOT_TOUCH"
 }
 
 figure_analysis_generation <- function(path) {
-  if (grepl("^archive/", path)) {
-    return("checksum-recorded archived analysis history")
-  }
   if (grepl("^figures/retained/", path)) {
     return("verified retained copy")
   }
-  if (grepl("downstream_526", path, fixed = TRUE)) {
-    return("current Step 22/23 canonical numerical analysis")
-  }
   if (grepl("^figures/manuscript/", path)) {
     return("current canonical targets analysis")
-  }
-  if (grepl("frequentist_hierarchical_auc/figures/step_", path, fixed = TRUE)) {
-    return("stepwise model development")
-  }
-  if (grepl("frequentist_hierarchical_auc", path, fixed = TRUE)) {
-    return("first-generation continuous-AUC analysis")
-  }
-  if (grepl("resident_phylogeny_pcoa|trait_data_audit", path)) {
-    return("current canonical audit")
-  }
-  if (grepl("output/step_by_step_modeling", path, fixed = TRUE)) {
-    return("stepwise analysis history")
-  }
-  if (grepl("^plot/", path)) {
-    return("upstream descriptive or retained historical analysis")
   }
   "unknown"
 }
 
 build_figure_provenance <- function(root = getwd(), retained_config = "config/retained_figures.csv") {
   candidates <- c(
-    list.files(file.path(root, "plot"), pattern = "\\.(pdf|png|svg)$", recursive = TRUE, full.names = TRUE, ignore.case = TRUE),
-    list.files(file.path(root, "output"), pattern = "\\.(pdf|png|svg)$", recursive = TRUE, full.names = TRUE, ignore.case = TRUE),
-    list.files(file.path(root, "figures"), pattern = "\\.(pdf|png|svg)$", recursive = TRUE, full.names = TRUE, ignore.case = TRUE),
-    list.files(file.path(root, "archive"), pattern = "\\.(pdf|png|svg)$", recursive = TRUE, full.names = TRUE, ignore.case = TRUE)
+    list.files(file.path(root, "figures"), pattern = "\\.(pdf|png|svg)$", recursive = TRUE, full.names = TRUE, ignore.case = TRUE)
   )
   candidates <- sort(unique(candidates[file.exists(candidates)]))
   paths <- relative_project_path(candidates, root)
@@ -308,9 +197,7 @@ build_figure_provenance <- function(root = getwd(), retained_config = "config/re
     hash <- sha256_file(candidates[[index]])
     expected <- if (nrow(override)) override$expected_sha256[[1]] else NA_character_
     hash_ok <- if (is.na(expected) || !nzchar(expected)) NA else identical(hash, expected)
-    proposed_destination <- if (grepl("^archive/", path)) {
-      path
-    } else if (identical(status, "KEEP_FOR_MANUSCRIPT") || identical(status, "KEEP_HISTORICAL")) {
+    proposed_destination <- if (identical(status, "KEEP_FOR_MANUSCRIPT") || identical(status, "KEEP_HISTORICAL")) {
       file.path("figures", "retained", basename(path))
     } else if (identical(status, "CURRENT_CANONICAL_ANALYSIS_FIGURE")) {
       file.path("figures", "candidates", basename(path))
@@ -500,7 +387,6 @@ build_scientific_source_inventory <- function(paths, root = getwd()) {
       relative == "_targets.R" ~ "target_entry_point",
       startsWith(relative, "R/functions/") ~ "canonical_function",
       startsWith(relative, "R/targets/") ~ "target_stage",
-      startsWith(relative, "R/pipeline/") ~ "active_upstream_module",
       startsWith(relative, "config/") ~ "configuration_or_decision_ledger",
       startsWith(relative, "reports/") ~ "report_source",
       startsWith(relative, "scripts/") ~ "command_line_entry_or_maintenance",

@@ -171,6 +171,141 @@ restore_phylogeny_tip_labels <- function(tree, species_order) {
   tree
 }
 
+build_phylogeny_species_order <- function(tree, decisions, downstream_species) {
+  if (!inherits(tree, "phylo")) {
+    stop("Phylogeny species order requires a phylo object.", call. = FALSE)
+  }
+  downstream_species <- sort(unique(as.character(downstream_species)))
+  tree_species <- as.character(tree$tip.label)
+  if (anyDuplicated(tree_species) || !setequal(tree_species, downstream_species)) {
+    stop(
+      "Tree tips do not uniquely match the active downstream species set.",
+      call. = FALSE
+    )
+  }
+  assert_columns(
+    decisions,
+    c("species_id", "TNRS accepted name", "TNRS genus", "TNRS family"),
+    "phylogeny placement decisions"
+  )
+  taxonomy <- decisions |>
+    dplyr::transmute(
+      species_id = as.character(.data$species_id),
+      tnrs_accepted_name = as.character(.data$`TNRS accepted name`),
+      tnrs_genus = as.character(.data$`TNRS genus`),
+      tnrs_family = as.character(.data$`TNRS family`)
+    )
+  result <- tibble::tibble(
+    tree_tip_position = seq_along(tree_species),
+    species_id = tree_species,
+    newick_tip_label = gsub(" ", "_", tree_species, fixed = TRUE)
+  ) |>
+    dplyr::left_join(taxonomy, by = "species_id")
+  if (anyNA(result[c("tnrs_accepted_name", "tnrs_genus", "tnrs_family")])) {
+    stop("Active phylogeny species order has missing reviewed taxonomy.", call. = FALSE)
+  }
+  result
+}
+
+build_zero_distance_audit <- function(distance_matrix, decisions,
+                                      tolerance = NULL) {
+  matrix <- as.matrix(distance_matrix)
+  if (is.null(tolerance)) {
+    tolerance <- 1e-10 * max(1, max(abs(matrix)))
+  }
+  indices <- which(
+    upper.tri(matrix) & abs(matrix) <= tolerance,
+    arr.ind = TRUE
+  )
+  assert_columns(
+    decisions,
+    c(
+      "species_id", "TNRS accepted name", "match_type", "parent_binomial",
+      "parent_in_backbone", "shared_parent_placement", "infraspecific_name",
+      "backbone matched name"
+    ),
+    "phylogeny placement decisions"
+  )
+  lookup <- decisions |>
+    dplyr::transmute(
+      species_id = as.character(.data$species_id),
+      tnrs_name = as.character(.data$`TNRS accepted name`),
+      match_type = as.character(.data$match_type),
+      parent_binomial = as.character(.data$parent_binomial),
+      parent_tip_present = as.logical(.data$parent_in_backbone),
+      shared_parent_placement = as.logical(.data$shared_parent_placement),
+      infraspecific = as.logical(.data$infraspecific_name),
+      backbone_matched_name = as.character(.data$`backbone matched name`)
+    )
+  if (!nrow(indices)) {
+    return(tibble::tibble(
+      species_id_1 = character(), `TNRS accepted name 1` = character(),
+      species_id_2 = character(), `TNRS accepted name 2` = character(),
+      phylogenetic_distance = numeric(), `match_type species 1` = character(),
+      `match_type species 2` = character(), `parent binomial 1` = character(),
+      `parent tip present 1` = logical(), `parent binomial 2` = character(),
+      `parent tip present 2` = logical(),
+      `either taxon infraspecific` = logical(), reason = character(),
+      classification = character()
+    ))
+  }
+  tibble::tibble(
+    species_id_1 = rownames(matrix)[indices[, "row"]],
+    species_id_2 = colnames(matrix)[indices[, "col"]],
+    phylogenetic_distance = matrix[indices]
+  ) |>
+    dplyr::left_join(
+      lookup |>
+        dplyr::rename_with(~ paste0(.x, "_1"), -"species_id") |>
+        dplyr::rename(species_id_1 = "species_id"),
+      by = "species_id_1"
+    ) |>
+    dplyr::left_join(
+      lookup |>
+        dplyr::rename_with(~ paste0(.x, "_2"), -"species_id") |>
+        dplyr::rename(species_id_2 = "species_id"),
+      by = "species_id_2"
+    ) |>
+    dplyr::mutate(
+      intentional = .data$shared_parent_placement_1 &
+        .data$shared_parent_placement_2 &
+        !is.na(.data$backbone_matched_name_1) &
+        .data$backbone_matched_name_1 == .data$backbone_matched_name_2 &
+        (.data$infraspecific_1 | .data$infraspecific_2),
+      reason = dplyr::if_else(
+        .data$intentional,
+        paste0(
+          "Ecologically distinct taxa deliberately share parent-species ",
+          "placement at ", .data$backbone_matched_name_1,
+          "; the backbone does not resolve their infraspecific divergence."
+        ),
+        "No documented shared parent-species placement explains this zero distance."
+      ),
+      classification = dplyr::if_else(
+        .data$intentional,
+        "intentional shared placement",
+        "unexpected zero distance"
+      )
+    ) |>
+    dplyr::transmute(
+      species_id_1 = .data$species_id_1,
+      `TNRS accepted name 1` = .data$tnrs_name_1,
+      species_id_2 = .data$species_id_2,
+      `TNRS accepted name 2` = .data$tnrs_name_2,
+      phylogenetic_distance = .data$phylogenetic_distance,
+      `match_type species 1` = .data$match_type_1,
+      `match_type species 2` = .data$match_type_2,
+      `parent binomial 1` = .data$parent_binomial_1,
+      `parent tip present 1` = .data$parent_tip_present_1,
+      `parent binomial 2` = .data$parent_binomial_2,
+      `parent tip present 2` = .data$parent_tip_present_2,
+      `either taxon infraspecific` =
+        .data$infraspecific_1 | .data$infraspecific_2,
+      reason = .data$reason,
+      classification = .data$classification
+    )
+}
+
 build_phylogeny_from_placement_decisions <- function(decisions,
                                                      downstream_species) {
   required <- c(
@@ -394,18 +529,17 @@ build_anchored_pev_modeling_interface <- function(recomputed, reference,
     abs(as.matrix(recomputed[axes]) - as.matrix(reference[axes]))
   )
   list(
-    data = reference,
+    data = recomputed,
     audit = tibble::tibble(
-      interface = "validated Step 19 PEV1-PEV3 modeling coordinates",
+      interface = "independently reconstructed PEV1-PEV3 modeling coordinates",
       recomputed_species = nrow(recomputed),
       maximum_recomputation_error = maximum_error,
       validation_tolerance = tolerance,
-      exact_reference_values_used_for_step22_modeling = TRUE,
+      exact_reference_values_used_for_step22_modeling = FALSE,
       reason = paste(
-        "The PCoA is recomputed independently and must pass tolerance before",
-        "the exact frozen coordinate values are supplied to the optimizer;",
-        "this prevents floating-point eigensolver noise from changing anchored",
-        "CR1 and heterogeneity results."
+        "The frozen coordinates are comparator-only. The independently",
+        "recomputed, response-independently oriented coordinates are supplied",
+        "to the optimizer after the migration tolerance audit."
       ),
       pass = TRUE
     )
@@ -509,6 +643,42 @@ validate_zero_distance_placements <- function(distance_matrix, audit) {
     pass = c(setequal(pairs, audited), all(audit$classification == "intentional shared placement")),
     detail = c(paste(length(pairs), "matrix pairs and", length(audited), "audit rows"),
                paste(sum(audit$classification == "intentional shared placement"), "documented"))
+  )
+}
+
+compare_zero_distance_audit <- function(candidate, reference,
+                                        tolerance = 1e-12) {
+  keys <- c("species_id_1", "species_id_2")
+  candidate <- dplyr::arrange(candidate, .data$species_id_1, .data$species_id_2)
+  reference <- dplyr::arrange(reference, .data$species_id_1, .data$species_id_2)
+  pair_equal <- identical(candidate[keys], reference[keys])
+  distance_equal <- pair_equal && numeric_values_equal(
+    candidate$phylogenetic_distance,
+    reference$phylogenetic_distance,
+    c(absolute = tolerance, relative = 1e-10)
+  )
+  classification_equal <- pair_equal && identical(
+    as.character(candidate$classification),
+    as.character(reference$classification)
+  )
+  reason_equal <- pair_equal && identical(
+    as.character(candidate$reason),
+    as.character(reference$reason)
+  )
+  tibble::tibble(
+    check = c(
+      "reference zero-distance pair identities",
+      "reference zero-distance values",
+      "reference zero-distance classifications",
+      "reference zero-distance reasons"
+    ),
+    pass = c(pair_equal, distance_equal, classification_equal, reason_equal),
+    detail = c(
+      paste(nrow(candidate), "candidate and", nrow(reference), "reference pairs"),
+      paste("absolute tolerance", format(tolerance, scientific = TRUE)),
+      "Semantic classification values compared as character.",
+      "Documented placement explanations compared exactly."
+    )
   )
 }
 

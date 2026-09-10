@@ -147,8 +147,32 @@ assert_step22_reference <- function(validation) {
   validation
 }
 
-assert_reference_table <- function(candidate, reference, label,
-                                   order_by = character()) {
+write_canonical_reference_once <- function(candidate, path) {
+  validate_step22_schema(candidate, "current canonical reference candidate")
+  if (file.exists(path)) {
+    existing <- readRDS(path)
+    validation <- validate_step22_reference(candidate, existing)
+    if (any(!validation$pass)) {
+      stop(
+        "The frozen canonical reference exists and differs from the active ",
+        "candidate. It will not be overwritten: ", path,
+        call. = FALSE
+      )
+    }
+    return(path)
+  }
+  write_rds_atomic(candidate, path)
+}
+
+validate_frozen_canonical_reference <- function(candidate, path) {
+  if (!file.exists(path)) {
+    stop("Canonical reference file is missing: ", path, call. = FALSE)
+  }
+  assert_step22_reference(validate_step22_reference(candidate, readRDS(path)))
+}
+
+validate_reference_table <- function(candidate, reference, label,
+                                     order_by = character()) {
   if (length(order_by)) {
     candidate <- candidate |>
       dplyr::arrange(!!!rlang::syms(order_by))
@@ -162,6 +186,12 @@ assert_reference_table <- function(candidate, reference, label,
     detail = if (length(failures)) paste(failures, collapse = " | ") else
       "All fields pass the Step 22 tolerance policy."
   )
+  result
+}
+
+assert_reference_table <- function(candidate, reference, label,
+                                   order_by = character()) {
+  result <- validate_reference_table(candidate, reference, label, order_by)
   if (any(!result$pass)) {
     stop(label, " regression failed: ", result$detail[[1]], call. = FALSE)
   }

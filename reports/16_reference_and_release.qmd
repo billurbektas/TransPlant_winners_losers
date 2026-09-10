@@ -6,10 +6,14 @@ execute: {echo: false, warning: false, message: false}
 
 ## Purpose
 
-Release gate for the immutable Step 22 numerical authority and Step 19 phylogenetic lineage.
+Release gate for the active canonical numerical reference. The frozen Step 22
+fixture remains a secondary historical comparator, not an analytical input.
 
 ```{r}
 step22 <- targets::tar_read(step22_reference_validation)
+canonical_reference <- targets::tar_read(canonical_reference_validation)
+active <- targets::tar_read(active_downstream_release_validation)
+migration <- targets::tar_read(phylogeny_migration_equivalence)
 phylogeny <- targets::tar_read(phylogeny_reproduction_validation)
 figures <- targets::tar_read(retained_figure_copy_audit)
 release <- targets::tar_read(release_validation)
@@ -33,6 +37,9 @@ models <- dplyr::bind_rows(
   targets::tar_read(heterogeneity_synthesis_equivalence)
 )
 knitr::kable(step22)
+knitr::kable(canonical_reference)
+knitr::kable(active)
+knitr::kable(migration)
 knitr::kable(phylogeny)
 knitr::kable(family)
 knitr::kable(models)
@@ -43,4 +50,8 @@ knitr::kable(run_provenance)
 
 ## PASS/FAIL
 
-All numerical, structural, phylogenetic, and retained-copy checks must pass. Regenerated figure pixels and file hashes are intentionally outside the numerical regression contract.
+All active numerical, structural, phylogenetic, migration, canonical-reference,
+and retained-copy checks must pass. The Step 22 comparison is reported for
+historical transparency and is not an active scientific-input gate. Regenerated
+figure pixels and file hashes are intentionally outside the numerical
+regression contract.

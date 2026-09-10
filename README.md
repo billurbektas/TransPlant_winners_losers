@@ -2,8 +2,9 @@
 
 This repository has one active scientific entry point: [`_targets.R`](_targets.R).
 It builds the community, taxonomy, climate, trait, AUC, temporal, and resident
-downstream branches, then validates the assembled downstream result against the
-approved Step 22 numerical reference.
+downstream branches, validates the independently reconstructed phylogeny branch
+against the historical Step 22 analysis, and freezes the assembled active
+result as the current canonical numerical reference.
 
 The current downstream analysis contains 1,604 resident effects from 526
 species in 42 experiments. The six downstream exclusions remain in upstream
@@ -16,24 +17,41 @@ community, AUC, and winner/loser calculations:
 - *Selaginella selaginoides*
 - *Juniperus communis*
 
-## Numerical authority and rollback
+## Numerical references and rollback
 
-The immutable numerical authority is:
+The primary reference for future canonical regression is:
 
 ```text
-output/step_by_step_modeling/downstream_526/downstream_526_reference_results.rds
+output/reference/canonical_reference_results.rds
+SHA-256 75f5659904616f3a1d8c2046f356ddbd363506bd21d55398af7b73995eb94792
+```
+
+It is assembled only from active canonical scientific targets and is written
+once: a differing candidate causes a failure instead of overwriting it.
+
+The active immutable pre-refactor Step 22 comparator is:
+
+```text
+tests/fixtures/step22_reference_results.rds
 SHA-256 8d5d7544a6e6bcb757827263763ffae95115fa10b52b187669eaa5627af6931f
 ```
 
-A byte-identical regression fixture is stored at
-`tests/fixtures/step22_reference_results.rds`. The pipeline never writes to the
-immutable reference path.
+The original byte-identical Step 22 RDS is preserved at
+`archive/canonical_source_snapshots/output/downstream_526/downstream_526_reference_results.rds`.
+Active scientific computations never consume values from either copy; only
+named validation/comparison branches may read the fixture.
 
 Branch-level transition interfaces are condensed in the 180-KB
 `tests/fixtures/canonical_transition_reference.rds`. This checksummed fixture
 contains only validated tables, covariance matrices, compact model signatures,
-and the Step 19 phylogeny/PCoA interface. It allows historical output trees to
-be archived without making them hidden active dependencies.
+and the Step 19 phylogeny/PCoA interface. It is restricted to transition
+validation and historical-comparison branches. The active phylogeny, PCoA,
+PEV model, and heterogeneity synthesis are reconstructed independently.
+
+Exact pre-refactor human-readable reports are preserved under
+[`reports/reference_text/`](reports/reference_text/). The reproducible current
+plain-text summary is generated at
+`reports/rendered/current_downstream_model_results.txt`.
 
 The complete pre-refactor scientific source is recoverable from:
 
@@ -84,11 +102,10 @@ The root target file is deliberately small. It sources:
   [`R/targets/publication_targets.R`](R/targets/publication_targets.R);
 - pure analytical functions under [`R/functions/`](R/functions/).
 
-The active pipeline-module list is explicit in
-`canonical_pipeline_source_files()`. Obsolete review/model modules are not
-loaded merely because they remain beside canonical upstream code during the
-validation phase, and archived files are never reached through a recursive
-source glob.
+The active upstream-module list is explicit in
+`canonical_pipeline_source_files()` and resolves entirely within
+[`R/functions/`](R/functions/). Archived files are never reached through a
+recursive source glob.
 
 The major dependency branches are:
 
@@ -191,11 +208,12 @@ Figure status is separate from numerical status:
 - `KEEP_FOR_MANUSCRIPT`, `KEEP_HISTORICAL`, `REGENERATABLE_AUDIT`,
   `INTERMEDIATE_DISCARDABLE`, and `UNKNOWN_DO_NOT_TOUCH` protect other roles.
 
-The complete inventory is
+The complete active inventory is
 `output/manifests/figure_provenance.csv`. Eleven explicitly retained figures
-are copied with checksum verification from `plot/` to `figures/retained/`;
-their originals remain in place. The retained allowlist and expected hashes are
-in [`config/retained_figures.csv`](config/retained_figures.csv).
+are checksum-locked in [`figures/retained/`](figures/retained/). Their former
+root `plot/` copies were verified and moved into the appropriate historical
+archive. The retained allowlist and expected hashes are in
+[`config/retained_figures.csv`](config/retained_figures.csv).
 
 The Woodiness surface uses a group-specific observed-climate support-mask
 target. This target derives support separately for woody and non-woody rows and
@@ -240,7 +258,8 @@ Useful scoped gates are:
 
 ```r
 targets::tar_make(names = c(
-  step22_reference_validation_file,
+  canonical_reference_results_file,
+  phylogeny_migration_equivalence_report_file,
   phylogeny_reproduction_validation_file
 ))
 
@@ -295,6 +314,7 @@ output/models/
 output/tables/
 output/audits/
 output/manifests/
+output/reference/
 ```
 
 `output/manifests/canonical_outputs.csv` is produced from the explicit
@@ -308,24 +328,29 @@ versions, and checksums of the lockfile, target script, Step 22 authority, and
 compact transition fixture. It is downstream of the numerical release gate and
 does not alter the immutable 12-field Step 22 schema.
 
-The active graph does not read superseded Step output directories. Validated
-Step 19–23 transition interfaces are held in the compact, immutable fixture
-described above. Old files are not moved until their replacement targets pass
-independently and the combined numerical, phylogeny, Step 22, and retained-
-figure release gate passes.
+The active graph does not read superseded root output directories. Validated
+Step 19–23 transition interfaces are held in compact immutable fixtures and in
+explicit reference-validation targets. Canonical scientific targets have no
+archive ancestry.
 
 Historical material is staged only under [`archive/`](archive/) with a manifest
 recording original path, destination, category, checksum, producer,
 dependencies, reason, and date. Archived R files are excluded from active
 source globs, targets, reports, and tests.
 
-`scripts/archive_validated_history.R` is dry-run-only by default and refuses to
-proceed unless `release_validation` is current and fully passing. The explicit
-`--apply` mode moves eligible source and generated history, verifies every
-post-move SHA-256, and writes the archive ledger. It never moves `plot/`, raw
-data, caches, `_targets/`, session snapshots, or the immutable Step 22 reference.
+The completed cleanup is documented in
+`output/audits/pre_cleanup_legacy_dependency_audit.csv`,
+`output/audits/post_cleanup_legacy_dependency_audit.csv`,
+`output/audits/active_archive_ancestry_summary.csv`,
+`output/audits/final_repository_tree_depth3.txt`,
+`output/audits/cleanup_archive_moves.csv`, and
+`archive/manifests/archive_moves.csv`. Transitional output trees, the root
+`plot/` tree, interactive workspace snapshots, the pre-cleanup repository
+inventory, and one-time archive/freeze utilities are preserved under
+[`archive/`](archive/) with verified checksums rather than deleted. The old
+inventory is retained as `archive/manifests/repository_contents_pre_cleanup.txt`.
 
-Nothing is deleted during the initial refactor. Deletion of snapshots, caches,
-duplicate figures, generated outputs, or archived material requires an explicit
-itemized approval with checksums and regeneration instructions. Unclassified
-figures remain `UNKNOWN_DO_NOT_TOUCH`.
+Future deletion of snapshots, caches, duplicate figures, generated outputs,
+or archived material still requires explicit itemized approval with checksums
+and regeneration instructions. Unclassified figures remain
+`UNKNOWN_DO_NOT_TOUCH`.

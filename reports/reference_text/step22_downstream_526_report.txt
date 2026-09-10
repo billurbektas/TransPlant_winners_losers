@@ -1,0 +1,476 @@
+UPDATED 526-SPECIES DOWNSTREAM MODELING AND HETEROGENEITY SYNTHESIS
+=================================================================
+
+Step 22; script R/34_step_22_downstream_526_models.R.
+Steps 20 and 21 were already occupied, so the next unused workflow step and file prefix were used.
+Upstream community, AUC, and significance-based winner/loser products were not modified.
+Response: maximum-duration raw relative-cover Delta AUC = warmed minus origin-control AUC.
+
+1. UPDATED M_both_526
+---------------------
+Effects: 1604; species: 526; experiments: 42.
+Excluded downstream only: Gymnocarpium dryopteris; Athyrium spinulosum; Botrychium lunaria; Equisetum arvense; Selaginella selaginoides; Juniperus communis
+Model:
+M_both_526 <- metafor::rma.mv(
+  yi = auc_effect, V = V_auc_526, mods = ~ T_z * P_z * W_z,
+  random = list(~1 | species_id, ~0 + W_z | species_id,
+                ~0 + T_z + P_z + TP_z | species_id),
+  struct = "GEN", data = auc_data_526, method = "REML", sparse = TRUE
+)
+Climate scaling (P is log destination JJA precipitation; equal-weight distinct experiments):
+# A tibble: 3 × 7
+  scaled_field source_field center scale weighting                n
+  <chr>        <chr>         <dbl> <dbl> <chr>                <int>
+1 T_z          T             13.8  3.39  distinct experiments    42
+2 P_z          P              5.90 0.522 distinct experiments    42
+3 W_z          W              2.86 2.10  distinct experiments    42
+  n_distinct_experiments
+                   <int>
+1                     42
+2                     42
+3                     42
+Fixed effects:
+# A tibble: 8 × 6
+  term         estimate model_SE model_CI_low model_CI_high model_p_value
+  <chr>           <dbl>    <dbl>        <dbl>         <dbl>         <dbl>
+1 intrcpt     -0.00664   0.00326    -0.0130       -0.000249  0.0417      
+2 T_z          0.000658  0.00640    -0.0119        0.0132    0.918       
+3 P_z         -0.0105    0.00489    -0.0201       -0.000942  0.0314      
+4 W_z          0.00839   0.00586    -0.00310       0.0199    0.152       
+5 T_z:P_z      0.0108    0.00516     0.000647      0.0209    0.0370      
+6 T_z:W_z     -0.00659   0.00330    -0.0130       -0.000122  0.0458      
+7 P_z:W_z     -0.0237    0.00481    -0.0332       -0.0143    0.000000816 
+8 T_z:P_z:W_z  0.0173    0.00322     0.0110        0.0236    0.0000000765
+Experiment-clustered CR1:
+# A tibble: 8 × 14
+  predictor      model      term         estimate model_SE model_CI_low
+  <chr>          <chr>      <chr>           <dbl>    <dbl>        <dbl>
+1 Updated M_both M_both_526 intrcpt     -0.00664   0.00326    -0.0130  
+2 Updated M_both M_both_526 T_z          0.000658  0.00640    -0.0119  
+3 Updated M_both M_both_526 P_z         -0.0105    0.00489    -0.0201  
+4 Updated M_both M_both_526 W_z          0.00839   0.00586    -0.00310 
+5 Updated M_both M_both_526 T_z:P_z      0.0108    0.00516     0.000647
+6 Updated M_both M_both_526 T_z:W_z     -0.00659   0.00330    -0.0130  
+7 Updated M_both M_both_526 P_z:W_z     -0.0237    0.00481    -0.0332  
+8 Updated M_both M_both_526 T_z:P_z:W_z  0.0173    0.00322     0.0110  
+  model_CI_high model_p_value  CR1_SE CR1_CI_low CR1_CI_high CR1_p_value
+          <dbl>         <dbl>   <dbl>      <dbl>       <dbl>       <dbl>
+1     -0.000249  0.0417       0.00467   -0.0161    0.00286        0.165 
+2      0.0132    0.918        0.00738   -0.0143    0.0157         0.929 
+3     -0.000942  0.0314       0.00834   -0.0275    0.00643        0.215 
+4      0.0199    0.152        0.00809   -0.00805   0.0248         0.307 
+5      0.0209    0.0370       0.00732   -0.00411   0.0256         0.150 
+6     -0.000122  0.0458       0.0164    -0.0400    0.0268         0.691 
+7     -0.0143    0.000000816  0.0117    -0.0474   -0.0000404      0.0496
+8      0.0236    0.0000000765 0.00933   -0.00167   0.0363         0.0726
+  CR1_denominator_df CR1_warnings
+               <dbl> <chr>       
+1                 34 ""          
+2                 34 ""          
+3                 34 ""          
+4                 34 ""          
+5                 34 ""          
+6                 34 ""          
+7                 34 ""          
+8                 34 ""          
+Random effects/covariance diagnostics:
+# A tibble: 1 × 22
+  predictor      model      n_effects n_species n_experiments
+  <chr>          <chr>          <int>     <int>         <int>
+1 Updated M_both M_both_526      1604       526            42
+  species_intercept_variance species_W_variance species_T_variance
+                       <dbl>              <dbl>              <dbl>
+1                    0.00139            0.00514            0.00825
+  species_P_variance species_TP_variance T_P_correlation T_TP_correlation
+               <dbl>               <dbl>           <dbl>            <dbl>
+1            0.00390             0.00250           0.764          -0.0928
+  P_TP_correlation minimum_full_covariance_eigenvalue
+             <dbl>                              <dbl>
+1           -0.631                           0.000218
+  covariance_positive_definite any_variance_at_boundary
+  <lgl>                        <lgl>                   
+1 TRUE                         FALSE                   
+  maximum_absolute_context_correlation covariance_identifiable optimizer_code
+                                 <dbl> <lgl>                            <int>
+1                                0.764 TRUE                                 0
+  finite_coefficients finite_fixed_covariance warnings
+  <lgl>               <lgl>                   <chr>   
+1 TRUE                TRUE                    ""      
+Profile-likelihood variance intervals:
+# A tibble: 5 × 6
+  component         estimate   CI_low CI_high warnings error
+  <chr>                <dbl>    <dbl>   <dbl> <chr>    <chr>
+1 species_intercept  0.00139 0.000856 0.00216 ""       ""   
+2 species_W          0.00514 0.00351  0.00716 ""       ""   
+3 species_T          0.00825 0.00612  0.0109  ""       ""   
+4 species_P          0.00390 0.00256  0.00582 ""       ""   
+5 species_TP         0.00250 0.00146  0.00409 ""       ""   
+
+2. SPECIES CONSISTENCY
+----------------------
+Median raw W over distinct experiments: 2.286743 C.
+# A tibble: 1 × 8
+  Resolution `N eligible units` `Winner N` `Winner %` `Loser N` `Loser %`
+  <chr>                   <int>      <int>      <dbl>     <int>     <dbl>
+1 Species                   116          8       6.90        41      35.3
+  `Context-dependent N` `Context-dependent %`
+                  <int>                 <dbl>
+1                    67                  57.8
+Eligibility required >=4 experiments and full rank [1,T_z,P_z,T_z*P_z] within each species' own climates.
+Predictions include fixed effects plus all five species conditional random coefficients and never leave own observed T-P convex hull.
+Figure: figures/species_minmax_classification_526.pdf.
+
+3. TAXONOMIC RESOLUTION
+-----------------------
+Family effects: 666; families: 51; experiments: 42.
+Family cover was summed from original plot x year x treatment x species relative cover, then family trapezoidal AUC effects and full emmeans covariance were reconstructed. Species AUC effects were never averaged.
+# A tibble: 2 × 8
+  Resolution `N eligible units` `Winner N` `Winner %` `Loser N` `Loser %`
+  <chr>                   <int>      <int>      <dbl>     <int>     <dbl>
+1 Species                   116          8       6.90        41      35.3
+2 Family                     33          1       3.03         7      21.2
+  `Context-dependent N` `Context-dependent %`
+                  <int>                 <dbl>
+1                    67                  57.8
+2                    25                  75.8
+Family is a taxonomic-resolution analysis and is excluded from the heterogeneity synthesis.
+
+4. TRAIT INFORMATION
+---------------------
+Trait_z is the natural logarithm of the approved species median, standardized across all unique retained species possessing that trait, before joining repeated AUC rows. Legacy row-weighted z-trait columns were not used.
+# A tibble: 3 × 10
+  trait             species_N_with_trait species_N_missing raw_trait_mean
+  <chr>                            <int>             <int>          <dbl>
+1 LDMC                               288               238         0.268 
+2 LMA                                327               199         0.0601
+3 vegetative_height                  303               223         0.244 
+  raw_trait_SD log_trait_mean log_trait_SD n_effects n_experiments
+         <dbl>          <dbl>        <dbl>     <int>         <int>
+1       0.0915          -1.38        0.354      1148            42
+2       0.0270          -2.90        0.416      1216            42
+3       0.544           -2.00        0.988      1180            42
+  weighting                                                      
+  <chr>                                                          
+1 unique retained trait-complete species before AUC-row expansion
+2 unique retained trait-complete species before AUC-row expansion
+3 unique retained trait-complete species before AUC-row expansion
+ML model support:
+# A tibble: 9 × 11
+  predictor model method n_effects n_fixed logLik    AIC   AICc    BIC
+  <chr>     <chr> <chr>      <int>   <int>  <dbl>  <dbl>  <dbl>  <dbl>
+1 LDMC      M0    ML          1148       8   503.  -972.  -971.  -886.
+2 LDMC      M1    ML          1148       9   503.  -970.  -969.  -879.
+3 LDMC      M2    ML          1148      16   507.  -964.  -963.  -838.
+4 LMA       M0    ML          1216       8   572. -1111. -1110. -1024.
+5 LMA       M1    ML          1216       9   572. -1109. -1108. -1017.
+6 LMA       M2    ML          1216      16   582. -1115. -1114.  -987.
+7 Height    M0    ML          1180       8   706. -1378. -1378. -1292.
+8 Height    M1    ML          1180       9   706. -1377. -1376. -1285.
+9 Height    M2    ML          1180      16   716. -1382. -1381. -1255.
+  optimizer_code warnings
+           <int> <chr>   
+1              0 ""      
+2              0 ""      
+3              0 ""      
+4              0 ""      
+5              0 ""      
+6              0 ""      
+7              0 ""      
+8              0 ""      
+9              0 ""      
+# A tibble: 6 × 8
+  predictor comparison likelihood_ratio    df p_value valid_nested_comparison
+  <chr>     <chr>                 <dbl> <dbl>   <dbl> <lgl>                  
+1 LDMC      M0 vs M1             0.0457     1 0.831   TRUE                   
+2 LDMC      M1 vs M2             7.67       7 0.363   TRUE                   
+3 LMA       M0 vs M1             0.0792     1 0.778   TRUE                   
+4 LMA       M1 vs M2            20.0        7 0.00562 TRUE                   
+5 Height    M0 vs M1             0.509      1 0.476   TRUE                   
+6 Height    M1 vs M2            19.0        7 0.00831 TRUE                   
+  same_rows_and_V method
+  <lgl>           <chr> 
+1 TRUE            ML    
+2 TRUE            ML    
+3 TRUE            ML    
+4 TRUE            ML    
+5 TRUE            ML    
+6 TRUE            ML    
+CR1 summary:
+# A tibble: 3 × 4
+  predictor n_fixed_terms n_CR1_p_below_0_05 minimum_CR1_p
+  <chr>             <int>              <int>         <dbl>
+1 LDMC                 16                  0         0.190
+2 LMA                  16                  0         0.205
+3 Height               16                  0         0.183
+
+5. FUNCTIONAL INFORMATION
+--------------------------
+Graminoid status and Woodiness are independent binary predictors. Non-graminoid is not called Forb, and woody non-graminoids are retained in both applicable levels.
+# A tibble: 4 × 3
+  variable         level         n_species
+  <chr>            <chr>             <int>
+1 Graminoid status graminoid           112
+2 Graminoid status non_graminoid       414
+3 Woodiness        non_woody           495
+4 Woodiness        woody                31
+Cross-tabulation:
+# A tibble: 3 × 3
+  graminoid_status woodiness n_species
+  <chr>            <chr>         <int>
+1 graminoid        non_woody       112
+2 non_graminoid    non_woody       383
+3 non_graminoid    woody            31
+Distinct-experiment climate coverage:
+# A tibble: 4 × 10
+  predictor        group         n_species n_experiments T_z_min T_z_max P_z_min
+  <chr>            <fct>             <int>         <int>   <dbl>   <dbl>   <dbl>
+1 Graminoid status non_graminoid       414            42   -1.49   2.12   -1.61 
+2 Graminoid status graminoid           112            41   -1.49   2.12   -1.61 
+3 Woodiness        non_woody           495            42   -1.49   2.12   -1.61 
+4 Woodiness        woody                31            21   -1.26   0.596  -0.766
+  P_z_max W_z_min W_z_max
+    <dbl>   <dbl>   <dbl>
+1    2.06   -1.19    3.92
+2    2.06   -1.19    3.92
+3    2.06   -1.19    3.92
+4    2.06   -1.03    1.50
+ML model support:
+# A tibble: 6 × 11
+  predictor        model method n_effects n_fixed logLik    AIC   AICc    BIC
+  <chr>            <chr> <chr>      <int>   <int>  <dbl>  <dbl>  <dbl>  <dbl>
+1 Graminoid status M0    ML          1604       8   817. -1601. -1600. -1509.
+2 Graminoid status M1    ML          1604       9   818. -1600. -1599. -1503.
+3 Graminoid status M2    ML          1604      16   829. -1607. -1606. -1473.
+4 Woodiness        M0    ML          1604       8   817. -1601. -1600. -1509.
+5 Woodiness        M1    ML          1604       9   817. -1599. -1598. -1502.
+6 Woodiness        M2    ML          1604      16   820. -1590. -1590. -1456.
+  optimizer_code warnings
+           <int> <chr>   
+1              0 ""      
+2              0 ""      
+3              0 ""      
+4              0 ""      
+5              0 ""      
+6              0 ""      
+# A tibble: 4 × 8
+  predictor        comparison likelihood_ratio    df p_value
+  <chr>            <chr>                 <dbl> <dbl>   <dbl>
+1 Graminoid status M0 vs M1             1.26       1 0.262  
+2 Graminoid status M1 vs M2            21.2        7 0.00349
+3 Woodiness        M0 vs M1             0.0183     1 0.892  
+4 Woodiness        M1 vs M2             5.65       7 0.581  
+  valid_nested_comparison same_rows_and_V method
+  <lgl>                   <lgl>           <chr> 
+1 TRUE                    TRUE            ML    
+2 TRUE                    TRUE            ML    
+3 TRUE                    TRUE            ML    
+4 TRUE                    TRUE            ML    
+CR1 summary:
+# A tibble: 2 × 4
+  predictor        n_fixed_terms n_CR1_p_below_0_05 minimum_CR1_p
+  <chr>                    <int>              <int>         <dbl>
+1 Graminoid status            16                  0        0.0996
+2 Woodiness                   16                  0        0.0795
+
+6. PHYLOGENETIC INFORMATION
+----------------------------
+PEV1-PEV3 represent 43.2784% of positive phylogenetic variation.
+They were selected response-independently, standardized across all 526 unique species before row expansion, and interpreted jointly; axis signs are not biological trait directions.
+# A tibble: 3 × 5
+  PEV   species_N  raw_mean raw_SD
+  <chr>     <int>     <dbl>  <dbl>
+1 PEV1        526 -2.16e-14   83.8
+2 PEV2        526  1.38e-13   58.3
+3 PEV3        526 -1.42e-13   47.8
+  weighting                                               
+  <chr>                                                   
+1 all 526 unique retained species before AUC-row expansion
+2 all 526 unique retained species before AUC-row expansion
+3 all 526 unique retained species before AUC-row expansion
+# A tibble: 3 × 11
+  predictor                         model method n_effects n_fixed logLik    AIC
+  <chr>                             <chr> <chr>      <int>   <int>  <dbl>  <dbl>
+1 Phylogenetic position (PEV1-PEV3) M0    ML          1604       8   817. -1601.
+2 Phylogenetic position (PEV1-PEV3) M1    ML          1604      11   819. -1597.
+3 Phylogenetic position (PEV1-PEV3) M3    ML          1604      23   826. -1589.
+    AICc    BIC optimizer_code warnings
+   <dbl>  <dbl>          <int> <chr>   
+1 -1600. -1509.              0 ""      
+2 -1597. -1490.              0 ""      
+3 -1588. -1417.              0 ""      
+# A tibble: 2 × 8
+  predictor                         comparison likelihood_ratio    df p_value
+  <chr>                             <chr>                 <dbl> <dbl>   <dbl>
+1 Phylogenetic position (PEV1-PEV3) M0 vs M1               2.60     3   0.458
+2 Phylogenetic position (PEV1-PEV3) M1 vs M3              15.7     12   0.206
+  valid_nested_comparison same_rows_and_V method
+  <lgl>                   <lgl>           <chr> 
+1 TRUE                    TRUE            ML    
+2 TRUE                    TRUE            ML    
+CR1 summary:
+# A tibble: 1 × 4
+  predictor                         n_fixed_terms n_CR1_p_below_0_05
+  <chr>                                     <int>              <int>
+1 Phylogenetic position (PEV1-PEV3)            23                  0
+  minimum_CR1_p
+          <dbl>
+1         0.153
+No PEV1-PEV5 model or response-driven axis selection was used.
+
+7. HETEROGENEITY SYNTHESIS
+---------------------------
+H_overall is the species intercept variance; H_W is mean(W_z^2 sigma_W^2); H_context is mean(x'G_context x) using the full T/P/TP covariance; H_total is their sum. Experiments receive equal weight and negative percentages are retained.
+# A tibble: 6 × 20
+  Predictor                         `N effects` `N species` `N experiments`
+  <chr>                                   <int>       <int>           <int>
+1 LDMC                                     1148         288              42
+2 LMA                                      1216         327              42
+3 Height                                   1180         303              42
+4 Graminoid status                         1604         526              42
+5 Woodiness                                1604         526              42
+6 Phylogenetic position (PEV1-PEV3)        1604         526              42
+  `H_overall baseline` `H_overall predictor`
+                 <dbl>                 <dbl>
+1              0.00186               0.00181
+2              0.00176               0.00162
+3              0.00139               0.00138
+4              0.00139               0.00127
+5              0.00139               0.00139
+6              0.00139               0.00125
+  `Overall heterogeneity resolved (%)` `H_W baseline` `H_W predictor`
+                                 <dbl>          <dbl>           <dbl>
+1                              2.49           0.00425         0.00445
+2                              7.99           0.00438         0.00442
+3                              0.502          0.00140         0.00137
+4                              8.86           0.00502         0.00531
+5                              0.00504        0.00502         0.00513
+6                              9.89           0.00502         0.00538
+  `Warming heterogeneity resolved (%)` `H_context baseline`
+                                 <dbl>                <dbl>
+1                               -4.55                0.0232
+2                               -0.964               0.0214
+3                                2.19                0.0149
+4                               -5.88                0.0106
+5                               -2.26                0.0106
+6                               -7.27                0.0106
+  `H_context predictor` `Context heterogeneity resolved (%)` `H_total baseline`
+                  <dbl>                                <dbl>              <dbl>
+1                0.0238                                -2.63             0.0293
+2                0.0212                                 1.09             0.0275
+3                0.0155                                -4.45             0.0177
+4                0.0111                                -4.67             0.0170
+5                0.0108                                -2.19             0.0170
+6                0.0117                               -10.4              0.0170
+  `H_total predictor` `Total heterogeneity resolved (%)`
+                <dbl>                              <dbl>
+1              0.0301                              -2.58
+2              0.0272                               1.21
+3              0.0183                              -3.53
+4              0.0177                              -3.92
+5              0.0173                              -2.03
+6              0.0183                              -7.83
+  `ML M0 vs M1 result`         `ML M1 vs full/context result` `Delta AIC`
+  <chr>                        <chr>                                <dbl>
+1 LR=0.045723; df=1; p=0.83068 LR=7.6664; df=7; p=0.36293            8.29
+2 LR=0.079176; df=1; p=0.77842 LR=19.978; df=7; p=0.0056166         -4.06
+3 LR=0.5086; df=1; p=0.47575   LR=18.962; df=7; p=0.0083057         -3.47
+4 LR=1.2566; df=1; p=0.26229   LR=21.198; df=7; p=0.0034883         -6.45
+5 LR=0.018312; df=1; p=0.89236 LR=5.6485; df=7; p=0.58133           10.3 
+6 LR=2.5968; df=3; p=0.45806   LR=15.678; df=12; p=0.20645          11.7 
+  `Delta AICc`
+         <dbl>
+1         8.90
+2        -3.48
+3        -2.87
+4        -6.02
+5        10.8 
+6        12.7 
+MODEL SUPPORT and HETEROGENEITY RESOLUTION are distinct: a systematic fixed-effect pattern can coexist with little reduction in residual species heterogeneity.
+
+8. REQUIRED CONSISTENCY CHECKS
+------------------------------
+# A tibble: 24 × 4
+   check_number
+          <int>
+ 1            1
+ 2            2
+ 3            3
+ 4            4
+ 5            5
+ 6            6
+ 7            7
+ 8            8
+ 9            9
+10           10
+11           11
+12           12
+13           13
+14           14
+15           15
+16           16
+17           17
+18           18
+19           19
+20           20
+21           21
+22           22
+23           23
+24           24
+   check                                                                  pass 
+   <chr>                                                                  <lgl>
+ 1 All complete-dataset downstream species analyses contain 526 species   TRUE 
+ 2 Excluded taxa absent from every downstream model row                   TRUE 
+ 3 Excluded taxa remain upstream and upstream products are byte-identical TRUE 
+ 4 Climate scaling identical across downstream analyses                   TRUE 
+ 5 Climate scaling uses distinct experiments                              TRUE 
+ 6 Every available retained species defines each trait distribution       TRUE 
+ 7 Natural log precedes trait standardization                             TRUE 
+ 8 Each species contributes once to trait center and SD                   TRUE 
+ 9 Trait_z is joined only after unique-species calculation                TRUE 
+10 Legacy row-weighted z-trait columns are unused                         TRUE 
+11 PEV1-PEV3 standardized across all 526 unique species                   TRUE 
+12 PEVs standardized before repeated-row join                             TRUE 
+13 Every predictor uses an exact matched baseline and V                   TRUE 
+14 Family AUC reconstructed from plot-level family cover                  TRUE 
+15 Family uses only retained 526-species universe                         TRUE 
+16 Family absent from heterogeneity synthesis                             TRUE 
+17 Graminoid status and Woodiness are separate predictors                 TRUE 
+18 No mutually exclusive Forb/Graminoid/Woody factor is used              TRUE 
+19 Woody non-graminoids are allowed                                       TRUE 
+20 PEV1-PEV3 selected independently of Delta AUC                          TRUE 
+21 No PEV axis selected by AUC significance                               TRUE 
+22 No PEV1-PEV5 model fitted                                              TRUE 
+23 Existing min/max classification rule retained                          TRUE 
+24 No broad codebase refactor performed                                   TRUE 
+   detail                                                                       
+   <chr>                                                                        
+ 1 M_both, Graminoid, Woodiness, and PEV1-PEV3 complete datasets checked        
+ 2 Species, family membership, traits/statuses, and PEV tables checked          
+ 3 upstream MD5 unchanged: TRUE                                                 
+ 4 Family climate columns compared with common species experiment table         
+ 5 42 equal-weight experiment climates                                          
+ 6 LDMC=288; LMA=327; vegetative_height=303                                     
+ 7 prepare_trait_data calculates log_trait before its center/scale              
+ 8 unique species tables used                                                   
+ 9 LDMC TRUE; LMA TRUE; vegetative_height TRUE                                  
+10 Trait_z was freshly constructed from Step 21 species medians                 
+11 PEV1 526; PEV2 526; PEV3 526                                                 
+12 unique-species z means=0 and SDs=1; repeated rows identical within species   
+13 validated effect_id order for six predictor sequences                        
+14 Executed validated Step 18 complete-family-cover and trapezoidal-AUC workflow
+15 526 resident member species                                                  
+16 six species-information predictors only                                      
+17 separate model sequences and formulas                                        
+18 independent binary variables                                                 
+19 31 woody non-graminoids                                                      
+20 read from final response-independent Step 19 PCoA                            
+21 fixed prespecified PEV1-PEV3 block                                           
+22 only PEV1, PEV2, PEV3                                                        
+23 minimum>0 winner; maximum<0 loser; otherwise context-dependent               
+24 one isolated coordinated rerun script added; validated upstream machinery re…
+
+REFERENCE OUTPUT
+----------------
+downstream_526_reference_results.rds freezes coefficients, random parameters, classifications, model fits, scaling, and all response-scale heterogeneity quantities for the later refactor.
+
+DOWNSTREAM 526-SPECIES ANALYSIS COMPLETE: TRUE

@@ -189,37 +189,13 @@ figure_manifest <- function(root) {
     "figures/manuscript/destination_climate_warming_gradient.pdf", "Experimental warming across equal-width climate cells with reviewed experiment-level display assignments", "analysis_dataset.csv; climate_context_experiments.csv", "figure_destination_climate_warming_gradient", 18, 12, "CURRENT_CANONICAL_ANALYSIS_FIGURE",
     "figures/manuscript/repeated_species_consistency.pdf", "Significant-response consistency among species in more than three experiments", "winner_loser_annotated.csv", "figure_species_consistency", 14, 8.5, "CURRENT_CANONICAL_ANALYSIS_FIGURE",
     "figures/manuscript/compare_rel.abund_vs.sqrt.rel.abund.pdf", "Raw-versus-square-root sensitivity", "winner_loser_results.csv", "figure_sensitivity", 8, 6, "CURRENT_CANONICAL_ANALYSIS_FIGURE",
-    "plot/climate_response_data_model_probability_prototype.pdf", "Observed densities, pool-specific odds ratios, and probability surfaces", "analysis_dataset.csv; climate_context_experiments.csv; reconstructed model predictions", "R/04_climate_response_model.R", 26, 14, "provisional modeling checkpoint; source outputs reconstructable",
-    "plot/response_to_climate_alluvial.pdf", "Significant responses linked to destination-climate groups with validated counts and percentages", "analysis_dataset.csv", "R/10_response_grouping_flows_gradients_review.R", 17, 11, "current; standalone alluvial",
-    "plot/response_by_climate_percentages.pdf", "Response-conditional loser, winner, and colonizer percentages across destination climates", "analysis_dataset.csv", "R/10_response_grouping_flows_gradients_review.R", 12, 7, "current; standalone descriptive figure",
-    "plot/response_by_climate_percentages_response_axis.pdf", "Response-conditional destination-climate composition shown within loser, winner, and colonizer categories", "analysis_dataset.csv", "R/10_response_grouping_flows_gradients_review.R", 12, 7, "current; standalone descriptive figure",
-    "plot/response_to_family_alluvial.pdf", "Significant response pools linked to responses, functional groups, and families", "analysis_dataset.csv", "R/10_response_grouping_flows_gradients_review.R", 28, 20, "current; standalone alluvial",
-    "plot/trait_categories_with_overall.pdf", "Significant loser, winner, and colonizer trait distributions across destination-climate backgrounds", "analysis_dataset.csv; climate_context_experiments.csv", "R/07_climate_faceted_descriptive_review.R", 23, 8.5, "current; standalone descriptive figure",
-    "plot/eg.sp.1.pdf", "Legacy worked species example", "Legacy winner-loser analysis objects", NA_character_, 7, 9, "legacy artifact; retained unchanged",
-    "plot/eg.sp.2.pdf", "Legacy worked species example", "Legacy winner-loser analysis objects", NA_character_, 5, 4, "legacy artifact; retained unchanged",
-    "plot/winners_losers.pdf", "Legacy winner-loser summary", "Legacy winner-loser analysis objects", NA_character_, 9, 7, "legacy artifact; retained unchanged",
-    "plot/figures_presentation/focal4_trait_phenology_warming.png", "Legacy four-trait phenology panel", "source code unavailable", NA_character_, NA_real_, NA_real_, "legacy artifact; retained unchanged"
+    "figures/retained/response_to_family_alluvial.pdf", "Significant response pools linked to responses, functional groups, and families", "analysis_dataset.csv", NA_character_, 28, 20, "KEEP_FOR_MANUSCRIPT",
+    "figures/retained/trait_categories_with_overall.pdf", "Significant loser, winner, and colonizer trait distributions across destination-climate backgrounds", "analysis_dataset.csv; climate_context_experiments.csv", NA_character_, 23, 8.5, "KEEP_FOR_MANUSCRIPT",
+    "figures/retained/eg.sp.1.pdf", "Legacy worked species example", "Legacy winner-loser analysis objects", NA_character_, 7, 9, "KEEP_FOR_MANUSCRIPT",
+    "figures/retained/eg.sp.2.pdf", "Legacy worked species example", "Legacy winner-loser analysis objects", NA_character_, 5, 4, "KEEP_FOR_MANUSCRIPT",
+    "figures/retained/winners_losers.pdf", "Legacy winner-loser summary", "Legacy winner-loser analysis objects", NA_character_, 9, 7, "KEEP_FOR_MANUSCRIPT"
   )
-  presentation_files <- file.path(
-    "plot", "figures_presentation",
-    list.files(
-      file.path(root, "plot", "figures_presentation"),
-      pattern = "[.](pdf|png)$", recursive = FALSE,
-      full.names = FALSE, ignore.case = TRUE
-    )
-  )
-  uncatalogued <- tibble::tibble(
-    filename = setdiff(presentation_files, curated$filename)
-  ) |>
-    dplyr::mutate(
-      question = "Legacy exploratory or presentation artifact",
-      source_data = "See legacy R scripts; exact source may be unavailable",
-      target = NA_character_,
-      width = NA_real_,
-      height = NA_real_,
-      status = "legacy artifact; retained unchanged"
-    )
-  dplyr::bind_rows(curated, uncatalogued) |>
+  curated |>
     dplyr::arrange(.data$filename) |>
     dplyr::mutate(
       file_exists = file.exists(file.path(root, .data$filename)),

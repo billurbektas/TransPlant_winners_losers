@@ -122,6 +122,33 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
+      current_downstream_model_report,
+      build_current_downstream_model_report(
+        canonical_downstream_settings,
+        downstream_scope_526,
+        downstream_climate_scaling_526,
+        mboth_526_refit_bundle,
+        species_classification_summary,
+        family_classification_summary,
+        trait_scaling_526,
+        predictor_model_comparisons,
+        heterogeneity_synthesis,
+        downstream_consistency_checks,
+        active_downstream_release_validation
+      )
+    ),
+    tar_target(
+      current_downstream_model_results_file,
+      write_text_atomic(
+        current_downstream_model_report,
+        file.path(
+          config$root, "reports", "rendered",
+          "current_downstream_model_results.txt"
+        )
+      ),
+      format = "file"
+    ),
+    tar_target(
       release_validation,
       assert_release_validation(assemble_release_validation(list(
         numerical = numerical_release_validation,

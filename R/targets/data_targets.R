@@ -74,7 +74,7 @@ list(
   ),
   tar_target(
     community_file,
-    write_rds_atomic(community, file.path(config$output_dir, "intermediate", "community.rds")),
+    write_rds_atomic(community, file.path(config$output_dir, "data", "community.rds")),
     format = "file"
   ),
   tar_target(
@@ -183,7 +183,7 @@ list(
   ),
   tar_target(
     try_individual_file,
-    write_rds_atomic(try_trait_outputs$long, file.path(config$output_dir, "intermediate", "try_traits_individual.rds")),
+    write_rds_atomic(try_trait_outputs$long, file.path(config$output_dir, "data", "try_traits_individual.rds")),
     format = "file"
   ),
   tar_target(
@@ -278,7 +278,11 @@ list(
   tar_target(winner_loser_validation, validate_winner_loser_outputs(winner_loser, auc_inputs$pools)),
   tar_target(
     legacy_auc_validation,
-    compare_legacy_auc(winner_loser, file.path(config$output_dir, "wl.determined.rds"), tolerance = 1e-8)
+    compare_legacy_auc(
+      winner_loser,
+      file.path(config$root, "tests", "fixtures", "legacy_wl_determined.rds"),
+      tolerance = 1e-8
+    )
   ),
   tar_target(
     winner_loser_file,
@@ -287,7 +291,7 @@ list(
   ),
   tar_target(
     auc_file,
-    write_rds_atomic(auc_inputs$auc, file.path(config$output_dir, "intermediate", "auc_by_plot.rds")),
+    write_rds_atomic(auc_inputs$auc, file.path(config$output_dir, "data", "auc_by_plot.rds")),
     format = "file"
   ),
 

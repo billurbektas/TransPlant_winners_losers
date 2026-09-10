@@ -10,4 +10,4 @@ purrr::walk(active_pipeline_files, source)
 canonical_function_files <- list.files(
   project_path("R", "functions"), pattern = "[.]R$", full.names = TRUE
 )
-purrr::walk(canonical_function_files, source)
+purrr::walk(setdiff(canonical_function_files, active_pipeline_files), source)

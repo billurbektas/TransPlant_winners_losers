@@ -2,10 +2,10 @@
 
 canonical_pipeline_source_files <- function(root = ".") {
   file.path(
-    root, "R", "pipeline",
+    root, "R", "functions",
     c(
-      "utils.R", "community.R", "chelsa.R", "try_traits.R",
-      "winner_loser.R", "temporal.R"
+      "upstream_utils.R", "upstream_community.R", "upstream_climate.R",
+      "upstream_traits.R", "upstream_winner_loser.R", "upstream_temporal.R"
     )
   )
 }
