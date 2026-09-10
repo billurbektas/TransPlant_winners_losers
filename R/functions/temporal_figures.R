@@ -44,6 +44,199 @@ plot_transient_strength <- function(classified, path) {
   save_plot_atomic(plot, path, 9, 4.5)
 }
 
+prepare_temporal_strength_pairs <- function(classified) {
+  horizon_rows <- classified |>
+    dplyr::ungroup() |>
+    dplyr::filter(
+      .data$transform == "raw",
+      as.character(.data$contrast) == "to_origin",
+      .data$pool == "resident",
+      .data$horizon %in% c("2", "4", "6")
+    ) |>
+    dplyr::select(
+      "experiment_id", "species", "horizon", "estimate", "category"
+    )
+  duplicated_rows <- horizon_rows |>
+    dplyr::count(.data$experiment_id, .data$species, .data$horizon) |>
+    dplyr::filter(.data$n != 1L)
+  if (nrow(duplicated_rows)) {
+    stop("Temporal strength input is not unique by experiment, species, and horizon.",
+         call. = FALSE)
+  }
+
+  wide <- horizon_rows |>
+    tidyr::pivot_wider(
+      names_from = "horizon",
+      values_from = c("estimate", "category"),
+      names_sep = "_"
+    )
+  pairs <- dplyr::bind_rows(
+    wide |>
+      dplyr::transmute(
+        comparison = "First 2 vs First 4 years",
+        earlier_strength = .data$estimate_2,
+        later_strength = .data$estimate_4,
+        source_category = as.character(.data$category_2)
+      ),
+    wide |>
+      dplyr::transmute(
+        comparison = "First 4 vs First 6 years",
+        earlier_strength = .data$estimate_4,
+        later_strength = .data$estimate_6,
+        source_category = as.character(.data$category_4)
+      )
+  ) |>
+    dplyr::filter(
+      is.finite(.data$earlier_strength),
+      is.finite(.data$later_strength)
+    ) |>
+    dplyr::mutate(
+      direction = dplyr::case_when(
+        .data$source_category %in% c("loser", "non_significant_loser") ~
+          "Loser",
+        .data$source_category %in% c("winner", "non_significant_winner") ~
+          "Winner",
+        TRUE ~ NA_character_
+      ),
+      comparison = factor(
+        .data$comparison,
+        levels = c(
+          "First 2 vs First 4 years",
+          "First 4 vs First 6 years"
+        )
+      ),
+      direction = factor(.data$direction, levels = c("Loser", "Winner"))
+    )
+  if (!nrow(pairs) || any(is.na(pairs$direction))) {
+    stop("Temporal strength pairs contain no usable resident winner/loser directions.",
+         call. = FALSE)
+  }
+  pairs
+}
+
+summarise_temporal_strength_correlations <- function(pairs) {
+  grouped <- dplyr::bind_rows(
+    pairs |> dplyr::mutate(correlation_group = "All"),
+    pairs |>
+      dplyr::mutate(correlation_group = as.character(.data$direction))
+  )
+  grouped |>
+    dplyr::summarise(
+      n = dplyr::n(),
+      correlation = stats::cor(.data$earlier_strength, .data$later_strength),
+      p_value = stats::cor.test(
+        .data$earlier_strength, .data$later_strength,
+        method = "pearson"
+      )$p.value,
+      .by = c("comparison", "correlation_group")
+    ) |>
+    dplyr::mutate(
+      correlation_group = factor(
+        .data$correlation_group,
+        levels = c("All", "Loser", "Winner")
+      ),
+      label = paste0(
+        as.character(.data$correlation_group),
+        ": r = ",
+        sprintf("%.2f", .data$correlation),
+        dplyr::if_else(.data$p_value < 0.05, "*", "")
+      ),
+      label_order = match(
+        as.character(.data$correlation_group), c("All", "Loser", "Winner")
+      ),
+      label_vjust = 1.15 + 1.15 * (.data$label_order - 1)
+    )
+}
+
+build_temporal_strength_correlation_inset <- function(classified) {
+  pairs <- prepare_temporal_strength_pairs(classified)
+  correlations <- summarise_temporal_strength_correlations(pairs)
+  correlation_colours <- c(
+    All = "grey30",
+    Loser = unname(category_palette[["loser"]]),
+    Winner = unname(category_palette[["winner"]])
+  )
+  build_panel <- function(comparison, x_label, y_label) {
+    panel_pairs <- pairs |>
+      dplyr::filter(as.character(.data$comparison) == .env$comparison)
+    panel_correlations <- correlations |>
+      dplyr::filter(as.character(.data$comparison) == .env$comparison)
+
+    ggplot2::ggplot(
+      panel_pairs,
+      ggplot2::aes(.data$earlier_strength, .data$later_strength)
+    ) +
+      ggplot2::geom_hline(
+        yintercept = 0, colour = "grey78", linewidth = 0.35
+      ) +
+      ggplot2::geom_vline(
+        xintercept = 0, colour = "grey78", linewidth = 0.35
+      ) +
+      ggplot2::geom_abline(
+        slope = 1, intercept = 0, colour = "grey70", linewidth = 0.45
+      ) +
+      ggplot2::geom_point(
+        ggplot2::aes(colour = .data$direction),
+        alpha = 0.28, size = 0.8
+      ) +
+      ggplot2::geom_smooth(
+        ggplot2::aes(group = 1),
+        method = "lm", formula = y ~ x, se = FALSE,
+        colour = correlation_colours[["All"]], linewidth = 1
+      ) +
+      ggplot2::geom_smooth(
+        ggplot2::aes(colour = .data$direction),
+        method = "lm", formula = y ~ x, se = FALSE,
+        linewidth = 1
+      ) +
+      ggplot2::geom_text(
+        data = panel_correlations,
+        ggplot2::aes(
+          x = -Inf, y = Inf, label = .data$label,
+          colour = .data$correlation_group,
+          vjust = .data$label_vjust
+        ),
+        inherit.aes = FALSE,
+        hjust = -0.06,
+        size = 5.3,
+        fontface = "bold"
+      ) +
+      ggplot2::scale_colour_manual(
+        values = correlation_colours, guide = "none"
+      ) +
+      ggplot2::labs(title = comparison, x = x_label, y = y_label) +
+      ggplot2::theme_bw(base_size = 16) +
+      ggplot2::theme(
+        panel.grid.minor = ggplot2::element_blank(),
+        panel.grid.major = ggplot2::element_line(
+          colour = "grey90", linewidth = 0.3
+        ),
+        plot.title = ggplot2::element_text(
+          size = 16, face = "bold", hjust = 0.5,
+          margin = ggplot2::margin(b = 5)
+        ),
+        axis.title = ggplot2::element_text(size = 15),
+        axis.text = ggplot2::element_text(size = 13),
+        plot.margin = ggplot2::margin(6, 6, 6, 6)
+      )
+  }
+
+  first_panel <- build_panel(
+    "First 2 vs First 4 years",
+    expression("First 2 years " * Delta * " AUC"),
+    expression("First 4 years " * Delta * " AUC")
+  )
+  second_panel <- build_panel(
+    "First 4 vs First 6 years",
+    expression("First 4 years " * Delta * " AUC"),
+    expression("First 6 years " * Delta * " AUC")
+  )
+  cowplot::plot_grid(
+    first_panel, second_panel,
+    ncol = 2, align = "h", axis = "tb"
+  )
+}
+
 temporal_pairwise_flow_summary <- function(linked_transitions) {
   flow_weight <- if ("n" %in% names(linked_transitions)) linked_transitions$n else 1
   weighted <- linked_transitions |>
@@ -85,15 +278,43 @@ temporal_pairwise_flow_summary <- function(linked_transitions) {
     dplyr::ungroup()
 }
 
-plot_temporal_flows <- function(linked_transitions, path) {
+plot_temporal_flows <- function(
+    linked_transitions,
+    path,
+    include_colonizers = TRUE,
+    base_size = 16,
+    flow_label_size = 3.0,
+    stratum_label_size = 3.6,
+    axis_text_size = 16,
+    legend_text_size = 13,
+    legend_position = "bottom",
+    direct_right_labels = FALSE,
+    direct_label_size = 5.5,
+    strength_inset = NULL,
+    width = 18,
+    height = 11,
+    bg = NULL) {
+  horizon_columns <- c("state_2", "state_4", "state_6")
+  colonizer_levels <- c("colonizer", "non_significant_colonizer")
+  if (!include_colonizers) {
+    linked_transitions <- linked_transitions |>
+      dplyr::filter(
+        !dplyr::if_any(
+          dplyr::all_of(.env$horizon_columns),
+          ~ .x %in% .env$colonizer_levels
+        )
+      )
+  }
   state_levels <- c(
     "loser", "non_significant_loser", "non_significant_winner",
     "winner", "colonizer", "non_significant_colonizer",
     "follow_up_unavailable"
   )
+  if (!include_colonizers) {
+    state_levels <- setdiff(state_levels, colonizer_levels)
+  }
   visible_levels <- setdiff(state_levels, "follow_up_unavailable")
   flow_colours <- c(category_palette, follow_up_unavailable = "white")
-  horizon_columns <- c("state_2", "state_4", "state_6")
   flow_weight <- if ("n" %in% names(linked_transitions)) linked_transitions$n else 1
   weighted_transitions <- linked_transitions |>
     dplyr::mutate(.flow_weight = .env$flow_weight)
@@ -162,7 +383,8 @@ plot_temporal_flows <- function(linked_transitions, path) {
       labels = clean_figure_label(unname(category_display_labels[visible_levels])),
       drop = FALSE,
       name = NULL
-    )
+    ) +
+    ggplot2::scale_colour_manual(values = flow_colours, guide = "none")
 
   built <- ggplot2::ggplot_build(base)$data
   flow_positions <- purrr::map2_dfr(
@@ -235,21 +457,37 @@ plot_temporal_flows <- function(linked_transitions, path) {
     dplyr::mutate(
       label = format(round(.data$n), scientific = FALSE, trim = TRUE)
     )
+  right_labels <- stratum_labels |>
+    dplyr::filter(.data$x == max(.data$x)) |>
+    dplyr::mutate(
+      label = dplyr::recode(
+        .data$state,
+        loser = "Loser",
+        non_significant_loser = "Loser (ns)",
+        non_significant_winner = "Winner (ns)",
+        winner = "Winner"
+      )
+    )
 
   plot <- base +
     ggrepel::geom_label_repel(
       data = flow_labels,
-      ggplot2::aes(.data$label_x, .data$label_y, label = .data$label),
-      inherit.aes = FALSE, size = 3.0, fontface = "bold", linewidth = 0,
+      ggplot2::aes(
+        .data$label_x,
+        .data$label_y,
+        label = .data$label,
+        colour = .data$source_state
+      ),
+      inherit.aes = FALSE, size = flow_label_size, fontface = "bold", linewidth = 0,
       label.padding = grid::unit(0.06, "lines"),
-      fill = scales::alpha("white", 0.82), colour = "grey15",
+      fill = scales::alpha("white", 0.82),
       direction = "y", box.padding = 0.12, point.padding = 0,
       min.segment.length = Inf, max.overlaps = Inf, seed = 47163
     ) +
     ggplot2::geom_label(
       data = stratum_labels,
       ggplot2::aes(.data$x, .data$y, label = .data$label),
-      inherit.aes = FALSE, size = 3.6, fontface = "bold", lineheight = 0.88,
+      inherit.aes = FALSE, size = stratum_label_size, fontface = "bold", lineheight = 0.88,
       label.padding = grid::unit(0.12, "lines"), linewidth = 0,
       fill = scales::alpha("white", 0.90), colour = "grey10"
     ) +
@@ -258,17 +496,44 @@ plot_temporal_flows <- function(linked_transitions, path) {
       limits = c(0.78, 3.22), expand = c(0, 0), position = "top"
     ) +
     ggplot2::scale_y_continuous(breaks = NULL, expand = ggplot2::expansion(mult = c(0, 0.02))) +
-    ggplot2::theme_void(base_size = 16) +
+    ggplot2::theme_void(base_size = base_size) +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(
-        colour = "#1A1A1A", size = 16, face = "bold", margin = ggplot2::margin(b = 12)
+        colour = "#1A1A1A", size = axis_text_size, face = "bold",
+        margin = ggplot2::margin(b = 12)
       ),
-      legend.position = "bottom",
-      legend.text = ggplot2::element_text(size = 13),
+      legend.position = legend_position,
+      legend.text = ggplot2::element_text(size = legend_text_size),
       legend.key.width = grid::unit(1.5, "lines"),
       plot.margin = ggplot2::margin(12, 32, 8, 32)
     )
-  save_plot_atomic(plot, path, 18, 11)
+  if (direct_right_labels) {
+    plot <- plot +
+      ggplot2::geom_text(
+        data = right_labels,
+        ggplot2::aes(
+          x = 3.165,
+          y = .data$y,
+          label = .data$label,
+          colour = .data$state
+        ),
+        inherit.aes = FALSE,
+        hjust = 0,
+        size = direct_label_size,
+        fontface = "bold"
+      ) +
+      ggplot2::coord_cartesian(clip = "off") +
+      ggplot2::theme(plot.margin = ggplot2::margin(12, 145, 8, 32))
+  }
+  if (!is.null(strength_inset)) {
+    plot <- cowplot::ggdraw() +
+      cowplot::draw_plot(plot, x = 0, y = 0, width = 1, height = 1) +
+      cowplot::draw_plot(
+        strength_inset,
+        x = 0.695, y = 0.025, width = 0.290, height = 0.605
+      )
+  }
+  save_plot_atomic(plot, path, width, height, bg = bg)
 }
 
 plot_temporal_transition_matrices <- function(transitions, composition, path) {

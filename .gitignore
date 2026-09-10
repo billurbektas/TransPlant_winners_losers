@@ -76,6 +76,8 @@ figures/candidates/
 figures/manuscript/*
 !figures/manuscript/fig01_winners_losers.pdf
 !figures/manuscript/fig01_winners_losers.png
+!figures/manuscript/fig02_temporal_category_flows.pdf
+!figures/manuscript/appendix_temporal_winning_losing_strength_correlations.pdf
 reports/rendered/
 reports/*.html
 reports/*_files/

@@ -151,13 +151,26 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/fig01_winners_losers[.]png$", path)) {
     script <- "R/functions/manuscript_winners_losers.R"
     target <- "figure01_winners_losers_png"
+  } else if (grepl("^figures/manuscript/fig02_temporal_category_flows[.]pdf$", path)) {
+    script <- "R/functions/temporal_figures.R"
+    target <- "figure02_temporal_category_flows_file"
+  } else if (grepl("^figures/manuscript/appendix_temporal_winning_losing_strength_correlations[.]pdf$", path)) {
+    script <- "R/functions/temporal_figures.R"
+    target <- "appendix_temporal_winning_losing_strength_correlations_file"
   }
 
   data.frame(generating_script_if_known = script, target_if_known = target)
 }
 
 default_figure_status <- function(path) {
-  if (grepl("^figures/manuscript/fig01_winners_losers[.](pdf|png)$", path)) {
+  if (grepl(
+    paste0(
+      "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
+      "fig02_temporal_category_flows[.]pdf|",
+      "appendix_temporal_winning_losing_strength_correlations[.]pdf)$"
+    ),
+    path
+  )) {
     return("FINAL_MANUSCRIPT")
   }
   if (grepl("^figures/retained/", path)) {
@@ -173,7 +186,14 @@ default_figure_status <- function(path) {
 }
 
 figure_analysis_generation <- function(path) {
-  if (grepl("^figures/manuscript/fig01_winners_losers[.](pdf|png)$", path)) {
+  if (grepl(
+    paste0(
+      "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
+      "fig02_temporal_category_flows[.]pdf|",
+      "appendix_temporal_winning_losing_strength_correlations[.]pdf)$"
+    ),
+    path
+  )) {
     return("explicitly approved canonical manuscript figure")
   }
   if (grepl("^figures/retained/", path)) {

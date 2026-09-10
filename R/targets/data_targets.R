@@ -442,17 +442,6 @@ list(
     format = "file"
   ),
   tar_target(
-    figure_temporal_flows,
-    plot_temporal_flows(
-      temporal_linked_rows,
-      file.path(
-        config$root, "figures", "manuscript",
-        "temporal_category_flows.pdf"
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
     figure_temporal_transition_matrices,
     plot_temporal_transition_matrices(
       temporal_transition_matrix, temporal_category_composition_rows,

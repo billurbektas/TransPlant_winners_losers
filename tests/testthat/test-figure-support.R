@@ -50,13 +50,14 @@ test_that("figure provenance exposes source and duplicate relationships", {
   ))
 })
 
-test_that("regeneratable upstream figures use canonical candidate paths", {
+test_that("regeneratable upstream figures use canonical manuscript paths", {
   manifest <- figure_manifest(PROJECT_ROOT)
   canonical_names <- c(
     "compare_rel.abund_vs.sqrt.rel.abund.pdf",
     "destination_climate_warming_gradient.pdf",
     "repeated_species_consistency.pdf",
-    "temporal_category_flows.pdf",
+    "fig02_temporal_category_flows.pdf",
+    "appendix_temporal_winning_losing_strength_correlations.pdf",
     "temporal_transition_matrices.pdf",
     "transient_winning_losing_strength.pdf"
   )
@@ -66,6 +67,7 @@ test_that("regeneratable upstream figures use canonical candidate paths", {
   expect_true(all(
     canonical$status %in% c(
       "CURRENT_CANONICAL_ANALYSIS_FIGURE",
+      "FINAL_MANUSCRIPT",
       "implemented target; not generated"
     )
   ))
