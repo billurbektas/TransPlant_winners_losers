@@ -55,3 +55,30 @@ save_plot_atomic <- function(plot, path, width, height, dpi = 300, bg = NULL) {
   }
   path
 }
+
+copy_figure_atomic_verified <- function(input, output, expected_sha256) {
+  input_hash <- sha256_file(input)
+  if (!identical(input_hash, expected_sha256)) {
+    stop(
+      "Figure source checksum mismatch: ", input,
+      "\nExpected: ", expected_sha256,
+      "\nObserved: ", input_hash,
+      call. = FALSE
+    )
+  }
+  copied <- copy_file_atomic_verified(input, output)
+  output_hash <- sha256_file(copied)
+  if (!identical(output_hash, expected_sha256)) {
+    stop("Published figure checksum differs from its verified source: ", output,
+         call. = FALSE)
+  }
+  receipt <- paste0(output, ".generated")
+  receipt_temporary <- tempfile(
+    pattern = paste0(basename(receipt), "."), tmpdir = dirname(output)
+  )
+  writeLines(format(Sys.time(), tz = "UTC", usetz = TRUE), receipt_temporary)
+  if (!file.rename(receipt_temporary, receipt)) {
+    stop("Could not save figure-generation receipt: ", receipt, call. = FALSE)
+  }
+  copied
+}

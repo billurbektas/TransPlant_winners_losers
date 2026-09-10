@@ -151,6 +151,24 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
+      appendix_repeated_species_consistency_file,
+      {
+        retained_figure_files
+        copy_figure_atomic_verified(
+          file.path(
+            config$root, "figures", "retained",
+            "repeated_species_consistency.pdf"
+          ),
+          file.path(
+            config$root, "figures", "manuscript",
+            "appendix_repeated_species_consistency.pdf"
+          ),
+          "507ed2a1fc0538894de3035debc5f56377b8607afd995182efee0b1971a99bcb"
+        )
+      },
+      format = "file"
+    ),
+    tar_target(
       retained_figure_copy_audit,
       {
         retained_figure_files
@@ -181,6 +199,7 @@ canonical_publication_targets <- function() {
         figure02_temporal_category_flows_png
         appendix_temporal_winning_losing_strength_correlations_file
         appendix_temporal_winning_losing_strength_correlations_png
+        appendix_repeated_species_consistency_file
         species_context_figure_file
         woodiness_figure_file
         retained_figure_files

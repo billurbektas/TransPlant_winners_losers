@@ -163,6 +163,9 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/appendix_temporal_winning_losing_strength_correlations[.]png$", path)) {
     script <- "R/functions/temporal_figures.R"
     target <- "appendix_temporal_winning_losing_strength_correlations_png"
+  } else if (grepl("^figures/manuscript/appendix_repeated_species_consistency[.]pdf$", path)) {
+    script <- "R/functions/retained_figure_helpers.R"
+    target <- "appendix_repeated_species_consistency_file"
   }
 
   data.frame(generating_script_if_known = script, target_if_known = target)
@@ -173,7 +176,8 @@ default_figure_status <- function(path) {
     paste0(
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
       "fig02_temporal_category_flows[.](pdf|png)|",
-      "appendix_temporal_winning_losing_strength_correlations[.](pdf|png))$"
+      "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
+      "appendix_repeated_species_consistency[.]pdf)$"
     ),
     path
   )) {
@@ -196,7 +200,8 @@ figure_analysis_generation <- function(path) {
     paste0(
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
       "fig02_temporal_category_flows[.](pdf|png)|",
-      "appendix_temporal_winning_losing_strength_correlations[.](pdf|png))$"
+      "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
+      "appendix_repeated_species_consistency[.]pdf)$"
     ),
     path
   )) {
