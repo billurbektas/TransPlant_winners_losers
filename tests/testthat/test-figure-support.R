@@ -57,7 +57,9 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "destination_climate_warming_gradient.pdf",
     "repeated_species_consistency.pdf",
     "fig02_temporal_category_flows.pdf",
+    "fig02_temporal_category_flows.png",
     "appendix_temporal_winning_losing_strength_correlations.pdf",
+    "appendix_temporal_winning_losing_strength_correlations.png",
     "temporal_transition_matrices.pdf",
     "transient_winning_losing_strength.pdf"
   )

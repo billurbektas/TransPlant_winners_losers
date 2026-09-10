@@ -70,6 +70,29 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
+      figure02_temporal_category_flows_png,
+      plot_temporal_flows(
+        temporal_linked_rows,
+        file.path(
+          config$root, "figures", "manuscript",
+          "fig02_temporal_category_flows.png"
+        ),
+        include_colonizers = FALSE,
+        base_size = 22,
+        flow_label_size = 5.4,
+        stratum_label_size = 5.0,
+        axis_text_size = 22,
+        legend_text_size = 18,
+        legend_position = "none",
+        direct_right_labels = TRUE,
+        direct_label_size = 5.8,
+        width = 18,
+        height = 11,
+        bg = "white"
+      ),
+      format = "file"
+    ),
+    tar_target(
       appendix_temporal_winning_losing_strength_correlations_file,
       save_plot_atomic(
         figure02_temporal_strength_correlation_inset,
@@ -79,6 +102,21 @@ canonical_publication_targets <- function() {
         ),
         width = 12,
         height = 5.5,
+        bg = "white"
+      ),
+      format = "file"
+    ),
+    tar_target(
+      appendix_temporal_winning_losing_strength_correlations_png,
+      save_plot_atomic(
+        figure02_temporal_strength_correlation_inset,
+        file.path(
+          config$root, "figures", "manuscript",
+          "appendix_temporal_winning_losing_strength_correlations.png"
+        ),
+        width = 12,
+        height = 5.5,
+        dpi = 300,
         bg = "white"
       ),
       format = "file"
@@ -140,7 +178,9 @@ canonical_publication_targets <- function() {
         figure01_winners_losers_pdf
         figure01_winners_losers_png
         figure02_temporal_category_flows_file
+        figure02_temporal_category_flows_png
         appendix_temporal_winning_losing_strength_correlations_file
+        appendix_temporal_winning_losing_strength_correlations_png
         species_context_figure_file
         woodiness_figure_file
         retained_figure_files
