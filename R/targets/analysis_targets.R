@@ -1353,6 +1353,17 @@ canonical_analysis_targets <- function() {
       format = "file"
     ),
     tar_target(
+      canonical_climate_scaling_file,
+      write_rds_atomic(
+        downstream_climate_scaling_526,
+        file.path(
+          canonical_downstream_settings$canonical_output$data,
+          "downstream_climate_scaling_526.rds"
+        )
+      ),
+      format = "file"
+    ),
+    tar_target(
       canonical_trait_scaling_file,
       write_csv_atomic(
         trait_scaling_526,
@@ -1749,6 +1760,7 @@ canonical_analysis_targets <- function() {
         canonical_family_classification_file = canonical_family_classification_file,
         canonical_family_summary_file = canonical_family_summary_file,
         canonical_family_cover_audit_file = canonical_family_cover_audit_file,
+        canonical_climate_scaling_file = canonical_climate_scaling_file,
         canonical_trait_scaling_file = canonical_trait_scaling_file,
         canonical_functional_species_file = canonical_functional_species_file,
         canonical_pev_scores_file = canonical_pev_scores_file,

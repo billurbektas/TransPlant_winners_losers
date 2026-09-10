@@ -222,6 +222,14 @@ tables. Its plotting helpers are in
 with a standalone figure-only renderer in
 [`scripts/build_predictor_synthesis_support_and_heterogeneity_526.R`](scripts/build_predictor_synthesis_support_and_heterogeneity_526.R).
 
+Figure 6 displays fixed-effect response surfaces from the six existing
+canonical 526-species predictor models. Predictions are restricted to the
+observed three-dimensional temperature–precipitation–warming support, with
+separate support masks for woody and non-woody species. Its figure-only
+renderer is
+[`scripts/build_predictor_response_atlas_526.R`](scripts/build_predictor_response_atlas_526.R);
+it reads existing canonical model and scaling exports and never refits a model.
+
 The Woodiness surface uses a group-specific observed-climate support-mask
 target. This target derives support separately for woody and non-woody rows and
 cannot alter or refit the anchored Woodiness model. Regenerated scientific

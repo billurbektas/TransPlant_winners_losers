@@ -300,6 +300,71 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
+      figure06_predictor_response_atlas_renderer,
+      file.path(
+        config$root, "scripts", "build_predictor_response_atlas_526.R"
+      ),
+      format = "file"
+    ),
+    tar_target(
+      figure06_predictor_response_atlas_files,
+      {
+        invisible(list(
+          canonical_ldmc_model_file,
+          canonical_lma_model_file,
+          canonical_height_model_file,
+          canonical_graminoid_model_file,
+          canonical_woodiness_model_file,
+          canonical_phylogeny_model_file,
+          canonical_trait_scaling_file,
+          canonical_pev_scaling_file,
+          canonical_pev_scores_file,
+          canonical_climate_scaling_file
+        ))
+        output_stem <- file.path(
+          config$root, "figures", "manuscript",
+          "fig06_predictor_response_atlas_526"
+        )
+        status <- system2(
+          file.path(R.home("bin"), "Rscript"),
+          args = c(
+            shQuote(figure06_predictor_response_atlas_renderer),
+            shQuote(output_stem),
+            shQuote(canonical_climate_scaling_file)
+          )
+        )
+        if (!identical(status, 0L)) {
+          stop("Figure 6 renderer failed with status ", status, ".")
+        }
+        paths <- paste0(
+          output_stem,
+          c(
+            ".pdf", ".png", "_data.csv", "_quantiles.csv",
+            "_caption.txt", "_validation.csv"
+          )
+        )
+        if (any(!file.exists(paths))) {
+          stop("Figure 6 renderer did not create every declared output.")
+        }
+        paths
+      },
+      format = "file"
+    ),
+    tar_target(
+      figure06_predictor_response_atlas_pdf,
+      figure06_predictor_response_atlas_files[
+        grepl("[.]pdf$", figure06_predictor_response_atlas_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      figure06_predictor_response_atlas_png,
+      figure06_predictor_response_atlas_files[
+        grepl("[.]png$", figure06_predictor_response_atlas_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
       retained_figure_files,
       copy_retained_figures_verified(config$root),
       format = "file"
@@ -369,6 +434,8 @@ canonical_publication_targets <- function() {
         figure04_species_minmax_classification_png
         figure05_predictor_synthesis_pdf
         figure05_predictor_synthesis_png
+        figure06_predictor_response_atlas_pdf
+        figure06_predictor_response_atlas_png
         woodiness_figure_file
         retained_figure_files
         build_figure_provenance(config$root)

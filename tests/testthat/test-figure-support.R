@@ -68,6 +68,8 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "fig04_species_minmax_classification_526.png",
     "fig05_predictor_synthesis_support_and_heterogeneity_526.pdf",
     "fig05_predictor_synthesis_support_and_heterogeneity_526.png",
+    "fig06_predictor_response_atlas_526.pdf",
+    "fig06_predictor_response_atlas_526.png",
     "appendix_temporal_winning_losing_strength_correlations.pdf",
     "appendix_temporal_winning_losing_strength_correlations.png",
     "appendix_temporal_transition_matrices.pdf",
@@ -104,6 +106,21 @@ test_that("Figure 4 uses enlarged typography and manuscript labels", {
   expect_match(body_text, "Shift with stronger warming", fixed = TRUE)
   expect_match(body_text, "Destination precipitation (mm)", fixed = TRUE)
   expect_match(body_text, "Fitted winning/losing strength", fixed = TRUE)
+})
+
+test_that("Figure 6 renderer is figure-only and support-masked", {
+  renderer <- readLines(
+    project_path("scripts", "build_predictor_response_atlas_526.R"),
+    warn = FALSE
+  )
+  renderer_text <- paste(renderer, collapse = "\n")
+  expect_false(grepl("targets::tar_make(", renderer_text, fixed = TRUE))
+  expect_false(grepl("rma.mv(", renderer_text, fixed = TRUE))
+  expect_match(renderer_text, "Support-mask enforcement", fixed = TRUE)
+  expect_match(renderer_text, "group-specific observed three-dimensional climate hull", fixed = TRUE)
+  expect_match(renderer_text, "Predicted winning-losing strength", fixed = TRUE)
+  expect_match(renderer_text, "Destination temperature (°C)", fixed = TRUE)
+  expect_match(renderer_text, "Destination precipitation (mm)", fixed = TRUE)
 })
 
 test_that("the destination-climate renderer drops inherited grouping", {
