@@ -145,27 +145,45 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/woodiness_response_surfaces_526[.]pdf$", path)) {
     script <- "R/functions/figures.R"
     target <- "woodiness_figure_file"
+  } else if (grepl("^figures/manuscript/fig01_winners_losers[.]pdf$", path)) {
+    script <- "R/functions/manuscript_winners_losers.R"
+    target <- "figure01_winners_losers_pdf"
+  } else if (grepl("^figures/manuscript/fig01_winners_losers[.]png$", path)) {
+    script <- "R/functions/manuscript_winners_losers.R"
+    target <- "figure01_winners_losers_png"
   }
 
   data.frame(generating_script_if_known = script, target_if_known = target)
 }
 
 default_figure_status <- function(path) {
+  if (grepl("^figures/manuscript/fig01_winners_losers[.](pdf|png)$", path)) {
+    return("FINAL_MANUSCRIPT")
+  }
   if (grepl("^figures/retained/", path)) {
     return("KEEP_FOR_MANUSCRIPT")
   }
   if (grepl("^figures/manuscript/", path)) {
     return("CURRENT_CANONICAL_ANALYSIS_FIGURE")
   }
+  if (grepl("^figures/candidates/", path)) {
+    return("CURRENT_CANONICAL_ANALYSIS_FIGURE")
+  }
   "UNKNOWN_DO_NOT_TOUCH"
 }
 
 figure_analysis_generation <- function(path) {
+  if (grepl("^figures/manuscript/fig01_winners_losers[.](pdf|png)$", path)) {
+    return("explicitly approved canonical manuscript figure")
+  }
   if (grepl("^figures/retained/", path)) {
     return("verified retained copy")
   }
   if (grepl("^figures/manuscript/", path)) {
     return("current canonical targets analysis")
+  }
+  if (grepl("^figures/candidates/", path)) {
+    return("current canonical targets figure candidate")
   }
   "unknown"
 }
@@ -199,6 +217,8 @@ build_figure_provenance <- function(root = getwd(), retained_config = "config/re
     hash_ok <- if (is.na(expected) || !nzchar(expected)) NA else identical(hash, expected)
     proposed_destination <- if (identical(status, "KEEP_FOR_MANUSCRIPT") || identical(status, "KEEP_HISTORICAL")) {
       file.path("figures", "retained", basename(path))
+    } else if (identical(status, "FINAL_MANUSCRIPT")) {
+      path
     } else if (identical(status, "CURRENT_CANONICAL_ANALYSIS_FIGURE")) {
       file.path("figures", "candidates", basename(path))
     } else {

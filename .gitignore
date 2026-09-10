@@ -73,7 +73,9 @@ output/*
 # copied into figures/retained and tracked there.
 plot/
 figures/candidates/
-figures/manuscript/
+figures/manuscript/*
+!figures/manuscript/fig01_winners_losers.pdf
+!figures/manuscript/fig01_winners_losers.png
 reports/rendered/
 reports/*.html
 reports/*_files/

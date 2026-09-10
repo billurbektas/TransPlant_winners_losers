@@ -38,12 +38,14 @@ transplant_figure_theme <- function(base_size = 15) {
     )
 }
 
-save_plot_atomic <- function(plot, path, width, height, dpi = 300) {
+save_plot_atomic <- function(plot, path, width, height, dpi = 300, bg = NULL) {
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
   extension <- tools::file_ext(path)
   temporary <- tempfile(pattern = paste0(basename(path), "."), tmpdir = dirname(path), fileext = paste0(".", extension))
   on.exit(if (file.exists(temporary)) unlink(temporary), add = TRUE)
-  ggplot2::ggsave(temporary, plot = plot, width = width, height = height, dpi = dpi)
+  ggplot2::ggsave(
+    temporary, plot = plot, width = width, height = height, dpi = dpi, bg = bg
+  )
   if (!file.rename(temporary, path)) stop("Could not save figure atomically: ", path, call. = FALSE)
   receipt <- paste0(path, ".generated")
   receipt_temporary <- tempfile(pattern = paste0(basename(receipt), "."), tmpdir = dirname(path))

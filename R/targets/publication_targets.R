@@ -1,6 +1,48 @@
 canonical_publication_targets <- function() {
   list(
     tar_target(
+      figure01_festuca_data,
+      prepare_figure01_festuca_data(
+        winner_loser,
+        species_classification_526,
+        auc_inputs$auc,
+        analysis_community,
+        experiments
+      )
+    ),
+    tar_target(
+      figure01_winners_losers,
+      build_figure01_winners_losers(figure01_festuca_data)
+    ),
+    tar_target(
+      figure01_winners_losers_pdf,
+      write_vector_figure(
+        figure01_winners_losers,
+        file.path(
+          config$root, "figures", "manuscript",
+          "fig01_winners_losers.pdf"
+        ),
+        width = 21,
+        height = 14.25
+      ),
+      format = "file"
+    ),
+    tar_target(
+      figure01_winners_losers_png,
+      save_plot_atomic(
+        figure01_winners_losers,
+        file.path(
+          config$root, "figures", "manuscript",
+          "fig01_winners_losers.png"
+        ),
+        width = 21,
+        height = 14.25,
+        dpi = 300,
+        bg = "white"
+      ),
+      format = "file"
+    ),
+    tar_target(
       species_context_figure,
       build_species_context_callout_figure(
         mboth_526_refit$fit,
@@ -54,6 +96,8 @@ canonical_publication_targets <- function() {
     tar_target(
       figure_provenance,
       {
+        figure01_winners_losers_pdf
+        figure01_winners_losers_png
         species_context_figure_file
         woodiness_figure_file
         retained_figure_files
