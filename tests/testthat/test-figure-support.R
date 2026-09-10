@@ -22,13 +22,16 @@ test_that("the Woodiness figure fails closed without a group-specific mask", {
   expect_match(function_text, "canonical_predictor_formulas()$Woodiness_full", fixed = TRUE)
 })
 
-test_that("all eleven retained figures match their approved checksums", {
+test_that("all currently retained figures match their approved checksums", {
+  approved <- readr::read_csv(
+    project_path("config", "retained_figures.csv"), show_col_types = FALSE
+  )
   audit <- audit_retained_figure_copies(project_path())
-  expect_identical(nrow(audit), 11L)
+  expect_identical(nrow(audit), nrow(approved))
   expect_true(all(audit$source_matches_expected))
   expect_true(all(audit$copy_matches_source))
   release <- retained_figure_release_check(audit)
-  expect_identical(nrow(release), 11L)
+  expect_identical(nrow(release), nrow(approved))
   expect_true(all(release$pass))
 })
 
@@ -44,7 +47,7 @@ test_that("figure provenance exposes source and duplicate relationships", {
     project_path("config", "retained_figures.csv"), show_col_types = FALSE
   )
   retained_rows <- manifest$figure_path %in% approved$figure_path
-  expect_identical(sum(retained_rows), 11L)
+  expect_identical(sum(retained_rows), nrow(approved))
   expect_true(all(
     manifest$proposed_status[retained_rows] == "KEEP_FOR_MANUSCRIPT"
   ))
@@ -57,14 +60,14 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "destination_climate_warming_gradient.pdf",
     "appendix_destination_climate_warming_gradient.pdf",
     "appendix_destination_climate_warming_gradient.png",
-    "repeated_species_consistency.pdf",
     "fig02_temporal_category_flows.pdf",
     "fig02_temporal_category_flows.png",
+    "fig03_repeated_species_consistency.pdf",
+    "fig03_repeated_species_consistency.png",
     "appendix_temporal_winning_losing_strength_correlations.pdf",
     "appendix_temporal_winning_losing_strength_correlations.png",
-    "appendix_repeated_species_consistency.pdf",
-    "temporal_transition_matrices.pdf",
-    "transient_winning_losing_strength.pdf"
+    "appendix_temporal_transition_matrices.pdf",
+    "appendix_temporal_transition_matrices.png"
   )
   canonical <- manifest[basename(manifest$filename) %in% canonical_names, ]
   expect_setequal(basename(canonical$filename), canonical_names)

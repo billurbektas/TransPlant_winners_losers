@@ -536,11 +536,20 @@ plot_temporal_flows <- function(
   save_plot_atomic(plot, path, width, height, bg = bg)
 }
 
-plot_temporal_transition_matrices <- function(transitions, composition, path) {
+plot_temporal_transition_matrices <- function(
+    transitions,
+    composition,
+    path,
+    include_colonizers = TRUE,
+    resident_classified = NULL) {
+  colonizer_levels <- c("colonizer", "non_significant_colonizer")
   category_levels <- c(
     "loser", "non_significant_loser", "non_significant_winner", "winner",
     "colonizer", "non_significant_colonizer"
   )
+  if (!include_colonizers) {
+    category_levels <- setdiff(category_levels, colonizer_levels)
+  }
   category_labels <- c(
     loser = "Loser",
     non_significant_loser = "Loser\n(non-significant)",
@@ -559,7 +568,9 @@ plot_temporal_transition_matrices <- function(transitions, composition, path) {
   matrix_data <- transitions |>
     dplyr::filter(
       .data$from_category != "no_change",
-      .data$to_category != "no_change"
+      .data$to_category != "no_change",
+      .data$from_category %in% .env$category_levels,
+      .data$to_category %in% .env$category_levels
     ) |>
     dplyr::mutate(
       comparison = factor(.data$comparison, levels = comparison_levels, labels = comparison_labels),
@@ -664,7 +675,11 @@ plot_temporal_transition_matrices <- function(transitions, composition, path) {
     ggplot2::scale_colour_manual(values = temporal_colours, guide = "none") +
     ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
     ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-    ggplot2::coord_fixed(xlim = c(0.5, 6.5), ylim = c(0.5, 6.5), clip = "off") +
+    ggplot2::coord_fixed(
+      xlim = c(0.5, length(category_levels) + 0.5),
+      ylim = c(0.5, length(category_levels) + 0.5),
+      clip = "off"
+    ) +
     transplant_figure_theme() +
     ggplot2::theme(
       axis.text = ggplot2::element_blank(),
@@ -694,7 +709,19 @@ plot_temporal_transition_matrices <- function(transitions, composition, path) {
     )
   }
   composition_data <- composition |>
-    dplyr::filter(.data$category != "no_change") |>
+    dplyr::filter(
+      .data$category != "no_change",
+      .data$category %in% .env$category_levels
+    )
+  if (!include_colonizers) {
+    composition_data <- composition_data |>
+      dplyr::mutate(
+        proportion = .data$n / sum(.data$n),
+        total_species_experiment = sum(.data$n),
+        .by = "year"
+      )
+  }
+  composition_data <- composition_data |>
     dplyr::mutate(
       category = factor(.data$category, levels = category_levels),
       percentage = 100 * .data$proportion,
@@ -705,20 +732,47 @@ plot_temporal_transition_matrices <- function(transitions, composition, path) {
         ),
         levels = c("Significant", "Non-significant")
       )
-    )
+  )
   composition_years <- sort(unique(composition_data$year))
-  year_metadata <- composition |>
-    dplyr::distinct(
-      .data$year, .data$total_species_experiment,
-      .data$n_species, .data$n_experiments
-    ) |>
-    dplyr::arrange(.data$year)
+  if (!include_colonizers && !is.null(resident_classified)) {
+    year_metadata <- resident_classified |>
+      dplyr::ungroup() |>
+      dplyr::filter(
+        .data$transform == "raw",
+        as.character(.data$contrast) == "to_origin",
+        .data$pool == "resident",
+        .data$horizon %in% as.character(.env$composition_years)
+      ) |>
+      dplyr::summarise(
+        total_species_experiment = dplyr::n(),
+        n_species = dplyr::n_distinct(.data$species),
+        n_experiments = dplyr::n_distinct(.data$experiment_id),
+        .by = "horizon"
+      ) |>
+      dplyr::transmute(
+        year = as.integer(.data$horizon),
+        .data$total_species_experiment,
+        .data$n_species,
+        .data$n_experiments
+      ) |>
+      dplyr::arrange(.data$year)
+  } else {
+    year_metadata <- composition |>
+      dplyr::distinct(
+        .data$year, .data$total_species_experiment,
+        .data$n_species, .data$n_experiments
+      ) |>
+      dplyr::arrange(.data$year)
+  }
   if (anyDuplicated(year_metadata$year)) {
     stop("Temporal sample-size metadata is inconsistent within at least one year.", call. = FALSE)
   }
+  if (!identical(year_metadata$year, composition_years)) {
+    stop("Temporal sample-size metadata does not cover every plotted year.", call. = FALSE)
+  }
   year_labels <- stats::setNames(
     sprintf(
-      "%d\nC=%s  S=%s  E=%s",
+      "%d\nC=%s\nS=%s  E=%s",
       year_metadata$year,
       year_metadata$total_species_experiment,
       year_metadata$n_species,

@@ -1,12 +1,23 @@
 # Canonical consistency, sensitivity, and figure-ledger functions.
 
-signed_species_consistency <- function(data) {
-  counts <- data |>
+signed_species_consistency <- function(data, include_colonizers = TRUE) {
+  if (!is.logical(include_colonizers) || length(include_colonizers) != 1L ||
+      is.na(include_colonizers)) {
+    stop("include_colonizers must be TRUE or FALSE.", call. = FALSE)
+  }
+  observations <- data |>
     dplyr::transmute(
       species = dplyr::coalesce(.data$accepted_name, .data$species),
       .data$experiment_id,
       category = as.character(.data$category)
-    ) |>
+    )
+  if (!include_colonizers) {
+    observations <- observations |>
+      dplyr::filter(
+        !.data$category %in% c("colonizer", "non_significant_colonizer")
+      )
+  }
+  counts <- observations |>
     dplyr::distinct(.data$species, .data$experiment_id, .data$category) |>
     dplyr::group_by(.data$species) |>
     dplyr::filter(dplyr::n_distinct(.data$experiment_id) > 3L) |>
@@ -61,9 +72,11 @@ signed_species_consistency <- function(data) {
     dplyr::mutate(species_position = dplyr::row_number())
 }
 
-plot_signed_consistency <- function(data, path) {
-  signed <- signed_species_consistency(data)
-  rectangles <- dplyr::bind_rows(
+plot_signed_consistency <- function(data, path, include_colonizers = TRUE) {
+  signed <- signed_species_consistency(
+    data, include_colonizers = include_colonizers
+  )
+  rectangle_layers <- list(
     signed |>
       dplyr::transmute(
         .data$species_position, .data$species, .data$consistency_group,
@@ -79,28 +92,30 @@ plot_signed_consistency <- function(data, path) {
       dplyr::transmute(
         .data$species_position, .data$species, .data$consistency_group,
         response = "Winner", ymin = .data$neutral_high, ymax = .data$winner_high
-      ),
-    signed |>
+      )
+  )
+  if (include_colonizers) {
+    rectangle_layers[[length(rectangle_layers) + 1L]] <- signed |>
       dplyr::transmute(
         .data$species_position, .data$species, .data$consistency_group,
         response = "Colonizer", ymin = .data$winner_high, ymax = .data$colonizer_high
       )
-  ) |>
+  }
+  response_levels <- c("Loser", "No significant change", "Winner")
+  if (include_colonizers) response_levels <- c(response_levels, "Colonizer")
+  rectangles <- dplyr::bind_rows(rectangle_layers) |>
     dplyr::filter(.data$ymax > .data$ymin) |>
     dplyr::mutate(
-      response = factor(
-        .data$response,
-        levels = c("Loser", "No significant change", "Winner", "Colonizer")
-      )
+      response = factor(.data$response, levels = response_levels)
     )
   response_palette <- c(
     Loser = category_palette[["loser"]],
     `No significant change` = "#CFCFCF",
     Winner = category_palette[["winner"]],
     Colonizer = category_palette[["colonizer"]]
-  )
+  )[response_levels]
   significant_labels <- rectangles |>
-    dplyr::filter(.data$response %in% c("Loser", "Winner", "Colonizer")) |>
+    dplyr::filter(.data$response != "No significant change") |>
     dplyr::mutate(
       experiment_count = .data$ymax - .data$ymin,
       label_y = (.data$ymin + .data$ymax) / 2,
@@ -183,23 +198,20 @@ plot_sensitivity <- function(classified, path) {
 figure_manifest <- function(root) {
   curated <- tibble::tribble(
     ~filename, ~question, ~source_data, ~target, ~width, ~height, ~status,
-    "figures/manuscript/transient_winning_losing_strength.pdf", "Temporal consistency of continuous strength with Pearson correlations and p-values", "winner_loser_results.csv", "figure_transient_strength", 9, 4.5, "CURRENT_CANONICAL_ANALYSIS_FIGURE",
+    "figures/manuscript/fig03_repeated_species_consistency.pdf", "Resident-only significant-response consistency among species represented in more than three resident experiments", "winner_loser_annotated.csv", "figure03_repeated_species_consistency_pdf", 14, 8.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig03_repeated_species_consistency.png", "Resident-only significant-response consistency among species represented in more than three resident experiments", "winner_loser_annotated.csv", "figure03_repeated_species_consistency_png", 14, 8.5, "FINAL_MANUSCRIPT",
     "figures/manuscript/fig02_temporal_category_flows.pdf", "Resident temporal category transitions with source-conditional percentages", "temporal_linked_flows.csv", "figure02_temporal_category_flows_file", 18, 11, "FINAL_MANUSCRIPT",
     "figures/manuscript/fig02_temporal_category_flows.png", "Resident temporal category transitions with source-conditional percentages", "temporal_linked_flows.csv", "figure02_temporal_category_flows_png", 18, 11, "FINAL_MANUSCRIPT",
     "figures/manuscript/appendix_temporal_winning_losing_strength_correlations.pdf", "Temporal consistency of winning-losing strength for all residents and for winner/loser directions separately", "winner_loser_results.csv", "appendix_temporal_winning_losing_strength_correlations_file", 12, 5.5, "FINAL_MANUSCRIPT",
     "figures/manuscript/appendix_temporal_winning_losing_strength_correlations.png", "Temporal consistency of winning-losing strength for all residents and for winner/loser directions separately", "winner_loser_results.csv", "appendix_temporal_winning_losing_strength_correlations_png", 12, 5.5, "FINAL_MANUSCRIPT",
-    "figures/manuscript/appendix_repeated_species_consistency.pdf", "Significant-response consistency among species represented in more than three experiments", "winner_loser_annotated.csv", "appendix_repeated_species_consistency_file", 14, 8.5, "FINAL_MANUSCRIPT",
     "figures/manuscript/appendix_destination_climate_warming_gradient.pdf", "Continuous destination climate and experimental JJA warming without climate categories or cutoffs", "analysis_dataset.csv", "appendix_destination_climate_warming_gradient_file", 18, 12, "FINAL_MANUSCRIPT",
     "figures/manuscript/appendix_destination_climate_warming_gradient.png", "Continuous destination climate and experimental JJA warming without climate categories or cutoffs", "analysis_dataset.csv", "appendix_destination_climate_warming_gradient_png", 18, 12, "FINAL_MANUSCRIPT",
-    "figures/manuscript/temporal_transition_matrices.pdf", "Category persistence, transitions, and composition through time", "temporal_transition_matrix.csv; temporal_category_composition.csv", "figure_temporal_transition_matrices", 17, 13, "CURRENT_CANONICAL_ANALYSIS_FIGURE",
+    "figures/manuscript/appendix_temporal_transition_matrices.pdf", "Resident-only temporal response composition and transition matrices", "temporal_transition_matrix.csv; temporal_category_composition.csv; winner_loser_results.csv", "appendix_temporal_transition_matrices_file", 17, 13, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_temporal_transition_matrices.png", "Resident-only temporal response composition and transition matrices", "temporal_transition_matrix.csv; temporal_category_composition.csv; winner_loser_results.csv", "appendix_temporal_transition_matrices_png", 17, 13, "FINAL_MANUSCRIPT",
     "figures/manuscript/destination_climate_warming_gradient.pdf", "Experimental warming across equal-width climate cells with reviewed experiment-level display assignments", "analysis_dataset.csv; climate_context_experiments.csv", "figure_destination_climate_warming_gradient", 18, 12, "CURRENT_CANONICAL_ANALYSIS_FIGURE",
-    "figures/manuscript/repeated_species_consistency.pdf", "Significant-response consistency among species in more than three experiments", "winner_loser_annotated.csv", "figure_species_consistency", 14, 8.5, "CURRENT_CANONICAL_ANALYSIS_FIGURE",
     "figures/manuscript/compare_rel.abund_vs.sqrt.rel.abund.pdf", "Raw-versus-square-root sensitivity", "winner_loser_results.csv", "figure_sensitivity", 8, 6, "CURRENT_CANONICAL_ANALYSIS_FIGURE",
     "figures/retained/response_to_family_alluvial.pdf", "Significant response pools linked to responses, functional groups, and families", "analysis_dataset.csv", NA_character_, 28, 20, "KEEP_FOR_MANUSCRIPT",
-    "figures/retained/trait_categories_with_overall.pdf", "Significant loser, winner, and colonizer trait distributions across destination-climate backgrounds", "analysis_dataset.csv; climate_context_experiments.csv", NA_character_, 23, 8.5, "KEEP_FOR_MANUSCRIPT",
-    "figures/retained/eg.sp.1.pdf", "Legacy worked species example", "Legacy winner-loser analysis objects", NA_character_, 7, 9, "KEEP_FOR_MANUSCRIPT",
-    "figures/retained/eg.sp.2.pdf", "Legacy worked species example", "Legacy winner-loser analysis objects", NA_character_, 5, 4, "KEEP_FOR_MANUSCRIPT",
-    "figures/retained/winners_losers.pdf", "Legacy winner-loser summary", "Legacy winner-loser analysis objects", NA_character_, 9, 7, "KEEP_FOR_MANUSCRIPT"
+    "figures/retained/trait_categories_with_overall.pdf", "Significant loser, winner, and colonizer trait distributions across destination-climate backgrounds", "analysis_dataset.csv; climate_context_experiments.csv", NA_character_, 23, 8.5, "KEEP_FOR_MANUSCRIPT"
   )
   curated |>
     dplyr::arrange(.data$filename) |>

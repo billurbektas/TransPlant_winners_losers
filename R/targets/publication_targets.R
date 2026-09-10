@@ -160,6 +160,34 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
+      appendix_temporal_transition_matrices_file,
+      plot_temporal_transition_matrices(
+        temporal_transition_matrix,
+        temporal_category_composition_rows,
+        file.path(
+          config$root, "figures", "manuscript",
+          "appendix_temporal_transition_matrices.pdf"
+        ),
+        include_colonizers = FALSE,
+        resident_classified = winner_loser
+      ),
+      format = "file"
+    ),
+    tar_target(
+      appendix_temporal_transition_matrices_png,
+      plot_temporal_transition_matrices(
+        temporal_transition_matrix,
+        temporal_category_composition_rows,
+        file.path(
+          config$root, "figures", "manuscript",
+          "appendix_temporal_transition_matrices.png"
+        ),
+        include_colonizers = FALSE,
+        resident_classified = winner_loser
+      ),
+      format = "file"
+    ),
+    tar_target(
       species_context_figure,
       build_species_context_callout_figure(
         mboth_526_refit$fit,
@@ -189,21 +217,27 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
-      appendix_repeated_species_consistency_file,
-      {
-        retained_figure_files
-        copy_figure_atomic_verified(
-          file.path(
-            config$root, "figures", "retained",
-            "repeated_species_consistency.pdf"
-          ),
-          file.path(
-            config$root, "figures", "manuscript",
-            "appendix_repeated_species_consistency.pdf"
-          ),
-          "507ed2a1fc0538894de3035debc5f56377b8607afd995182efee0b1971a99bcb"
-        )
-      },
+      figure03_repeated_species_consistency_pdf,
+      plot_signed_consistency(
+        descriptive_analysis_data,
+        file.path(
+          config$root, "figures", "manuscript",
+          "fig03_repeated_species_consistency.pdf"
+        ),
+        include_colonizers = FALSE
+      ),
+      format = "file"
+    ),
+    tar_target(
+      figure03_repeated_species_consistency_png,
+      plot_signed_consistency(
+        descriptive_analysis_data,
+        file.path(
+          config$root, "figures", "manuscript",
+          "fig03_repeated_species_consistency.png"
+        ),
+        include_colonizers = FALSE
+      ),
       format = "file"
     ),
     tar_target(
@@ -237,10 +271,12 @@ canonical_publication_targets <- function() {
         figure02_temporal_category_flows_png
         appendix_temporal_winning_losing_strength_correlations_file
         appendix_temporal_winning_losing_strength_correlations_png
-        appendix_repeated_species_consistency_file
+        figure03_repeated_species_consistency_pdf
+        figure03_repeated_species_consistency_png
         appendix_destination_climate_warming_gradient_file
         appendix_destination_climate_warming_gradient_png
-        species_context_figure_file
+        appendix_temporal_transition_matrices_file
+        appendix_temporal_transition_matrices_png
         woodiness_figure_file
         retained_figure_files
         build_figure_provenance(config$root)

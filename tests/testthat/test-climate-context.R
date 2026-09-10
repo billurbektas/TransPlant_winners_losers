@@ -68,6 +68,16 @@ test_that("repeated-species consistency retains and orders significant identitie
   expect_false("Species E" %in% result$species)
   expect_true(all(result$significant_total > 0L))
   expect_equal(result$significant_total, c(3L, 2L, 2L, 2L))
+
+  residents <- signed_species_consistency(fixture, include_colonizers = FALSE)
+  expect_equal(
+    as.character(residents$consistency_group),
+    c("Loser only", "Experiment-dependent responses", "Winner only")
+  )
+  expect_equal(residents$species, paste0("Species ", LETTERS[1:3]))
+  expect_true(all(residents$colonizer == 0L))
+  expect_true(all(residents$non_significant_colonizer == 0L))
+  expect_false(any(as.character(residents$consistency_group) == "Colonizer only"))
 })
 
 test_that("family consistency uses unique species-experiment combinations and percentages", {

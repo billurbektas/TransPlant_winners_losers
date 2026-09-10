@@ -119,24 +119,22 @@ known_figure_producer <- function(path) {
 
   target_map <- c(
     "compare_rel.abund_vs.sqrt.rel.abund.pdf" = "figure_sensitivity",
-    "destination_climate_warming_gradient.pdf" = "figure_destination_climate_warming_gradient",
-    "repeated_species_consistency.pdf" = "figure_species_consistency",
-    "temporal_category_flows.pdf" = "figure_temporal_flows",
-    "temporal_transition_matrices.pdf" = "figure_temporal_transition_matrices",
-    "transient_winning_losing_strength.pdf" = "figure_transient_strength"
+    "destination_climate_warming_gradient.pdf" = "figure_destination_climate_warming_gradient"
   )
   if (filename %in% names(target_map)) {
     target <- unname(target_map[[filename]])
     script <- dplyr::case_when(
-      filename %in% c(
-        "temporal_category_flows.pdf",
-        "temporal_transition_matrices.pdf",
-        "transient_winning_losing_strength.pdf"
-      ) ~ "R/functions/temporal_figures.R",
       filename == "destination_climate_warming_gradient.pdf" ~
         "R/functions/climate_display_figure.R",
       TRUE ~ "R/functions/consistency_figures.R"
     )
+  }
+  historical_script_map <- c(
+    "repeated_species_consistency.pdf" = "R/functions/consistency_figures.R",
+    "temporal_transition_matrices.pdf" = "R/functions/temporal_figures.R"
+  )
+  if (filename %in% names(historical_script_map) && is.na(script)) {
+    script <- unname(historical_script_map[[filename]])
   }
 
   if (grepl("^figures/manuscript/species_minmax_classification_526[.]pdf$", path)) {
@@ -163,15 +161,24 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/appendix_temporal_winning_losing_strength_correlations[.]png$", path)) {
     script <- "R/functions/temporal_figures.R"
     target <- "appendix_temporal_winning_losing_strength_correlations_png"
-  } else if (grepl("^figures/manuscript/appendix_repeated_species_consistency[.]pdf$", path)) {
-    script <- "R/functions/retained_figure_helpers.R"
-    target <- "appendix_repeated_species_consistency_file"
+  } else if (grepl("^figures/manuscript/fig03_repeated_species_consistency[.]pdf$", path)) {
+    script <- "R/functions/consistency_figures.R"
+    target <- "figure03_repeated_species_consistency_pdf"
+  } else if (grepl("^figures/manuscript/fig03_repeated_species_consistency[.]png$", path)) {
+    script <- "R/functions/consistency_figures.R"
+    target <- "figure03_repeated_species_consistency_png"
   } else if (grepl("^figures/manuscript/appendix_destination_climate_warming_gradient[.]pdf$", path)) {
     script <- "R/functions/climate_display_figure.R"
     target <- "appendix_destination_climate_warming_gradient_file"
   } else if (grepl("^figures/manuscript/appendix_destination_climate_warming_gradient[.]png$", path)) {
     script <- "R/functions/climate_display_figure.R"
     target <- "appendix_destination_climate_warming_gradient_png"
+  } else if (grepl("^figures/manuscript/appendix_temporal_transition_matrices[.]pdf$", path)) {
+    script <- "R/functions/temporal_figures.R"
+    target <- "appendix_temporal_transition_matrices_file"
+  } else if (grepl("^figures/manuscript/appendix_temporal_transition_matrices[.]png$", path)) {
+    script <- "R/functions/temporal_figures.R"
+    target <- "appendix_temporal_transition_matrices_png"
   }
 
   data.frame(generating_script_if_known = script, target_if_known = target)
@@ -182,9 +189,10 @@ default_figure_status <- function(path) {
     paste0(
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
       "fig02_temporal_category_flows[.](pdf|png)|",
+      "fig03_repeated_species_consistency[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
-      "appendix_repeated_species_consistency[.]pdf|",
-      "appendix_destination_climate_warming_gradient[.](pdf|png))$"
+      "appendix_destination_climate_warming_gradient[.](pdf|png)|",
+      "appendix_temporal_transition_matrices[.](pdf|png))$"
     ),
     path
   )) {
@@ -207,9 +215,10 @@ figure_analysis_generation <- function(path) {
     paste0(
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
       "fig02_temporal_category_flows[.](pdf|png)|",
+      "fig03_repeated_species_consistency[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
-      "appendix_repeated_species_consistency[.]pdf|",
-      "appendix_destination_climate_warming_gradient[.](pdf|png))$"
+      "appendix_destination_climate_warming_gradient[.](pdf|png)|",
+      "appendix_temporal_transition_matrices[.](pdf|png))$"
     ),
     path
   )) {

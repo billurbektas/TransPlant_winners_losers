@@ -78,11 +78,14 @@ figures/manuscript/*
 !figures/manuscript/fig01_winners_losers.png
 !figures/manuscript/fig02_temporal_category_flows.pdf
 !figures/manuscript/fig02_temporal_category_flows.png
+!figures/manuscript/fig03_repeated_species_consistency.pdf
+!figures/manuscript/fig03_repeated_species_consistency.png
 !figures/manuscript/appendix_temporal_winning_losing_strength_correlations.pdf
 !figures/manuscript/appendix_temporal_winning_losing_strength_correlations.png
-!figures/manuscript/appendix_repeated_species_consistency.pdf
 !figures/manuscript/appendix_destination_climate_warming_gradient.pdf
 !figures/manuscript/appendix_destination_climate_warming_gradient.png
+!figures/manuscript/appendix_temporal_transition_matrices.pdf
+!figures/manuscript/appendix_temporal_transition_matrices.png
 reports/rendered/
 reports/*.html
 reports/*_files/

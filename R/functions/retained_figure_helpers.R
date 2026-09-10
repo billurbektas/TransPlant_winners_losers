@@ -56,21 +56,37 @@ save_plot_atomic <- function(plot, path, width, height, dpi = 300, bg = NULL) {
   path
 }
 
-copy_figure_atomic_verified <- function(input, output, expected_sha256) {
-  input_hash <- sha256_file(input)
-  if (!identical(input_hash, expected_sha256)) {
-    stop(
-      "Figure source checksum mismatch: ", input,
-      "\nExpected: ", expected_sha256,
-      "\nObserved: ", input_hash,
-      call. = FALSE
-    )
+convert_pdf_to_png_atomic <- function(input, output, dpi = 300L, page = 1L) {
+  executable <- Sys.which("pdftoppm")
+  if (!nzchar(executable)) {
+    stop("pdftoppm is required to create the PNG appendix export.", call. = FALSE)
   }
-  copied <- copy_file_atomic_verified(input, output)
-  output_hash <- sha256_file(copied)
-  if (!identical(output_hash, expected_sha256)) {
-    stop("Published figure checksum differs from its verified source: ", output,
-         call. = FALSE)
+  if (!file.exists(input) || dir.exists(input)) {
+    stop("PDF input does not exist: ", input, call. = FALSE)
+  }
+  dir.create(dirname(output), recursive = TRUE, showWarnings = FALSE)
+  temporary_stem <- tempfile(
+    pattern = paste0(tools::file_path_sans_ext(basename(output)), "."),
+    tmpdir = dirname(output)
+  )
+  temporary_output <- paste0(temporary_stem, ".png")
+  on.exit(if (file.exists(temporary_output)) unlink(temporary_output), add = TRUE)
+  status <- system2(
+    executable,
+    c(
+      "-png", "-f", as.character(page), "-l", as.character(page),
+      "-singlefile", "-r", as.character(as.integer(dpi)), input,
+      temporary_stem
+    ),
+    stdout = FALSE,
+    stderr = FALSE
+  )
+  if (!identical(status, 0L) || !file.exists(temporary_output)) {
+    stop("Could not convert PDF figure to PNG: ", input, call. = FALSE)
+  }
+  if (file.exists(output)) unlink(output)
+  if (!file.rename(temporary_output, output)) {
+    stop("Could not publish converted PNG atomically: ", output, call. = FALSE)
   }
   receipt <- paste0(output, ".generated")
   receipt_temporary <- tempfile(
@@ -80,5 +96,5 @@ copy_figure_atomic_verified <- function(input, output, expected_sha256) {
   if (!file.rename(receipt_temporary, receipt)) {
     stop("Could not save figure-generation receipt: ", receipt, call. = FALSE)
   }
-  copied
+  output
 }

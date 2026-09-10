@@ -431,28 +431,6 @@ list(
     format = "file"
   ),
   tar_target(
-    figure_transient_strength,
-    plot_transient_strength(
-      winner_loser,
-      file.path(
-        config$root, "figures", "manuscript",
-        "transient_winning_losing_strength.pdf"
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    figure_temporal_transition_matrices,
-    plot_temporal_transition_matrices(
-      temporal_transition_matrix, temporal_category_composition_rows,
-      file.path(
-        config$root, "figures", "manuscript",
-        "temporal_transition_matrices.pdf"
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
     figure_destination_climate_warming_gradient,
     plot_destination_climate_warming_gradient(
       analysis_data,
@@ -460,17 +438,6 @@ list(
       file.path(
         config$root, "figures", "manuscript",
         "destination_climate_warming_gradient.pdf"
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    figure_species_consistency,
-    plot_signed_consistency(
-      descriptive_analysis_data,
-      file.path(
-        config$root, "figures", "manuscript",
-        "repeated_species_consistency.pdf"
       )
     ),
     format = "file"
