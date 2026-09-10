@@ -143,6 +143,12 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/fig04_species_minmax_classification_526[.]png$", path)) {
     script <- "R/functions/figures.R"
     target <- "figure04_species_minmax_classification_png"
+  } else if (grepl("^figures/manuscript/fig05_predictor_synthesis_support_and_heterogeneity_526[.]pdf$", path)) {
+    script <- "R/functions/manuscript_predictor_synthesis.R"
+    target <- "figure05_predictor_synthesis_pdf"
+  } else if (grepl("^figures/manuscript/fig05_predictor_synthesis_support_and_heterogeneity_526[.]png$", path)) {
+    script <- "R/functions/manuscript_predictor_synthesis.R"
+    target <- "figure05_predictor_synthesis_png"
   } else if (grepl("^figures/manuscript/woodiness_response_surfaces_526[.]pdf$", path)) {
     script <- "R/functions/figures.R"
     target <- "woodiness_figure_file"
@@ -194,6 +200,7 @@ default_figure_status <- function(path) {
       "fig02_temporal_category_flows[.](pdf|png)|",
       "fig03_repeated_species_consistency[.](pdf|png)|",
       "fig04_species_minmax_classification_526[.](pdf|png)|",
+      "fig05_predictor_synthesis_support_and_heterogeneity_526[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
       "appendix_destination_climate_warming_gradient[.](pdf|png)|",
       "appendix_temporal_transition_matrices[.](pdf|png))$"
@@ -221,6 +228,7 @@ figure_analysis_generation <- function(path) {
       "fig02_temporal_category_flows[.](pdf|png)|",
       "fig03_repeated_species_consistency[.](pdf|png)|",
       "fig04_species_minmax_classification_526[.](pdf|png)|",
+      "fig05_predictor_synthesis_support_and_heterogeneity_526[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
       "appendix_destination_climate_warming_gradient[.](pdf|png)|",
       "appendix_temporal_transition_matrices[.](pdf|png))$"

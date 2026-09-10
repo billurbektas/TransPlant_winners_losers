@@ -215,6 +215,13 @@ root `plot/` copies were verified and moved into the appropriate historical
 archive. The retained allowlist and expected hashes are in
 [`config/retained_figures.csv`](config/retained_figures.csv).
 
+Figure 5 summarizes predictor support and residual heterogeneity using only
+the canonical exported ML fit, nested-comparison, and heterogeneity-synthesis
+tables. Its plotting helpers are in
+[`R/functions/manuscript_predictor_synthesis.R`](R/functions/manuscript_predictor_synthesis.R),
+with a standalone figure-only renderer in
+[`scripts/build_predictor_synthesis_support_and_heterogeneity_526.R`](scripts/build_predictor_synthesis_support_and_heterogeneity_526.R).
+
 The Woodiness surface uses a group-specific observed-climate support-mask
 target. This target derives support separately for woody and non-woody rows and
 cannot alter or refit the anchored Woodiness model. Regenerated scientific

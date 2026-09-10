@@ -237,6 +237,69 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
+      figure05_predictor_synthesis_data,
+      prepare_predictor_synthesis_526(
+        canonical_predictor_fit_file,
+        canonical_predictor_comparison_file,
+        canonical_heterogeneity_synthesis_file
+      )
+    ),
+    tar_target(
+      figure05_predictor_synthesis_data_file,
+      write_csv_atomic(
+        figure05_predictor_synthesis_data,
+        file.path(
+          canonical_downstream_settings$canonical_output$tables,
+          "predictor_synthesis_support_and_heterogeneity_526_data.csv"
+        )
+      ),
+      format = "file"
+    ),
+    tar_target(
+      figure05_predictor_synthesis,
+      {
+        figure05_predictor_synthesis_data_file
+        build_predictor_synthesis_figure_526(
+          figure05_predictor_synthesis_data
+        )
+      }
+    ),
+    tar_target(
+      figure05_predictor_synthesis_pdf,
+      {
+        path <- write_vector_figure(
+          figure05_predictor_synthesis,
+          file.path(
+            config$root, "figures", "manuscript",
+            "fig05_predictor_synthesis_support_and_heterogeneity_526.pdf"
+          ),
+          width = 16,
+          height = 8.5
+        )
+        writeLines(
+          format(Sys.time(), tz = "UTC", usetz = TRUE),
+          paste0(path, ".generated")
+        )
+        path
+      },
+      format = "file"
+    ),
+    tar_target(
+      figure05_predictor_synthesis_png,
+      save_plot_atomic(
+        figure05_predictor_synthesis,
+        file.path(
+          config$root, "figures", "manuscript",
+          "fig05_predictor_synthesis_support_and_heterogeneity_526.png"
+        ),
+        width = 16,
+        height = 8.5,
+        dpi = 300,
+        bg = "white"
+      ),
+      format = "file"
+    ),
+    tar_target(
       retained_figure_files,
       copy_retained_figures_verified(config$root),
       format = "file"
@@ -304,6 +367,8 @@ canonical_publication_targets <- function() {
         appendix_temporal_transition_matrices_png
         figure04_species_minmax_classification_pdf
         figure04_species_minmax_classification_png
+        figure05_predictor_synthesis_pdf
+        figure05_predictor_synthesis_png
         woodiness_figure_file
         retained_figure_files
         build_figure_provenance(config$root)

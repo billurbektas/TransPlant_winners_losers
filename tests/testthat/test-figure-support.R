@@ -66,6 +66,8 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "fig03_repeated_species_consistency.png",
     "fig04_species_minmax_classification_526.pdf",
     "fig04_species_minmax_classification_526.png",
+    "fig05_predictor_synthesis_support_and_heterogeneity_526.pdf",
+    "fig05_predictor_synthesis_support_and_heterogeneity_526.png",
     "appendix_temporal_winning_losing_strength_correlations.pdf",
     "appendix_temporal_winning_losing_strength_correlations.png",
     "appendix_temporal_transition_matrices.pdf",
