@@ -314,7 +314,9 @@ build_species_context_callout_figure <- function(
   )
   # Canvas coordinates of the classification plot's data panel after the
   # enlarged manuscript axes and legend are laid out.
-  panel_box <- c(left = 0.317, right = 0.734, bottom = 0.290, top = 0.843)
+  # The two-line warming-sensitivity legend raises the lower data-panel edge.
+  # Keep this boundary aligned so internal and external connector segments meet.
+  panel_box <- c(left = 0.317, right = 0.734, bottom = 0.309, top = 0.843)
   callout_centres_y <- vapply(
     inset_boxes, function(box) box[["y"]] + box[["height"]] / 2, numeric(1)
   )

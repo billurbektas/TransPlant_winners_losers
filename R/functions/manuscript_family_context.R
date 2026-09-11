@@ -173,12 +173,14 @@ build_family_context_callout_figure_526 <- function(
 
   class_box <- c(x = 0.265, y = 0.155, width = 0.47, height = 0.69)
   inset_boxes <- list(
-    "Poaceae" = c(x = 0.012, y = 0.575, width = 0.225, height = 0.39),
-    "Rosaceae" = c(x = 0.012, y = 0.075, width = 0.225, height = 0.39),
-    "Rubiaceae" = c(x = 0.763, y = 0.535, width = 0.225, height = 0.39),
-    "Fabaceae" = c(x = 0.763, y = 0.075, width = 0.225, height = 0.39)
+    "Poaceae" = c(x = 0.020, y = 0.575, width = 0.225, height = 0.39),
+    "Rosaceae" = c(x = 0.020, y = 0.075, width = 0.225, height = 0.39),
+    "Rubiaceae" = c(x = 0.755, y = 0.535, width = 0.225, height = 0.39),
+    "Fabaceae" = c(x = 0.755, y = 0.075, width = 0.225, height = 0.39)
   )
-  panel_box <- c(left = 0.317, right = 0.734, bottom = 0.290, top = 0.843)
+  # The two-line warming-sensitivity legend raises the lower data-panel edge.
+  # Keep this boundary aligned so internal and external connector segments meet.
+  panel_box <- c(left = 0.310, right = 0.734, bottom = 0.309, top = 0.843)
   callout_centres_y <- vapply(
     inset_boxes, function(box) box[["y"]] + box[["height"]] / 2, numeric(1)
   )
@@ -355,8 +357,16 @@ build_family_context_callout_figure_526 <- function(
           barwidth = grid::unit(50, "mm"), barheight = grid::unit(4, "mm")
         )
       ) +
-      ggplot2::scale_x_continuous(labels = raw_T_labels, expand = c(0, 0)) +
-      ggplot2::scale_y_continuous(labels = raw_P_labels, expand = c(0, 0)) +
+      ggplot2::scale_x_continuous(
+        labels = raw_T_labels,
+        breaks = function(limits) pretty(limits, n = 3),
+        expand = c(0, 0)
+      ) +
+      ggplot2::scale_y_continuous(
+        labels = raw_P_labels,
+        breaks = function(limits) pretty(limits, n = 3),
+        expand = c(0, 0)
+      ) +
       ggplot2::coord_cartesian(expand = FALSE) +
       ggplot2::theme_bw(base_size = inset_base_size) +
       ggplot2::theme(
