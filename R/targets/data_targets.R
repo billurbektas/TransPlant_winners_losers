@@ -436,7 +436,7 @@ list(
       analysis_data,
       climate_context_gate,
       file.path(
-        config$root, "figures", "manuscript",
+        config$root, "figures", "candidates",
         "destination_climate_warming_gradient.pdf"
       )
     ),

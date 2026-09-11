@@ -330,17 +330,27 @@ canonical_publication_targets <- function() {
           args = c(
             shQuote(figure06_predictor_response_atlas_renderer),
             shQuote(output_stem),
-            shQuote(canonical_climate_scaling_file)
+            shQuote(canonical_climate_scaling_file),
+            shQuote(config$output_dir)
           )
         )
         if (!identical(status, 0L)) {
           stop("Figure 6 renderer failed with status ", status, ".")
         }
-        paths <- paste0(
-          output_stem,
-          c(
-            ".pdf", ".png", "_data.csv", "_quantiles.csv",
-            "_caption.txt", "_validation.csv"
+        output_name <- basename(output_stem)
+        paths <- c(
+          paste0(output_stem, c(".pdf", ".png", "_caption.txt")),
+          file.path(
+            config$output_dir, "data",
+            paste0(output_name, "_data.csv")
+          ),
+          file.path(
+            config$output_dir, "tables",
+            paste0(output_name, "_quantiles.csv")
+          ),
+          file.path(
+            config$output_dir, "audits",
+            paste0(output_name, "_validation.csv")
           )
         )
         if (any(!file.exists(paths))) {
@@ -361,6 +371,212 @@ canonical_publication_targets <- function() {
       figure06_predictor_response_atlas_png,
       figure06_predictor_response_atlas_files[
         grepl("[.]png$", figure06_predictor_response_atlas_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      appendix_family_minmax_renderer,
+      file.path(
+        config$root, "scripts",
+        "build_appendix_family_minmax_classification_526.R"
+      ),
+      format = "file"
+    ),
+    tar_target(
+      appendix_family_minmax_files,
+      {
+        invisible(list(
+          canonical_family_model_file,
+          canonical_family_data_file,
+          canonical_family_classification_file,
+          canonical_family_random_file,
+          canonical_climate_scaling_file
+        ))
+        output_stem <- file.path(
+          config$root, "figures", "manuscript",
+          "appendix_family_minmax_classification_526"
+        )
+        status <- system2(
+          file.path(R.home("bin"), "Rscript"),
+          args = c(
+            shQuote(appendix_family_minmax_renderer),
+            shQuote(output_stem),
+            shQuote(canonical_climate_scaling_file),
+            shQuote(config$output_dir)
+          )
+        )
+        if (!identical(status, 0L)) {
+          stop("Family appendix renderer failed with status ", status, ".")
+        }
+        paths <- c(
+          paste0(output_stem, c(".pdf", ".png")),
+          file.path(
+            config$output_dir, "tables",
+            "appendix_family_minmax_classification_526_selected_families.csv"
+          ),
+          file.path(
+            config$output_dir, "audits",
+            "appendix_family_minmax_classification_526_validation.csv"
+          )
+        )
+        if (any(!file.exists(paths))) {
+          stop("Family appendix renderer did not create every declared output.")
+        }
+        paths
+      },
+      format = "file"
+    ),
+    tar_target(
+      appendix_family_minmax_pdf,
+      appendix_family_minmax_files[
+        grepl("[.]pdf$", appendix_family_minmax_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      appendix_family_minmax_png,
+      appendix_family_minmax_files[
+        grepl("[.]png$", appendix_family_minmax_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      appendix_pev2_pev3_atlas_renderer,
+      file.path(
+        config$root, "scripts",
+        "build_appendix_pev2_pev3_prediction_atlas_526.R"
+      ),
+      format = "file"
+    ),
+    tar_target(
+      appendix_pev2_pev3_atlas_files,
+      {
+        invisible(list(
+          canonical_phylogeny_model_file,
+          canonical_pev_scaling_file,
+          canonical_pev_scores_file,
+          canonical_climate_scaling_file,
+          figure06_predictor_response_atlas_files
+        ))
+        output_stem <- file.path(
+          config$root, "figures", "manuscript",
+          "appendix_pev2_pev3_prediction_atlas_526"
+        )
+        figure06_data_file <- figure06_predictor_response_atlas_files[
+          grepl("_data[.]csv$", figure06_predictor_response_atlas_files)
+        ]
+        status <- system2(
+          file.path(R.home("bin"), "Rscript"),
+          args = c(
+            shQuote(appendix_pev2_pev3_atlas_renderer),
+            shQuote(output_stem),
+            shQuote(canonical_climate_scaling_file),
+            shQuote(figure06_data_file),
+            shQuote(config$output_dir)
+          )
+        )
+        if (!identical(status, 0L)) {
+          stop("PEV2/PEV3 appendix renderer failed with status ", status, ".")
+        }
+        paths <- c(
+          paste0(output_stem, c(".pdf", ".png", "_caption.txt")),
+          file.path(
+            config$output_dir, "data",
+            "appendix_pev2_pev3_prediction_atlas_526_data.csv"
+          ),
+          file.path(
+            config$output_dir, "tables",
+            "appendix_pev2_pev3_prediction_atlas_526_quantiles.csv"
+          ),
+          file.path(
+            config$output_dir, "audits",
+            "appendix_pev2_pev3_prediction_atlas_526_validation.csv"
+          )
+        )
+        if (any(!file.exists(paths))) {
+          stop("PEV2/PEV3 appendix renderer did not create every declared output.")
+        }
+        paths
+      },
+      format = "file"
+    ),
+    tar_target(
+      appendix_pev2_pev3_atlas_pdf,
+      appendix_pev2_pev3_atlas_files[
+        grepl("[.]pdf$", appendix_pev2_pev3_atlas_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      appendix_pev2_pev3_atlas_png,
+      appendix_pev2_pev3_atlas_files[
+        grepl("[.]png$", appendix_pev2_pev3_atlas_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      appendix_phylogeny_pcoa_summary_renderer,
+      file.path(
+        config$root, "scripts",
+        "build_appendix_phylogeny_pcoa_summary_526.R"
+      ),
+      format = "file"
+    ),
+    tar_target(
+      appendix_phylogeny_pcoa_summary_files,
+      {
+        invisible(list(
+          canonical_pev_scores_file,
+          canonical_pcoa_eigen_file
+        ))
+        output_stem <- file.path(
+          config$root, "figures", "manuscript",
+          "appendix_phylogeny_pcoa_summary_526"
+        )
+        status <- system2(
+          file.path(R.home("bin"), "Rscript"),
+          args = c(
+            shQuote(appendix_phylogeny_pcoa_summary_renderer),
+            shQuote(output_stem),
+            shQuote(config$output_dir)
+          )
+        )
+        if (!identical(status, 0L)) {
+          stop("Phylogeny PCoA appendix renderer failed with status ", status, ".")
+        }
+        paths <- c(
+          paste0(output_stem, c(".pdf", ".png")),
+          file.path(
+            config$output_dir, "data",
+            "appendix_phylogeny_pcoa_summary_526_data.csv"
+          ),
+          file.path(
+            config$output_dir, "tables",
+            "appendix_phylogeny_pcoa_first10_axes_526.csv"
+          ),
+          file.path(
+            config$output_dir, "audits",
+            "appendix_phylogeny_pcoa_summary_526_validation.csv"
+          )
+        )
+        if (any(!file.exists(paths))) {
+          stop("Phylogeny PCoA appendix renderer did not create every declared output.")
+        }
+        paths
+      },
+      format = "file"
+    ),
+    tar_target(
+      appendix_phylogeny_pcoa_summary_pdf,
+      appendix_phylogeny_pcoa_summary_files[
+        grepl("[.]pdf$", appendix_phylogeny_pcoa_summary_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      appendix_phylogeny_pcoa_summary_png,
+      appendix_phylogeny_pcoa_summary_files[
+        grepl("[.]png$", appendix_phylogeny_pcoa_summary_files)
       ],
       format = "file"
     ),
@@ -436,6 +652,12 @@ canonical_publication_targets <- function() {
         figure05_predictor_synthesis_png
         figure06_predictor_response_atlas_pdf
         figure06_predictor_response_atlas_png
+        appendix_family_minmax_pdf
+        appendix_family_minmax_png
+        appendix_pev2_pev3_atlas_pdf
+        appendix_pev2_pev3_atlas_png
+        appendix_phylogeny_pcoa_summary_pdf
+        appendix_phylogeny_pcoa_summary_png
         woodiness_figure_file
         retained_figure_files
         build_figure_provenance(config$root)
@@ -494,7 +716,7 @@ canonical_publication_targets <- function() {
       write_vector_figure(
         woodiness_figure,
         file.path(
-          config$root, "figures", "manuscript",
+          config$root, "figures", "candidates",
           "woodiness_response_surfaces_526.pdf"
         ),
         width = 9.5,

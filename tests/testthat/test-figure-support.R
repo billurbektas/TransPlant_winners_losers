@@ -57,7 +57,6 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
   manifest <- figure_manifest(PROJECT_ROOT)
   canonical_names <- c(
     "compare_rel.abund_vs.sqrt.rel.abund.pdf",
-    "destination_climate_warming_gradient.pdf",
     "appendix_destination_climate_warming_gradient.pdf",
     "appendix_destination_climate_warming_gradient.png",
     "fig02_temporal_category_flows.pdf",
@@ -70,6 +69,12 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "fig05_predictor_synthesis_support_and_heterogeneity_526.png",
     "fig06_predictor_response_atlas_526.pdf",
     "fig06_predictor_response_atlas_526.png",
+    "appendix_family_minmax_classification_526.pdf",
+    "appendix_family_minmax_classification_526.png",
+    "appendix_pev2_pev3_prediction_atlas_526.pdf",
+    "appendix_pev2_pev3_prediction_atlas_526.png",
+    "appendix_phylogeny_pcoa_summary_526.pdf",
+    "appendix_phylogeny_pcoa_summary_526.png",
     "appendix_temporal_winning_losing_strength_correlations.pdf",
     "appendix_temporal_winning_losing_strength_correlations.png",
     "appendix_temporal_transition_matrices.pdf",
@@ -103,7 +108,11 @@ test_that("Figure 4 uses enlarged typography and manuscript labels", {
   expect_false(grepl("Delta T =", body_text, fixed = TRUE))
   expect_match(body_text, "Minimum fitted winning-losing strength", fixed = TRUE)
   expect_match(body_text, "Maximum fitted winning-losing strength", fixed = TRUE)
-  expect_match(body_text, "Shift with stronger warming", fixed = TRUE)
+  expect_match(
+    body_text,
+    "Warming sensitivity\\n(shift with stronger warming)",
+    fixed = TRUE
+  )
   expect_match(body_text, "Destination precipitation (mm)", fixed = TRUE)
   expect_match(body_text, "Fitted winning/losing strength", fixed = TRUE)
 })

@@ -155,7 +155,25 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/fig06_predictor_response_atlas_526[.]png$", path)) {
     script <- "scripts/build_predictor_response_atlas_526.R"
     target <- "figure06_predictor_response_atlas_png"
-  } else if (grepl("^figures/manuscript/woodiness_response_surfaces_526[.]pdf$", path)) {
+  } else if (grepl("^figures/manuscript/appendix_family_minmax_classification_526[.]pdf$", path)) {
+    script <- "scripts/build_appendix_family_minmax_classification_526.R"
+    target <- "appendix_family_minmax_pdf"
+  } else if (grepl("^figures/manuscript/appendix_family_minmax_classification_526[.]png$", path)) {
+    script <- "scripts/build_appendix_family_minmax_classification_526.R"
+    target <- "appendix_family_minmax_png"
+  } else if (grepl("^figures/manuscript/appendix_pev2_pev3_prediction_atlas_526[.]pdf$", path)) {
+    script <- "scripts/build_appendix_pev2_pev3_prediction_atlas_526.R"
+    target <- "appendix_pev2_pev3_atlas_pdf"
+  } else if (grepl("^figures/manuscript/appendix_pev2_pev3_prediction_atlas_526[.]png$", path)) {
+    script <- "scripts/build_appendix_pev2_pev3_prediction_atlas_526.R"
+    target <- "appendix_pev2_pev3_atlas_png"
+  } else if (grepl("^figures/manuscript/appendix_phylogeny_pcoa_summary_526[.]pdf$", path)) {
+    script <- "scripts/build_appendix_phylogeny_pcoa_summary_526.R"
+    target <- "appendix_phylogeny_pcoa_summary_pdf"
+  } else if (grepl("^figures/manuscript/appendix_phylogeny_pcoa_summary_526[.]png$", path)) {
+    script <- "scripts/build_appendix_phylogeny_pcoa_summary_526.R"
+    target <- "appendix_phylogeny_pcoa_summary_png"
+  } else if (grepl("^figures/candidates/woodiness_response_surfaces_526[.]pdf$", path)) {
     script <- "R/functions/figures.R"
     target <- "woodiness_figure_file"
   } else if (grepl("^figures/manuscript/fig01_winners_losers[.]pdf$", path)) {
@@ -208,6 +226,9 @@ default_figure_status <- function(path) {
       "fig04_species_minmax_classification_526[.](pdf|png)|",
       "fig05_predictor_synthesis_support_and_heterogeneity_526[.](pdf|png)|",
       "fig06_predictor_response_atlas_526[.](pdf|png)|",
+      "appendix_family_minmax_classification_526[.](pdf|png)|",
+      "appendix_pev2_pev3_prediction_atlas_526[.](pdf|png)|",
+      "appendix_phylogeny_pcoa_summary_526[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
       "appendix_destination_climate_warming_gradient[.](pdf|png)|",
       "appendix_temporal_transition_matrices[.](pdf|png))$"
@@ -237,6 +258,9 @@ figure_analysis_generation <- function(path) {
       "fig04_species_minmax_classification_526[.](pdf|png)|",
       "fig05_predictor_synthesis_support_and_heterogeneity_526[.](pdf|png)|",
       "fig06_predictor_response_atlas_526[.](pdf|png)|",
+      "appendix_family_minmax_classification_526[.](pdf|png)|",
+      "appendix_pev2_pev3_prediction_atlas_526[.](pdf|png)|",
+      "appendix_phylogeny_pcoa_summary_526[.](pdf|png)|",
       "appendix_temporal_winning_losing_strength_correlations[.](pdf|png)|",
       "appendix_destination_climate_warming_gradient[.](pdf|png)|",
       "appendix_temporal_transition_matrices[.](pdf|png))$"
@@ -316,7 +340,7 @@ build_figure_provenance <- function(root = getwd(), retained_config = "config/re
       refinement_note = dplyr::case_when(
         identical(
           path,
-          "figures/manuscript/woodiness_response_surfaces_526.pdf"
+          "figures/candidates/woodiness_response_surfaces_526.pdf"
         ) ~ paste(
           "group_specific_observed_climate_support_mask = IMPLEMENTED;",
           "model_refit = FALSE"

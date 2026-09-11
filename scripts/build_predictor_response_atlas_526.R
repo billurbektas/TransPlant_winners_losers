@@ -36,12 +36,24 @@ climate_scaling_file <- if (length(arguments) >= 2L) {
 } else {
   NA_character_
 }
+output_root <- if (length(arguments) >= 3L) {
+  arguments[[3]]
+} else {
+  "output"
+}
 pdf_file <- paste0(output_stem, ".pdf")
 png_file <- paste0(output_stem, ".png")
-data_file <- paste0(output_stem, "_data.csv")
-quantile_file <- paste0(output_stem, "_quantiles.csv")
+output_name <- basename(output_stem)
+data_file <- file.path(
+  output_root, "data", paste0(output_name, "_data.csv")
+)
+quantile_file <- file.path(
+  output_root, "tables", paste0(output_name, "_quantiles.csv")
+)
 caption_file <- paste0(output_stem, "_caption.txt")
-validation_file <- paste0(output_stem, "_validation.csv")
+validation_file <- file.path(
+  output_root, "audits", paste0(output_name, "_validation.csv")
+)
 
 model_files <- c(
   LDMC = "output/models/LDMC_full_REML_526.rds",
@@ -732,6 +744,12 @@ caption <- paste0(
 )
 
 dir.create(dirname(output_stem), recursive = TRUE, showWarnings = FALSE)
+invisible(lapply(
+  unique(dirname(c(data_file, quantile_file, validation_file))),
+  dir.create,
+  recursive = TRUE,
+  showWarnings = FALSE
+))
 readr::write_csv(plotting_export, data_file)
 readr::write_csv(quantile_table, quantile_file)
 readr::write_csv(validation, validation_file)
