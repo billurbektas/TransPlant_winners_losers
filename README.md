@@ -1,6 +1,7 @@
 # TransPlant warming winners and losers
 
-This repository has one active scientific entry point: [`_targets.R`](_targets.R).
+This repository has one active scientific-analysis entry point:
+[`_targets.R`](_targets.R).
 It builds the community, taxonomy, climate, trait, AUC, temporal, and resident
 downstream branches, validates the independently reconstructed phylogeny branch
 against the historical Step 22 analysis, and freezes the assembled active
@@ -61,7 +62,8 @@ tag    pre-refactor-source-2026-09-09
 commit cc9ee54
 ```
 
-Active refactoring is performed on `refactor/canonical-targets`. The source
+The canonical refactor lineage is preserved on `refactor/canonical-targets`;
+manuscript-figure finalization takes place on `manuscript/figures`. The source
 checkpoint intentionally excludes raw data, caches, `_targets/`, generated
 models and reports, bulk figures, whole-session snapshots, and
 `repository_contents.txt`.
@@ -209,34 +211,60 @@ Figure status is separate from numerical status:
   `INTERMEDIATE_DISCARDABLE`, and `UNKNOWN_DO_NOT_TOUCH` protect other roles.
 
 The complete active inventory is
-`output/manifests/figure_provenance.csv`. Eleven explicitly retained figures
-are checksum-locked in [`figures/retained/`](figures/retained/). Their former
-root `plot/` copies were verified and moved into the appropriate historical
-archive. The retained allowlist and expected hashes are in
+`output/manifests/figure_provenance.csv`. Three explicitly retained figures are
+checksum-locked in [`figures/retained/`](figures/retained/). Their former root
+`plot/` copies were verified and moved into the appropriate historical archive.
+The retained allowlist and expected hashes are in
 [`config/retained_figures.csv`](config/retained_figures.csv).
 
-Figure 5 displays population-average fixed-effect response surfaces from the
-canonical climate-only 526-species model at low and high warming. Predictions
-are restricted to observed three-dimensional
-temperature–precipitation–warming support, and all experiments are annotated
+The finalized main-manuscript sequence is:
+
+| Figure | Canonical PDF | Scientific content |
+|---:|---|---|
+| 1 | [`fig01_winners_losers.pdf`](figures/manuscript/fig01_winners_losers.pdf) | *Festuca rubra* winner/loser examples and the species-level origin-versus-warmed synthesis |
+| 2 | [`fig02_repeated_species_consistency.pdf`](figures/manuscript/fig02_repeated_species_consistency.pdf) | Resident-only response consistency among species occurring in more than three experiments |
+| 3 | [`fig03_temporal_category_flows.pdf`](figures/manuscript/fig03_temporal_category_flows.pdf) | Resident temporal response-category flows for the first 2, 4, and 6 years |
+| 4 | [`fig04_species_minmax_classification_526.pdf`](figures/manuscript/fig04_species_minmax_classification_526.pdf) | Minimum-versus-maximum fitted species responses and selected climate-response surfaces |
+| 5 | [`fig05_climate_only_fixed_effect_prediction_surfaces_526.pdf`](figures/manuscript/fig05_climate_only_fixed_effect_prediction_surfaces_526.pdf) | Population-average climate-only response surfaces at low and high warming |
+| 6 | [`fig06_predictor_synthesis_support_and_heterogeneity_526.pdf`](figures/manuscript/fig06_predictor_synthesis_support_and_heterogeneity_526.pdf) | Predictor model support and residual heterogeneity resolved |
+| 7 | [`fig07_predictor_response_atlas_526.pdf`](figures/manuscript/fig07_predictor_response_atlas_526.pdf) | Fixed-effect response surfaces for the six canonical predictor classes |
+
+Each numbered figure has a same-stem PNG beside the PDF. Figures 2 and 3
+exclude colonizers. The approved appendix figures are also stored as paired PDF
+and PNG files in [`figures/manuscript/`](figures/manuscript/), with names that
+begin `appendix_`; appendix numbering is intentionally left open until the
+manuscript order is fixed.
+
+| Appendix stem | Scientific content |
+|---|---|
+| `appendix_destination_climate_warming_gradient` | Continuous destination climate and experimental warming |
+| `appendix_family_minmax_classification_526` | Family-level minimum/maximum classification and response surfaces |
+| `appendix_pev2_pev3_prediction_atlas_526` | PEV2 and PEV3 prediction surfaces |
+| `appendix_phylogeny_pcoa_summary_526` | PCoA species positions and variation explained by the first ten axes |
+| `appendix_temporal_transition_matrices` | Resident-only temporal response composition and transition matrices |
+| `appendix_temporal_winning_losing_strength_correlations` | Temporal correlations in winning-losing strength |
+
+Figure 5 predictions are restricted to observed three-dimensional
+temperature–precipitation–warming support, and all 42 experiments are annotated
 with their origin-to-destination elevation change. Its figure-only renderer is
 [`scripts/build_climate_only_fixed_effect_surfaces_526.R`](scripts/build_climate_only_fixed_effect_surfaces_526.R);
 it reads existing canonical exports and never refits the model.
 
-Figure 6 summarizes predictor support and residual heterogeneity using only
-the canonical exported ML fit, nested-comparison, and heterogeneity-synthesis
-tables. Its plotting helpers are in
+Figure 6 uses only the canonical exported ML fit, nested-comparison, and
+heterogeneity-synthesis tables. Its plotting helpers are in
 [`R/functions/manuscript_predictor_synthesis.R`](R/functions/manuscript_predictor_synthesis.R),
 with a standalone figure-only renderer in
 [`scripts/build_predictor_synthesis_support_and_heterogeneity_526.R`](scripts/build_predictor_synthesis_support_and_heterogeneity_526.R).
 
-Figure 7 displays fixed-effect response surfaces from the six existing
-canonical 526-species predictor models. Predictions are restricted to the
-observed three-dimensional temperature–precipitation–warming support, with
-separate support masks for woody and non-woody species. Its figure-only
-renderer is
+Figure 7 predictions are restricted to observed three-dimensional
+temperature–precipitation–warming support, with separate support masks for woody
+and non-woody species. Its figure-only renderer is
 [`scripts/build_predictor_response_atlas_526.R`](scripts/build_predictor_response_atlas_526.R);
 it reads existing canonical model and scaling exports and never refits a model.
+
+Figure-generated data, quantile summaries, and validation tables belong under
+`output/data/`, `output/tables/`, and `output/audits/`, respectively; CSV files
+are not stored in the figure directories.
 
 The Woodiness surface uses a group-specific observed-climate support-mask
 target. This target derives support separately for woody and non-woody rows and
