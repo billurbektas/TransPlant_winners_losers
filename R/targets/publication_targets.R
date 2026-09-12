@@ -43,16 +43,16 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
-      figure02_temporal_strength_correlation_inset,
+      figure03_temporal_strength_correlation_inset,
       build_temporal_strength_correlation_inset(winner_loser)
     ),
     tar_target(
-      figure02_temporal_category_flows_file,
+      figure03_temporal_category_flows_file,
       plot_temporal_flows(
         temporal_linked_rows,
         file.path(
           config$root, "figures", "manuscript",
-          "fig02_temporal_category_flows.pdf"
+          "fig03_temporal_category_flows.pdf"
         ),
         include_colonizers = FALSE,
         base_size = 22,
@@ -70,12 +70,12 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
-      figure02_temporal_category_flows_png,
+      figure03_temporal_category_flows_png,
       plot_temporal_flows(
         temporal_linked_rows,
         file.path(
           config$root, "figures", "manuscript",
-          "fig02_temporal_category_flows.png"
+          "fig03_temporal_category_flows.png"
         ),
         include_colonizers = FALSE,
         base_size = 22,
@@ -95,7 +95,7 @@ canonical_publication_targets <- function() {
     tar_target(
       appendix_temporal_winning_losing_strength_correlations_file,
       save_plot_atomic(
-        figure02_temporal_strength_correlation_inset,
+        figure03_temporal_strength_correlation_inset,
         file.path(
           config$root, "figures", "manuscript",
           "appendix_temporal_winning_losing_strength_correlations.pdf"
@@ -109,7 +109,7 @@ canonical_publication_targets <- function() {
     tar_target(
       appendix_temporal_winning_losing_strength_correlations_png,
       save_plot_atomic(
-        figure02_temporal_strength_correlation_inset,
+        figure03_temporal_strength_correlation_inset,
         file.path(
           config$root, "figures", "manuscript",
           "appendix_temporal_winning_losing_strength_correlations.png"
@@ -237,7 +237,77 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
-      figure05_predictor_synthesis_data,
+      figure05_climate_only_fixed_effect_renderer,
+      file.path(
+        config$root, "scripts",
+        "build_climate_only_fixed_effect_surfaces_526.R"
+      ),
+      format = "file"
+    ),
+    tar_target(
+      figure05_climate_only_fixed_effect_files,
+      {
+        invisible(list(
+          canonical_mboth_model_file,
+          canonical_mboth_fixed_file,
+          canonical_climate_scaling_file,
+          experiments_file,
+          sites_file
+        ))
+        output_stem <- file.path(
+          config$root, "figures", "manuscript",
+          "fig05_climate_only_fixed_effect_prediction_surfaces_526"
+        )
+        status <- system2(
+          file.path(R.home("bin"), "Rscript"),
+          args = c(
+            shQuote(figure05_climate_only_fixed_effect_renderer),
+            shQuote(output_stem),
+            shQuote(config$output_dir)
+          )
+        )
+        if (!identical(status, 0L)) {
+          stop("Figure 5 renderer failed with status ", status, ".")
+        }
+        output_name <- basename(output_stem)
+        paths <- c(
+          paste0(output_stem, c(".pdf", ".png")),
+          file.path(
+            config$output_dir, "data",
+            paste0(output_name, "_data.csv")
+          ),
+          file.path(
+            config$output_dir, "tables",
+            paste0(output_name, "_quantiles.csv")
+          ),
+          file.path(
+            config$output_dir, "audits",
+            paste0(output_name, "_validation.csv")
+          )
+        )
+        if (any(!file.exists(paths))) {
+          stop("Figure 5 renderer did not create every declared output.")
+        }
+        paths
+      },
+      format = "file"
+    ),
+    tar_target(
+      figure05_climate_only_fixed_effect_pdf,
+      figure05_climate_only_fixed_effect_files[
+        grepl("[.]pdf$", figure05_climate_only_fixed_effect_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      figure05_climate_only_fixed_effect_png,
+      figure05_climate_only_fixed_effect_files[
+        grepl("[.]png$", figure05_climate_only_fixed_effect_files)
+      ],
+      format = "file"
+    ),
+    tar_target(
+      figure06_predictor_synthesis_data,
       prepare_predictor_synthesis_526(
         canonical_predictor_fit_file,
         canonical_predictor_comparison_file,
@@ -245,9 +315,9 @@ canonical_publication_targets <- function() {
       )
     ),
     tar_target(
-      figure05_predictor_synthesis_data_file,
+      figure06_predictor_synthesis_data_file,
       write_csv_atomic(
-        figure05_predictor_synthesis_data,
+        figure06_predictor_synthesis_data,
         file.path(
           canonical_downstream_settings$canonical_output$tables,
           "predictor_synthesis_support_and_heterogeneity_526_data.csv"
@@ -256,22 +326,22 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
-      figure05_predictor_synthesis,
+      figure06_predictor_synthesis,
       {
-        figure05_predictor_synthesis_data_file
+        figure06_predictor_synthesis_data_file
         build_predictor_synthesis_figure_526(
-          figure05_predictor_synthesis_data
+          figure06_predictor_synthesis_data
         )
       }
     ),
     tar_target(
-      figure05_predictor_synthesis_pdf,
+      figure06_predictor_synthesis_pdf,
       {
         path <- write_vector_figure(
-          figure05_predictor_synthesis,
+          figure06_predictor_synthesis,
           file.path(
             config$root, "figures", "manuscript",
-            "fig05_predictor_synthesis_support_and_heterogeneity_526.pdf"
+            "fig06_predictor_synthesis_support_and_heterogeneity_526.pdf"
           ),
           width = 16,
           height = 8.5
@@ -285,12 +355,12 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
-      figure05_predictor_synthesis_png,
+      figure06_predictor_synthesis_png,
       save_plot_atomic(
-        figure05_predictor_synthesis,
+        figure06_predictor_synthesis,
         file.path(
           config$root, "figures", "manuscript",
-          "fig05_predictor_synthesis_support_and_heterogeneity_526.png"
+          "fig06_predictor_synthesis_support_and_heterogeneity_526.png"
         ),
         width = 16,
         height = 8.5,
@@ -300,14 +370,14 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
-      figure06_predictor_response_atlas_renderer,
+      figure07_predictor_response_atlas_renderer,
       file.path(
         config$root, "scripts", "build_predictor_response_atlas_526.R"
       ),
       format = "file"
     ),
     tar_target(
-      figure06_predictor_response_atlas_files,
+      figure07_predictor_response_atlas_files,
       {
         invisible(list(
           canonical_ldmc_model_file,
@@ -323,19 +393,19 @@ canonical_publication_targets <- function() {
         ))
         output_stem <- file.path(
           config$root, "figures", "manuscript",
-          "fig06_predictor_response_atlas_526"
+          "fig07_predictor_response_atlas_526"
         )
         status <- system2(
           file.path(R.home("bin"), "Rscript"),
           args = c(
-            shQuote(figure06_predictor_response_atlas_renderer),
+            shQuote(figure07_predictor_response_atlas_renderer),
             shQuote(output_stem),
             shQuote(canonical_climate_scaling_file),
             shQuote(config$output_dir)
           )
         )
         if (!identical(status, 0L)) {
-          stop("Figure 6 renderer failed with status ", status, ".")
+          stop("Figure 7 renderer failed with status ", status, ".")
         }
         output_name <- basename(output_stem)
         paths <- c(
@@ -354,23 +424,23 @@ canonical_publication_targets <- function() {
           )
         )
         if (any(!file.exists(paths))) {
-          stop("Figure 6 renderer did not create every declared output.")
+          stop("Figure 7 renderer did not create every declared output.")
         }
         paths
       },
       format = "file"
     ),
     tar_target(
-      figure06_predictor_response_atlas_pdf,
-      figure06_predictor_response_atlas_files[
-        grepl("[.]pdf$", figure06_predictor_response_atlas_files)
+      figure07_predictor_response_atlas_pdf,
+      figure07_predictor_response_atlas_files[
+        grepl("[.]pdf$", figure07_predictor_response_atlas_files)
       ],
       format = "file"
     ),
     tar_target(
-      figure06_predictor_response_atlas_png,
-      figure06_predictor_response_atlas_files[
-        grepl("[.]png$", figure06_predictor_response_atlas_files)
+      figure07_predictor_response_atlas_png,
+      figure07_predictor_response_atlas_files[
+        grepl("[.]png$", figure07_predictor_response_atlas_files)
       ],
       format = "file"
     ),
@@ -456,14 +526,14 @@ canonical_publication_targets <- function() {
           canonical_pev_scaling_file,
           canonical_pev_scores_file,
           canonical_climate_scaling_file,
-          figure06_predictor_response_atlas_files
+          figure07_predictor_response_atlas_files
         ))
         output_stem <- file.path(
           config$root, "figures", "manuscript",
           "appendix_pev2_pev3_prediction_atlas_526"
         )
-        figure06_data_file <- figure06_predictor_response_atlas_files[
-          grepl("_data[.]csv$", figure06_predictor_response_atlas_files)
+        figure07_data_file <- figure07_predictor_response_atlas_files[
+          grepl("_data[.]csv$", figure07_predictor_response_atlas_files)
         ]
         status <- system2(
           file.path(R.home("bin"), "Rscript"),
@@ -471,7 +541,7 @@ canonical_publication_targets <- function() {
             shQuote(appendix_pev2_pev3_atlas_renderer),
             shQuote(output_stem),
             shQuote(canonical_climate_scaling_file),
-            shQuote(figure06_data_file),
+            shQuote(figure07_data_file),
             shQuote(config$output_dir)
           )
         )
@@ -586,24 +656,24 @@ canonical_publication_targets <- function() {
       format = "file"
     ),
     tar_target(
-      figure03_repeated_species_consistency_pdf,
+      figure02_repeated_species_consistency_pdf,
       plot_signed_consistency(
         descriptive_analysis_data,
         file.path(
           config$root, "figures", "manuscript",
-          "fig03_repeated_species_consistency.pdf"
+          "fig02_repeated_species_consistency.pdf"
         ),
         include_colonizers = FALSE
       ),
       format = "file"
     ),
     tar_target(
-      figure03_repeated_species_consistency_png,
+      figure02_repeated_species_consistency_png,
       plot_signed_consistency(
         descriptive_analysis_data,
         file.path(
           config$root, "figures", "manuscript",
-          "fig03_repeated_species_consistency.png"
+          "fig02_repeated_species_consistency.png"
         ),
         include_colonizers = FALSE
       ),
@@ -636,22 +706,24 @@ canonical_publication_targets <- function() {
       {
         figure01_winners_losers_pdf
         figure01_winners_losers_png
-        figure02_temporal_category_flows_file
-        figure02_temporal_category_flows_png
+        figure02_repeated_species_consistency_pdf
+        figure02_repeated_species_consistency_png
         appendix_temporal_winning_losing_strength_correlations_file
         appendix_temporal_winning_losing_strength_correlations_png
-        figure03_repeated_species_consistency_pdf
-        figure03_repeated_species_consistency_png
+        figure03_temporal_category_flows_file
+        figure03_temporal_category_flows_png
         appendix_destination_climate_warming_gradient_file
         appendix_destination_climate_warming_gradient_png
         appendix_temporal_transition_matrices_file
         appendix_temporal_transition_matrices_png
         figure04_species_minmax_classification_pdf
         figure04_species_minmax_classification_png
-        figure05_predictor_synthesis_pdf
-        figure05_predictor_synthesis_png
-        figure06_predictor_response_atlas_pdf
-        figure06_predictor_response_atlas_png
+        figure05_climate_only_fixed_effect_pdf
+        figure05_climate_only_fixed_effect_png
+        figure06_predictor_synthesis_pdf
+        figure06_predictor_synthesis_png
+        figure07_predictor_response_atlas_pdf
+        figure07_predictor_response_atlas_png
         appendix_family_minmax_pdf
         appendix_family_minmax_png
         appendix_pev2_pev3_atlas_pdf

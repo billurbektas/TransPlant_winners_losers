@@ -39,10 +39,10 @@ climate_scaling_file <- if (length(arguments) >= 2L) {
 } else {
   "output/data/downstream_climate_scaling_526.rds"
 }
-figure06_data_file <- if (length(arguments) >= 3L) {
+figure07_data_file <- if (length(arguments) >= 3L) {
   arguments[[3]]
 } else {
-  "output/data/fig06_predictor_response_atlas_526_data.csv"
+  "output/data/fig07_predictor_response_atlas_526_data.csv"
 }
 output_root <- if (length(arguments) >= 4L) arguments[[4]] else "output"
 
@@ -66,7 +66,7 @@ input_files <- c(
   pev_scaling = "output/tables/PEV1_PEV3_scaling_526.csv",
   pev_scores = "output/data/species_pev_scores_526.csv",
   climate_scaling = climate_scaling_file,
-  figure06_plotting_data = figure06_data_file
+  figure07_plotting_data = figure07_data_file
 )
 missing_inputs <- input_files[!file.exists(input_files)]
 if (length(missing_inputs) > 0L) {
@@ -348,18 +348,18 @@ panel_results <- lapply(seq_len(nrow(level_specs)), function(index) {
 predictions <- dplyr::bind_rows(lapply(panel_results, `[[`, "predictions"))
 observed <- dplyr::bind_rows(lapply(panel_results, `[[`, "observed"))
 
-# Use the exact common colour scale already established for main Figure 6.
-figure06_data <- readr::read_csv(
-  input_files[["figure06_plotting_data"]], show_col_types = FALSE
+# Use the exact common colour scale already established for main Figure 7.
+figure07_data <- readr::read_csv(
+  input_files[["figure07_plotting_data"]], show_col_types = FALSE
 )
-figure06_values <- figure06_data$predicted_delta_auc[
-  figure06_data$row_type == "prediction_grid" &
-    figure06_data$supported %in% TRUE &
-    is.finite(figure06_data$predicted_delta_auc)
+figure07_values <- figure07_data$predicted_delta_auc[
+  figure07_data$row_type == "prediction_grid" &
+    figure07_data$supported %in% TRUE &
+    is.finite(figure07_data$predicted_delta_auc)
 ]
-global_limit <- max(abs(figure06_values))
+global_limit <- max(abs(figure07_values))
 if (!is.finite(global_limit) || global_limit <= 0) {
-  stop("Could not recover Figure 6's common colour limit.", call. = FALSE)
+  stop("Could not recover Figure 7's common colour limit.", call. = FALSE)
 }
 
 predictor_order <- c("PEV2", "PEV3")
@@ -527,7 +527,7 @@ validation <- tibble::tribble(
   "Canonical reconstructed PEVs", all(standardization_checks$n_species == 526L) && all(standardization_checks$maximum_error <= 1e-10), paste(sprintf("%s maximum error %.3g", standardization_checks$PEV, standardization_checks$maximum_error), collapse = "; "),
   "Other PEV axes at reference", reference_axes_zero, "For each varied PEV, the other two standardized PEV coordinates equal zero",
   "Support-mask enforcement", all(is.finite(predictions$predicted_delta_auc[predictions$supported])) && all(is.na(predictions$predicted_delta_auc[!predictions$supported])), "Only cells inside the observed three-dimensional climate-warming hull receive predictions",
-  "Figure 6 colour scale", isTRUE(all.equal(global_limit, max(abs(figure06_values)))), sprintf("shared zero-centred limit +/- %.6f", global_limit),
+  "Figure 7 colour scale", isTRUE(all.equal(global_limit, max(abs(figure07_values)))), sprintf("shared zero-centred limit +/- %.6f", global_limit),
   "Common response sign", TRUE, "Every panel predicts auc_effect: warmed minus origin-control AUC"
 )
 if (any(!validation$pass)) {
@@ -553,7 +553,7 @@ caption <- paste0(
   sprintf("%.2f", warming_raw[[2]]), " degrees C). Points show observed ",
   "experiment climates; coloured areas are restricted to observed ",
   "three-dimensional temperature--precipitation--warming support. The shared ",
-  "zero-centred colour scale is identical to main Figure 6. PEV signs are ",
+  "zero-centred colour scale is identical to main Figure 7. PEV signs are ",
   "coordinate orientations and are not universal biological directions."
 )
 
@@ -595,7 +595,7 @@ invisible(lapply(c(pdf_file, png_file), function(path) {
 
 message("Low/high values used:")
 print(dplyr::bind_rows(pev_quantiles, warming_table), n = Inf)
-message(sprintf("Figure 6 common colour limit retained: +/- %.6f", global_limit))
+message(sprintf("Figure 7 common colour limit retained: +/- %.6f", global_limit))
 message("Wrote: ", pdf_file)
 message("Wrote: ", png_file)
 message("Wrote: ", data_file)

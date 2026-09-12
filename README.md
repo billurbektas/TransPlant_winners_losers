@@ -215,14 +215,22 @@ root `plot/` copies were verified and moved into the appropriate historical
 archive. The retained allowlist and expected hashes are in
 [`config/retained_figures.csv`](config/retained_figures.csv).
 
-Figure 5 summarizes predictor support and residual heterogeneity using only
+Figure 5 displays population-average fixed-effect response surfaces from the
+canonical climate-only 526-species model at low and high warming. Predictions
+are restricted to observed three-dimensional
+temperature–precipitation–warming support, and all experiments are annotated
+with their origin-to-destination elevation change. Its figure-only renderer is
+[`scripts/build_climate_only_fixed_effect_surfaces_526.R`](scripts/build_climate_only_fixed_effect_surfaces_526.R);
+it reads existing canonical exports and never refits the model.
+
+Figure 6 summarizes predictor support and residual heterogeneity using only
 the canonical exported ML fit, nested-comparison, and heterogeneity-synthesis
 tables. Its plotting helpers are in
 [`R/functions/manuscript_predictor_synthesis.R`](R/functions/manuscript_predictor_synthesis.R),
 with a standalone figure-only renderer in
 [`scripts/build_predictor_synthesis_support_and_heterogeneity_526.R`](scripts/build_predictor_synthesis_support_and_heterogeneity_526.R).
 
-Figure 6 displays fixed-effect response surfaces from the six existing
+Figure 7 displays fixed-effect response surfaces from the six existing
 canonical 526-species predictor models. Predictions are restricted to the
 observed three-dimensional temperature–precipitation–warming support, with
 separate support masks for woody and non-woody species. Its figure-only

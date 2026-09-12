@@ -143,18 +143,24 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/fig04_species_minmax_classification_526[.]png$", path)) {
     script <- "R/functions/figures.R"
     target <- "figure04_species_minmax_classification_png"
-  } else if (grepl("^figures/manuscript/fig05_predictor_synthesis_support_and_heterogeneity_526[.]pdf$", path)) {
+  } else if (grepl("^figures/manuscript/fig05_climate_only_fixed_effect_prediction_surfaces_526[.]pdf$", path)) {
+    script <- "scripts/build_climate_only_fixed_effect_surfaces_526.R"
+    target <- "figure05_climate_only_fixed_effect_pdf"
+  } else if (grepl("^figures/manuscript/fig05_climate_only_fixed_effect_prediction_surfaces_526[.]png$", path)) {
+    script <- "scripts/build_climate_only_fixed_effect_surfaces_526.R"
+    target <- "figure05_climate_only_fixed_effect_png"
+  } else if (grepl("^figures/manuscript/fig06_predictor_synthesis_support_and_heterogeneity_526[.]pdf$", path)) {
     script <- "R/functions/manuscript_predictor_synthesis.R"
-    target <- "figure05_predictor_synthesis_pdf"
-  } else if (grepl("^figures/manuscript/fig05_predictor_synthesis_support_and_heterogeneity_526[.]png$", path)) {
+    target <- "figure06_predictor_synthesis_pdf"
+  } else if (grepl("^figures/manuscript/fig06_predictor_synthesis_support_and_heterogeneity_526[.]png$", path)) {
     script <- "R/functions/manuscript_predictor_synthesis.R"
-    target <- "figure05_predictor_synthesis_png"
-  } else if (grepl("^figures/manuscript/fig06_predictor_response_atlas_526[.]pdf$", path)) {
+    target <- "figure06_predictor_synthesis_png"
+  } else if (grepl("^figures/manuscript/fig07_predictor_response_atlas_526[.]pdf$", path)) {
     script <- "scripts/build_predictor_response_atlas_526.R"
-    target <- "figure06_predictor_response_atlas_pdf"
-  } else if (grepl("^figures/manuscript/fig06_predictor_response_atlas_526[.]png$", path)) {
+    target <- "figure07_predictor_response_atlas_pdf"
+  } else if (grepl("^figures/manuscript/fig07_predictor_response_atlas_526[.]png$", path)) {
     script <- "scripts/build_predictor_response_atlas_526.R"
-    target <- "figure06_predictor_response_atlas_png"
+    target <- "figure07_predictor_response_atlas_png"
   } else if (grepl("^figures/manuscript/appendix_family_minmax_classification_526[.]pdf$", path)) {
     script <- "scripts/build_appendix_family_minmax_classification_526.R"
     target <- "appendix_family_minmax_pdf"
@@ -182,24 +188,24 @@ known_figure_producer <- function(path) {
   } else if (grepl("^figures/manuscript/fig01_winners_losers[.]png$", path)) {
     script <- "R/functions/manuscript_winners_losers.R"
     target <- "figure01_winners_losers_png"
-  } else if (grepl("^figures/manuscript/fig02_temporal_category_flows[.]pdf$", path)) {
-    script <- "R/functions/temporal_figures.R"
-    target <- "figure02_temporal_category_flows_file"
-  } else if (grepl("^figures/manuscript/fig02_temporal_category_flows[.]png$", path)) {
-    script <- "R/functions/temporal_figures.R"
-    target <- "figure02_temporal_category_flows_png"
+  } else if (grepl("^figures/manuscript/fig02_repeated_species_consistency[.]pdf$", path)) {
+    script <- "R/functions/consistency_figures.R"
+    target <- "figure02_repeated_species_consistency_pdf"
+  } else if (grepl("^figures/manuscript/fig02_repeated_species_consistency[.]png$", path)) {
+    script <- "R/functions/consistency_figures.R"
+    target <- "figure02_repeated_species_consistency_png"
   } else if (grepl("^figures/manuscript/appendix_temporal_winning_losing_strength_correlations[.]pdf$", path)) {
     script <- "R/functions/temporal_figures.R"
     target <- "appendix_temporal_winning_losing_strength_correlations_file"
   } else if (grepl("^figures/manuscript/appendix_temporal_winning_losing_strength_correlations[.]png$", path)) {
     script <- "R/functions/temporal_figures.R"
     target <- "appendix_temporal_winning_losing_strength_correlations_png"
-  } else if (grepl("^figures/manuscript/fig03_repeated_species_consistency[.]pdf$", path)) {
-    script <- "R/functions/consistency_figures.R"
-    target <- "figure03_repeated_species_consistency_pdf"
-  } else if (grepl("^figures/manuscript/fig03_repeated_species_consistency[.]png$", path)) {
-    script <- "R/functions/consistency_figures.R"
-    target <- "figure03_repeated_species_consistency_png"
+  } else if (grepl("^figures/manuscript/fig03_temporal_category_flows[.]pdf$", path)) {
+    script <- "R/functions/temporal_figures.R"
+    target <- "figure03_temporal_category_flows_file"
+  } else if (grepl("^figures/manuscript/fig03_temporal_category_flows[.]png$", path)) {
+    script <- "R/functions/temporal_figures.R"
+    target <- "figure03_temporal_category_flows_png"
   } else if (grepl("^figures/manuscript/appendix_destination_climate_warming_gradient[.]pdf$", path)) {
     script <- "R/functions/climate_display_figure.R"
     target <- "appendix_destination_climate_warming_gradient_file"
@@ -221,11 +227,12 @@ default_figure_status <- function(path) {
   if (grepl(
     paste0(
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
-      "fig02_temporal_category_flows[.](pdf|png)|",
-      "fig03_repeated_species_consistency[.](pdf|png)|",
+      "fig02_repeated_species_consistency[.](pdf|png)|",
+      "fig03_temporal_category_flows[.](pdf|png)|",
       "fig04_species_minmax_classification_526[.](pdf|png)|",
-      "fig05_predictor_synthesis_support_and_heterogeneity_526[.](pdf|png)|",
-      "fig06_predictor_response_atlas_526[.](pdf|png)|",
+      "fig05_climate_only_fixed_effect_prediction_surfaces_526[.](pdf|png)|",
+      "fig06_predictor_synthesis_support_and_heterogeneity_526[.](pdf|png)|",
+      "fig07_predictor_response_atlas_526[.](pdf|png)|",
       "appendix_family_minmax_classification_526[.](pdf|png)|",
       "appendix_pev2_pev3_prediction_atlas_526[.](pdf|png)|",
       "appendix_phylogeny_pcoa_summary_526[.](pdf|png)|",
@@ -253,11 +260,12 @@ figure_analysis_generation <- function(path) {
   if (grepl(
     paste0(
       "^figures/manuscript/(fig01_winners_losers[.](pdf|png)|",
-      "fig02_temporal_category_flows[.](pdf|png)|",
-      "fig03_repeated_species_consistency[.](pdf|png)|",
+      "fig02_repeated_species_consistency[.](pdf|png)|",
+      "fig03_temporal_category_flows[.](pdf|png)|",
       "fig04_species_minmax_classification_526[.](pdf|png)|",
-      "fig05_predictor_synthesis_support_and_heterogeneity_526[.](pdf|png)|",
-      "fig06_predictor_response_atlas_526[.](pdf|png)|",
+      "fig05_climate_only_fixed_effect_prediction_surfaces_526[.](pdf|png)|",
+      "fig06_predictor_synthesis_support_and_heterogeneity_526[.](pdf|png)|",
+      "fig07_predictor_response_atlas_526[.](pdf|png)|",
       "appendix_family_minmax_classification_526[.](pdf|png)|",
       "appendix_pev2_pev3_prediction_atlas_526[.](pdf|png)|",
       "appendix_phylogeny_pcoa_summary_526[.](pdf|png)|",

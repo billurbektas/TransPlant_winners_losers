@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Standalone Figure 5 renderer. This reads canonical exported summary tables
+# Standalone Figure 6 renderer. This reads canonical exported summary tables
 # only; it does not invoke targets, load model objects, or refit models.
 
 required_packages <- c("dplyr", "ggplot2", "patchwork", "readr", "tidyr")

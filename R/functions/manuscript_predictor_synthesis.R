@@ -1,4 +1,4 @@
-# Figure 5: predictor model support and residual heterogeneity synthesis.
+# Figure 6: predictor model support and residual heterogeneity synthesis.
 #
 # These helpers read canonical exported summary tables only. They do not load
 # model objects, refit models, or recompute upstream scientific results.
@@ -205,7 +205,7 @@ build_predictor_synthesis_figure_526 <- function(plot_data) {
       "predictor", "delta_AIC_full_minus_additive", "lrt_p_value",
       heterogeneity_columns
     ),
-    "Figure 5 plotting data"
+    "Figure 6 plotting data"
   )
 
   support_plot_data <- plot_data |>

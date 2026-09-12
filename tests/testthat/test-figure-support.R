@@ -59,16 +59,18 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "compare_rel.abund_vs.sqrt.rel.abund.pdf",
     "appendix_destination_climate_warming_gradient.pdf",
     "appendix_destination_climate_warming_gradient.png",
-    "fig02_temporal_category_flows.pdf",
-    "fig02_temporal_category_flows.png",
-    "fig03_repeated_species_consistency.pdf",
-    "fig03_repeated_species_consistency.png",
+    "fig02_repeated_species_consistency.pdf",
+    "fig02_repeated_species_consistency.png",
+    "fig03_temporal_category_flows.pdf",
+    "fig03_temporal_category_flows.png",
     "fig04_species_minmax_classification_526.pdf",
     "fig04_species_minmax_classification_526.png",
-    "fig05_predictor_synthesis_support_and_heterogeneity_526.pdf",
-    "fig05_predictor_synthesis_support_and_heterogeneity_526.png",
-    "fig06_predictor_response_atlas_526.pdf",
-    "fig06_predictor_response_atlas_526.png",
+    "fig05_climate_only_fixed_effect_prediction_surfaces_526.pdf",
+    "fig05_climate_only_fixed_effect_prediction_surfaces_526.png",
+    "fig06_predictor_synthesis_support_and_heterogeneity_526.pdf",
+    "fig06_predictor_synthesis_support_and_heterogeneity_526.png",
+    "fig07_predictor_response_atlas_526.pdf",
+    "fig07_predictor_response_atlas_526.png",
     "appendix_family_minmax_classification_526.pdf",
     "appendix_family_minmax_classification_526.png",
     "appendix_pev2_pev3_prediction_atlas_526.pdf",
@@ -117,7 +119,23 @@ test_that("Figure 4 uses enlarged typography and manuscript labels", {
   expect_match(body_text, "Fitted winning/losing strength", fixed = TRUE)
 })
 
-test_that("Figure 6 renderer is figure-only and support-masked", {
+test_that("Figure 5 climate-only renderer is fixed-effect-only and support-masked", {
+  renderer <- readLines(
+    project_path(
+      "scripts", "build_climate_only_fixed_effect_surfaces_526.R"
+    ),
+    warn = FALSE
+  )
+  renderer_text <- paste(renderer, collapse = "\n")
+  expect_false(grepl("targets::tar_make(", renderer_text, fixed = TRUE))
+  expect_false(grepl("rma.mv(", renderer_text, fixed = TRUE))
+  expect_match(renderer_text, "Fixed-effect predictions", fixed = TRUE)
+  expect_match(renderer_text, "Canonical elevation labels", fixed = TRUE)
+  expect_match(renderer_text, "Support-mask enforcement", fixed = TRUE)
+  expect_match(renderer_text, "All experiments annotated", fixed = TRUE)
+})
+
+test_that("Figure 7 renderer is figure-only and support-masked", {
   renderer <- readLines(
     project_path("scripts", "build_predictor_response_atlas_526.R"),
     warn = FALSE
