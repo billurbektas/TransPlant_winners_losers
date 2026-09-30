@@ -269,7 +269,7 @@ list(
   tar_target(
     climate_context_experiments_file,
     write_csv_atomic(
-      climate_context_experiments,
+      climate_context_result$assigned,
       file.path(config$output_dir, "tables", "climate_context_experiments.csv")
     ),
     format = "file"

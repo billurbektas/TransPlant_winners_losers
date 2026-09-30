@@ -13,7 +13,7 @@ publication_target_definitions <- function() {
       figure01_festuca_data,
       prepare_figure01_festuca_data(
         winner_loser,
-        species_classification,
+        species_context_bundle$classification,
         auc_inputs$auc,
         analysis_community,
         experiments
@@ -204,8 +204,8 @@ publication_target_definitions <- function() {
       species_context_figure,
       build_species_context_callout_figure(
         resident_climate_model$fit,
-        resident_model_data,
-        species_classification,
+        resident_auc_data,
+        species_context_bundle$classification,
         species_context_bundle$random_coefficients,
         resident_climate_scaling,
         species_callout_examples,
@@ -906,8 +906,8 @@ publication_target_definitions <- function() {
         species_classification_summary,
         family_classification_summary,
         trait_scaling,
-        predictor_model_comparisons,
-        heterogeneity_synthesis,
+        predictor_model_tables$comparisons,
+        heterogeneity_bundle$synthesis,
         current_scientific_release_validation
       )
     ),

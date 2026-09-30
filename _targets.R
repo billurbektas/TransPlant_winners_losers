@@ -30,13 +30,7 @@ tar_option_set(
 
 c(
   tarchetypes::tar_tangle("analysis_workflow.qmd"),
-  source_targets(),
-  community_targets(),
-  covariate_targets(),
-  response_targets(),
-  resident_model_targets(),
-  predictor_model_targets(),
-  evaluation_targets(),
-  publication_targets(),
-  release_targets()
+  data_target_definitions(),
+  model_target_definitions(),
+  publication_target_definitions()
 )

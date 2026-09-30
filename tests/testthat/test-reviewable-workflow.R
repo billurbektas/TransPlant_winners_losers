@@ -70,6 +70,40 @@ testthat::test_that("the manifest contains the review workflow and no history", 
   ))
 })
 
+testthat::test_that("regrouped results keep their separate scientific exports", {
+  previous_directory <- setwd(PROJECT_ROOT)
+  on.exit(setwd(previous_directory), add = TRUE)
+  manifest <- targets::tar_manifest(callr_function = NULL)
+  removed_projections <- c(
+    "resident_model_data", "climate_scaling", "species_classification",
+    "family_auc_data", "family_sampling_variance_matrix",
+    "predictor_model_fit", "predictor_model_comparisons", "predictor_CR1",
+    "heterogeneity_components", "heterogeneity_synthesis",
+    "climate_context_experiments", "family_random_coefficients",
+    "resident_phylogeny_candidate", "phylogenetic_distance",
+    "pcoa_eigen_summary", "pev_scaling"
+  )
+  testthat::expect_false(any(removed_projections %in% manifest$name))
+  retained_exports <- c(
+    "resident_data_file", "species_classification_file",
+    "family_data_file", "family_sampling_variance_file",
+    "predictor_fit_file", "predictor_comparison_file", "predictor_CR1_file",
+    "heterogeneity_components_file", "heterogeneity_synthesis_file",
+    "climate_context_experiments_file", "family_random_file",
+    "phylogeny_file", "phylogeny_newick_file",
+    "phylogenetic_distance_file", "pcoa_eigen_file", "pev_scaling_file"
+  )
+  testthat::expect_true(all(retained_exports %in% manifest$name))
+  testthat::expect_match(
+    manifest$command[match("family_sampling_variance_file", manifest$name)],
+    "family_auc_bundle$sampling_variance_matrix", fixed = TRUE
+  )
+  testthat::expect_match(
+    manifest$command[match("predictor_comparison_file", manifest$name)],
+    "predictor_model_tables$comparisons", fixed = TRUE
+  )
+})
+
 testthat::test_that("model specifications are literal in the review document", {
   text <- paste(
     readLines(project_path("analysis_workflow.qmd"), warn = FALSE),
@@ -155,6 +189,7 @@ testthat::test_that("migration map gives every historical path one disposition",
   replacement_targets <- sub(
     " .*", "", sub("^target:", "", nonretired_targets$new_component)
   )
+  replacement_targets <- sub("\\$.*", "", replacement_targets)
   testthat::expect_true(all(replacement_targets %in% target_names))
 
   nonretired_files <- migration[
@@ -165,7 +200,7 @@ testthat::test_that("migration map gives every historical path one disposition",
     nonretired_files$new_component,
     function(replacement) {
       if (startsWith(replacement, "target:")) {
-        target <- sub(" .*", "", sub("^target:", "", replacement))
+        target <- sub("\\$.*", "", sub(" .*", "", sub("^target:", "", replacement)))
         return(target %in% target_names)
       }
       path <- sub(" (plus|/) .*", "", replacement)
@@ -192,7 +227,8 @@ testthat::test_that("migration map gives every historical path one disposition",
   testthat::expect_true(all(function_replacements_resolve))
 
   factory_targets <- vapply(
-    pipeline_target_definitions(),
+    c(data_target_definitions(), model_target_definitions(),
+      publication_target_definitions()),
     function(target) target$name,
     character(1)
   )

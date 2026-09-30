@@ -110,8 +110,12 @@ testthat::test_that("model-effect targets keep profiling separate from primary f
   testthat::expect_match(
     target_text, "pattern = map(model_random_profile_job)", fixed = TRUE
   )
+  publication_text <- paste(
+    readLines(project_path("R", "targets", "definitions", "publication.R")),
+    collapse = "\n"
+  )
   testthat::expect_match(
-    target_text, "model_effects = model_effects_release_validation",
+    publication_text, "model_effects = model_effects_release_validation",
     fixed = TRUE
   )
 })

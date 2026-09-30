@@ -544,11 +544,6 @@ analysis_data <- join_experiment_climate(
 climate_context_result <- reviewed_five_climate_contexts(analysis_data)
 ```
 
-```{r}
-#| description: Reviewed assignment of experiments to the five descriptive climate contexts.
-climate_context_experiments <- climate_context_result$assigned
-```
-
 This compact audit makes the main changes in data size visible without making
 every filter or join a separate target.
 
@@ -732,11 +727,6 @@ resident_sampling_variance_check <- validate_sampling_variance_matrix(
 ```
 
 ```{r}
-#| description: Resident data supplied to all species-level meta-regressions.
-resident_model_data <- resident_auc_data
-```
-
-```{r}
 #| description: Fixed sample-size and completeness checks for the resident modeling cohort.
 analysis_settings <- resident_analysis_spec(config$root)
 ```
@@ -830,7 +820,7 @@ robust_uses_club_sandwich <- FALSE
 ```{r}
 #| description: Resident climate model fitted by ML only for later nested model comparisons.
 resident_climate_model_ML <- fit_meta_regression(
-  data = resident_model_data,
+  data = resident_auc_data,
   sampling_variance_matrix = resident_sampling_variance_matrix,
   formula = resident_climate_formula,
   method = "ML",
@@ -844,7 +834,7 @@ resident_climate_model_ML <- fit_meta_regression(
 ```{r}
 #| description: Final resident climate meta-regression fitted by REML with the explicit species random structure.
 resident_climate_model <- fit_meta_regression(
-  data = resident_model_data,
+  data = resident_auc_data,
   sampling_variance_matrix = resident_sampling_variance_matrix,
   formula = resident_climate_formula,
   method = "REML",
@@ -880,22 +870,22 @@ otherwise. The class uses fitted extrema, not p-values or confidence intervals.
 #| description: Species predictions over each eligible species observed climate range and fitted-extrema classification.
 species_context_bundle <- build_species_context_bundle(
   resident_climate_model,
-  resident_model_data,
+  resident_auc_data,
   resident_climate_formula
 )
 ```
 
 ```{r}
-#| description: Species classifications as consistent winner, consistent loser, or context dependent.
-species_classification <- species_context_bundle$classification
+#| description: Counts and proportions of the three species context classes.
+species_classification_summary <- summarize_context_classification(
+  species_context_bundle$classification,
+  "Species"
+)
 ```
 
 ```{r}
-#| description: Counts and proportions of the three species context classes.
-species_classification_summary <- summarize_context_classification(
-  species_classification,
-  "Species"
-)
+#| eval: true
+knitr::kable(tar_read(species_classification_summary))
 ```
 
 ## Family reconstruction and model
@@ -944,18 +934,8 @@ family_plot_auc_bundle <- build_family_plot_auc(
 family_auc_bundle <- build_family_auc_effects(
   family_plot_auc_bundle$plot_auc,
   family_resident_membership,
-  resident_model_data
+  resident_auc_data
 )
-```
-
-```{r}
-#| description: Family effect table used by the family meta-regression.
-family_auc_data <- family_auc_bundle$data
-```
-
-```{r}
-#| description: Diagonal family sampling-variance matrix with family_auc_se squared in effect order.
-family_sampling_variance_matrix <- family_auc_bundle$sampling_variance_matrix
 ```
 
 ```{r}
@@ -987,6 +967,19 @@ family_model_bundle <- fit_family_aggregated_model(
 ```{r}
 #| description: Family fixed effects, random variation, convergence, and classification summary.
 family_model_summary <- summarize_family_model(family_model_bundle)
+```
+
+The family contrast result keeps the effect rows and their sampling variances
+together. The first rows and matrix dimensions can be checked after rebuilding:
+
+```{r}
+#| eval: true
+knitr::kable(utils::head(tar_read(family_auc_bundle)$data))
+```
+
+```{r}
+#| eval: true
+print(dim(tar_read(family_auc_bundle)$sampling_variance_matrix))
 ```
 
 ## Trait, functional-group, and phylogenetic models
@@ -1090,28 +1083,23 @@ phylogeny_placement_decisions <- read_pipeline_csv(
 #| description: Resident-species phylogeny reconstructed from the pinned backbone and reviewed placements.
 resident_phylogeny_rebuild <- build_phylogeny_from_placement_decisions(
   phylogeny_placement_decisions,
-  resident_model_data$species_id
+  resident_auc_data$species_id
 )
-```
-
-```{r}
-#| description: Reconstructed resident phylogeny supplied to distance and PCoA calculations.
-resident_phylogeny_candidate <- resident_phylogeny_rebuild$tree
 ```
 
 ```{r}
 #| description: Exact resident-species tip order used for phylogenetic distances and PCoA.
 phylogeny_species_order <- build_phylogeny_species_order(
-  resident_phylogeny_candidate,
+  resident_phylogeny_rebuild$tree,
   phylogeny_placement_decisions,
-  resident_model_data$species_id
+  resident_auc_data$species_id
 )
 ```
 
 ```{r}
 #| description: Patristic-distance PCoA for the retained resident species in fixed tip order.
 resident_pcoa_candidate <- recompute_phylogenetic_pcoa(
-  resident_phylogeny_candidate,
+  resident_phylogeny_rebuild$tree,
   metadata = NULL,
   tip_order = phylogeny_species_order$species_id
 )
@@ -1129,11 +1117,6 @@ standardized_pev_species <- standardize_unique_species_predictors(
   resident_pev_scores_oriented,
   c("PEV1", "PEV2", "PEV3")
 )
-```
-
-```{r}
-#| description: Phylogenetic-axis scaling values calculated across unique species.
-pev_scaling <- standardized_pev_species$scaling
 ```
 
 ```{r}
@@ -1399,21 +1382,6 @@ predictor_model_tables <- assemble_predictor_model_tables(
 )
 ```
 
-```{r}
-#| description: ML fit statistics for climate-only and full predictor models.
-predictor_model_fit <- predictor_model_tables$fit_statistics
-```
-
-```{r}
-#| description: Direct climate-only versus full ML likelihood-ratio comparisons for all six predictors.
-predictor_model_comparisons <- predictor_model_tables$comparisons
-```
-
-```{r}
-#| description: Experiment-clustered CR1 coefficient inference for each final full REML predictor model.
-predictor_CR1 <- predictor_model_tables$CR1
-```
-
 This compact table is generated from the literal objects above; it is not a
 second specification system.
 
@@ -1442,7 +1410,12 @@ knitr::kable(tar_read(model_specification_table))
 
 ```{r}
 #| eval: true
-knitr::kable(tar_read(predictor_model_comparisons))
+knitr::kable(tar_read(predictor_model_tables)$fit_statistics)
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(predictor_model_tables)$comparisons)
 ```
 
 # Inference and diagnostics
@@ -1469,16 +1442,6 @@ heterogeneity_bundle <- assemble_heterogeneity_synthesis(
   woodiness_model_pair,
   phylogeny_model_pair
 )
-```
-
-```{r}
-#| description: Climate-only and full response-scale heterogeneity components.
-heterogeneity_components <- heterogeneity_bundle$components
-```
-
-```{r}
-#| description: Percent change in matched random-effect heterogeneity components after adding each predictor.
-heterogeneity_synthesis <- heterogeneity_bundle$synthesis
 ```
 
 ## Appendix Figure S7: model R2 and leave-gradient-out RMSE
@@ -1605,7 +1568,12 @@ model_performance_release_validation <- {
 
 ```{r}
 #| eval: true
-knitr::kable(tar_read(heterogeneity_synthesis))
+knitr::kable(tar_read(heterogeneity_bundle)$components)
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(heterogeneity_bundle)$synthesis)
 ```
 
 ```{r}
@@ -1668,31 +1636,26 @@ knitr::kable(
 
 ## Scientific dependency spine
 
+This compact view follows one connected route from the original data to the
+release check. Graminoid status is shown as one example of the six predictor
+fits; all six formulas and fitting calls are displayed above.
+
 ```{r}
 #| eval: true
 tar_glimpse(
   targets_only = TRUE,
   names = c(
     "current_input", "community", "analysis_community", "auc_inputs",
-    "winner_loser", "descriptive_analysis_data", "analysis_data",
-    "climate_context_result", "climate_context_experiments",
+    "auc_contrasts", "winner_loser", "descriptive_analysis_data",
+    "analysis_data", "analysis_data_file", "resident_analysis_dataset",
     "resident_auc_unscaled", "resident_scaled", "resident_auc_data",
-    "resident_sampling_variance_matrix", "resident_climate_model",
-    "species_context_bundle", "species_classification",
-    "family_resident_membership", "family_plot_auc_bundle",
-    "family_auc_bundle", "family_model_bundle", "ldmc_model_pair",
-    "lma_model_pair", "height_model_pair", "graminoid_model_pair",
-    "woodiness_model_pair", "phylogeny_model_pair",
-    "predictor_model_tables", "predictor_model_comparisons",
-    "heterogeneity_bundle", "heterogeneity_synthesis", "model_fit_r2",
-    "model_performance_fold", "model_performance_cv",
-    "model_cross_validation_metrics", "current_scientific_release_validation",
-    "model_performance_release_validation", "model_effects_release_validation",
-    "retained_figure_validation", "release_validation"
+    "resident_climate_model", "graminoid_model_pair",
+    "heterogeneity_bundle", "current_scientific_release_validation",
+    "release_validation"
   ),
   shortcut = TRUE,
-  degree_from = 2L,
-  degree_to = 2L
+  degree_from = 0L,
+  degree_to = 0L
 )
 ```
 
@@ -1703,45 +1666,41 @@ tar_glimpse(
 tar_visnetwork(
   targets_only = TRUE,
   names = c(
-    "current_input", "community", "sites", "experiments",
-    "analysis_community", "analysis_data", "auc_inputs", "winner_loser",
-    "resident_auc_data", "resident_sampling_variance_matrix"
+    "current_input", "community", "analysis_community", "auc_inputs",
+    "auc_contrasts", "winner_loser", "descriptive_analysis_data",
+    "analysis_data", "analysis_data_file", "resident_analysis_dataset",
+    "resident_auc_unscaled", "resident_scaled", "resident_auc_data",
+    "resident_sampling_variance_matrix"
   ),
   shortcut = TRUE,
   outdated = FALSE,
-  degree_from = 2L,
-  degree_to = 2L
+  degree_from = 0L,
+  degree_to = 0L
 )
 ```
 
-## Responses to figures
+## Resident models to Figure 6 and release
+
+This focused view shows the resident climate, family, one example predictor,
+heterogeneity, and Figure 6 branches. The full workflow has analogous branches
+for the other five predictors and for all other figures.
 
 ```{r}
 #| eval: true
 tar_visnetwork(
   targets_only = TRUE,
   names = c(
-    "resident_auc_data", "resident_sampling_variance_matrix",
-    "resident_climate_model", "species_context_bundle",
-    "species_classification", "family_auc_bundle", "family_model_bundle",
-    "ldmc_model_pair", "lma_model_pair", "height_model_pair",
-    "graminoid_model_pair", "woodiness_model_pair", "phylogeny_model_pair",
-    "predictor_model_tables", "predictor_model_comparisons",
-    "predictor_fit_file", "predictor_comparison_file",
-    "heterogeneity_bundle", "heterogeneity_synthesis",
+    "resident_auc_data", "resident_climate_model", "species_context_bundle",
+    "family_auc_bundle", "family_model_bundle", "family_model_summary",
+    "graminoid_model_pair", "heterogeneity_bundle",
     "heterogeneity_synthesis_file", "figure06_predictor_synthesis_data",
-    "figure06_predictor_synthesis", "model_fit_r2",
-    "model_performance_fold", "model_performance_cv",
-    "model_cross_validation_metrics", "model_performance_validation",
-    "model_performance_release_validation",
-    "appendix_model_predictive_performance",
-    "current_scientific_release_validation", "model_effects_release_validation",
-    "retained_figure_validation", "release_validation"
+    "figure06_predictor_synthesis", "current_scientific_release_validation",
+    "release_validation"
   ),
   shortcut = TRUE,
   outdated = FALSE,
-  degree_from = 2L,
-  degree_to = 2L
+  degree_from = 0L,
+  degree_to = 0L
 )
 ```
 

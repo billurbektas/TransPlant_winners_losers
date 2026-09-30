@@ -3,7 +3,8 @@
 Open [`analysis_workflow.qmd`](analysis_workflow.qmd) first to review the
 analysis in scientific order. Its top-level analytical assignments become
 targets through `tarchetypes::tar_tangle()`. `_targets.R` sources supporting
-functions and combines those QMD targets with temporary supporting/file targets.
+functions and combines those QMD targets with three direct groups of supporting
+targets for data, models, and publication files.
 
 This guide describes execution, naming, failure behavior, and the historical
 retirement record.
@@ -57,9 +58,9 @@ from the active workflow. Generated results remain until the clean rebuild.
 | 5 | Inference and diagnostics | [Inference and diagnostics](analysis_workflow.qmd#inference-and-diagnostics) | tangled QMD targets plus repeated-fit support | classifications, heterogeneity, `model_fit_r2`, cross-validation | heterogeneity and the four Appendix Figure S7 measures | evaluation validations |
 | 6 | Figures, tables, and release | [Figures and tables](analysis_workflow.qmd#figures-and-tables) | supporting publication/release targets | registered figures, tables, `release_validation` | PDF/PNG, CSV/RDS, HTML, provenance | figure and current-release checks |
 
-The temporary split between QMD-owned targets and supporting targets is
-implemented in [`R/targets/stages.R`](R/targets/stages.R). The support targets
-are being regrouped by scientific step; dispositions are recorded in
+The QMD holds the central calculations. Supporting targets are listed directly
+in `R/targets/definitions/` rather than routed by target-name patterns.
+Each removed one-hop target is recorded in
 [`docs/workflow_migration_map.csv`](docs/workflow_migration_map.csv).
 
 ## Code layout
@@ -73,7 +74,7 @@ R/
   evaluation/       heterogeneity, cross-validation, diagnostics
   figures/          shared styles, figure builders, export renderers
   validation/       current resident-cohort and release checks
-  targets/          stage registry and target definitions
+  targets/          supporting data, model, and publication target definitions
 ```
 
 Every active R module starts with its responsibility, inputs, outputs, and

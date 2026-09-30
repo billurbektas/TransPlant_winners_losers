@@ -43,7 +43,7 @@ model_target_definitions <- function() {
 
     tar_target(
       species_callout_examples,
-      select_species_callout_examples(species_classification)
+      select_species_callout_examples(species_context_bundle$classification)
     ),
     tar_target(
       species_callout_examples_file,
@@ -67,10 +67,6 @@ model_target_definitions <- function() {
       extract_family_random_coefficients(family_model_bundle, family_support)
     ),
     tar_target(
-      family_random_coefficients,
-      family_random_bundle$coefficients
-    ),
-    tar_target(
       family_classification,
       classify_family_context(
         family_model_bundle, family_support,
@@ -84,8 +80,8 @@ model_target_definitions <- function() {
     tar_target(
       family_bundle_validation,
       validate_family_bundle(
-        family_auc_data,
-        family_sampling_variance_matrix,
+        family_auc_bundle$data,
+        family_auc_bundle$sampling_variance_matrix,
         family_classification,
         family_model_summary
       )
@@ -93,7 +89,7 @@ model_target_definitions <- function() {
     tar_target(
       species_family_resolution_comparison,
       compare_classification_resolutions(
-        species_classification, family_classification
+        species_context_bundle$classification, family_classification
       )
     ),
 
@@ -105,7 +101,6 @@ model_target_definitions <- function() {
         vegetative_height = prepared_height
       )
     ),
-    tar_target(climate_scaling, resident_climate_scaling),
     tar_target(
       functional_source_coverage_audit,
       audit_functional_source_coverage(
@@ -153,7 +148,7 @@ model_target_definitions <- function() {
       model_fixed_effects,
       assemble_model_fixed_effects(
         resident_climate_model_results$CR1,
-        predictor_CR1,
+        predictor_model_tables$CR1,
         model_fit_r2
       )
     ),
@@ -303,18 +298,13 @@ model_target_definitions <- function() {
         dplyr::select("species_id", "PEV1", "PEV2", "PEV3")
     ),
     tar_target(
-      pcoa_eigen_summary,
-      resident_pcoa_candidate$eigen_summary
-    ),
-    tar_target(
       phylogenetic_positive_variation_PEV1_PEV3,
-      validated_phylogenetic_variation(pcoa_eigen_summary)
+      validated_phylogenetic_variation(resident_pcoa_candidate$eigen_summary)
     ),
-    tar_target(phylogenetic_distance, resident_pcoa_candidate$distance),
     tar_target(
       zero_distance_audit,
       build_zero_distance_audit(
-        phylogenetic_distance,
+        resident_pcoa_candidate$distance,
         phylogeny_placement_decisions
       )
     ),
@@ -354,8 +344,8 @@ model_target_definitions <- function() {
         family_model_summary,
         resident_phylogeny_rebuild$audit,
         zero_distance_audit,
-        heterogeneity_components,
-        heterogeneity_synthesis
+        heterogeneity_bundle$components,
+        heterogeneity_bundle$synthesis
       ),
       description = paste(
         "Current cohort model family phylogeny predictor and heterogeneity",
@@ -451,7 +441,7 @@ model_target_definitions <- function() {
     tar_target(
       species_classification_file,
       write_csv_atomic(
-        species_classification,
+        species_context_bundle$classification,
         file.path(
           analysis_settings$output$tables,
           "species_context_classification.csv"
@@ -462,7 +452,7 @@ model_target_definitions <- function() {
     tar_target(
       family_data_file,
       write_csv_atomic(
-        family_auc_data,
+        family_auc_bundle$data,
         file.path(
           analysis_settings$output$data,
           "family_auc_data.csv"
@@ -473,7 +463,7 @@ model_target_definitions <- function() {
     tar_target(
       family_sampling_variance_file,
       write_rds_atomic(
-        family_sampling_variance_matrix,
+        family_auc_bundle$sampling_variance_matrix,
         file.path(
           analysis_settings$output$data,
           "family_sampling_variance_matrix.rds"
@@ -506,7 +496,7 @@ model_target_definitions <- function() {
     tar_target(
       family_random_file,
       write_csv_atomic(
-        family_random_coefficients,
+        family_random_bundle$coefficients,
         file.path(
           analysis_settings$output$tables,
           "family_random_coefficients.csv"
@@ -594,7 +584,7 @@ model_target_definitions <- function() {
     tar_target(
       pev_scaling_file,
       write_csv_atomic(
-        pev_scaling,
+        standardized_pev_species$scaling,
         file.path(
           analysis_settings$output$tables,
           "phylogeny_predictor_scaling.csv"
@@ -605,7 +595,7 @@ model_target_definitions <- function() {
     tar_target(
       phylogeny_file,
       write_rds_atomic(
-        resident_phylogeny_candidate,
+        resident_phylogeny_rebuild$tree,
         file.path(
           analysis_settings$output$models,
           "phylogeny_tree.rds"
@@ -616,7 +606,7 @@ model_target_definitions <- function() {
     tar_target(
       phylogeny_newick_file,
       write_text_atomic(
-        ape::write.tree(resident_phylogeny_candidate),
+        ape::write.tree(resident_phylogeny_rebuild$tree),
         file.path(
           analysis_settings$output$models,
           "phylogeny_tree.newick"
@@ -627,7 +617,7 @@ model_target_definitions <- function() {
     tar_target(
       phylogenetic_distance_file,
       write_rds_atomic(
-        phylogenetic_distance,
+        resident_pcoa_candidate$distance,
         file.path(
           analysis_settings$output$data,
           "phylogeny_distances.rds"
@@ -715,7 +705,7 @@ model_target_definitions <- function() {
     tar_target(
       pcoa_eigen_file,
       write_csv_atomic(
-        pcoa_eigen_summary,
+        resident_pcoa_candidate$eigen_summary,
         file.path(
           analysis_settings$output$tables,
           "pcoa_eigenvalue_summary.csv"
@@ -726,7 +716,7 @@ model_target_definitions <- function() {
     tar_target(
       predictor_fit_file,
       write_csv_atomic(
-        predictor_model_fit,
+        predictor_model_tables$fit_statistics,
         file.path(
           analysis_settings$output$tables,
           "predictor_model_fit_statistics.csv"
@@ -737,7 +727,7 @@ model_target_definitions <- function() {
     tar_target(
       predictor_comparison_file,
       write_csv_atomic(
-        predictor_model_comparisons,
+        predictor_model_tables$comparisons,
         file.path(
           analysis_settings$output$tables,
           "predictor_model_comparisons.csv"
@@ -748,7 +738,7 @@ model_target_definitions <- function() {
     tar_target(
       predictor_CR1_file,
       write_csv_atomic(
-        predictor_CR1,
+        predictor_model_tables$CR1,
         file.path(
           analysis_settings$output$tables,
           "predictor_model_robust_inference.csv"
@@ -781,7 +771,7 @@ model_target_definitions <- function() {
     tar_target(
       heterogeneity_components_file,
       write_csv_atomic(
-        heterogeneity_components,
+        heterogeneity_bundle$components,
         file.path(
           analysis_settings$output$tables,
           "heterogeneity_components.csv"
@@ -792,7 +782,7 @@ model_target_definitions <- function() {
     tar_target(
       heterogeneity_synthesis_file,
       write_csv_atomic(
-        heterogeneity_synthesis,
+        heterogeneity_bundle$synthesis,
         file.path(
           analysis_settings$output$tables,
           "heterogeneity_synthesis.csv"
