@@ -6,7 +6,7 @@
 
 # Figure 6: predictor model support and residual heterogeneity synthesis.
 #
-# These helpers read canonical exported summary tables only. They do not load
+# These helpers read exported summary tables only. They do not load
 # model objects, refit models, or recompute upstream scientific results.
 
 #' Predictor Synthesis Key.
@@ -14,13 +14,13 @@
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 predictor_synthesis_key <- function() {
   tibble::tribble(
-    ~source_predictor,                   ~predictor,          ~full_model,
-    "LDMC",                              "LDMC",              "M2",
-    "LMA",                               "LMA",               "M2",
-    "Height",                            "Vegetative height", "M2",
-    "Graminoid status",                  "Graminoid status",   "M2",
-    "Woodiness",                         "Woodiness",          "M2",
-    "Phylogenetic position (PEV1-PEV3)", "Phylogeny",          "M3"
+    ~source_predictor,                   ~predictor,
+    "LDMC",                              "LDMC",
+    "LMA",                               "LMA",
+    "Height",                            "Vegetative height",
+    "Graminoid status",                  "Graminoid status",
+    "Woodiness",                         "Woodiness",
+    "Phylogenetic position (PEV1-PEV3)", "Phylogeny"
   )
 }
 
@@ -52,7 +52,7 @@ prepare_predictor_synthesis <- function(
   missing_inputs <- input_files[!file.exists(input_files)]
   if (length(missing_inputs) > 0L) {
     stop(
-      "Required canonical exported table(s) missing: ",
+      "Required exported table(s) missing: ",
       paste(missing_inputs, collapse = ", "),
       call. = FALSE
     )
@@ -68,7 +68,7 @@ prepare_predictor_synthesis <- function(
   required_fit_columns <- c("predictor", "model", "method", "AIC")
   required_comparison_columns <- c(
     "predictor", "comparison", "likelihood_ratio", "df", "p_value",
-    "valid_nested_comparison", "same_rows_and_V", "method"
+    "valid_nested_comparison", "same_rows_and_sampling_variances", "method"
   )
   required_heterogeneity_columns <- c(
     "Predictor",
@@ -98,33 +98,34 @@ prepare_predictor_synthesis <- function(
     )
   }
 
-  # Support uses the full context-dependent predictor model against its
-  # additive matched baseline: M1 versus M2, or M1 versus M3 for the three-axis
-  # phylogenetic model. Conventional delta AIC is full minus additive, so
-  # negative values indicate improved fit.
+  # Support compares the full predictor-by-climate model directly with the
+  # matched climate-only model. Negative delta AIC favours the full model.
   support_data <- predictor_key |>
     dplyr::left_join(
       fit_statistics |>
-        dplyr::filter(.data$method == "ML", .data$model == "M1") |>
+        dplyr::filter(
+          .data$method == "ML", .data$model == "climate only"
+        ) |>
         dplyr::select(
           source_predictor = "predictor",
-          AIC_additive = "AIC"
+          AIC_climate = "AIC"
         ),
       by = "source_predictor"
     ) |>
     dplyr::left_join(
       fit_statistics |>
-        dplyr::filter(.data$method == "ML") |>
+        dplyr::filter(
+          .data$method == "ML", .data$model == "full predictor-climate"
+        ) |>
         dplyr::select(
           source_predictor = "predictor",
-          full_model = "model",
           AIC_full = "AIC"
         ),
-      by = c("source_predictor", "full_model")
+      by = "source_predictor"
     ) |>
     dplyr::mutate(
-      comparison = paste("M1 vs", .data$full_model),
-      delta_AIC_full_minus_additive = .data$AIC_full - .data$AIC_additive
+      comparison = "climate only vs full predictor-climate",
+      delta_AIC_full_minus_climate = .data$AIC_full - .data$AIC_climate
     ) |>
     dplyr::left_join(
       comparisons |>
@@ -136,7 +137,8 @@ prepare_predictor_synthesis <- function(
           lrt_df = "df",
           lrt_p_value = "p_value",
           valid_nested_comparison = "valid_nested_comparison",
-          same_rows_and_V = "same_rows_and_V"
+          same_rows_and_sampling_variances =
+            "same_rows_and_sampling_variances"
         ),
       by = c("source_predictor", "comparison")
     )
@@ -148,7 +150,7 @@ prepare_predictor_synthesis <- function(
       call. = FALSE
     )
   }
-  if (any(!is.finite(support_data$AIC_additive)) ||
+  if (any(!is.finite(support_data$AIC_climate)) ||
       any(!is.finite(support_data$AIC_full)) ||
       any(!is.finite(support_data$lrt_p_value))) {
     stop(
@@ -157,7 +159,7 @@ prepare_predictor_synthesis <- function(
     )
   }
   if (any(!support_data$valid_nested_comparison) ||
-      any(!support_data$same_rows_and_V)) {
+      any(!support_data$same_rows_and_sampling_variances)) {
     stop(
       "A requested support comparison is not a valid matched nested comparison.",
       call. = FALSE
@@ -189,8 +191,8 @@ prepare_predictor_synthesis <- function(
       )
     ) |>
     dplyr::select(
-      "predictor", "source_predictor", "comparison", "full_model",
-      "AIC_additive", "AIC_full", "delta_AIC_full_minus_additive",
+      "predictor", "source_predictor", "comparison",
+      "AIC_climate", "AIC_full", "delta_AIC_full_minus_climate",
       "likelihood_ratio", "lrt_df", "lrt_p_value", "lrt_significance",
       "heterogeneity_overall_percent", "heterogeneity_warming_percent",
       "heterogeneity_background_climate_percent",
@@ -227,7 +229,7 @@ build_predictor_synthesis_figure <- function(plot_data) {
   assert_predictor_synthesis_columns(
     plot_data,
     c(
-      "predictor", "delta_AIC_full_minus_additive", "lrt_p_value",
+      "predictor", "delta_AIC_full_minus_climate", "lrt_p_value",
       heterogeneity_columns
     ),
     "Figure 6 plotting data"
@@ -251,26 +253,26 @@ build_predictor_synthesis_figure <- function(plot_data) {
       )
     )
   support_span <- diff(range(c(
-    0, support_plot_data$delta_AIC_full_minus_additive
+    0, support_plot_data$delta_AIC_full_minus_climate
   )))
   label_offset <- 0.035 * support_span
   support_plot_data <- support_plot_data |>
     dplyr::mutate(
-      label_x = .data$delta_AIC_full_minus_additive +
+      label_x = .data$delta_AIC_full_minus_climate +
         dplyr::if_else(
-          .data$delta_AIC_full_minus_additive >= 0,
+          .data$delta_AIC_full_minus_climate >= 0,
           label_offset,
           -label_offset
         ),
       label_hjust = dplyr::if_else(
-        .data$delta_AIC_full_minus_additive >= 0, 0, 1
+        .data$delta_AIC_full_minus_climate >= 0, 0, 1
       )
     )
 
   panel_a <- ggplot2::ggplot(
     support_plot_data,
     ggplot2::aes(
-      x = .data$delta_AIC_full_minus_additive,
+      x = .data$delta_AIC_full_minus_climate,
       y = .data$predictor
     )
   ) +
@@ -290,9 +292,9 @@ build_predictor_synthesis_figure <- function(plot_data) {
       fontface = "plain"
     ) +
     ggplot2::scale_x_continuous(
-      expand = ggplot2::expansion(mult = c(0.42, 0.27))
+      expand = ggplot2::expansion(mult = c(0.52, 0.45))
     ) +
-    ggplot2::labs(title = "a", x = "ΔAIC (full − additive)", y = NULL) +
+    ggplot2::labs(title = "a", x = "ΔAIC (full − climate only)", y = NULL) +
     ggplot2::theme_bw(base_size = 20) +
     ggplot2::theme(
       plot.title = ggplot2::element_text(
@@ -407,11 +409,22 @@ build_predictor_synthesis_figure <- function(plot_data) {
       plot.margin = ggplot2::margin(10, 10, 10, 8)
     )
 
-  panel_a + panel_b +
-    patchwork::plot_layout(
-      widths = c(1.05, 1.35), guides = "collect"
-    ) &
-    ggplot2::theme(
+  legend <- cowplot::get_legend(
+    panel_b + ggplot2::theme(
       legend.position = "bottom", legend.justification = "center"
     )
+  )
+  panels <- cowplot::plot_grid(
+    panel_a,
+    panel_b + ggplot2::theme(legend.position = "none"),
+    nrow = 1L,
+    rel_widths = c(1.05, 1.35),
+    align = "h",
+    axis = "tb"
+  )
+  cowplot::plot_grid(
+    panels, legend,
+    ncol = 1L,
+    rel_heights = c(1, 0.2)
+  )
 }

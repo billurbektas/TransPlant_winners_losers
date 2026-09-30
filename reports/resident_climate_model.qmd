@@ -24,7 +24,7 @@ Validate the six resident-model exclusions and exact model universe.
 
 ### Inputs
 
-Maximum-duration resident AUC effects, climate context, taxonomy, and full sampling covariance.
+Maximum-duration resident AUC effects, their standard errors, climate context, and taxonomy.
 
 ### Decisions and exclusions
 
@@ -39,16 +39,16 @@ knitr::kable(data.frame(
   effects = scope$effects, species = scope$species, experiments = scope$experiments
 ))
 knitr::kable(data.frame(excluded_from_resident_models = settings$exclusions))
-knitr::kable(scope$V_validation)
+knitr::kable(scope$sampling_variance_validation)
 ```
 
 ### Problems flagged
 
-Any count, identity, covariance, ordering, or required-consistency mismatch stops this branch.
+Any count, identity, sampling-variance, ordering, or required-consistency mismatch stops this branch.
 
 ### Principal outputs
 
-`resident_auc_data`, `resident_sampling_covariance_matrix`, and `resident_scope`.
+`resident_auc_data`, `resident_sampling_variance_matrix`, and `resident_scope`.
 
 ### PASS/FAIL
 
@@ -71,7 +71,9 @@ Fixed effects are `T_z * P_z * W_z`. Random effects are an independent species i
 
 ### Assumptions
 
-Effect estimates use the full ordered `V_auc`; CR1 clusters by experiment. Scaling is fixed before fitting.
+Effect estimates use an ordered diagonal matrix containing `auc_se^2`; sampling
+errors between effects are assumed independent. CR1 separately clusters
+fixed-effect uncertainty by experiment. Scaling is fixed before fitting.
 
 ### Convergence and covariance diagnostics
 

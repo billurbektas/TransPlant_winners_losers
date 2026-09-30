@@ -24,7 +24,7 @@ How much overall, warming, context, and total response-scale species heterogenei
 
 ### Dataset and sample size
 
-Each information source uses the matched data and covariance from its own validated predictor sequence.
+Each information source uses the matched effects and diagonal sampling variances from its own validated predictor-model pair.
 
 Predictive performance uses 20-fold leave-one-gradient-out validation. Trait models are evaluated on their own complete-case effects and must therefore be compared with their matched climate-only baselines rather than ranked by raw scores across traits.
 
@@ -36,7 +36,7 @@ Response-scale components are calculated from each full REML random covariance a
 
 Overall, warming, context, and total components use the registered analysis definitions; negative reductions are not truncated.
 
-The primary performance summaries give every gradient equal influence. Effect-pooled summaries are retained as a sensitivity analysis. General-model predictions use fixed effects; repeat-species predictions additionally condition on species information learned in the training gradients. Predictive covariance includes sampling covariance, fitted species heterogeneity, and fixed-coefficient uncertainty, but treats variance-component estimates as fixed.
+The primary performance summaries give every gradient equal influence. Effect-pooled summaries are retained as a sensitivity analysis. General-model predictions use fixed effects; repeat-species predictions additionally condition on species information learned in the training gradients. Predictive covariance includes the diagonal sampling variances, fitted species heterogeneity, and fixed-coefficient uncertainty, but treats variance-component estimates as fixed.
 
 ### Convergence and covariance diagnostics
 
@@ -195,4 +195,4 @@ flagged sensitivity stratum.
 
 `model_fit_r2`, `model_cross_validation_predictions`, `model_cross_validation_metrics`, `model_predictive_skill`, `model_performance_validation`, `model_fixed_effects`, `model_random_effect_profiles`, `model_random_effect_correlations`, and `model_effects_validation`.
 
-The predictive-performance release gate additionally requires all 200 fold fits to converge without rank reduction, every predictive covariance to be positive definite, exact train/test covariance separation, finite metric and bootstrap estimates, and valid interval coverage.
+The predictive-performance release gate additionally requires all 200 fold fits to converge without rank reduction, every predictive covariance to be positive definite, disjoint training and held-out effect IDs, finite metric and bootstrap estimates, and valid interval coverage.

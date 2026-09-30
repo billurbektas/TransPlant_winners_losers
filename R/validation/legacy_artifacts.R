@@ -22,6 +22,105 @@ read_reference_csv <- function(path) {
   result
 }
 
+#' Retain climate-only and full predictor fits from the historical table.
+#'
+#' The historical table also contains additive fits that are no longer part of
+#' the active analysis. This temporary certification adapter keeps the two fits
+#' that remain scientifically active and translates only their role labels.
+#'
+#' @param historical_fit Historical predictor fit-statistics table.
+#' @return Climate-only and full rows in the active table schema.
+legacy_predictor_pair_fit_statistics <- function(historical_fit) {
+  predictor_order <- unique(as.character(historical_fit$predictor))
+  historical_fit |>
+    dplyr::group_by(.data$predictor) |>
+    dplyr::filter(.data$model == "M0" | .data$n_fixed == max(.data$n_fixed)) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      model = dplyr::if_else(
+        .data$model == "M0", "climate only", "full predictor-climate"
+      ),
+      predictor_order = match(.data$predictor, .env$predictor_order),
+      model_order = match(
+        .data$model, c("climate only", "full predictor-climate")
+      )
+    ) |>
+    dplyr::arrange(.data$predictor_order, .data$model_order) |>
+    dplyr::select(-"predictor_order", -"model_order")
+}
+
+#' Derive the direct historical climate-only versus full comparisons.
+#'
+#' @param historical_fit Historical predictor fit-statistics table.
+#' @return One direct ML likelihood-ratio comparison per predictor.
+derive_legacy_predictor_pair_comparisons <- function(historical_fit) {
+  paired <- legacy_predictor_pair_fit_statistics(historical_fit)
+  dplyr::bind_rows(lapply(
+    split(paired, factor(
+      paired$predictor, levels = unique(as.character(paired$predictor))
+    )),
+    function(rows) {
+      climate <- rows[rows$model == "climate only", , drop = FALSE]
+      full <- rows[rows$model == "full predictor-climate", , drop = FALSE]
+      likelihood_ratio <- 2 * (full$logLik - climate$logLik)
+      degrees_freedom <- full$n_fixed - climate$n_fixed
+      tibble::tibble(
+        predictor = as.character(climate$predictor),
+        comparison = "climate only vs full predictor-climate",
+        likelihood_ratio = likelihood_ratio,
+        df = degrees_freedom,
+        p_value = stats::pchisq(
+          likelihood_ratio, degrees_freedom, lower.tail = FALSE
+        ),
+        valid_nested_comparison = is.finite(likelihood_ratio) &&
+          likelihood_ratio >= -1e-7 && degrees_freedom > 0,
+        same_rows_and_sampling_variances = TRUE,
+        method = "ML"
+      )
+    }
+  ))
+}
+
+#' Translate historical full-model CR1 labels to their scientific role.
+#'
+#' @param historical_cr1 Historical robust-inference table.
+#' @return The same inference values with the active full-model role label.
+legacy_predictor_pair_cr1 <- function(historical_cr1) {
+  historical_cr1 |>
+    dplyr::mutate(model = "full predictor-climate REML")
+}
+
+#' Translate the historical heterogeneity table to the active comparison.
+#'
+#' @param historical Historical heterogeneity synthesis.
+#' @param pair_comparisons Direct climate-only versus full comparisons.
+#' @return Historical heterogeneity results in the active table schema.
+legacy_heterogeneity_pair_reference <- function(historical, pair_comparisons) {
+  comparison_text <- pair_comparisons |>
+    dplyr::transmute(
+      Predictor = .data$predictor,
+      `ML climate-only vs full result` = sprintf(
+        "LR=%.5g; df=%d; p=%.5g",
+        .data$likelihood_ratio, .data$df, .data$p_value
+      )
+    )
+  historical |>
+    dplyr::select(
+      -dplyr::any_of(c(
+        "ML M0 vs M1 result", "ML M1 vs full/context result"
+      ))
+    ) |>
+    dplyr::rename(
+      `Delta AIC full minus climate only` = "Delta AIC",
+      `Delta AICc full minus climate only` = "Delta AICc"
+    ) |>
+    dplyr::left_join(comparison_text, by = "Predictor") |>
+    dplyr::relocate(
+      `ML climate-only vs full result`,
+      .before = `Delta AIC full minus climate only`
+    )
+}
+
 #' Summarize Reference Classification.
 #'
 #' @param classification A data frame whose required columns are checked before use.
@@ -49,28 +148,17 @@ summarize_reference_classification <- function(classification, resolution) {
 #' Validate Resident Scope Artifacts.
 #'
 #' @param auc_data A data frame whose required columns are checked before use.
-#' @param V_auc A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param sampling_variance_matrix Diagonal, effect-ordered sampling variances.
 #' @param config A validated workflow configuration or specification object.
 #' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-validate_resident_scope_artifacts <- function(auc_data, V_auc, config) {
+validate_resident_scope_artifacts <- function(
+    auc_data, sampling_variance_matrix, config) {
   ids <- as.character(auc_data$effect_id)
   species <- unique(as.character(auc_data$species_id))
   experiments <- unique(as.character(auc_data$experiment_id))
   expected <- config$expected
-  dimensions_valid <- nrow(V_auc) == nrow(auc_data) && ncol(V_auc) == nrow(auc_data)
-  order_valid <- dimensions_valid && identical(rownames(V_auc), ids) &&
-    identical(colnames(V_auc), ids)
-  V <- as.matrix(V_auc)
-  validation <- tibble::tibble(
-    dimensions_valid = dimensions_valid,
-    order_valid = order_valid,
-    maximum_symmetry_error = max(abs(V - t(V))),
-    minimum_eigenvalue = min(eigen(V, symmetric = TRUE, only.values = TRUE)$values),
-    maximum_diagonal_se_error = max(abs(diag(V) - auc_data$auc_se^2)),
-    valid = dimensions_valid && order_valid &&
-      max(abs(V - t(V))) <= 1e-10 &&
-      min(eigen(V, symmetric = TRUE, only.values = TRUE)$values) >= -1e-10 &&
-      max(abs(diag(V) - auc_data$auc_se^2)) <= 1e-8
+  validation <- validate_sampling_variance_matrix(
+    sampling_variance_matrix, auc_data, "auc_se"
   )
   checks <- tibble::tibble(
     check_number = seq_len(6L),
@@ -80,7 +168,7 @@ validate_resident_scope_artifacts <- function(auc_data, V_auc, config) {
       "Expected downstream experiment count",
       "Excluded taxa absent from downstream rows",
       "Unique effect identifiers",
-      "Valid sampling covariance"
+      "Valid diagonal sampling variances"
     ),
     pass = c(
       nrow(auc_data) == expected$effects,
@@ -96,7 +184,11 @@ validate_resident_scope_artifacts <- function(auc_data, V_auc, config) {
       paste(length(experiments), "experiments"),
       paste(length(intersect(species, config$exclusions)), "excluded taxa found"),
       paste(anyDuplicated(ids), "first duplicate index"),
-      paste("dimensions", dimensions_valid, "order", order_valid)
+      paste(
+        "dimensions", validation$dimensions_valid,
+        "order", validation$order_valid,
+        "maximum off-diagonal", validation$maximum_absolute_off_diagonal
+      )
     )
   )
   gates <- c(
@@ -116,7 +208,7 @@ validate_resident_scope_artifacts <- function(auc_data, V_auc, config) {
     effect_ids = ids,
     species_ids = sort(species),
     experiment_ids = sort(experiments),
-    V_validation = validation,
+    sampling_variance_validation = validation,
     consistency_checks = checks
   )
 }
@@ -124,7 +216,6 @@ validate_resident_scope_artifacts <- function(auc_data, V_auc, config) {
 #' Build Resident Consistency Checks.
 #'
 #' @param auc_data A data frame whose required columns are checked before use.
-#' @param V_auc A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param upstream_winner_loser A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param upstream_analysis_data A data frame whose required columns are checked before use.
 #' @param config A validated workflow configuration or specification object.
@@ -141,7 +232,7 @@ validate_resident_scope_artifacts <- function(auc_data, V_auc, config) {
 #' @param species_classification A data frame whose required columns are checked before use.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 build_resident_consistency_checks <- function(
-    auc_data, V_auc, upstream_winner_loser, upstream_analysis_data, config,
+    auc_data, upstream_winner_loser, upstream_analysis_data, config,
     family_membership,
     family_cover_audit, climate_scaling, prepared_trait_models,
     standardized_pev_species, phylogeny_auc_data, predictor_specifications,
@@ -178,7 +269,7 @@ build_resident_consistency_checks <- function(
   functional_species_ids <- sort(unique(as.character(functional_species$species_id)))
   trait_scaling <- dplyr::bind_rows(lapply(prepared_trait_models, `[[`, "scaling"))
   all_formulas <- unlist(lapply(predictor_specifications, function(specification) {
-    c(deparse(specification$M1), deparse(specification$full))
+    deparse(specification$full_formula)
   }))
   classification_valid <- with(
     species_classification,
@@ -243,9 +334,12 @@ build_resident_consistency_checks <- function(
           standardized_pev_species$scaling$species_N, collapse = "; "),
     12L, "PEVs standardized before repeated-row join", pev_z_check,
     "unique-species z means=0 and SDs=1; repeated rows identical within species",
-    13L, "Every predictor uses an exact matched baseline and V",
-    all(predictor_validation$exact_V_order & predictor_validation$expected_full_rows),
-    "validated effect_id order for six predictor sequences",
+    13L, "Every predictor uses matched rows and sampling variances",
+    all(
+      predictor_validation$exact_sampling_variance_order &
+        predictor_validation$expected_full_rows
+    ),
+    "validated effect_id order for six predictor model pairs",
     14L, "Family AUC reconstructed from plot-level family cover",
     nrow(family_cover_audit) == config$expected$experiments,
     paste(nrow(family_cover_audit), "experiment cover audits"),
@@ -257,7 +351,7 @@ build_resident_consistency_checks <- function(
     "six species-information predictors only",
     17L, "Graminoid status and Woodiness are separate predictors",
     all(c("Graminoid status", "Woodiness") %in% heterogeneity_synthesis$Predictor),
-    "separate model sequences and formulas",
+    "separate model pairs and formulas",
     18L, "No mutually exclusive Forb/Graminoid/Woody factor is used",
     !any(grepl("Forb", all_formulas, ignore.case = TRUE)),
     "independent binary variables",
@@ -272,7 +366,8 @@ build_resident_consistency_checks <- function(
     21L, "No PEV axis selected by AUC significance", TRUE,
     "fixed prespecified PEV1-PEV3 block",
     22L, "No PEV1-PEV5 model fitted",
-    !any(c("PEV4", "PEV5") %in% all.vars(predictor_specifications$Phylogeny$full)),
+    !any(c("PEV4", "PEV5") %in%
+           all.vars(predictor_specifications$Phylogeny$full_formula)),
     "only PEV1, PEV2, PEV3",
     23L, "Existing min/max classification rule retained",
     all(classification_valid),
@@ -282,23 +377,26 @@ build_resident_consistency_checks <- function(
   )
 }
 
-#' Resident Covariance Release Check.
+#' Resident sampling-variance release check.
 #'
 #' @param validation A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-resident_covariance_release_check <- function(validation) {
+resident_sampling_variance_release_check <- function(validation) {
   if (!is.data.frame(validation) || !"valid" %in% names(validation) ||
       nrow(validation) != 1L) {
-    stop("Downstream covariance validation must contain one valid row.",
+    stop("Resident sampling-variance validation must contain one valid row.",
          call. = FALSE)
   }
   tibble::tibble(
-    check = "validated downstream sampling covariance",
+    check = "validated resident diagonal sampling variances",
     pass = as.logical(validation$valid),
     detail = paste(
       "dimensions", validation$dimensions_valid,
       "order", validation$order_valid,
-      "minimum eigenvalue", format(validation$minimum_eigenvalue, digits = 8)
+      "minimum variance",
+      format(validation$minimum_sampling_variance, digits = 8),
+      "maximum off-diagonal",
+      format(validation$maximum_absolute_off_diagonal, digits = 8)
     )
   )
 }
@@ -310,9 +408,17 @@ resident_covariance_release_check <- function(validation) {
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 legacy_data_validation_component <- function(scope,
                                              consistency_checks = scope$consistency_checks) {
-  result <- scope[
-    c("effects", "species", "experiments", "V_validation")
-  ]
+  result <- scope[c("effects", "species", "experiments")]
+  validation <- scope$sampling_variance_validation
+  result$V_validation <- tibble::tibble(
+    dimensions_valid = validation$dimensions_valid,
+    order_valid = validation$order_valid,
+    maximum_symmetry_error = validation$maximum_absolute_off_diagonal,
+    minimum_eigenvalue = validation$minimum_sampling_variance,
+    maximum_diagonal_se_error =
+      validation$maximum_diagonal_variance_error,
+    valid = validation$valid
+  )
   result$consistency_checks <- consistency_checks |>
     dplyr::mutate(check_number = as.integer(.data$check_number))
   result

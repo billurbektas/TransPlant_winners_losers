@@ -20,7 +20,14 @@ test_that("the Step 22 data-validation adapter preserves integer check IDs", {
     effects = 1L,
     species = 1L,
     experiments = 1L,
-    V_validation = tibble::tibble(valid = TRUE),
+    sampling_variance_validation = tibble::tibble(
+      dimensions_valid = TRUE,
+      order_valid = TRUE,
+      maximum_absolute_off_diagonal = 0,
+      minimum_sampling_variance = 0.1,
+      maximum_diagonal_variance_error = 0,
+      valid = TRUE
+    ),
     consistency_checks = tibble::tibble(
       check_number = c(1, 2), check = c("a", "b"), pass = TRUE
     )
@@ -29,33 +36,34 @@ test_that("the Step 22 data-validation adapter preserves integer check IDs", {
   expect_type(adapted$consistency_checks$check_number, "integer")
 })
 
-test_that("the downstream covariance check exposes the release-gate interface", {
+test_that("the resident sampling-variance check exposes the release interface", {
   source(project_path("R", "validation", "legacy_artifacts.R"))
   validation <- tibble::tibble(
     dimensions_valid = TRUE,
     order_valid = TRUE,
-    maximum_symmetry_error = 0,
-    minimum_eigenvalue = 0,
-    maximum_diagonal_se_error = 0,
+    maximum_absolute_off_diagonal = 0,
+    minimum_sampling_variance = 0.1,
+    maximum_diagonal_variance_error = 0,
     valid = TRUE
   )
-  gate <- resident_covariance_release_check(validation)
+  gate <- resident_sampling_variance_release_check(validation)
   expect_identical(gate$pass, TRUE)
-  expect_match(gate$detail, "minimum eigenvalue")
+  expect_match(gate$detail, "minimum variance")
 })
 
-test_that("the Step 22 comparator passes identical objects and rejects drift", {
+test_that("the historical comparator translates retired predictor rows and rejects drift", {
   reference <- readRDS(project_path("tests", "fixtures", "step22_reference_results.rds"))
-  expect_true(all(validate_legacy_reference(reference, reference)$pass))
+  candidate <- translate_legacy_reference_for_active_analysis(reference)
+  expect_true(all(validate_legacy_reference(candidate, reference)$pass))
 
-  changed <- reference
+  changed <- candidate
   changed$M_both$fixed$estimate[[1]] <-
     changed$M_both$fixed$estimate[[1]] + 1e-4
   validation <- validate_legacy_reference(changed, reference)
   expect_false(validation$pass[[2]])
   expect_match(validation$detail[[2]], "M_both/fixed/estimate")
 
-  changed_count <- reference
+  changed_count <- candidate
   changed_count$data_validation$effects <-
     changed_count$data_validation$effects + 1L
   count_validation <- validate_legacy_reference(changed_count, reference)

@@ -10,22 +10,28 @@
 #' Validate Family Bundle.
 #'
 #' @param data A data frame whose required columns are checked before use.
-#' @param V A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param sampling_variance_matrix Diagonal, effect-ordered sampling variances.
 #' @param classification A data frame whose required columns are checked before use.
 #' @param model_summary A fitted model object with the structure checked by this function.
 #' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-validate_family_bundle <- function(data, V, classification, model_summary) {
+validate_family_bundle <- function(
+    data, sampling_variance_matrix, classification, model_summary) {
   ids <- as.character(data$effect_id)
   gates <- tibble::tibble(
     check = c(
-      "unique_family_effect_ids", "covariance_dimensions", "covariance_order",
-      "covariance_symmetric", "classification_unique", "model_summary_present"
+      "unique_family_effect_ids", "sampling_variance_dimensions",
+      "sampling_variance_order", "sampling_variance_diagonal",
+      "classification_unique", "model_summary_present"
     ),
     pass = c(
       !anyDuplicated(ids),
-      identical(dim(V), c(length(ids), length(ids))),
-      identical(rownames(V), ids) && identical(colnames(V), ids),
-      max(abs(as.matrix(V) - t(as.matrix(V)))) <= 1e-10,
+      identical(dim(sampling_variance_matrix), c(length(ids), length(ids))),
+      identical(rownames(sampling_variance_matrix), ids) &&
+        identical(colnames(sampling_variance_matrix), ids),
+      Matrix::nnzero(
+        sampling_variance_matrix -
+          Matrix::Diagonal(x = Matrix::diag(sampling_variance_matrix))
+      ) == 0L,
       !anyDuplicated(classification$family_id),
       nrow(model_summary) > 0L
     )
@@ -258,16 +264,21 @@ build_family_plot_auc <- function(community, experiments, membership) {
   )
 }
 
-#' Build Family Auc Covariance.
+#' Estimate family AUC effects and their sampling variances.
 #'
-#' @param plot_auc A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param membership A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param climate_data A data frame whose required columns are checked before use.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
-build_family_auc_covariance <- function(plot_auc, membership, climate_data) {
+#' Family cover must first be analysed at plot level because family effects are
+#' not averages of species effects. Each experiment is fitted once. The model
+#' supplies the warmed-minus-origin estimate and its standard error; subsequent
+#' meta-regressions use the squared standard errors as diagonal sampling
+#' variances and do not claim cross-family sampling covariance.
+#'
+#' @param plot_auc Plot-level family AUC values.
+#' @param membership Resident species-to-family membership by experiment.
+#' @param climate_data Experiment-level climate variables and scaling.
+#' @return Family effects, diagonal sampling variances, warnings, and validation.
+build_family_auc_effects <- function(plot_auc, membership, climate_data) {
   experiment_ids <- sort(unique(as.character(membership$experiment_id)))
   contrast_blocks <- list()
-  covariance_blocks <- list()
   contrast_warnings <- character()
   for (experiment_id in experiment_ids) {
     raw <- plot_auc |>
@@ -287,12 +298,9 @@ build_family_auc_covariance <- function(plot_auc, membership, climate_data) {
         model <- stats::lm(auc ~ ODT * family_id, data = raw)
         means <- emmeans::emmeans(model, ~ ODT | family_id)
         contrast <- emmeans::contrast(
-          means, method = list(to_origin = c(0, -1, 1)), adjust = "none"
+          means, method = list(to_origin = c(0, -1, 1))
         )
-        list(
-          summary = tibble::as_tibble(as.data.frame(summary(contrast))),
-          covariance = as.matrix(stats::vcov(contrast))
-        )
+        tibble::as_tibble(as.data.frame(summary(contrast)))
       }, warning = function(condition) {
         warnings <<- c(warnings, conditionMessage(condition))
         invokeRestart("muffleWarning")
@@ -308,13 +316,13 @@ build_family_auc_covariance <- function(plot_auc, membership, climate_data) {
       dplyr::distinct(.data$family_id) |>
       dplyr::arrange(.data$family_id) |>
       dplyr::pull(.data$family_id)
-    order_index <- match(target_families, as.character(fitted$summary$family_id))
+    order_index <- match(target_families, as.character(fitted$family_id))
     if (anyNA(order_index)) {
       stop("A resident family is missing from contrasts for ", experiment_id,
            ".", call. = FALSE)
     }
     contrast_blocks[[experiment_id]] <-
-      fitted$summary[order_index, , drop = FALSE] |>
+      fitted[order_index, , drop = FALSE] |>
       dplyr::transmute(
         experiment_id = experiment_id,
         family_id = as.character(.data$family_id),
@@ -322,8 +330,6 @@ build_family_auc_covariance <- function(plot_auc, membership, climate_data) {
         family_auc_se = as.numeric(.data$SE),
         contrast_df = as.numeric(.data$df)
       )
-    covariance_blocks[[experiment_id]] <-
-      fitted$covariance[order_index, order_index, drop = FALSE]
     if (length(warnings)) {
       contrast_warnings <- c(
         contrast_warnings,
@@ -337,14 +343,6 @@ build_family_auc_covariance <- function(plot_auc, membership, climate_data) {
       horizon = "max",
       effect_id = paste("max", .data$experiment_id, .data$family_id, sep = "::")
     )
-  ordered_ids <- unlist(lapply(names(contrast_blocks), function(id) {
-    paste("max", id, contrast_blocks[[id]]$family_id, sep = "::")
-  }), use.names = FALSE)
-  assembled <- as.matrix(Matrix::bdiag(covariance_blocks))
-  V_index <- match(data$effect_id, ordered_ids)
-  if (anyNA(V_index)) stop("Family V ordering could not be aligned.", call. = FALSE)
-  V <- assembled[V_index, V_index, drop = FALSE]
-  dimnames(V) <- list(data$effect_id, data$effect_id)
   climate <- climate_data |>
     dplyr::transmute(
       experiment_id = as.character(.data$experiment_id),
@@ -370,30 +368,25 @@ build_family_auc_covariance <- function(plot_auc, membership, climate_data) {
       anyDuplicated(data$effect_id)) {
     stop("Family AUC data failed completeness/key/SE validation.", call. = FALSE)
   }
-  symmetry_error <- max(abs(V - t(V)))
-  diagonal_error <- max(abs(diag(V) - data$family_auc_se^2))
-  minimum_eigenvalue <- min(eigen(V, symmetric = TRUE, only.values = TRUE)$values)
-  valid <- identical(rownames(V), data$effect_id) &&
-    symmetry_error <= 1e-8 && diagonal_error <= 1e-8 &&
-    minimum_eigenvalue >= -1e-8
-  if (!valid) {
-    stop("Full family AUC covariance failed validation; it was not repaired.",
-         call. = FALSE)
+  sampling_variance_matrix <- build_sampling_variance_matrix(
+    data, "family_auc_se"
+  )
+  validation <- validate_sampling_variance_matrix(
+    sampling_variance_matrix, data, "family_auc_se"
+  ) |>
+    dplyr::mutate(
+      n_effects = nrow(data),
+      n_experiments = dplyr::n_distinct(data$experiment_id),
+      .before = 1L
+    )
+  if (!validation$valid[[1]]) {
+    stop("Family sampling variances failed validation.", call. = FALSE)
   }
   list(
     data = data,
-    V = V,
+    sampling_variance_matrix = sampling_variance_matrix,
     contrast_warnings = contrast_warnings,
-    validation = tibble::tibble(
-      n_effects = nrow(data),
-      n_experiments = dplyr::n_distinct(data$experiment_id),
-      dimensions_valid = all(dim(V) == nrow(data)),
-      order_valid = identical(rownames(V), data$effect_id),
-      maximum_symmetry_error = symmetry_error,
-      maximum_diagonal_variance_error = diagonal_error,
-      minimum_eigenvalue = minimum_eigenvalue,
-      valid = valid
-    )
+    validation = validation
   )
 }
 
@@ -415,7 +408,7 @@ fit_family_aggregated_model <- function(family_auc_bundle) {
   fit_once <- function(control = NULL) {
     arguments <- list(
       yi = data$family_auc_effect,
-      V = family_auc_bundle$V,
+      V = family_auc_bundle$sampling_variance_matrix,
       mods = ~ T_z * P_z * W_z,
       random = random,
       struct = "GEN",
@@ -446,9 +439,9 @@ fit_family_aggregated_model <- function(family_auc_bundle) {
     warnings = captured$warnings,
     attempts = attempts,
     data = data,
-    V = family_auc_bundle$V,
+    sampling_variance_matrix = family_auc_bundle$sampling_variance_matrix,
     contrast_warnings = family_auc_bundle$contrast_warnings,
-    V_validation = family_auc_bundle$validation
+    sampling_variance_validation = family_auc_bundle$validation
   )
 }
 
@@ -791,7 +784,7 @@ summarize_family_model <- function(model_bundle) {
   } else {
     class(fit$opt.res)[[1]]
   }
-  validation <- model_bundle$V_validation
+  validation <- model_bundle$sampling_variance_validation
   tibble::tibble(
     model = "M_family_aggregated",
     formula = "family_auc_effect ~ T_z * P_z * W_z",
@@ -829,26 +822,28 @@ summarize_family_model <- function(model_bundle) {
       min(full_eigenvalues) > boundary_tolerance &&
       all(random_variances > boundary_tolerance) &&
       maximum_correlation < 1 - 1e-6,
-    V_source = "full family emmeans covariance reconstructed from family AUC models",
-    V_maximum_diagonal_variance_error =
+    sampling_variance_source =
+      "diagonal matrix of squared family AUC contrast standard errors",
+    sampling_variance_maximum_diagonal_error =
       validation$maximum_diagonal_variance_error,
-    V_maximum_symmetry_error = validation$maximum_symmetry_error,
-    V_minimum_eigenvalue = validation$minimum_eigenvalue,
-    V_valid = validation$valid,
+    sampling_variance_maximum_off_diagonal =
+      validation$maximum_absolute_off_diagonal,
+    minimum_sampling_variance = validation$minimum_sampling_variance,
+    sampling_variance_valid = validation$valid,
     contrast_warnings = paste(model_bundle$contrast_warnings, collapse = " | ")
   )
 }
 
-#' Compare Family Covariance.
+#' Compare family sampling variances with the historical matrix.
 #'
 #' @param candidate A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param reference A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param absolute A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param relative A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_family_covariance <- function(candidate, reference,
-                                      absolute = 1e-10,
-                                      relative = 1e-8) {
+compare_family_sampling_variances <- function(candidate, reference,
+                                              absolute = 1e-10,
+                                              relative = 1e-8) {
   reference_matrix <- if (is.list(reference) && !is.null(reference$V_family_auc)) {
     as.matrix(reference$V_family_auc)
   } else {
@@ -869,8 +864,9 @@ compare_family_covariance <- function(candidate, reference,
   }
   result <- tibble::tibble(
     check = c(
-      "family_covariance_dimensions", "family_covariance_order",
-      "family_covariance_values"
+      "family_sampling_variance_dimensions",
+      "family_sampling_variance_order",
+      "family_sampling_variance_values"
     ),
     pass = c(
       same_dimensions, same_names,
@@ -888,9 +884,31 @@ compare_family_covariance <- function(candidate, reference,
   )
   if (any(!result$pass)) {
     stop(
-      "Family sampling covariance regression failed: ",
+      "Family sampling-variance regression failed: ",
       paste(result$check[!result$pass], collapse = ", "), call. = FALSE
     )
   }
   result
+}
+
+#' Compare the scientific family-model summary with its historical reference.
+#'
+#' Sampling-matrix descriptions changed intentionally from reconstructed full
+#' covariance to explicit diagonal variances. All shared model-result fields
+#' must remain equivalent.
+#'
+#' @param candidate Current family-model summary.
+#' @param reference Historical family-model summary.
+#' @return A validation table from `assert_reference_table()`.
+compare_family_model_summary_reference <- function(candidate, reference) {
+  shared <- intersect(names(candidate), names(reference))
+  shared <- setdiff(shared, c(
+    "V_source", "V_maximum_diagonal_variance_error",
+    "V_maximum_symmetry_error", "V_minimum_eigenvalue", "V_valid"
+  ))
+  assert_reference_table(
+    candidate[, shared, drop = FALSE],
+    reference[, shared, drop = FALSE],
+    "family_model_summary", "model"
+  )
 }

@@ -88,10 +88,15 @@ model_target_definitions <- function() {
         )
     ),
     tar_target(
-      resident_sampling_covariance,
-      reconstruct_auc_covariance(resident_auc_data, auc_inputs$auc)
+      resident_sampling_variance_matrix,
+      build_sampling_variance_matrix(resident_auc_data, "auc_se")
     ),
-    tar_target(resident_sampling_covariance_matrix, resident_sampling_covariance$V),
+    tar_target(
+      resident_sampling_variance_check,
+      validate_sampling_variance_matrix(
+        resident_sampling_variance_matrix, resident_auc_data, "auc_se"
+      )
+    ),
     tar_target(
       legacy_resident_auc_data,
       legacy_transition_reference$downstream_auc_data
@@ -103,19 +108,21 @@ model_target_definitions <- function() {
     tar_target(
       resident_input_equivalence,
       compare_resident_inputs(
-        resident_auc_data, resident_sampling_covariance_matrix,
+        resident_auc_data, resident_sampling_variance_matrix,
         legacy_resident_auc_data, legacy_resident_V_auc
       )
     ),
     tar_target(
       resident_scope,
       validate_resident_scope_artifacts(
-        resident_auc_data, resident_sampling_covariance_matrix, analysis_settings
+        resident_auc_data, resident_sampling_variance_matrix, analysis_settings
       )
     ),
     tar_target(
-      resident_covariance_validation,
-      resident_covariance_release_check(resident_scope$V_validation)
+      resident_sampling_variance_validation,
+      resident_sampling_variance_release_check(
+        resident_scope$sampling_variance_validation
+      )
     ),
 
     tar_target(legacy_resident_climate_model_signature, legacy_transition_reference$mboth_model_signature),
@@ -127,10 +134,10 @@ model_target_definitions <- function() {
       resident_climate_model,
       fit_meta_regression(
         resident_model_data,
-        resident_sampling_covariance_matrix,
+        resident_sampling_variance_matrix,
         analysis_settings$climate_formula,
         method = "REML",
-        label = "canonical M_both REML",
+        label = "resident climate REML",
         random = analysis_settings$species_random
       )
     ),
@@ -255,9 +262,9 @@ model_target_definitions <- function() {
       legacy_transition_reference$family$cover_audit
     ),
 
-    # The family branch reconstructs family cover and sampling covariance from
-    # the active upstream file targets. The explicit read boundary mirrors the
-    # validated Step 18/22 interface without sourcing either historical runner.
+    # The family branch reconstructs family cover and estimates family AUC
+    # effects once per experiment. Squared contrast SEs supply the diagonal
+    # sampling variances used by the family meta-regression.
     tar_target(family_community_input, readRDS(community_file)),
     tar_target(
       family_experiments_input,
@@ -284,14 +291,17 @@ model_target_definitions <- function() {
     ),
     tar_target(
       family_auc_bundle,
-      build_family_auc_covariance(
+      build_family_auc_effects(
         family_plot_auc_bundle$plot_auc,
         family_resident_membership,
         resident_model_data
       )
     ),
     tar_target(family_auc_data, family_auc_bundle$data),
-    tar_target(family_V_auc, family_auc_bundle$V),
+    tar_target(
+      family_sampling_variance_matrix,
+      family_auc_bundle$sampling_variance_matrix
+    ),
     tar_target(
       family_auc_data_equivalence,
       assert_reference_table(
@@ -300,9 +310,9 @@ model_target_definitions <- function() {
       )
     ),
     tar_target(
-      family_V_equivalence,
-      compare_family_covariance(
-        family_V_auc, legacy_family_V_reference_container
+      family_sampling_variance_equivalence,
+      compare_family_sampling_variances(
+        family_sampling_variance_matrix, legacy_family_V_reference_container
       )
     ),
     tar_target(
@@ -375,16 +385,15 @@ model_target_definitions <- function() {
     ),
     tar_target(
       family_model_summary_equivalence,
-      assert_reference_table(
-        family_model_summary, legacy_family_model_summary,
-        "family_model_summary", "model"
+      compare_family_model_summary_reference(
+        family_model_summary, legacy_family_model_summary
       )
     ),
     tar_target(
       family_bundle_validation,
       validate_family_bundle(
         family_auc_data,
-        family_V_auc,
+        family_sampling_variance_matrix,
         family_classification,
         family_model_summary
       )
@@ -425,19 +434,19 @@ model_target_definitions <- function() {
     tar_target(
       prepared_ldmc,
       prepare_trait_data(
-        trait_species, resident_auc_data, resident_sampling_covariance_matrix, "LDMC"
+        trait_species, resident_auc_data, resident_sampling_variance_matrix, "LDMC"
       )
     ),
     tar_target(
       prepared_lma,
       prepare_trait_data(
-        trait_species, resident_auc_data, resident_sampling_covariance_matrix, "LMA"
+        trait_species, resident_auc_data, resident_sampling_variance_matrix, "LMA"
       )
     ),
     tar_target(
       prepared_height,
       prepare_trait_data(
-        trait_species, resident_auc_data, resident_sampling_covariance_matrix,
+        trait_species, resident_auc_data, resident_sampling_variance_matrix,
         "vegetative_height"
       )
     ),
@@ -561,20 +570,20 @@ model_target_definitions <- function() {
       graminoid_predictor_specification,
       functional_predictor_specification(
         "Graminoid", "Graminoid status", functional_auc_data,
-        resident_sampling_covariance_matrix
+        resident_sampling_variance_matrix
       )
     ),
     tar_target(
       woodiness_predictor_specification,
       functional_predictor_specification(
         "Woodiness", "Woodiness", functional_auc_data,
-        resident_sampling_covariance_matrix
+        resident_sampling_variance_matrix
       )
     ),
     tar_target(
       phylogeny_predictor_specification,
       build_phylogeny_predictor_specification(
-        phylogeny_auc_data, resident_sampling_covariance_matrix
+        phylogeny_auc_data, resident_sampling_variance_matrix
       )
     ),
     tar_target(
@@ -608,60 +617,64 @@ model_target_definitions <- function() {
     ),
     tar_target(legacy_predictor_CR1, legacy_transition_reference$predictor$CR1),
     tar_target(
-      full_sample_climate_baseline_ML,
+      legacy_predictor_pair_CR1,
+      legacy_predictor_pair_cr1(legacy_predictor_CR1)
+    ),
+    tar_target(
+      resident_climate_model_ML,
       fit_meta_regression(
         resident_auc_data,
-        resident_sampling_covariance_matrix,
+        resident_sampling_variance_matrix,
         analysis_settings$climate_formula,
         "ML",
-        "Full 526-species M0 ML"
+        "resident climate ML"
       )
     ),
     tar_target(
-      ldmc_model_sequence,
-      fit_predictor_sequence(
+      ldmc_model_pair,
+      fit_predictor_model_pair(
         ldmc_predictor_specification,
         analysis_settings$climate_formula
       )
     ),
     tar_target(
-      lma_model_sequence,
-      fit_predictor_sequence(
+      lma_model_pair,
+      fit_predictor_model_pair(
         lma_predictor_specification,
         analysis_settings$climate_formula
       )
     ),
     tar_target(
-      height_model_sequence,
-      fit_predictor_sequence(
+      height_model_pair,
+      fit_predictor_model_pair(
         height_predictor_specification,
         analysis_settings$climate_formula
       )
     ),
     tar_target(
-      graminoid_model_sequence,
-      fit_predictor_sequence(
+      graminoid_model_pair,
+      fit_predictor_model_pair(
         graminoid_predictor_specification,
         analysis_settings$climate_formula,
-        full_sample_climate_baseline_ML,
+        resident_climate_model_ML,
         resident_climate_model
       )
     ),
     tar_target(
-      woodiness_model_sequence,
-      fit_predictor_sequence(
+      woodiness_model_pair,
+      fit_predictor_model_pair(
         woodiness_predictor_specification,
         analysis_settings$climate_formula,
-        full_sample_climate_baseline_ML,
+        resident_climate_model_ML,
         resident_climate_model
       )
     ),
     tar_target(
-      phylogeny_model_sequence,
-      fit_predictor_sequence(
+      phylogeny_model_pair,
+      fit_predictor_model_pair(
         phylogeny_predictor_specification,
         analysis_settings$climate_formula,
-        full_sample_climate_baseline_ML,
+        resident_climate_model_ML,
         resident_climate_model
       )
     ),
@@ -688,78 +701,85 @@ model_target_definitions <- function() {
       legacy_phylogeny_predictor_specification_reference,
       build_phylogeny_predictor_specification(
         legacy_phylogeny_auc_data_reference,
-        resident_sampling_covariance_matrix
+        resident_sampling_variance_matrix
       )
     ),
     tar_target(
-      legacy_phylogeny_model_sequence_reference,
-      fit_predictor_sequence(
+      legacy_phylogeny_model_pair_reference,
+      fit_predictor_model_pair(
         legacy_phylogeny_predictor_specification_reference,
         analysis_settings$climate_formula,
-        full_sample_climate_baseline_ML,
+        resident_climate_model_ML,
         resident_climate_model
       )
     ),
     tar_target(
-      predictor_sequence_tables,
-      assemble_predictor_sequence_tables(
-        ldmc_model_sequence,
-        lma_model_sequence,
-        height_model_sequence,
-        graminoid_model_sequence,
-        woodiness_model_sequence,
-        phylogeny_model_sequence
+      predictor_model_tables,
+      assemble_predictor_model_tables(
+        ldmc_model_pair,
+        lma_model_pair,
+        height_model_pair,
+        graminoid_model_pair,
+        woodiness_model_pair,
+        phylogeny_model_pair
       )
     ),
     # Report-facing assemblies stay branch-specific. This prevents a change to
     # one scientific branch from invalidating unrelated reports.
     tar_target(
       trait_model_tables,
-      assemble_predictor_sequence_tables(
-        ldmc_model_sequence,
-        lma_model_sequence,
-        height_model_sequence
+      assemble_predictor_model_tables(
+        ldmc_model_pair,
+        lma_model_pair,
+        height_model_pair
       )
     ),
     tar_target(
       functional_model_tables,
-      assemble_predictor_sequence_tables(
-        graminoid_model_sequence,
-        woodiness_model_sequence
+      assemble_predictor_model_tables(
+        graminoid_model_pair,
+        woodiness_model_pair
       )
     ),
     tar_target(
       phylogeny_model_tables,
-      assemble_predictor_sequence_tables(phylogeny_model_sequence)
+      assemble_predictor_model_tables(phylogeny_model_pair)
     ),
     tar_target(
       predictor_model_fit,
-      predictor_sequence_tables$fit_statistics
+      predictor_model_tables$fit_statistics
     ),
     tar_target(
       predictor_model_comparisons,
-      predictor_sequence_tables$comparisons
+      predictor_model_tables$comparisons
     ),
-    tar_target(predictor_CR1, predictor_sequence_tables$CR1),
+    tar_target(predictor_CR1, predictor_model_tables$CR1),
+    tar_target(
+      legacy_predictor_pair_fit,
+      legacy_predictor_pair_fit_statistics(legacy_predictor_model_fit)
+    ),
+    tar_target(
+      legacy_predictor_pair_comparisons,
+      derive_legacy_predictor_pair_comparisons(legacy_predictor_model_fit)
+    ),
     tar_target(
       predictor_model_fit_equivalence,
       validate_reference_table(
-        predictor_model_fit, legacy_predictor_model_fit,
+        predictor_model_fit, legacy_predictor_pair_fit,
         "predictor ML fit statistics"
       )
     ),
     tar_target(
       predictor_model_comparisons_equivalence,
       validate_reference_table(
-        predictor_model_comparisons,
-        legacy_predictor_model_comparisons,
-        "predictor ML nested comparisons"
+        predictor_model_comparisons, legacy_predictor_pair_comparisons,
+        "predictor climate-only versus full ML comparisons"
       )
     ),
     tar_target(
       predictor_CR1_equivalence,
       validate_reference_table(
-        predictor_CR1, legacy_predictor_CR1,
+        predictor_CR1, legacy_predictor_pair_CR1,
         "predictor full REML CR1"
       )
     ),
@@ -768,7 +788,7 @@ model_target_definitions <- function() {
       assert_reference_table(
         trait_model_tables$fit_statistics,
         dplyr::filter(
-          legacy_predictor_model_fit,
+          legacy_predictor_pair_fit,
           .data$predictor %in% c("LDMC", "LMA", "Height")
         ),
         "trait-model ML fit statistics"
@@ -779,7 +799,7 @@ model_target_definitions <- function() {
       assert_reference_table(
         trait_model_tables$comparisons,
         dplyr::filter(
-          legacy_predictor_model_comparisons,
+          legacy_predictor_pair_comparisons,
           .data$predictor %in% c("LDMC", "LMA", "Height")
         ),
         "trait-model ML nested comparisons"
@@ -790,7 +810,7 @@ model_target_definitions <- function() {
       assert_reference_table(
         trait_model_tables$CR1,
         dplyr::filter(
-          legacy_predictor_CR1,
+          legacy_predictor_pair_CR1,
           .data$predictor %in% c("LDMC", "LMA", "Height")
         ),
         "trait-model full REML CR1"
@@ -801,7 +821,7 @@ model_target_definitions <- function() {
       assert_reference_table(
         functional_model_tables$fit_statistics,
         dplyr::filter(
-          legacy_predictor_model_fit,
+          legacy_predictor_pair_fit,
           .data$predictor %in% c("Graminoid status", "Woodiness")
         ),
         "functional-model ML fit statistics"
@@ -812,7 +832,7 @@ model_target_definitions <- function() {
       assert_reference_table(
         functional_model_tables$comparisons,
         dplyr::filter(
-          legacy_predictor_model_comparisons,
+          legacy_predictor_pair_comparisons,
           .data$predictor %in% c("Graminoid status", "Woodiness")
         ),
         "functional-model ML nested comparisons"
@@ -823,7 +843,7 @@ model_target_definitions <- function() {
       assert_reference_table(
         functional_model_tables$CR1,
         dplyr::filter(
-          legacy_predictor_CR1,
+          legacy_predictor_pair_CR1,
           .data$predictor %in% c("Graminoid status", "Woodiness")
         ),
         "functional-model full REML CR1"
@@ -834,7 +854,7 @@ model_target_definitions <- function() {
       validate_reference_table(
         phylogeny_model_tables$fit_statistics,
         dplyr::filter(
-          legacy_predictor_model_fit,
+          legacy_predictor_pair_fit,
           .data$predictor == "Phylogenetic position (PEV1-PEV3)"
         ),
         "phylogeny-model ML fit statistics"
@@ -845,7 +865,7 @@ model_target_definitions <- function() {
       validate_reference_table(
         phylogeny_model_tables$comparisons,
         dplyr::filter(
-          legacy_predictor_model_comparisons,
+          legacy_predictor_pair_comparisons,
           .data$predictor == "Phylogenetic position (PEV1-PEV3)"
         ),
         "phylogeny-model ML nested comparisons"
@@ -856,7 +876,7 @@ model_target_definitions <- function() {
       validate_reference_table(
         phylogeny_model_tables$CR1,
         dplyr::filter(
-          legacy_predictor_CR1,
+          legacy_predictor_pair_CR1,
           .data$predictor == "Phylogenetic position (PEV1-PEV3)"
         ),
         "phylogeny-model full REML CR1"
@@ -874,12 +894,12 @@ model_target_definitions <- function() {
     tar_target(
       heterogeneity_bundle,
       assemble_heterogeneity_synthesis(
-        ldmc_model_sequence,
-        lma_model_sequence,
-        height_model_sequence,
-        graminoid_model_sequence,
-        woodiness_model_sequence,
-        phylogeny_model_sequence
+        ldmc_model_pair,
+        lma_model_pair,
+        height_model_pair,
+        graminoid_model_pair,
+        woodiness_model_pair,
+        phylogeny_model_pair
       )
     ),
     tar_target(
@@ -893,12 +913,12 @@ model_target_definitions <- function() {
     tar_target(
       legacy_heterogeneity_bundle_reference,
       assemble_heterogeneity_synthesis(
-        ldmc_model_sequence,
-        lma_model_sequence,
-        height_model_sequence,
-        graminoid_model_sequence,
-        woodiness_model_sequence,
-        legacy_phylogeny_model_sequence_reference
+        ldmc_model_pair,
+        lma_model_pair,
+        height_model_pair,
+        graminoid_model_pair,
+        woodiness_model_pair,
+        legacy_phylogeny_model_pair_reference
       )
     ),
     tar_target(
@@ -906,8 +926,8 @@ model_target_definitions <- function() {
       build_phylogeny_migration_equivalence(
         resident_pev_scores_oriented,
         legacy_resident_pev_scores,
-        phylogeny_model_sequence,
-        legacy_phylogeny_model_sequence_reference,
+        phylogeny_model_pair,
+        legacy_phylogeny_model_pair_reference,
         heterogeneity_bundle,
         legacy_heterogeneity_bundle_reference
       )
@@ -920,7 +940,6 @@ model_target_definitions <- function() {
       resident_consistency_checks,
       build_resident_consistency_checks(
         resident_auc_data,
-        resident_sampling_covariance_matrix,
         winner_loser_input,
         analysis_data_input,
         analysis_settings,
@@ -958,12 +977,12 @@ model_target_definitions <- function() {
       model_fit_r2,
       assemble_model_fit_r2(
         resident_climate_model,
-        ldmc_model_sequence,
-        lma_model_sequence,
-        height_model_sequence,
-        graminoid_model_sequence,
-        woodiness_model_sequence,
-        phylogeny_model_sequence
+        ldmc_model_pair,
+        lma_model_pair,
+        height_model_pair,
+        graminoid_model_pair,
+        woodiness_model_pair,
+        phylogeny_model_pair
       )
     ),
     tar_target(
@@ -977,12 +996,12 @@ model_target_definitions <- function() {
     tar_target(
       model_random_profile_job,
       build_predictor_variance_profile_jobs(
-        ldmc_model_sequence,
-        lma_model_sequence,
-        height_model_sequence,
-        graminoid_model_sequence,
-        woodiness_model_sequence,
-        phylogeny_model_sequence
+        ldmc_model_pair,
+        lma_model_pair,
+        height_model_pair,
+        graminoid_model_pair,
+        woodiness_model_pair,
+        phylogeny_model_pair
       ),
       iteration = "list"
     ),
@@ -1005,12 +1024,12 @@ model_target_definitions <- function() {
       model_random_effect_correlations,
       assemble_model_random_correlations(
         resident_climate_model,
-        ldmc_model_sequence,
-        lma_model_sequence,
-        height_model_sequence,
-        graminoid_model_sequence,
-        woodiness_model_sequence,
-        phylogeny_model_sequence
+        ldmc_model_pair,
+        lma_model_pair,
+        height_model_pair,
+        graminoid_model_pair,
+        woodiness_model_pair,
+        phylogeny_model_pair
       )
     ),
     tar_target(
@@ -1032,7 +1051,7 @@ model_target_definitions <- function() {
         model_performance_gradient,
         predictor_specifications,
         resident_auc_data,
-        resident_sampling_covariance_matrix,
+        resident_sampling_variance_matrix,
         analysis_settings$climate_formula
       ),
       pattern = map(model_performance_gradient),
@@ -1373,7 +1392,7 @@ model_target_definitions <- function() {
       current_release_checks(
         resident_scope,
         predictor_specification_validation,
-        predictor_sequence_tables,
+        predictor_model_tables,
         family_model_summary,
         resident_phylogeny_rebuild$audit,
         zero_distance_audit,
@@ -1441,12 +1460,12 @@ model_target_definitions <- function() {
       format = "file"
     ),
     tar_target(
-      resident_V_file,
+      resident_sampling_variance_file,
       write_rds_atomic(
-        resident_sampling_covariance_matrix,
+        resident_sampling_variance_matrix,
         file.path(
           analysis_settings$output$data,
-          "resident_sampling_covariance.rds"
+          "resident_sampling_variance_matrix.rds"
         )
       ),
       format = "file"
@@ -1529,12 +1548,12 @@ model_target_definitions <- function() {
       format = "file"
     ),
     tar_target(
-      family_V_file,
+      family_sampling_variance_file,
       write_rds_atomic(
-        family_V_auc,
+        family_sampling_variance_matrix,
         file.path(
           analysis_settings$output$data,
-          "family_V_auc.rds"
+          "family_sampling_variance_matrix.rds"
         )
       ),
       format = "file"
@@ -1707,7 +1726,7 @@ model_target_definitions <- function() {
     tar_target(
       ldmc_model_file,
       write_rds_atomic(
-        ldmc_model_sequence$fits$full_REML$fit,
+        ldmc_model_pair$fits$full_REML$fit,
         file.path(
           analysis_settings$output$models,
           "predictor_ldmc_model.rds"
@@ -1718,7 +1737,7 @@ model_target_definitions <- function() {
     tar_target(
       lma_model_file,
       write_rds_atomic(
-        lma_model_sequence$fits$full_REML$fit,
+        lma_model_pair$fits$full_REML$fit,
         file.path(
           analysis_settings$output$models,
           "predictor_lma_model.rds"
@@ -1729,7 +1748,7 @@ model_target_definitions <- function() {
     tar_target(
       height_model_file,
       write_rds_atomic(
-        height_model_sequence$fits$full_REML$fit,
+        height_model_pair$fits$full_REML$fit,
         file.path(
           analysis_settings$output$models,
           "predictor_height_model.rds"
@@ -1740,7 +1759,7 @@ model_target_definitions <- function() {
     tar_target(
       graminoid_model_file,
       write_rds_atomic(
-        graminoid_model_sequence$fits$full_REML$fit,
+        graminoid_model_pair$fits$full_REML$fit,
         file.path(
           analysis_settings$output$models,
           "predictor_graminoid_model.rds"
@@ -1751,7 +1770,7 @@ model_target_definitions <- function() {
     tar_target(
       woodiness_model_file,
       write_rds_atomic(
-        woodiness_model_sequence$fits$full_REML$fit,
+        woodiness_model_pair$fits$full_REML$fit,
         file.path(
           analysis_settings$output$models,
           "predictor_woodiness_model.rds"
@@ -1762,7 +1781,7 @@ model_target_definitions <- function() {
     tar_target(
       phylogeny_model_file,
       write_rds_atomic(
-        phylogeny_model_sequence$fits$full_REML$fit,
+        phylogeny_model_pair$fits$full_REML$fit,
         file.path(
           analysis_settings$output$models,
           "predictor_phylogeny_model.rds"
@@ -1817,7 +1836,7 @@ model_target_definitions <- function() {
     tar_target(
       predictor_diagnostics_file,
       write_csv_atomic(
-        predictor_sequence_tables$diagnostics,
+        predictor_model_tables$diagnostics,
         file.path(
           analysis_settings$output$audits,
           "predictor_model_random_effects.csv"
@@ -1828,7 +1847,7 @@ model_target_definitions <- function() {
     tar_target(
       predictor_audit_file,
       write_csv_atomic(
-        predictor_sequence_tables$audit,
+        predictor_model_tables$audit,
         file.path(
           analysis_settings$output$audits,
           "predictor_model_data_audit.csv"
@@ -1922,13 +1941,13 @@ model_target_definitions <- function() {
         upstream_winner_loser = winner_loser_validation,
         temporal_flows = flow_validation,
         downstream_inputs = resident_input_equivalence,
-        downstream_covariance = resident_covariance_validation,
+        downstream_sampling_variance = resident_sampling_variance_validation,
         downstream_consistency = resident_consistency_checks,
         mboth_fit = legacy_resident_climate_model_equivalence,
         mboth_profiles = legacy_resident_climate_variance_profile_equivalence,
         species_classification = species_classification_equivalence,
         family_data = family_auc_data_equivalence,
-        family_covariance = family_V_equivalence,
+        family_sampling_variance = family_sampling_variance_equivalence,
         family_cover = family_cover_audit_equivalence,
         family_fit = family_model_equivalence,
         family_support = family_support_equivalence,
@@ -1996,7 +2015,7 @@ model_target_definitions <- function() {
         try_individual_file = try_individual_file,
         auc_by_plot_file = auc_file,
         resident_data_file = resident_data_file,
-        resident_V_file = resident_V_file,
+        resident_sampling_variance_file = resident_sampling_variance_file,
         resident_climate_model_file = resident_climate_model_file,
         resident_climate_fixed_effects_file = resident_climate_fixed_effects_file,
         resident_climate_robust_inference_file = resident_climate_robust_inference_file,
@@ -2004,7 +2023,7 @@ model_target_definitions <- function() {
         resident_climate_variance_profiles_file = resident_climate_variance_profiles_file,
         species_classification_file = species_classification_file,
         family_data_file = family_data_file,
-        family_V_file = family_V_file,
+        family_sampling_variance_file = family_sampling_variance_file,
         family_model_file = family_model_file,
         family_support_file = family_support_file,
         family_random_file = family_random_file,

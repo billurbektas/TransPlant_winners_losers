@@ -193,18 +193,19 @@ model_performance_fit_r2 <- function(fit, model_key, candidate_role) {
 #' @param ... Additional arguments forwarded to the delegated operation.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 assemble_model_fit_r2 <- function(climate_model, ...) {
-  sequences <- list(...)
+  model_pairs <- list(...)
   rows <- list(
     model_performance_fit_r2(
       climate_model$fit, "Climate", "standalone"
     )
   )
-  for (sequence in sequences) {
+  for (model_pair in model_pairs) {
     rows[[length(rows) + 1L]] <- model_performance_fit_r2(
-      sequence$fits$M0_REML$fit, sequence$key, "matched_baseline"
+      model_pair$fits$climate_REML$fit,
+      model_pair$key, "matched_baseline"
     )
     rows[[length(rows) + 1L]] <- model_performance_fit_r2(
-      sequence$fits$full_REML$fit, sequence$key, "full"
+      model_pair$fits$full_REML$fit, model_pair$key, "full"
     )
   }
   dplyr::bind_rows(rows)
@@ -213,10 +214,11 @@ assemble_model_fit_r2 <- function(climate_model, ...) {
 #' Model Performance Partition.
 #'
 #' @param data A data frame whose required columns are checked before use.
-#' @param V A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param sampling_variance_matrix Diagonal, effect-ordered sampling variances.
 #' @param heldout_gradient A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-model_performance_partition <- function(data, V, heldout_gradient) {
+model_performance_partition <- function(
+    data, sampling_variance_matrix, heldout_gradient) {
   required <- c(
     "effect_id", "gradient_id", "experiment_id", "species_id",
     "auc_effect", "T_z", "P_z", "W_z", "TP_z"
@@ -226,8 +228,10 @@ model_performance_partition <- function(data, V, heldout_gradient) {
     stop("Performance data lack: ", paste(missing, collapse = ", "), call. = FALSE)
   }
   effect_ids <- as.character(data$effect_id)
-  if (!identical(rownames(V), effect_ids) || !identical(colnames(V), effect_ids)) {
-    stop("Performance data and V are not identically ordered.", call. = FALSE)
+  if (!identical(rownames(sampling_variance_matrix), effect_ids) ||
+      !identical(colnames(sampling_variance_matrix), effect_ids)) {
+    stop("Performance data and sampling variances are not identically ordered.",
+         call. = FALSE)
   }
   test_index <- as.character(data$gradient_id) == heldout_gradient
   if (!any(test_index) || all(test_index)) {
@@ -237,19 +241,15 @@ model_performance_partition <- function(data, V, heldout_gradient) {
   test <- data[test_index, , drop = FALSE]
   train_ids <- as.character(train$effect_id)
   test_ids <- as.character(test$effect_id)
-  train_V <- subset_auc_v(V, train_ids)
-  test_V <- subset_auc_v(V, test_ids)
-  cross_V <- V[train_ids, test_ids, drop = FALSE]
-  maximum_cross_covariance <- if (length(cross_V)) {
-    max(abs(as.numeric(cross_V)))
-  } else {
-    0
-  }
-  if (!is.finite(maximum_cross_covariance) || maximum_cross_covariance > 1e-12) {
-    stop(
-      "Held-out gradient has nonzero sampling covariance with training data.",
-      call. = FALSE
-    )
+  train_V <- subset_sampling_variance_matrix(
+    sampling_variance_matrix, train_ids
+  )
+  test_V <- subset_sampling_variance_matrix(
+    sampling_variance_matrix, test_ids
+  )
+  effect_partitions_disjoint <- !any(train_ids %in% test_ids)
+  if (!effect_partitions_disjoint) {
+    stop("Training and held-out effects overlap.", call. = FALSE)
   }
   training_experiments <- train |>
     dplyr::distinct(.data$experiment_id, .data$T_z, .data$P_z, .data$W_z)
@@ -267,7 +267,7 @@ model_performance_partition <- function(data, V, heldout_gradient) {
     test_V = test_V,
     climate_supported = as.logical(support$grid$supported),
     support_diagnostic = support$diagnostic,
-    maximum_cross_covariance = maximum_cross_covariance
+    effect_partitions_disjoint = effect_partitions_disjoint
   )
 }
 
@@ -648,8 +648,7 @@ model_performance_fit_audit_row <- function(
       n_test = nrow(partition$test),
       n_train_species = dplyr::n_distinct(partition$train$species_id),
       n_test_species = dplyr::n_distinct(partition$test$species_id),
-      maximum_cross_sampling_covariance =
-        partition$maximum_cross_covariance,
+      effect_partitions_disjoint = partition$effect_partitions_disjoint,
       support_diagnostic = partition$support_diagnostic,
       .before = 1L
     )
@@ -660,16 +659,17 @@ model_performance_fit_audit_row <- function(
 #' @param heldout_gradient A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param predictor_specifications A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param full_data A data frame whose required columns are checked before use.
-#' @param full_V A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param full_sampling_variance_matrix Complete diagonal sampling-variance matrix.
 #' @param climate_formula A model formula or random-effects specification.
 #' @details Holds out one complete gradient, refits the registered climate and
 #' predictor formulas on all remaining gradients, and returns general and
 #' repeat-species predictions with covariance-aware Gaussian scores. Sampling
-#' covariance order, support diagnostics, and fit warnings are retained; no
+#' variance order, support diagnostics, and fit warnings are retained; no
 #' fitted release model is replaced by these evaluation-only fits.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 run_model_performance_gradient_fold <- function(
-    heldout_gradient, predictor_specifications, full_data, full_V,
+    heldout_gradient, predictor_specifications, full_data,
+    full_sampling_variance_matrix,
     climate_formula) {
   heldout_gradient <- as.character(heldout_gradient[[1]])
   predictions <- list()
@@ -678,9 +678,9 @@ run_model_performance_gradient_fold <- function(
   prediction_audits <- list()
 
   full_partition <- model_performance_partition(
-    full_data, full_V, heldout_gradient
+    full_data, full_sampling_variance_matrix, heldout_gradient
   )
-  baseline_id <- "Climate_full_data_M0"
+  baseline_id <- "Climate_full_data"
   full_baseline <- fit_model_performance_fold(
     full_partition, climate_formula,
     paste(heldout_gradient, "full-data climate-only REML")
@@ -704,7 +704,7 @@ run_model_performance_gradient_fold <- function(
 
   for (spec in predictor_specifications) {
     partition <- model_performance_partition(
-      spec$data, spec$V, heldout_gradient
+      spec$data, spec$sampling_variance_matrix, heldout_gradient
     )
     if (isTRUE(spec$full_data)) {
       if (!identical(
@@ -720,7 +720,7 @@ run_model_performance_gradient_fold <- function(
       baseline_bundle <- full_baseline_bundle
       baseline_fit_id <- baseline_id
     } else {
-      baseline_fit_id <- paste0(spec$key, "_matched_M0")
+      baseline_fit_id <- paste0(spec$key, "_matched_climate")
       baseline <- fit_model_performance_fold(
         partition, climate_formula,
         paste(heldout_gradient, spec$label, "matched climate-only REML")
@@ -748,22 +748,22 @@ run_model_performance_gradient_fold <- function(
 
     full_fit_id <- paste0(spec$key, "_full")
     full_fit <- fit_model_performance_fold(
-      partition, spec$full,
-      paste(heldout_gradient, spec$label, spec$full_name, "REML"),
+      partition, spec$full_formula,
+      paste(heldout_gradient, spec$label, "full predictor-climate REML"),
       spec$predictor_columns
     )
     fit_audits[[length(fit_audits) + 1L]] <-
       model_performance_fit_audit_row(
         full_fit, partition, heldout_gradient, spec$key,
-        "full", full_fit_id, spec$full
+        "full", full_fit_id, spec$full_formula
       )
     full_bundle <- predict_model_performance_fold(
-      full_fit, partition, spec$full,
-      paste(heldout_gradient, spec$label, spec$full_name)
+      full_fit, partition, spec$full_formula,
+      paste(heldout_gradient, spec$label, "full predictor-climate")
     )
     decorated_full <- decorate_model_performance_prediction(
       full_bundle, partition, heldout_gradient, spec$key,
-      "full", full_fit_id, spec$full
+      "full", full_fit_id, spec$full_formula
     )
     predictions[[length(predictions) + 1L]] <- decorated_full$predictions
     gaussian_scores[[length(gaussian_scores) + 1L]] <-
@@ -1180,12 +1180,9 @@ validate_model_performance <- function(
     "Fold fit convergence and rank",
     nrow(fit_audit) == expected_fits && all(fit_audit$pass),
     paste(sum(fit_audit$pass), "of", nrow(fit_audit), "fit audits pass"),
-    "Cross-fold sampling independence",
-    all(fit_audit$maximum_cross_sampling_covariance <= 1e-12),
-    paste(
-      "maximum absolute cross-fold sampling covariance",
-      format(max(fit_audit$maximum_cross_sampling_covariance), scientific = TRUE)
-    ),
+    "Disjoint training and held-out effects",
+    all(fit_audit$effect_partitions_disjoint),
+    paste(sum(fit_audit$effect_partitions_disjoint), "fit partitions checked"),
     "Predictive covariance and unseen-species identity",
     all(prediction_audit$pass),
     paste(sum(prediction_audit$pass), "of", nrow(prediction_audit),

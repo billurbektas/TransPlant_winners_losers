@@ -45,8 +45,8 @@ current_release_checks <- function(
     heterogeneity_components, heterogeneity_synthesis) {
   tibble::tibble(
     check = c(
-      "resident-model scope", "sampling covariance",
-      "predictor specifications", "predictor row/covariance audits",
+      "resident-model scope", "diagonal sampling variances",
+      "predictor specifications", "predictor row/variance audits",
       "predictor convergence and covariance diagnostics",
       "family model diagnostics", "phylogeny reconstruction",
       "documented zero-distance placements",
@@ -55,17 +55,17 @@ current_release_checks <- function(
     pass = c(
       scope$effects == 1604L && scope$species == 526L &&
         scope$experiments == 42L,
-      isTRUE(scope$V_validation$valid[[1]]),
+      isTRUE(scope$sampling_variance_validation$valid[[1]]),
       all(predictor_validation$pass),
-      all(predictor_tables$audit$exact_V_order &
-            predictor_tables$audit$matched_M0_M1_full_rows &
+      all(predictor_tables$audit$exact_sampling_variance_order &
+            predictor_tables$audit$matched_climate_and_full_rows_and_variances &
             (is.na(predictor_tables$audit$baseline_reproduces_resident_climate_model) |
                predictor_tables$audit$baseline_reproduces_resident_climate_model)),
       all(predictor_tables$diagnostics$covariance_positive_definite &
             predictor_tables$diagnostics$covariance_identifiable &
             predictor_tables$diagnostics$finite_coefficients &
             predictor_tables$diagnostics$finite_fixed_covariance),
-      isTRUE(family_model_summary$V_valid[[1]]) &&
+      isTRUE(family_model_summary$sampling_variance_valid[[1]]) &&
         isTRUE(family_model_summary$covariance_positive_definite[[1]]) &&
         isTRUE(family_model_summary$random_structure_identifiable[[1]]) &&
         isTRUE(family_model_summary$finite_coefficients[[1]]) &&
@@ -90,9 +90,14 @@ current_release_checks <- function(
     detail = c(
       paste(scope$effects, "effects;", scope$species, "species;",
             scope$experiments, "experiments"),
-      paste("minimum eigenvalue", report_number(scope$V_validation$minimum_eigenvalue)),
+      paste(
+        "minimum sampling variance",
+        report_number(
+          scope$sampling_variance_validation$minimum_sampling_variance
+        )
+      ),
       paste(sum(predictor_validation$pass), "of", nrow(predictor_validation), "checks passed"),
-      paste(nrow(predictor_tables$audit), "predictor sequences"),
+      paste(nrow(predictor_tables$audit), "predictor model pairs"),
       paste(nrow(predictor_tables$diagnostics), "REML diagnostic rows"),
       paste(family_model_summary$n_effects, "effects;",
             family_model_summary$n_families, "families"),
@@ -158,10 +163,11 @@ format_heterogeneity_synthesis <- function(synthesis) {
       " | H_total=", report_number(row$`H_total baseline`), " -> ",
       report_number(row$`H_total predictor`), " (",
       report_number(row$`Total heterogeneity resolved (%)`), "%)",
-      " | ", row$`ML M0 vs M1 result`,
-      " | ", row$`ML M1 vs full/context result`,
-      " | Delta AIC=", report_number(row$`Delta AIC`),
-      " | Delta AICc=", report_number(row$`Delta AICc`)
+      " | ", row$`ML climate-only vs full result`,
+      " | Delta AIC (full - climate only)=",
+      report_number(row$`Delta AIC full minus climate only`),
+      " | Delta AICc (full - climate only)=",
+      report_number(row$`Delta AICc full minus climate only`)
     )
   }, character(1))
 }

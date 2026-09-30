@@ -28,7 +28,7 @@ Family effects are reconstructed from the retained resident community for the sa
 
 ### Exact model specification
 
-The fixed and random structures mirror the resident climate model, replacing species with family after raw-cover aggregation and full family-AUC covariance reconstruction.
+The fixed and random structures mirror the resident climate model, replacing species with family after raw-cover aggregation. Family sampling variances are the squared contrast SEs in effect order.
 
 ### Assumptions
 
@@ -36,7 +36,7 @@ Family identities follow validated taxonomy plus the single explicit `Viola palu
 
 ### Convergence and covariance diagnostics
 
-Optimizer, positive-definiteness, identifiability, covariance, support, and classification gates are shown below.
+Optimizer, positive-definiteness, identifiability, sampling-variance, support, and classification checks are shown below.
 
 ### Main numerical results
 
@@ -57,8 +57,8 @@ knitr::kable(head(classification, 20))
 
 ### Interpretation boundary
 
-Species effects are not averaged; family AUC and its full covariance are
-reconstructed from plot cover. The `Viola palustris` family value is the
+Species effects are not averaged; family AUC effects and SEs are estimated from
+plot cover, then represented by a diagonal sampling-variance matrix. The `Viola palustris` family value is the
 explicit `Violaceae` decision recorded in the resident-species override ledger.
 
 ### Principal objects
@@ -67,5 +67,5 @@ explicit `Violaceae` decision recorded in the resident-species override ledger.
 
 ### PASS/FAIL
 
-Cover reconstruction, covariance, fitted-model diagnostics, support, random
+Cover reconstruction, sampling variances, fitted-model diagnostics, support, random
 coefficients, classification, and summary must all pass their current checks.

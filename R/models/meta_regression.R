@@ -4,7 +4,7 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
-# Pure model helpers for the anchored 526-species meta-regression lineage.
+# Model helpers for the resident-species meta-regressions.
 
 #' Random Structure Text.
 #'
@@ -57,7 +57,7 @@ model_fit_signature <- function(data, formula, method,
 #' Fit Meta Regression.
 #'
 #' @param data A data frame whose required columns are checked before use.
-#' @param V A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param sampling_variance_matrix Effect-ordered sampling variances.
 #' @param formula A model formula or random-effects specification.
 #' @param method A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param label A value supplied by the calling workflow; admissible values are checked in the function body.
@@ -65,21 +65,25 @@ model_fit_signature <- function(data, formula, method,
 #' @param random A model formula or random-effects specification.
 #' @details `data` must contain `effect_id`, `auc_effect`, the grouping fields,
 #' and every variable referenced by `formula` and `random`. Row and column names
-#' of `V` must exactly equal `effect_id` order. The registered `GEN` random
+#' of `sampling_variance_matrix` must exactly equal `effect_id` order. The registered `GEN` random
 #' structure and supplied ML/REML method are not simplified on failure; fit
 #' errors and warnings are retained in the returned bundle.
 #' @return A fitted model bundle with diagnostics retained for validation.
-fit_meta_regression <- function(data, V, formula, method, label,
+fit_meta_regression <- function(data, sampling_variance_matrix, formula, method, label,
                                 predictor_columns = character(),
                                 random = resident_analysis_spec()$species_random) {
-  if (!identical(rownames(V), as.character(data$effect_id)) ||
-      !identical(colnames(V), as.character(data$effect_id))) {
-    stop(label, ": effect rows and sampling covariance are not identically ordered.",
+  if (!identical(
+        rownames(sampling_variance_matrix), as.character(data$effect_id)
+      ) ||
+      !identical(
+        colnames(sampling_variance_matrix), as.character(data$effect_id)
+      )) {
+    stop(label, ": effect rows and sampling variances are not identically ordered.",
          call. = FALSE)
   }
   captured <- capture_model_fit(
     metafor::rma.mv(
-      yi = auc_effect, V = V, mods = formula,
+      yi = auc_effect, V = sampling_variance_matrix, mods = formula,
       random = random, struct = "GEN", data = data,
       method = method, sparse = TRUE
     ),
@@ -133,14 +137,22 @@ nested_model_lrt <- function(smaller, larger, predictor, comparison) {
   ll1 <- stats::logLik(larger$fit)
   df <- attr(ll1, "df") - attr(ll0, "df")
   statistic <- 2 * (as.numeric(ll1) - as.numeric(ll0))
+  same_rows_and_sampling_variances <- identical(
+    smaller$signature$effect_id, larger$signature$effect_id
+  ) && isTRUE(all.equal(
+    smaller$fit$V, larger$fit$V,
+    tolerance = 0, check.attributes = TRUE
+  ))
   tibble::tibble(
     predictor = predictor,
     comparison = comparison,
     likelihood_ratio = statistic,
     df = df,
     p_value = stats::pchisq(statistic, df, lower.tail = FALSE),
-    valid_nested_comparison = is.finite(statistic) && statistic >= -1e-7 && df > 0,
-    same_rows_and_V = TRUE,
+    valid_nested_comparison = is.finite(statistic) &&
+      statistic >= -1e-7 && df > 0 &&
+      same_rows_and_sampling_variances,
+    same_rows_and_sampling_variances = same_rows_and_sampling_variances,
     method = "ML"
   )
 }

@@ -28,7 +28,7 @@ Each trait uses its own complete-case species/effect subset; the scaling table r
 
 ### Exact model specification
 
-For each trait, compare climate-only `M0`, additive-trait `M1`, and full `Trait_z * T_z * P_z * W_z` models on identical rows and covariance.
+For each trait, compare climate-only `T_z * P_z * W_z` directly with full `Trait_z * T_z * P_z * W_z` on identical rows and diagonal sampling variances.
 
 ### Assumptions
 
@@ -36,7 +36,7 @@ Positive species medians are natural-log transformed and standardized over uniqu
 
 ### Convergence and covariance diagnostics
 
-Matched-row/V checks and branch-specific numerical regression gates accompany the ML and full REML results.
+Matched-row/sampling-variance checks and branch-specific numerical regression gates accompany the climate-only and full ML/REML results.
 
 ### Main numerical results
 
@@ -59,7 +59,7 @@ Each trait is fitted separately after log unique-species scaling; missing values
 
 ### PASS/FAIL
 
-Trait values, scaling, matched-row covariance checks, ML fits/comparisons, and
+Trait values, scaling, matched-row sampling-variance checks, ML fits/comparisons, and
 full-REML robust-inference rows must pass their current checks.
 ## Functional-group predictors
 
@@ -74,12 +74,12 @@ Both predictors use the complete 1,604-effect, 526-species resident cohort; grou
 
 ### Exact model specification
 
-Each predictor is fitted separately as climate-only `M0`, additive-status `M1`, and full status-by-`T_z * P_z * W_z` interaction model.
+Each predictor is fitted separately as a climate-only model and a full status-by-`T_z * P_z * W_z` interaction model. ML compares them directly; REML provides final estimates.
 
 ### Assumptions
 
 Graminoid and Woodiness assignments remain independent binary variables and
-share the exact ordered `V_auc`. TNRS-derived family rows supply 525 retained
+share the exact ordered diagonal sampling-variance matrix. TNRS-derived family rows supply 525 retained
 taxa; the shared resident-species override ledger augments the active functional
 target with the validated non-graminoid/non-woody assignment for *Viola
 palustris*.
@@ -111,8 +111,8 @@ The Woodiness support mask is calculated independently within the observed clima
 
 ### Principal objects
 
-`functional_species`, `graminoid_model_sequence`,
-`woodiness_model_sequence`, and `woodiness_support_mask`.
+`functional_species`, `graminoid_model_pair`,
+`woodiness_model_pair`, and `woodiness_support_mask`.
 
 ### PASS/FAIL
 
@@ -130,7 +130,7 @@ The tree and PCoA contain exactly the 526 resident-cohort species; the PEV model
 
 ### Exact model specification
 
-The tree is built with pinned V.PhyloMaker2 scenario 3. The PEV sequence compares climate-only `M0`, additive PEV `M1`, and the anchored PEV-by-climate `M3`.
+The tree is built with pinned V.PhyloMaker2 scenario 3. Climate-only ML is compared directly with the specified PEV-by-climate ML model; both roles are also fitted by REML.
 
 ### Assumptions
 
@@ -163,7 +163,7 @@ model receives the independently built and oriented coordinates.
 ### Principal objects
 
 `resident_phylogeny_rebuild`, `resident_pcoa_candidate`,
-`resident_pev_scores_oriented`, `phylogeny_model_sequence`, and
+`resident_pev_scores_oriented`, `phylogeny_model_pair`, and
 `phylogeny_model_tables`.
 
 ### PASS/FAIL

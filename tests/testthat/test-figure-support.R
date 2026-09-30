@@ -1,6 +1,56 @@
 source(project_path("R", "figures", "species_context.R"))
 source(project_path("R", "infrastructure", "provenance.R"))
 
+test_that("Figure 6 uses direct climate-only versus full support", {
+  key <- predictor_synthesis_key()
+  fit <- dplyr::bind_rows(
+    tibble::tibble(
+      predictor = key$source_predictor,
+      model = "climate only", method = "ML", AIC = 100
+    ),
+    tibble::tibble(
+      predictor = key$source_predictor,
+      model = "full predictor-climate", method = "ML",
+      AIC = 100 + c(8.2879, -4.0575, -3.4711, -6.4543, 10.3332, 11.7257)
+    )
+  )
+  comparison <- tibble::tibble(
+    predictor = key$source_predictor,
+    comparison = "climate only vs full predictor-climate",
+    likelihood_ratio = 1,
+    df = 1,
+    p_value = c(0.4621, 0.0101, 0.0125, 0.00414, 0.6845, 0.2485),
+    valid_nested_comparison = TRUE,
+    same_rows_and_sampling_variances = TRUE,
+    method = "ML"
+  )
+  heterogeneity <- tibble::tibble(
+    Predictor = key$source_predictor,
+    `Overall heterogeneity resolved (%)` = 1,
+    `Warming heterogeneity resolved (%)` = 2,
+    `Context heterogeneity resolved (%)` = 3,
+    `Total heterogeneity resolved (%)` = 4
+  )
+  fit_file <- withr::local_tempfile(fileext = ".csv")
+  comparison_file <- withr::local_tempfile(fileext = ".csv")
+  heterogeneity_file <- withr::local_tempfile(fileext = ".csv")
+  readr::write_csv(fit, fit_file)
+  readr::write_csv(comparison, comparison_file)
+  readr::write_csv(heterogeneity, heterogeneity_file)
+
+  prepared <- prepare_predictor_synthesis(
+    fit_file, comparison_file, heterogeneity_file
+  )
+  expect_equal(
+    prepared$delta_AIC_full_minus_climate,
+    c(8.2879, -4.0575, -3.4711, -6.4543, 10.3332, 11.7257)
+  )
+  expect_equal(prepared$lrt_p_value, comparison$p_value)
+  expect_false(any(grepl("additive|M[0-3]", names(prepared))))
+  figure <- build_predictor_synthesis_figure(prepared)
+  expect_s3_class(figure, "ggplot")
+})
+
 test_that("functional coverage is computed independently by group", {
   data <- tibble::tibble(
     species_id = c("a", "b", "c", "d"),

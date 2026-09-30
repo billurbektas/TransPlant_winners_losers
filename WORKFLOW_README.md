@@ -2,8 +2,8 @@
 
 This is the authoritative guide to the analysis. The workflow is organized by
 scientific stage, and `_targets.R` is the executable definition of the graph.
-The refactor does not change formulas, exclusions, covariance structures,
-classification rules, or other scientific decisions.
+The workflow documents formulas, exclusions, sampling-variance assumptions,
+classification rules, and other scientific decisions explicitly.
 
 ## Analysis flow
 
@@ -15,7 +15,7 @@ flowchart TD
 
   external["TRY export + CHELSA cache/downloads"] --> covariates["climate, traits, functional groups, and phylogeny inputs"]
   taxonomy --> covariates
-  taxonomy --> responses["plot AUC + sampling covariance + winner/loser + temporal analysis"]
+  taxonomy --> responses["plot AUC + sampling variances + winner/loser + temporal analysis"]
 
   covariates --> cohortGate["resident-cohort validation"]
   responses --> cohortGate
@@ -51,9 +51,9 @@ will be deleted after explicit acceptance.
 | 1 | Sources and configuration | [data foundation](reports/data_foundation.qmd) | `source_targets()` | `config`, input files, decision ledgers, `active_source_inventory` | source inventory and checksums | required files and configuration parse |
 | 2 | Community and taxonomy | [data foundation](reports/data_foundation.qmd) | `community_targets()` | `community`, `sites`, `experiments`, taxonomy review | standardized community/site/experiment tables | `community_validation` |
 | 3 | Covariates | [data foundation](reports/data_foundation.qmd) | `covariate_targets()` | CHELSA summaries, TRY summaries, functional groups, analysis data | climate, trait, taxonomy, and analysis tables | coordinate, unit, range, and join validation |
-| 4 | Responses | [response estimation](reports/response_estimation.qmd) | `response_targets()` | `auc_inputs`, `winner_loser`, temporal transitions | plot AUC, sampling covariance, response classifications | AUC covariance and flow conservation |
-| 5 | Resident climate and family models | [resident climate model](reports/resident_climate_model.qmd), [family context model](reports/family_context_model.qmd) | `resident_model_targets()` | `resident_model_data`, `resident_climate_model`, `species_classification`, `family_model_bundle` | resident effects/covariance, climate model, species/family classifications | resident scope, covariance, and model diagnostics |
-| 6 | Predictor models | [predictor models](reports/predictor_models.qmd) | `predictor_model_targets()` | trait, functional, and phylogenetic model sequences | model objects, robust inference, phylogeny and PEV tables | matched-row/covariance and fit diagnostics |
+| 4 | Responses | [response estimation](reports/response_estimation.qmd) | `response_targets()` | `auc_inputs`, `winner_loser`, temporal transitions | plot AUC, effect SEs, response classifications | contrast and flow checks |
+| 5 | Resident climate and family models | [resident climate model](reports/resident_climate_model.qmd), [family context model](reports/family_context_model.qmd) | `resident_model_targets()` | `resident_model_data`, `resident_sampling_variance_matrix`, `resident_climate_model`, `species_classification`, `family_model_bundle` | resident effects and diagonal sampling variances, climate model, species/family classifications | resident scope, sampling-variance order, and model diagnostics |
+| 6 | Predictor models | [predictor models](reports/predictor_models.qmd) | `predictor_model_targets()` | trait, functional, and phylogenetic model pairs | climate-only/full model objects, robust inference, phylogeny and PEV tables | matched-row/sampling-variance and fit diagnostics |
 | 7 | Evaluation | [model synthesis](reports/model_synthesis.qmd) | `evaluation_targets()` | `heterogeneity_synthesis`, cross-validation, model-effect profiles | heterogeneity, predictive performance, and diagnostic tables | evaluation release validations |
 | 8 | Publication | all seven reports | `publication_targets()` | figure objects, renderer targets, Quarto targets | registered PDF/PNG figures and rendered reports | figure registry and retained-copy audit |
 | 9 | Release | [release validation](reports/release_validation.qmd) | `release_targets()` | `current_scientific_release_validation`, `release_validation`, manifests | release tables, provenance, checksums | current release gate |
@@ -69,7 +69,7 @@ a target total because the graph can grow without changing this interface.
 R/
   infrastructure/   configuration support, I/O, provenance, artifact handling
   data/             community, taxonomy, climate, traits, analysis dataset
-  responses/        AUC, covariance, winner/loser, temporal analysis
+  responses/        AUC, sampling variances, winner/loser, temporal analysis
   models/           meta-regression, species, family, predictors, phylogeny
   evaluation/       heterogeneity, cross-validation, diagnostics
   figures/          shared styles, figure builders, export renderers
@@ -135,7 +135,7 @@ Rscript -e 'targets::tar_make(names = release_validation)'
 ## Failure behavior
 
 Validation is fail-closed. Missing columns, duplicate identifiers, invalid
-covariance ordering, non-finite model results, failed classifications, or a
+sampling-variance ordering, non-finite model results, failed classifications, or a
 failed release check stop the affected branch. Per-stage audit tables remain in
 `output/audits/` when they were successfully written before the failure.
 

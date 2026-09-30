@@ -40,7 +40,7 @@ test_that("current scientific targets have no frozen-fixture ancestry", {
   expect_false(any(terminals$fixture_ancestor))
 
   phylogeny <- dplyr::filter(
-    scientific, .data$target == "phylogeny_model_sequence"
+    scientific, .data$target == "phylogeny_model_pair"
   )
   expect_match(
     phylogeny$direct_dependencies,

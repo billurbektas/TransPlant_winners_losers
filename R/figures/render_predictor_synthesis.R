@@ -14,10 +14,10 @@
 #' @return A character vector of generated artifact paths, invisibly.
 render_predictor_synthesis_figure <- function(arguments = character()) {
   
-  # Standalone Figure 6 renderer. This reads canonical exported summary tables
+  # Standalone Figure 6 renderer. This reads exported summary tables
   # only; it does not invoke targets, load model objects, or refit models.
   
-  required_packages <- c("dplyr", "ggplot2", "patchwork", "readr", "tidyr")
+  required_packages <- c("cowplot", "dplyr", "ggplot2", "readr", "tidyr")
   missing_packages <- required_packages[
     !vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)
   ]
@@ -47,11 +47,15 @@ render_predictor_synthesis_figure <- function(arguments = character()) {
   }
   pdf_file <- paste0(output_stem, ".pdf")
   png_file <- paste0(output_stem, ".png")
+  fit_file <- if (length(arguments) >= 3L) arguments[[3]] else
+    "output/tables/predictor_model_fit_statistics.csv"
+  comparison_file <- if (length(arguments) >= 4L) arguments[[4]] else
+    "output/tables/predictor_model_comparisons.csv"
+  heterogeneity_file <- if (length(arguments) >= 5L) arguments[[5]] else
+    "output/tables/heterogeneity_synthesis.csv"
   
   plot_data <- prepare_predictor_synthesis(
-    "output/tables/predictor_model_fit_statistics.csv",
-    "output/tables/predictor_model_comparisons.csv",
-    "output/tables/heterogeneity_synthesis.csv"
+    fit_file, comparison_file, heterogeneity_file
   )
   figure <- build_predictor_synthesis_figure(plot_data)
   

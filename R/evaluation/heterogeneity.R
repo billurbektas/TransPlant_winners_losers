@@ -75,31 +75,30 @@ heterogeneity_comparison_text <- function(row) {
   )
 }
 
-#' Heterogeneity from Predictor Sequence.
+#' Heterogeneity from matched predictor models.
 #'
-#' @param sequence A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param model_pair Matched climate-only and full predictor models.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-heterogeneity_from_predictor_sequence <- function(sequence) {
+heterogeneity_from_predictor_models <- function(model_pair) {
   baseline <- response_heterogeneity_metrics(
-    sequence$fits$M0_REML$fit, sequence$data
+    model_pair$fits$climate_REML$fit, model_pair$data
   )
   predictor <- response_heterogeneity_metrics(
-    sequence$fits$full_REML$fit, sequence$data
+    model_pair$fits$full_REML$fit, model_pair$data
   )
   components <- assemble_heterogeneity_components(
-    sequence$label, sequence$data, baseline, predictor
+    model_pair$label, model_pair$data, baseline, predictor
   )
-  M0_statistics <- sequence$statistics |>
-    dplyr::filter(.data$model == "M0")
-  full_name <- sequence$full_name
-  full_statistics <- sequence$statistics |>
-    dplyr::filter(.data$model == .env$full_name)
+  climate_statistics <- model_pair$statistics |>
+    dplyr::filter(.data$model == "climate only")
+  full_statistics <- model_pair$statistics |>
+    dplyr::filter(.data$model == "full predictor-climate")
   resolved <- heterogeneity_resolution(baseline, predictor)
   synthesis <- tibble::tibble(
-    Predictor = sequence$label,
-    `N effects` = nrow(sequence$data),
-    `N species` = dplyr::n_distinct(sequence$data$species_id),
-    `N experiments` = dplyr::n_distinct(sequence$data$experiment_id),
+    Predictor = model_pair$label,
+    `N effects` = nrow(model_pair$data),
+    `N species` = dplyr::n_distinct(model_pair$data$species_id),
+    `N experiments` = dplyr::n_distinct(model_pair$data$experiment_id),
     `H_overall baseline` = baseline[["H_overall"]],
     `H_overall predictor` = predictor[["H_overall"]],
     `Overall heterogeneity resolved (%)` = resolved[["H_overall"]],
@@ -112,14 +111,13 @@ heterogeneity_from_predictor_sequence <- function(sequence) {
     `H_total baseline` = baseline[["H_total"]],
     `H_total predictor` = predictor[["H_total"]],
     `Total heterogeneity resolved (%)` = resolved[["H_total"]],
-    `ML M0 vs M1 result` = heterogeneity_comparison_text(
-      sequence$comparisons[1, ]
+    `ML climate-only vs full result` = heterogeneity_comparison_text(
+      model_pair$comparisons[1, ]
     ),
-    `ML M1 vs full/context result` = heterogeneity_comparison_text(
-      sequence$comparisons[2, ]
-    ),
-    `Delta AIC` = full_statistics$AIC - M0_statistics$AIC,
-    `Delta AICc` = full_statistics$AICc - M0_statistics$AICc
+    `Delta AIC full minus climate only` =
+      full_statistics$AIC - climate_statistics$AIC,
+    `Delta AICc full minus climate only` =
+      full_statistics$AICc - climate_statistics$AICc
   )
   list(components = components, synthesis = synthesis)
 }
@@ -129,8 +127,8 @@ heterogeneity_from_predictor_sequence <- function(sequence) {
 #' @param ... Additional arguments forwarded to the delegated operation.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 assemble_heterogeneity_synthesis <- function(...) {
-  sequences <- list(...)
-  individual <- lapply(sequences, heterogeneity_from_predictor_sequence)
+  model_pairs <- list(...)
+  individual <- lapply(model_pairs, heterogeneity_from_predictor_models)
   result <- list(
     components = dplyr::bind_rows(lapply(individual, `[[`, "components")),
     synthesis = dplyr::bind_rows(lapply(individual, `[[`, "synthesis"))

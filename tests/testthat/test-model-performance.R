@@ -217,16 +217,18 @@ testthat::test_that("metric and paired-skill bootstraps are reproducible", {
   ))
 })
 
-testthat::test_that("the canonical covariance is block-independent by gradient", {
+testthat::test_that("the sampling-variance matrix is diagonal across gradients", {
   data_path <- project_path("output", "data", "resident_effects.csv")
-  covariance_path <- project_path("output", "data", "resident_sampling_covariance.rds")
-  testthat::skip_if_not(file.exists(data_path) && file.exists(covariance_path))
+  variance_path <- project_path(
+    "output", "data", "resident_sampling_variance_matrix.rds"
+  )
+  testthat::skip_if_not(file.exists(data_path) && file.exists(variance_path))
   data <- readr::read_csv(data_path, show_col_types = FALSE)
-  covariance <- readRDS(covariance_path)
+  sampling_variances <- readRDS(variance_path)
   testthat::expect_equal(dplyr::n_distinct(data$gradient_id), 20L)
   for (gradient in unique(as.character(data$gradient_id))) {
     test <- as.character(data$gradient_id) == gradient
-    cross <- covariance[!test, test, drop = FALSE]
+    cross <- sampling_variances[!test, test, drop = FALSE]
     testthat::expect_lte(max(abs(as.numeric(cross))), 1e-12)
   }
 })

@@ -81,197 +81,104 @@ scale_resident_auc_data <- function(data) {
   data$gradient_id <- factor(data$gradient_id)
   list(data = data, scaling = scaling)
 }
-#' Validate Auc Covariance.
+#' Build a diagonal sampling-variance matrix.
 #'
-#' @param V A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param data A data frame whose required columns are checked before use.
-#' @param tolerance A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-validate_auc_covariance <- function(V, data, tolerance = 1e-8) {
-  dimensions_valid <- is.matrix(V) && identical(dim(V), c(nrow(data), nrow(data)))
+#' The AUC contrast model supplies one standard error per effect. The resident
+#' and family meta-regressions treat sampling errors for different effects as
+#' independent, so the model input contains squared standard errors on the
+#' diagonal and exact zeros elsewhere.
+#'
+#' @param data Data frame containing unique effect identifiers and standard
+#'   errors.
+#' @param se_column Name of the standard-error column.
+#' @param id_column Name of the effect-identifier column.
+#' @return A sparse diagonal matrix ordered exactly like `data`.
+build_sampling_variance_matrix <- function(
+    data, se_column, id_column = "effect_id") {
+  required <- c(id_column, se_column)
+  missing <- setdiff(required, names(data))
+  if (length(missing)) {
+    stop(
+      "Sampling-variance data lack: ", paste(missing, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  effect_ids <- as.character(data[[id_column]])
+  standard_errors <- as.numeric(data[[se_column]])
+  if (anyNA(effect_ids) || any(!nzchar(effect_ids)) || anyDuplicated(effect_ids)) {
+    stop("Sampling-variance effect identifiers must be complete and unique.",
+         call. = FALSE)
+  }
+  if (any(!is.finite(standard_errors) | standard_errors <= 0)) {
+    stop("Sampling standard errors must be positive and finite.", call. = FALSE)
+  }
+  result <- Matrix::Diagonal(x = standard_errors^2)
+  dimnames(result) <- list(effect_ids, effect_ids)
+  result
+}
+
+#' Validate a diagonal sampling-variance matrix.
+#'
+#' @param sampling_variance_matrix Matrix to validate.
+#' @param data Data frame containing the matching effects and standard errors.
+#' @param se_column Name of the standard-error column.
+#' @param id_column Name of the effect-identifier column.
+#' @param tolerance Numerical comparison tolerance.
+#' @return One-row validation table.
+validate_sampling_variance_matrix <- function(
+    sampling_variance_matrix, data, se_column, id_column = "effect_id",
+    tolerance = 1e-12) {
+  expected_dimension <- c(nrow(data), nrow(data))
+  dimensions_valid <- identical(dim(sampling_variance_matrix), expected_dimension)
   if (!dimensions_valid) {
     return(tibble::tibble(
-      dimensions_valid = FALSE, order_valid = FALSE,
-      maximum_symmetry_error = NA_real_, minimum_eigenvalue = NA_real_,
-      maximum_diagonal_se_error = NA_real_, valid = FALSE
+      dimensions_valid = FALSE,
+      order_valid = FALSE,
+      maximum_diagonal_variance_error = NA_real_,
+      maximum_absolute_off_diagonal = NA_real_,
+      minimum_sampling_variance = NA_real_,
+      valid = FALSE
     ))
   }
-  order_valid <- !is.null(rownames(V)) && !is.null(colnames(V)) &&
-    identical(rownames(V), data$effect_id) && identical(colnames(V), data$effect_id)
-  symmetry_error <- max(abs(V - t(V)))
-  eigen_min <- if (symmetry_error <= tolerance) {
-    min(eigen(V, symmetric = TRUE, only.values = TRUE)$values)
+  effect_ids <- as.character(data[[id_column]])
+  diagonal <- as.numeric(Matrix::diag(sampling_variance_matrix))
+  expected_diagonal <- as.numeric(data[[se_column]])^2
+  off_diagonal <- sampling_variance_matrix - Matrix::Diagonal(x = diagonal)
+  maximum_off_diagonal <- if (Matrix::nnzero(off_diagonal) == 0L) {
+    0
   } else {
-    NA_real_
+    max(abs(as.numeric(off_diagonal)))
   }
-  diagonal_error <- if (all(diag(V) >= 0)) {
-    max(abs(sqrt(diag(V)) - data$auc_se))
-  } else {
-    Inf
-  }
+  order_valid <- identical(rownames(sampling_variance_matrix), effect_ids) &&
+    identical(colnames(sampling_variance_matrix), effect_ids)
+  diagonal_error <- max(abs(diagonal - expected_diagonal))
+  minimum_variance <- min(diagonal)
   tibble::tibble(
-    dimensions_valid = dimensions_valid, order_valid = order_valid,
-    maximum_symmetry_error = symmetry_error, minimum_eigenvalue = eigen_min,
-    maximum_diagonal_se_error = diagonal_error,
-    valid = dimensions_valid && order_valid && symmetry_error <= tolerance &&
-      is.finite(eigen_min) && eigen_min >= -tolerance && diagonal_error <= tolerance
+    dimensions_valid = dimensions_valid,
+    order_valid = order_valid,
+    maximum_diagonal_variance_error = diagonal_error,
+    maximum_absolute_off_diagonal = maximum_off_diagonal,
+    minimum_sampling_variance = minimum_variance,
+    valid = dimensions_valid && order_valid &&
+      is.finite(diagonal_error) && diagonal_error <= tolerance &&
+      is.finite(maximum_off_diagonal) && maximum_off_diagonal <= tolerance &&
+      is.finite(minimum_variance) && minimum_variance > 0
   )
 }
 
-#' Select Auc Covariance.
+#' Subset a sampling-variance matrix by effect identifier.
 #'
-#' @param full_V A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param data A data frame whose required columns are checked before use.
-#' @param tolerance A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reconstruction_error A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
-select_auc_covariance <- function(full_V, data, tolerance = 1e-8,
-                                  reconstruction_error = "") {
-  validation <- validate_auc_covariance(full_V, data, tolerance)
-  if (isTRUE(validation$valid[[1]])) {
-    computational_V <- Matrix::drop0(
-      Matrix::Matrix(full_V, sparse = TRUE), tol = tolerance
-    )
-    return(list(
-      V = computational_V,
-      selected_v_type = paste0(
-        "full emmeans covariance reconstructed from per-experiment AUC models; ",
-        "entries below ", format(tolerance, scientific = TRUE),
-        " stored as exact sparse zeros"
-      ),
-      fallback_reason = "", validation = validation
-    ))
+#' @param sampling_variance_matrix Effect-ordered sampling-variance matrix.
+#' @param effect_ids Identifiers to retain, in the required order.
+#' @return The matching square submatrix.
+subset_sampling_variance_matrix <- function(
+    sampling_variance_matrix, effect_ids) {
+  if (is.null(rownames(sampling_variance_matrix)) ||
+      any(!effect_ids %in% rownames(sampling_variance_matrix))) {
+    stop("Cannot align sampling variances to requested effect identifiers.",
+         call. = FALSE)
   }
-  if (any(!is.finite(data$auc_se) | data$auc_se <= 0)) {
-    stop("Full V failed and diagonal sampling variances are invalid.", call. = FALSE)
-  }
-  diagonal <- diag(data$auc_se^2)
-  dimnames(diagonal) <- list(data$effect_id, data$effect_id)
-  list(
-    V = diagonal, selected_v_type = "diagonal sampling-variance approximation",
-    fallback_reason = paste(
-      c(reconstruction_error, "full covariance validation failed")[
-        nzchar(c(reconstruction_error, "full covariance validation failed"))
-      ],
-      collapse = " | "
-    ),
-    validation = validation
-  )
-}
-
-#' Reconstruct Auc Covariance.
-#'
-#' @param data A data frame whose required columns are checked before use.
-#' @param auc_by_plot A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param tolerance A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
-reconstruct_auc_covariance <- function(data, auc_by_plot, tolerance = 1e-8) {
-  horizon_value <- unique(as.character(data$horizon))
-  if (length(horizon_value) != 1L) stop("Reconstruct V one horizon at a time.", call. = FALSE)
-  blocks <- list()
-  ordered_ids <- character()
-  block_audit <- list()
-  errors <- character()
-
-  for (experiment in levels(droplevels(data$experiment_id))) {
-    target <- data |>
-      dplyr::filter(as.character(.data$experiment_id) == .env$experiment) |>
-      dplyr::arrange(.data$source_species)
-    raw <- auc_by_plot |>
-      dplyr::filter(
-        as.character(.data$experiment_id) == .env$experiment,
-        as.character(.data$horizon) == .env$horizon_value,
-        as.character(.data$transform) == "raw", !is.na(.data$auc)
-      ) |>
-      dplyr::mutate(
-        ODT = factor(
-          as.character(.data$ODT),
-          levels = c("destination_controls", "origin_controls", "warmed")
-        )
-      )
-    captured <- auc_capture({
-      model <- stats::lm(auc ~ ODT * species, data = raw)
-      means <- emmeans::emmeans(model, ~ ODT | species)
-      contrast <- emmeans::contrast(
-        means, method = list(to_origin = c(0, -1, 1)), adjust = "none"
-      )
-      summary <- tibble::as_tibble(as.data.frame(summary(contrast)))
-      covariance <- as.matrix(stats::vcov(contrast))
-      index <- match(target$source_species, as.character(summary$species))
-      if (anyNA(index)) stop("Resident species missing from reconstructed contrasts.")
-      list(summary = summary[index, , drop = FALSE], covariance = covariance[index, index, drop = FALSE])
-    })
-    if (is.null(captured$fit)) {
-      errors <- c(errors, paste(experiment, captured$error, sep = ": "))
-      next
-    }
-    reconstructed <- captured$fit
-    estimate_error <- max(abs(reconstructed$summary$estimate - target$auc_effect))
-    se_error <- max(abs(reconstructed$summary$SE - target$auc_se))
-    symmetry_error <- max(abs(reconstructed$covariance - t(reconstructed$covariance)))
-    eigen_min <- min(eigen(reconstructed$covariance, symmetric = TRUE, only.values = TRUE)$values)
-    blocks[[experiment]] <- reconstructed$covariance
-    ordered_ids <- c(ordered_ids, target$effect_id)
-    block_audit[[experiment]] <- tibble::tibble(
-      horizon = horizon_value, experiment_id = experiment, n_effects = nrow(target),
-      maximum_estimate_error = estimate_error, maximum_se_error = se_error,
-      maximum_symmetry_error = symmetry_error, minimum_eigenvalue = eigen_min,
-      valid = estimate_error <= tolerance && se_error <= tolerance &&
-        symmetry_error <= tolerance && eigen_min >= -tolerance,
-      warning = paste(captured$warnings, collapse = " | "), error = ""
-    )
-  }
-
-  full_valid <- !length(errors) && length(blocks) == dplyr::n_distinct(data$experiment_id)
-  V_full <- NULL
-  if (full_valid) {
-    assembled <- as.matrix(Matrix::bdiag(blocks))
-    index <- match(data$effect_id, ordered_ids)
-    full_valid <- !anyNA(index)
-    if (full_valid) V_full <- assembled[index, index, drop = FALSE]
-  }
-  audit_blocks <- dplyr::bind_rows(block_audit)
-  full_valid <- full_valid && nrow(audit_blocks) && all(audit_blocks$valid)
-  if (full_valid) dimnames(V_full) <- list(data$effect_id, data$effect_id)
-  selected <- select_auc_covariance(
-    if (full_valid) V_full else matrix(numeric(), 0, 0), data, tolerance,
-    paste(errors, collapse = " | ")
-  )
-  V <- selected$V
-  v_type <- selected$selected_v_type
-  fallback_reason <- selected$fallback_reason
-  validation <- selected$validation
-  full_valid <- isTRUE(validation$valid[[1]])
-  dim_valid <- validation$dimensions_valid[[1]]
-  symmetry_error <- validation$maximum_symmetry_error[[1]]
-  eigen_min <- validation$minimum_eigenvalue[[1]]
-  diagonal_error <- validation$maximum_diagonal_se_error[[1]]
-  off_diagonal <- if (!is.null(V_full) && length(V_full)) {
-    V_full[row(V_full) != col(V_full)]
-  } else {
-    V[row(V) != col(V)]
-  }
-  audit <- tibble::tibble(
-    horizon = horizon_value, n_effects = nrow(data), n_experiments = length(blocks),
-    dimensions_valid = dim_valid, maximum_symmetry_error = symmetry_error,
-    minimum_eigenvalue = eigen_min, maximum_diagonal_se_error = diagonal_error,
-    maximum_absolute_off_diagonal = if (length(off_diagonal)) max(abs(off_diagonal)) else 0,
-    full_covariance_valid = full_valid, selected_v_type = v_type,
-    fallback_reason = fallback_reason
-  )
-  list(V = V, audit = audit, block_audit = audit_blocks, selected_v_type = v_type)
-}
-
-#' Subset Auc v.
-#'
-#' @param V A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param effect_ids A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
-subset_auc_v <- function(V, effect_ids) {
-  if (is.null(rownames(V)) || any(!effect_ids %in% rownames(V))) {
-    stop("Cannot align V to requested effect_id values.", call. = FALSE)
-  }
-  V[effect_ids, effect_ids, drop = FALSE]
+  sampling_variance_matrix[effect_ids, effect_ids, drop = FALSE]
 }
 #' Auc Fit Statistics.
 #'

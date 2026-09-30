@@ -20,7 +20,7 @@ Sys.setenv(TAR_CONFIG = report_target_config)
 
 ### Purpose
 
-Report plot-level AUC construction, contrast output, and covariance/classification checks.
+Report plot-level AUC construction, contrast output, and classification checks.
 
 ### Inputs
 
@@ -42,7 +42,7 @@ knitr::kable(validation)
 
 ### Problems flagged
 
-Non-finite effects, invalid contrast covariance, order mismatches, and legacy-regression failures stop this branch.
+Non-finite effects, invalid contrast estimates, order mismatches, and legacy-regression failures stop this branch.
 
 ### Principal outputs
 

@@ -122,12 +122,13 @@ build_resident_auc_data_from_objects <- function(winner_loser, analysis_data,
 #' Compare Resident Inputs.
 #'
 #' @param candidate_data A data frame whose required columns are checked before use.
-#' @param candidate_V A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param candidate_sampling_variances Current diagonal sampling variances.
 #' @param reference_data A data frame whose required columns are checked before use.
-#' @param reference_V A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param reference_sampling_variances Frozen historical sampling variances.
 #' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_resident_inputs <- function(candidate_data, candidate_V,
-                                      reference_data, reference_V) {
+compare_resident_inputs <- function(
+    candidate_data, candidate_sampling_variances,
+    reference_data, reference_sampling_variances) {
   numeric_columns <- intersect(
     names(candidate_data)[vapply(candidate_data, is.numeric, logical(1))],
     names(reference_data)
@@ -135,16 +136,21 @@ compare_resident_inputs <- function(candidate_data, candidate_V,
   numeric_error <- max(vapply(numeric_columns, function(column) {
     max(abs(candidate_data[[column]] - reference_data[[column]]), na.rm = TRUE)
   }, numeric(1)))
-  V_error <- max(abs(as.matrix(candidate_V) - as.matrix(reference_V)))
+  candidate_diagonal <- diag(as.matrix(candidate_sampling_variances))
+  reference_diagonal <- diag(as.matrix(reference_sampling_variances))
+  sampling_variance_error <- max(abs(candidate_diagonal - reference_diagonal))
   checks <- tibble::tibble(
-    check = c("effect order", "species set", "numeric preprocessing", "sampling covariance"),
+    check = c(
+      "effect order", "species set", "numeric preprocessing",
+      "sampling variances"
+    ),
     value = c(
       as.numeric(identical(as.character(candidate_data$effect_id),
                            as.character(reference_data$effect_id))),
       as.numeric(setequal(as.character(candidate_data$species_id),
                           as.character(reference_data$species_id))),
       numeric_error,
-      V_error
+      sampling_variance_error
     ),
     tolerance = c(0, 0, 1e-12, 1e-12),
     pass = c(
@@ -153,7 +159,7 @@ compare_resident_inputs <- function(candidate_data, candidate_V,
       setequal(as.character(candidate_data$species_id),
                as.character(reference_data$species_id)),
       numeric_error <= 1e-12,
-      V_error <= 1e-12
+      sampling_variance_error <= 1e-12
     )
   )
   if (any(!checks$pass)) {

@@ -168,13 +168,9 @@ predictor_formulas <- function() {
     PEV1_z:TP_z + PEV2_z:TP_z + PEV3_z:TP_z
   list(
     climate = ~ T_z * P_z * W_z,
-    continuous_M1 = ~ Trait_z + T_z * P_z * W_z,
     continuous_full = ~ Trait_z * T_z * P_z * W_z,
-    Graminoid_M1 = ~ GraminoidStatus + T_z * P_z * W_z,
     Graminoid_full = ~ GraminoidStatus * T_z * P_z * W_z,
-    Woodiness_M1 = ~ Woodiness + T_z * P_z * W_z,
     Woodiness_full = ~ Woodiness * T_z * P_z * W_z,
-    Phylogeny_M1 = ~ T_z * P_z * W_z + PEV1_z + PEV2_z + PEV3_z,
     Phylogeny_full = phylogeny_full
   )
 }
@@ -183,12 +179,13 @@ predictor_formulas <- function() {
 #'
 #' @param trait_species A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param auc_data A data frame whose required columns are checked before use.
-#' @param V_auc A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param sampling_variance_matrix Effect-ordered sampling variances.
 #' @param trait A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param expected_species A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-prepare_trait_data <- function(trait_species, auc_data, V_auc, trait,
-                                         expected_species = 526L) {
+prepare_trait_data <- function(
+    trait_species, auc_data, sampling_variance_matrix, trait,
+    expected_species = 526L) {
   required <- c("species_id", trait)
   if (!all(required %in% names(trait_species))) {
     stop("Trait input is missing: ", paste(setdiff(required, names(trait_species)),
@@ -215,13 +212,17 @@ prepare_trait_data <- function(trait_species, auc_data, V_auc, trait,
       species_id = droplevels(factor(.data$species_id)),
       experiment_id = droplevels(factor(.data$experiment_id))
     )
-  V <- subset_auc_v(V_auc, data$effect_id)
-  if (!identical(rownames(V), as.character(data$effect_id))) {
-    stop(trait, " row/V ordering validation failed.", call. = FALSE)
+  trait_sampling_variances <- subset_sampling_variance_matrix(
+    sampling_variance_matrix, data$effect_id
+  )
+  if (!identical(
+        rownames(trait_sampling_variances), as.character(data$effect_id)
+      )) {
+    stop(trait, " sampling-variance ordering validation failed.", call. = FALSE)
   }
   list(
     data = data,
-    V = V,
+    sampling_variance_matrix = trait_sampling_variances,
     species_values = unique_values,
     scaling = tibble::tibble(
       trait = trait,
@@ -297,15 +298,17 @@ prepare_functional_predictors <- function(auc_data, functional_species) {
 #' @param prepared_traits A data frame whose required columns are checked before use.
 #' @param functional_data A data frame whose required columns are checked before use.
 #' @param phylogeny_data A data frame whose required columns are checked before use.
-#' @param V_auc A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param sampling_variance_matrix Effect-ordered sampling variances.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 build_predictor_specifications <- function(prepared_traits, functional_data,
-                                               phylogeny_data, V_auc) {
+                                               phylogeny_data,
+                                               sampling_variance_matrix) {
   f <- predictor_formulas()
   trait_spec <- function(key, label, prepared) {
     list(
-      key = key, label = label, data = prepared$data, V = prepared$V,
-      M1 = f$continuous_M1, full = f$continuous_full, full_name = "M2",
+      key = key, label = label, data = prepared$data,
+      sampling_variance_matrix = prepared$sampling_variance_matrix,
+      full_formula = f$continuous_full,
       predictor_columns = "Trait_z", full_data = FALSE
     )
   }
@@ -315,18 +318,21 @@ build_predictor_specifications <- function(prepared_traits, functional_data,
     Height = trait_spec("Height", "Height", prepared_traits$vegetative_height),
     Graminoid = list(
       key = "Graminoid", label = "Graminoid status", data = functional_data,
-      V = V_auc, M1 = f$Graminoid_M1, full = f$Graminoid_full,
-      full_name = "M2", predictor_columns = "GraminoidStatus", full_data = TRUE
+      sampling_variance_matrix = sampling_variance_matrix,
+      full_formula = f$Graminoid_full,
+      predictor_columns = "GraminoidStatus", full_data = TRUE
     ),
     Woodiness = list(
       key = "Woodiness", label = "Woodiness", data = functional_data,
-      V = V_auc, M1 = f$Woodiness_M1, full = f$Woodiness_full,
-      full_name = "M2", predictor_columns = "Woodiness", full_data = TRUE
+      sampling_variance_matrix = sampling_variance_matrix,
+      full_formula = f$Woodiness_full,
+      predictor_columns = "Woodiness", full_data = TRUE
     ),
     Phylogeny = list(
       key = "Phylogeny", label = "Phylogenetic position (PEV1-PEV3)",
-      data = phylogeny_data, V = V_auc, M1 = f$Phylogeny_M1,
-      full = f$Phylogeny_full, full_name = "M3",
+      data = phylogeny_data,
+      sampling_variance_matrix = sampling_variance_matrix,
+      full_formula = f$Phylogeny_full,
       predictor_columns = c("PEV1_z", "PEV2_z", "PEV3_z"), full_data = TRUE
     )
   )
@@ -344,10 +350,8 @@ trait_predictor_specification <- function(key, label, prepared) {
     key = key,
     label = label,
     data = prepared$data,
-    V = prepared$V,
-    M1 = formulas$continuous_M1,
-    full = formulas$continuous_full,
-    full_name = "M2",
+    sampling_variance_matrix = prepared$sampling_variance_matrix,
+    full_formula = formulas$continuous_full,
     predictor_columns = "Trait_z",
     full_data = FALSE
   )
@@ -358,17 +362,16 @@ trait_predictor_specification <- function(key, label, prepared) {
 #' @param key A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param label A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param data A data frame whose required columns are checked before use.
-#' @param V A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param sampling_variance_matrix Effect-ordered sampling variances.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-functional_predictor_specification <- function(key, label, data, V) {
+functional_predictor_specification <- function(
+    key, label, data, sampling_variance_matrix) {
   formulas <- predictor_formulas()
   if (identical(key, "Graminoid")) {
-    M1 <- formulas$Graminoid_M1
-    full <- formulas$Graminoid_full
+    full_formula <- formulas$Graminoid_full
     predictor_columns <- "GraminoidStatus"
   } else if (identical(key, "Woodiness")) {
-    M1 <- formulas$Woodiness_M1
-    full <- formulas$Woodiness_full
+    full_formula <- formulas$Woodiness_full
     predictor_columns <- "Woodiness"
   } else {
     stop("Unknown functional predictor key: ", key, call. = FALSE)
@@ -377,10 +380,8 @@ functional_predictor_specification <- function(key, label, data, V) {
     key = key,
     label = label,
     data = data,
-    V = V,
-    M1 = M1,
-    full = full,
-    full_name = "M2",
+    sampling_variance_matrix = sampling_variance_matrix,
+    full_formula = full_formula,
     predictor_columns = predictor_columns,
     full_data = TRUE
   )
@@ -389,83 +390,82 @@ functional_predictor_specification <- function(key, label, data, V) {
 #' Build Phylogeny Predictor Specification.
 #'
 #' @param data A data frame whose required columns are checked before use.
-#' @param V A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param sampling_variance_matrix Effect-ordered sampling variances.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-build_phylogeny_predictor_specification <- function(data, V) {
+build_phylogeny_predictor_specification <- function(
+    data, sampling_variance_matrix) {
   formulas <- predictor_formulas()
   list(
     key = "Phylogeny",
     label = "Phylogenetic position (PEV1-PEV3)",
     data = data,
-    V = V,
-    M1 = formulas$Phylogeny_M1,
-    full = formulas$Phylogeny_full,
-    full_name = "M3",
+    sampling_variance_matrix = sampling_variance_matrix,
+    full_formula = formulas$Phylogeny_full,
     predictor_columns = c("PEV1_z", "PEV2_z", "PEV3_z"),
     full_data = TRUE
   )
 }
 
-#' Fit Predictor Sequence.
+#' Fit matched climate-only and full predictor models.
 #'
 #' @param spec A validated workflow configuration or specification object.
 #' @param climate_formula A model formula or random-effects specification.
-#' @param full_M0_ML A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param full_M0_REML A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @details `spec` must contain identically ordered effect rows and sampling
-#' covariance plus registered additive and full formulas. Complete-data
-#' predictors reuse the shared climate baseline; incomplete trait branches fit
-#' matched-row baselines. The sequence always retains ML comparisons and the
-#' full REML fit, and fails on row/covariance or formula mismatches.
+#' @param full_climate_ML Shared complete-data climate-only ML fit, when used.
+#' @param full_climate_REML Shared complete-data climate-only REML fit, when used.
+#' @details The climate-only and full predictor-by-climate models use identical
+#' effect rows and sampling variances. ML provides the direct nested comparison;
+#' REML provides final estimates and response-heterogeneity summaries. No
+#' intermediate additive predictor model is fitted.
 #' @return A fitted model bundle with diagnostics retained for validation.
-fit_predictor_sequence <- function(spec, climate_formula, full_M0_ML = NULL,
-                                   full_M0_REML = NULL) {
+fit_predictor_model_pair <- function(
+    spec, climate_formula, full_climate_ML = NULL,
+    full_climate_REML = NULL) {
   validate_predictor_specification(spec, climate_formula)
   if (isTRUE(spec$full_data)) {
-    if (is.null(full_M0_ML) || is.null(full_M0_REML)) {
+    if (is.null(full_climate_ML) || is.null(full_climate_REML)) {
       stop(spec$label, " requires the shared complete-data baselines.",
            call. = FALSE)
     }
-    M0_ML <- full_M0_ML
-    M0_REML <- full_M0_REML
+    climate_ML <- full_climate_ML
+    climate_REML <- full_climate_REML
   } else {
-    M0_ML <- fit_meta_regression(
-      spec$data, spec$V, climate_formula, "ML",
-      paste(spec$label, "M0 ML")
+    climate_ML <- fit_meta_regression(
+      spec$data, spec$sampling_variance_matrix, climate_formula, "ML",
+      paste(spec$label, "climate-only ML")
     )
-    M0_REML <- fit_meta_regression(
-      spec$data, spec$V, climate_formula, "REML",
-      paste(spec$label, "M0 REML")
+    climate_REML <- fit_meta_regression(
+      spec$data, spec$sampling_variance_matrix, climate_formula, "REML",
+      paste(spec$label, "climate-only REML")
     )
   }
-  M1_ML <- fit_meta_regression(
-    spec$data, spec$V, spec$M1, "ML",
-    paste(spec$label, "M1 ML"), spec$predictor_columns
-  )
   full_ML <- fit_meta_regression(
-    spec$data, spec$V, spec$full, "ML",
-    paste(spec$label, spec$full_name, "ML"), spec$predictor_columns
+    spec$data, spec$sampling_variance_matrix, spec$full_formula, "ML",
+    paste(spec$label, "full predictor-climate ML"), spec$predictor_columns
   )
   full_REML <- fit_meta_regression(
-    spec$data, spec$V, spec$full, "REML",
-    paste(spec$label, spec$full_name, "REML"), spec$predictor_columns
+    spec$data, spec$sampling_variance_matrix, spec$full_formula, "REML",
+    paste(spec$label, "full predictor-climate REML"), spec$predictor_columns
   )
-  full_model_name <- paste0(spec$full_name, "_REML")
-  cr1 <- cluster_robust_inference(full_REML, spec$label, full_model_name)
+  cr1 <- cluster_robust_inference(
+    full_REML, spec$label, "full predictor-climate REML"
+  )
   statistics <- dplyr::bind_rows(
-    model_fit_statistics(M0_ML, spec$label, "M0", "ML"),
-    model_fit_statistics(M1_ML, spec$label, "M1", "ML"),
-    model_fit_statistics(full_ML, spec$label, spec$full_name, "ML")
-  )
-  comparisons <- dplyr::bind_rows(
-    nested_model_lrt(M0_ML, M1_ML, spec$label, "M0 vs M1"),
-    nested_model_lrt(
-      M1_ML, full_ML, spec$label, paste0("M1 vs ", spec$full_name)
+    model_fit_statistics(climate_ML, spec$label, "climate only", "ML"),
+    model_fit_statistics(
+      full_ML, spec$label, "full predictor-climate", "ML"
     )
   )
+  comparisons <- nested_model_lrt(
+    climate_ML, full_ML, spec$label,
+    "climate only vs full predictor-climate"
+  )
   diagnostics <- dplyr::bind_rows(
-    random_effect_diagnostics(M0_REML, spec$label, "M0_REML"),
-    random_effect_diagnostics(full_REML, spec$label, full_model_name)
+    random_effect_diagnostics(
+      climate_REML, spec$label, "climate-only REML"
+    ),
+    random_effect_diagnostics(
+      full_REML, spec$label, "full predictor-climate REML"
+    )
   )
   audit <- tibble::tibble(
     predictor = spec$label,
@@ -475,37 +475,37 @@ fit_predictor_sequence <- function(spec, climate_formula, full_M0_ML = NULL,
     experiment_IDs = paste(
       sort(unique(as.character(spec$data$experiment_id))), collapse = ";"
     ),
-    exact_V_order = identical(
-      rownames(spec$V), as.character(spec$data$effect_id)
-    ) && identical(colnames(spec$V), as.character(spec$data$effect_id)),
-    matched_M0_M1_full_rows = identical(
-      M0_ML$signature$effect_id, M1_ML$signature$effect_id
-    ) && identical(M1_ML$signature$effect_id, full_ML$signature$effect_id),
+    exact_sampling_variance_order = identical(
+      rownames(spec$sampling_variance_matrix), as.character(spec$data$effect_id)
+    ) && identical(
+      colnames(spec$sampling_variance_matrix), as.character(spec$data$effect_id)
+    ),
+    matched_climate_and_full_rows_and_variances =
+      isTRUE(comparisons$same_rows_and_sampling_variances[[1]]),
     baseline_reproduces_resident_climate_model = if (isTRUE(spec$full_data)) {
       isTRUE(all.equal(
-        as.numeric(M0_REML$fit$beta),
-        as.numeric(full_M0_REML$fit$beta),
+        as.numeric(climate_REML$fit$beta),
+        as.numeric(full_climate_REML$fit$beta),
         tolerance = 1e-10
       ))
     } else {
       NA
     }
   )
-  if (!audit$exact_V_order || !audit$matched_M0_M1_full_rows ||
+  if (!audit$exact_sampling_variance_order ||
+      !audit$matched_climate_and_full_rows_and_variances ||
       (isTRUE(spec$full_data) && !audit$baseline_reproduces_resident_climate_model)) {
-    stop(spec$label, " predictor sequence failed its matched-data audit.",
+    stop(spec$label, " predictor models failed their matched-data audit.",
          call. = FALSE)
   }
   list(
     key = spec$key,
     label = spec$label,
-    full_name = spec$full_name,
     data = spec$data,
-    V = spec$V,
+    sampling_variance_matrix = spec$sampling_variance_matrix,
     fits = list(
-      M0_ML = M0_ML,
-      M0_REML = M0_REML,
-      M1_ML = M1_ML,
+      climate_ML = climate_ML,
+      climate_REML = climate_REML,
       full_ML = full_ML,
       full_REML = full_REML
     ),
@@ -518,18 +518,18 @@ fit_predictor_sequence <- function(spec, climate_formula, full_M0_ML = NULL,
   )
 }
 
-#' Assemble Predictor Sequence Tables.
+#' Assemble predictor model-pair tables.
 #'
 #' @param ... Additional arguments forwarded to the delegated operation.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-assemble_predictor_sequence_tables <- function(...) {
-  sequences <- list(...)
+assemble_predictor_model_tables <- function(...) {
+  model_pairs <- list(...)
   list(
-    fit_statistics = dplyr::bind_rows(lapply(sequences, `[[`, "statistics")),
-    comparisons = dplyr::bind_rows(lapply(sequences, `[[`, "comparisons")),
-    diagnostics = dplyr::bind_rows(lapply(sequences, `[[`, "diagnostics")),
-    audit = dplyr::bind_rows(lapply(sequences, `[[`, "audit")),
-    CR1 = dplyr::bind_rows(lapply(sequences, `[[`, "CR1"))
+    fit_statistics = dplyr::bind_rows(lapply(model_pairs, `[[`, "statistics")),
+    comparisons = dplyr::bind_rows(lapply(model_pairs, `[[`, "comparisons")),
+    diagnostics = dplyr::bind_rows(lapply(model_pairs, `[[`, "diagnostics")),
+    audit = dplyr::bind_rows(lapply(model_pairs, `[[`, "audit")),
+    CR1 = dplyr::bind_rows(lapply(model_pairs, `[[`, "CR1"))
   )
 }
 
@@ -542,23 +542,25 @@ assemble_predictor_sequence_tables <- function(...) {
 validate_predictor_specification <- function(spec, climate_formula,
                                              full_effect_ids = NULL) {
   designs <- lapply(
-    list(climate_formula, spec$M1, spec$full),
+    list(climate_formula, spec$full_formula),
     stats::model.matrix,
     data = spec$data
   )
   full_rank <- vapply(designs, function(x) qr(x)$rank == ncol(x), logical(1))
-  exact_V <- identical(rownames(spec$V), as.character(spec$data$effect_id)) &&
-    identical(colnames(spec$V), as.character(spec$data$effect_id))
+  exact_sampling_variance_order <- identical(
+    rownames(spec$sampling_variance_matrix), as.character(spec$data$effect_id)
+  ) && identical(
+    colnames(spec$sampling_variance_matrix), as.character(spec$data$effect_id)
+  )
   full_rows <- !isTRUE(spec$full_data) || is.null(full_effect_ids) ||
     identical(as.character(spec$data$effect_id), as.character(full_effect_ids))
   result <- tibble::tibble(
     predictor = spec$label,
     climate_design_full_rank = full_rank[[1]],
-    M1_design_full_rank = full_rank[[2]],
-    full_design_full_rank = full_rank[[3]],
-    exact_V_order = exact_V,
+    full_design_full_rank = full_rank[[2]],
+    exact_sampling_variance_order = exact_sampling_variance_order,
     expected_full_rows = full_rows,
-    pass = all(full_rank) && exact_V && full_rows
+    pass = all(full_rank) && exact_sampling_variance_order && full_rows
   )
   if (!result$pass[[1]]) stop(spec$label, " predictor specification failed validation.")
   result

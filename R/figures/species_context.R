@@ -55,15 +55,15 @@ build_group_specific_climate_support <- function(data, group_column,
 
 #' Build Woodiness Response Surface Figure.
 #'
-#' @param model_sequence A fitted model object with the structure checked by this function.
+#' @param model_pair Matched climate-only and full predictor model bundle.
 #' @param support_mask A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param analysis_data A data frame whose required columns are checked before use.
 #' @param scaling A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @return A plot object, or the declared figure path when rendering to disk.
 build_woodiness_response_surface_figure <- function(
-    model_sequence, support_mask, analysis_data, scaling) {
-  fit <- model_sequence$fits$full_REML$fit
-  group_levels <- levels(model_sequence$data$Woodiness)
+    model_pair, support_mask, analysis_data, scaling) {
+  fit <- model_pair$fits$full_REML$fit
+  group_levels <- levels(model_pair$data$Woodiness)
   expected_levels <- c("non_woody", "woody")
   if (!identical(group_levels, expected_levels)) {
     stop("Woodiness model levels are not the canonical binary levels.",
