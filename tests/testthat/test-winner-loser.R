@@ -287,7 +287,7 @@ test_that("contrast seeds are stable and group-specific", {
 })
 
 test_that("canonical predictor formulas retain the settled interaction structures", {
-  formulas <- canonical_predictor_formulas()
+  formulas <- predictor_formulas()
   continuous_terms <- attr(stats::terms(formulas$continuous_full), "term.labels")
   phylogeny_terms <- attr(stats::terms(formulas$Phylogeny_full), "term.labels")
 

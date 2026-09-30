@@ -1,0 +1,71 @@
+---
+title: "Family context model"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+```{r}
+report_target_store <- Sys.getenv("TRANSPLANT_TARGET_STORE", "_targets")
+if (!grepl("^/", report_target_store)) {
+  report_target_store <- file.path(here::here(), report_target_store)
+}
+report_target_store <- normalizePath(report_target_store, winslash = "/", mustWork = TRUE)
+report_target_config <- tempfile(fileext = ".yaml")
+targets::tar_config_set(store = report_target_store, config = report_target_config)
+Sys.setenv(TAR_CONFIG = report_target_config)
+```
+
+## Family reconstruction and context classification
+
+
+### Question
+
+How does response classification change after reconstructing plot-cover family AUCs?
+
+### Dataset and sample size
+
+Family effects are reconstructed from the retained resident community for the same 42 experiments; exact effects and families appear in the diagnostics.
+
+### Exact model specification
+
+The fixed and random structures mirror the resident climate model, replacing species with family after raw-cover aggregation and full family-AUC covariance reconstruction.
+
+### Assumptions
+
+Family identities follow validated taxonomy plus the single explicit `Viola palustris` → `Violaceae` decision.
+
+### Convergence and covariance diagnostics
+
+Optimizer, positive-definiteness, identifiability, covariance, support, and classification gates are shown below.
+
+### Main numerical results
+
+```{r}
+model <- targets::tar_read(family_model_summary)
+summary <- targets::tar_read(family_classification_summary)
+classification <- targets::tar_read(family_classification)
+validation <- targets::tar_read(family_bundle_validation)
+comparison <- targets::tar_read(species_family_resolution_comparison)
+override <- targets::tar_read(family_override_table)
+knitr::kable(model)
+knitr::kable(summary)
+knitr::kable(validation)
+knitr::kable(comparison)
+knitr::kable(override)
+knitr::kable(head(classification, 20))
+```
+
+### Interpretation boundary
+
+Species effects are not averaged; family AUC and its full covariance are
+reconstructed from plot cover. The `Viola palustris` family value is the
+explicit `Violaceae` decision recorded in the resident-species override ledger.
+
+### Principal objects
+
+`family_auc_bundle`, `family_model_bundle`, `family_support`, and `family_classification`.
+
+### PASS/FAIL
+
+Cover reconstruction, covariance, fitted-model diagnostics, support, random
+coefficients, classification, and summary must all pass their current checks.

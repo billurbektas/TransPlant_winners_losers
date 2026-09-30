@@ -1,5 +1,5 @@
-source(project_path("R", "functions", "figures.R"))
-source(project_path("R", "functions", "provenance.R"))
+source(project_path("R", "figures", "species_context.R"))
+source(project_path("R", "infrastructure", "provenance.R"))
 
 test_that("functional coverage is computed independently by group", {
   data <- tibble::tibble(
@@ -8,7 +8,7 @@ test_that("functional coverage is computed independently by group", {
     T_z = c(-1, 0, 2, 3), P_z = c(-2, 0, 1, 4), W_z = c(-1, 1, -2, 2),
     Woodiness = factor(c("non_woody", "non_woody", "woody", "woody"))
   )
-  coverage <- functional_climate_coverage(data, "Woodiness", "Woodiness")
+  coverage <- summarize_functional_climate_coverage(data, "Woodiness", "Woodiness")
   expect_setequal(as.character(coverage$group), c("non_woody", "woody"))
   expect_equal(coverage$T_z_min[coverage$group == "woody"], 2)
   expect_equal(coverage$T_z_max[coverage$group == "non_woody"], 0)
@@ -19,7 +19,7 @@ test_that("the Woodiness figure fails closed without a group-specific mask", {
     deparse(body(build_woodiness_response_surface_figure)), collapse = "\n"
   )
   expect_match(function_text, "group-specific observed climate support", fixed = TRUE)
-  expect_match(function_text, "canonical_predictor_formulas()$Woodiness_full", fixed = TRUE)
+  expect_match(function_text, "predictor_formulas()$Woodiness_full", fixed = TRUE)
 })
 
 test_that("all currently retained figures match their approved checksums", {
@@ -63,20 +63,22 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "fig02_repeated_species_consistency.png",
     "fig03_temporal_category_flows.pdf",
     "fig03_temporal_category_flows.png",
-    "fig04_species_minmax_classification_526.pdf",
-    "fig04_species_minmax_classification_526.png",
-    "fig05_climate_only_fixed_effect_prediction_surfaces_526.pdf",
-    "fig05_climate_only_fixed_effect_prediction_surfaces_526.png",
-    "fig06_predictor_synthesis_support_and_heterogeneity_526.pdf",
-    "fig06_predictor_synthesis_support_and_heterogeneity_526.png",
-    "fig07_predictor_response_atlas_526.pdf",
-    "fig07_predictor_response_atlas_526.png",
-    "appendix_family_minmax_classification_526.pdf",
-    "appendix_family_minmax_classification_526.png",
-    "appendix_pev2_pev3_prediction_atlas_526.pdf",
-    "appendix_pev2_pev3_prediction_atlas_526.png",
-    "appendix_phylogeny_pcoa_summary_526.pdf",
-    "appendix_phylogeny_pcoa_summary_526.png",
+    "fig04_species_minmax_classification.pdf",
+    "fig04_species_minmax_classification.png",
+    "fig05_climate_only_fixed_effect_prediction_surfaces.pdf",
+    "fig05_climate_only_fixed_effect_prediction_surfaces.png",
+    "fig06_predictor_synthesis_support_and_heterogeneity.pdf",
+    "fig06_predictor_synthesis_support_and_heterogeneity.png",
+    "fig07_predictor_response_atlas.pdf",
+    "fig07_predictor_response_atlas.png",
+    "appendix_family_minmax_classification.pdf",
+    "appendix_family_minmax_classification.png",
+    "appendix_model_predictive_performance.pdf",
+    "appendix_model_predictive_performance.png",
+    "appendix_pev2_pev3_prediction_atlas.pdf",
+    "appendix_pev2_pev3_prediction_atlas.png",
+    "appendix_phylogeny_pcoa_summary.pdf",
+    "appendix_phylogeny_pcoa_summary.png",
     "appendix_temporal_winning_losing_strength_correlations.pdf",
     "appendix_temporal_winning_losing_strength_correlations.png",
     "appendix_temporal_transition_matrices.pdf",
@@ -87,7 +89,7 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
   expect_true(all(grepl("/figures/manuscript/", canonical$filename, fixed = TRUE)))
   expect_true(all(
     canonical$status %in% c(
-      "CURRENT_CANONICAL_ANALYSIS_FIGURE",
+      "CURRENT_ANALYSIS_FIGURE",
       "FINAL_MANUSCRIPT",
       "implemented target; not generated"
     )
@@ -122,7 +124,7 @@ test_that("Figure 4 uses enlarged typography and manuscript labels", {
 test_that("Figure 5 climate-only renderer is fixed-effect-only and support-masked", {
   renderer <- readLines(
     project_path(
-      "scripts", "build_climate_only_fixed_effect_surfaces_526.R"
+      "R", "figures", "render_climate_response.R"
     ),
     warn = FALSE
   )
@@ -137,7 +139,7 @@ test_that("Figure 5 climate-only renderer is fixed-effect-only and support-maske
 
 test_that("Figure 7 renderer is figure-only and support-masked", {
   renderer <- readLines(
-    project_path("scripts", "build_predictor_response_atlas_526.R"),
+    project_path("R", "figures", "render_predictor_atlas.R"),
     warn = FALSE
   )
   renderer_text <- paste(renderer, collapse = "\n")
@@ -151,7 +153,7 @@ test_that("Figure 7 renderer is figure-only and support-masked", {
 })
 
 test_that("the destination-climate renderer drops inherited grouping", {
-  source(project_path("R", "functions", "climate_display_figure.R"))
+  source(project_path("R", "figures", "climate.R"))
   body_text <- paste(
     deparse(body(plot_destination_climate_warming_gradient)), collapse = "\n"
   )

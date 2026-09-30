@@ -1,0 +1,442 @@
+# Module: R/figures/consistency
+# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
+# Inputs: Function arguments and explicitly declared target dependencies.
+# Outputs: Validated in-memory objects and declared workflow artifacts.
+# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+
+# Canonical consistency, sensitivity, and figure-ledger functions.
+
+#' Signed Species Consistency.
+#'
+#' @param data A data frame whose required columns are checked before use.
+#' @param include_colonizers A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @return An R object described by the function name; its structure is validated before later stages use it.
+signed_species_consistency <- function(data, include_colonizers = TRUE) {
+  if (!is.logical(include_colonizers) || length(include_colonizers) != 1L ||
+      is.na(include_colonizers)) {
+    stop("include_colonizers must be TRUE or FALSE.", call. = FALSE)
+  }
+  observations <- data |>
+    dplyr::transmute(
+      species = dplyr::coalesce(.data$accepted_name, .data$species),
+      .data$experiment_id,
+      category = as.character(.data$category)
+    )
+  if (!include_colonizers) {
+    observations <- observations |>
+      dplyr::filter(
+        !.data$category %in% c("colonizer", "non_significant_colonizer")
+      )
+  }
+  counts <- observations |>
+    dplyr::distinct(.data$species, .data$experiment_id, .data$category) |>
+    dplyr::group_by(.data$species) |>
+    dplyr::filter(dplyr::n_distinct(.data$experiment_id) > 3L) |>
+    dplyr::count(.data$species, .data$category, name = "n") |>
+    tidyr::pivot_wider(names_from = "category", values_from = "n", values_fill = 0) |>
+    dplyr::ungroup()
+  for (column in c(
+    "loser", "non_significant_loser", "no_change", "non_significant_winner",
+    "winner", "colonizer", "non_significant_colonizer"
+  )) {
+    if (!column %in% names(counts)) counts[[column]] <- 0L
+  }
+  counts |>
+    dplyr::mutate(
+      significant_total = .data$loser + .data$winner + .data$colonizer,
+      neutral_total = .data$non_significant_loser + .data$no_change +
+        .data$non_significant_winner + .data$non_significant_colonizer,
+      neutral_low = -.data$neutral_total / 2,
+      neutral_high = .data$neutral_total / 2,
+      significant_categories = (.data$loser > 0L) + (.data$winner > 0L) +
+        (.data$colonizer > 0L),
+      consistency_group = dplyr::case_when(
+        .data$loser > 0L & .data$winner == 0L & .data$colonizer == 0L ~ "Loser only",
+        .data$significant_categories > 1L ~ "Experiment-dependent responses",
+        .data$winner > 0L & .data$loser == 0L & .data$colonizer == 0L ~ "Winner only",
+        .data$colonizer > 0L & .data$loser == 0L & .data$winner == 0L ~ "Colonizer only",
+        TRUE ~ NA_character_
+      ),
+      loser_low = .data$neutral_low - .data$loser,
+      winner_high = .data$neutral_high + .data$winner,
+      colonizer_high = .data$winner_high + .data$colonizer,
+      net = .data$winner + .data$colonizer - .data$loser,
+      within_group_order = dplyr::case_when(
+        .data$consistency_group == "Loser only" ~ -.data$loser,
+        .data$consistency_group == "Experiment-dependent responses" ~ .data$net,
+        .data$consistency_group == "Winner only" ~ .data$winner,
+        .data$consistency_group == "Colonizer only" ~ .data$colonizer,
+        TRUE ~ 0
+      ),
+      consistency_group = factor(
+        .data$consistency_group,
+        levels = c(
+          "Loser only", "Experiment-dependent responses", "Winner only", "Colonizer only"
+        )
+      )
+    ) |>
+    dplyr::filter(.data$significant_total > 0L, !is.na(.data$consistency_group)) |>
+    dplyr::arrange(
+      .data$consistency_group, .data$within_group_order,
+      .data$significant_total, .data$species
+    ) |>
+    dplyr::mutate(species_position = dplyr::row_number())
+}
+
+#' Plot Signed Consistency.
+#'
+#' @param data A data frame whose required columns are checked before use.
+#' @param path A project-relative or absolute filesystem path.
+#' @param include_colonizers A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @return A plot object, or the declared figure path when rendering to disk.
+plot_signed_consistency <- function(data, path, include_colonizers = TRUE) {
+  signed <- signed_species_consistency(
+    data, include_colonizers = include_colonizers
+  )
+  rectangle_layers <- list(
+    signed |>
+      dplyr::transmute(
+        .data$species_position, .data$species, .data$consistency_group,
+        response = "Loser", ymin = .data$loser_low, ymax = .data$neutral_low
+      ),
+    signed |>
+      dplyr::transmute(
+        .data$species_position, .data$species, .data$consistency_group,
+        response = "No significant change", ymin = .data$neutral_low,
+        ymax = .data$neutral_high
+      ),
+    signed |>
+      dplyr::transmute(
+        .data$species_position, .data$species, .data$consistency_group,
+        response = "Winner", ymin = .data$neutral_high, ymax = .data$winner_high
+      )
+  )
+  if (include_colonizers) {
+    rectangle_layers[[length(rectangle_layers) + 1L]] <- signed |>
+      dplyr::transmute(
+        .data$species_position, .data$species, .data$consistency_group,
+        response = "Colonizer", ymin = .data$winner_high, ymax = .data$colonizer_high
+      )
+  }
+  response_levels <- c("Loser", "No significant change", "Winner")
+  if (include_colonizers) response_levels <- c(response_levels, "Colonizer")
+  rectangles <- dplyr::bind_rows(rectangle_layers) |>
+    dplyr::filter(.data$ymax > .data$ymin) |>
+    dplyr::mutate(
+      response = factor(.data$response, levels = response_levels)
+    )
+  response_palette <- c(
+    Loser = category_palette[["loser"]],
+    `No significant change` = "#CFCFCF",
+    Winner = category_palette[["winner"]],
+    Colonizer = category_palette[["colonizer"]]
+  )[response_levels]
+  significant_labels <- rectangles |>
+    dplyr::filter(.data$response != "No significant change") |>
+    dplyr::mutate(
+      experiment_count = .data$ymax - .data$ymin,
+      label_y = (.data$ymin + .data$ymax) / 2,
+      label = sprintf("%d", round(.data$experiment_count))
+    )
+  if (any(significant_labels$experiment_count <= 0) ||
+      any(abs(
+        significant_labels$experiment_count -
+          round(significant_labels$experiment_count)
+      ) > 1e-7) ||
+      abs(sum(significant_labels$experiment_count) -
+            sum(signed$significant_total)) > 1e-7 ||
+      any(significant_labels$response == "No significant change")) {
+    stop("Significant species-segment labels are invalid.", call. = FALSE)
+  }
+  plot <- ggplot2::ggplot(rectangles) +
+    ggplot2::geom_rect(
+      ggplot2::aes(
+        xmin = .data$species_position - 0.42, xmax = .data$species_position + 0.42,
+        ymin = .data$ymin, ymax = .data$ymax, fill = .data$response
+      ),
+      colour = "white", linewidth = 0.2
+    ) +
+    ggplot2::geom_text(
+      data = significant_labels,
+      mapping = ggplot2::aes(
+        x = .data$species_position, y = .data$label_y,
+        label = .data$label
+      ),
+      inherit.aes = FALSE, colour = "white", fontface = "bold", size = 2.55
+    ) +
+    ggplot2::geom_hline(yintercept = 0, colour = "white", linewidth = 0.5) +
+    ggplot2::facet_grid(
+      . ~ consistency_group, scales = "free_x", space = "free_x", drop = TRUE
+    ) +
+    ggplot2::scale_x_continuous(
+      breaks = signed$species_position, labels = signed$species,
+      expand = ggplot2::expansion(add = 0.6)
+    ) +
+    ggplot2::scale_fill_manual(values = response_palette, drop = FALSE, name = NULL) +
+    ggplot2::scale_y_continuous(
+      breaks = function(limits) {
+        breaks <- unique(round(pretty(limits, n = 7)))
+        breaks[breaks >= ceiling(limits[[1]]) & breaks <= floor(limits[[2]])]
+      },
+      labels = scales::label_number(accuracy = 1)
+    ) +
+    transplant_figure_theme() +
+    ggplot2::theme(
+      panel.grid = ggplot2::element_blank(),
+      panel.spacing.x = grid::unit(0.25, "cm"),
+      strip.text = ggplot2::element_text(face = "bold", size = 13),
+      axis.text.x = ggplot2::element_text(angle = 60, hjust = 1, size = 8),
+      legend.position = "bottom"
+    ) +
+    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1)) +
+    ggplot2::labs(
+      x = NULL,
+      y = "Number of experiments\n(losers below zero)"
+    )
+  save_plot_atomic(plot, path, 14, 8.5)
+}
+#' Plot Sensitivity.
+#'
+#' @param classified A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param path A project-relative or absolute filesystem path.
+#' @return A plot object, or the declared figure path when rendering to disk.
+plot_sensitivity <- function(classified, path) {
+  data <- classified |>
+    dplyr::ungroup() |>
+    dplyr::filter(.data$horizon == "max") |>
+    dplyr::select(experiment_id, species, transform, estimate) |>
+    tidyr::pivot_wider(names_from = transform, values_from = estimate)
+  plot <- ggplot2::ggplot(data, ggplot2::aes(.data$raw, .data$sqrt)) +
+    ggplot2::geom_hline(yintercept = 0, colour = "grey75") +
+    ggplot2::geom_vline(xintercept = 0, colour = "grey75") +
+    ggplot2::geom_abline(slope = 1, colour = "grey60") +
+    ggplot2::geom_point(alpha = 0.35, size = 0.7) +
+    ggplot2::geom_smooth(method = "lm", colour = "#D55E00", se = FALSE) +
+    transplant_figure_theme() +
+    ggplot2::labs(x = "Raw relative-cover strength", y = "Square-root relative-cover strength")
+  save_plot_atomic(plot, path, 8, 6)
+}
+
+#' Figure Registry.
+#'
+#' @return One row per supported figure artifact, including its producer target.
+figure_registry <- function() {
+  curated <- tibble::tribble(
+    ~filename, ~question, ~source_data, ~target, ~width, ~height, ~status,
+    "figures/manuscript/fig01_winners_losers.pdf", "Resident winner/loser AUC responses with a context-dependent species example", "winner_loser_results.csv; auc_by_plot.rds", "figure01_winners_losers_pdf", 15, 15, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig01_winners_losers.png", "Resident winner/loser AUC responses with a context-dependent species example", "winner_loser_results.csv; auc_by_plot.rds", "figure01_winners_losers_png", 15, 15, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig02_repeated_species_consistency.pdf", "Resident-only significant-response consistency among species represented in more than three resident experiments", "winner_loser_annotated.csv", "figure02_repeated_species_consistency_pdf", 14, 8.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig02_repeated_species_consistency.png", "Resident-only significant-response consistency among species represented in more than three resident experiments", "winner_loser_annotated.csv", "figure02_repeated_species_consistency_png", 14, 8.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig04_species_minmax_classification.pdf", "Species minimum-versus-maximum fitted winning-losing strength with canonical climate-response callouts", "species_context_classification.csv; resident_model_data; species_callout_examples.csv", "figure04_species_minmax_classification_pdf", 16, 12.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig04_species_minmax_classification.png", "Species minimum-versus-maximum fitted winning-losing strength with canonical climate-response callouts", "species_context_classification.csv; resident_model_data; species_callout_examples.csv", "figure04_species_minmax_classification_png", 16, 12.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig05_climate_only_fixed_effect_prediction_surfaces.pdf", "Canonical climate-only fixed-effect response surfaces across destination climate at low and high warming with all experiments annotated by elevation change", "resident_climate_model.rds; resident_climate_fixed_effects.csv; resident_climate_scaling.rds; experiments.csv; sites.csv", "figure05_climate_only_fixed_effect_pdf", 24, 13, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig05_climate_only_fixed_effect_prediction_surfaces.png", "Canonical climate-only fixed-effect response surfaces across destination climate at low and high warming with all experiments annotated by elevation change", "resident_climate_model.rds; resident_climate_fixed_effects.csv; resident_climate_scaling.rds; experiments.csv; sites.csv", "figure05_climate_only_fixed_effect_png", 24, 13, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_model_predictive_performance.pdf", "Hierarchical model-fit and leave-gradient-out predictive performance across the seven canonical species models", "model_fit_r2.csv; model_cross_validation_metrics.csv", "appendix_model_predictive_performance_pdf", 18, 12, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_model_predictive_performance.png", "Hierarchical model-fit and leave-gradient-out predictive performance across the seven canonical species models", "model_fit_r2.csv; model_cross_validation_metrics.csv", "appendix_model_predictive_performance_png", 18, 12, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_model_fixed_and_random_effects.pdf", "Fixed-effect coefficients with experiment-clustered CR1 intervals and species-level random-effect heterogeneity with profile-likelihood intervals across the seven canonical species models", "model_fixed_effects_robust_inference.csv; model_random_effect_profile_intervals.csv; model_random_effect_correlations.csv", "appendix_model_fixed_and_random_effects_pdf", 20, 28, "CURRENT_ANALYSIS_FIGURE",
+    "figures/manuscript/appendix_model_fixed_and_random_effects.png", "Fixed-effect coefficients with experiment-clustered CR1 intervals and species-level random-effect heterogeneity with profile-likelihood intervals across the seven canonical species models", "model_fixed_effects_robust_inference.csv; model_random_effect_profile_intervals.csv; model_random_effect_correlations.csv", "appendix_model_fixed_and_random_effects_png", 20, 28, "CURRENT_ANALYSIS_FIGURE",
+    "figures/manuscript/fig06_predictor_synthesis_support_and_heterogeneity.pdf", "Predictor model support and residual heterogeneity explained across canonical trait, functional, and phylogenetic models", "predictor_model_fit_statistics.csv; predictor_model_comparisons.csv; heterogeneity_synthesis.csv", "figure06_predictor_synthesis_pdf", 16, 8.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig06_predictor_synthesis_support_and_heterogeneity.png", "Predictor model support and residual heterogeneity explained across canonical trait, functional, and phylogenetic models", "predictor_model_fit_statistics.csv; predictor_model_comparisons.csv; heterogeneity_synthesis.csv", "figure06_predictor_synthesis_png", 16, 8.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig07_predictor_response_atlas.pdf", "Canonical predictor response surfaces across destination climate at low and high warming", "predictor_ldmc_model.rds; predictor_lma_model.rds; predictor_height_model.rds; predictor_graminoid_model.rds; predictor_woodiness_model.rds; predictor_phylogeny_model.rds; trait_scaling.csv; phylogeny_predictor_scaling.csv; phylogeny_predictor_scores.csv; resident_climate_scaling.rds", "figure07_predictor_response_atlas_pdf", 20, 20, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig07_predictor_response_atlas.png", "Canonical predictor response surfaces across destination climate at low and high warming", "predictor_ldmc_model.rds; predictor_lma_model.rds; predictor_height_model.rds; predictor_graminoid_model.rds; predictor_woodiness_model.rds; predictor_phylogeny_model.rds; trait_scaling.csv; phylogeny_predictor_scaling.csv; phylogeny_predictor_scores.csv; resident_climate_scaling.rds", "figure07_predictor_response_atlas_png", 20, 20, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_family_minmax_classification.pdf", "Family minimum-versus-maximum fitted winning-losing strength with canonical family climate-response callouts", "family_context_model.rds; family_auc_data.csv; family_context_classification.csv; family_random_coefficients.csv; resident_climate_scaling.rds", "appendix_family_minmax_pdf", 16, 12.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_family_minmax_classification.png", "Family minimum-versus-maximum fitted winning-losing strength with canonical family climate-response callouts", "family_context_model.rds; family_auc_data.csv; family_context_classification.csv; family_random_coefficients.csv; resident_climate_scaling.rds", "appendix_family_minmax_png", 16, 12.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_pev2_pev3_prediction_atlas.pdf", "Canonical PEV2 and PEV3 response surfaces across destination climate at low and high warming", "predictor_phylogeny_model.rds; phylogeny_predictor_scaling.csv; phylogeny_predictor_scores.csv; resident_climate_scaling.rds; output/data/fig07_predictor_response_atlas_data.csv", "appendix_pev2_pev3_atlas_pdf", 20, 8.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_pev2_pev3_prediction_atlas.png", "Canonical PEV2 and PEV3 response surfaces across destination climate at low and high warming", "predictor_phylogeny_model.rds; phylogeny_predictor_scaling.csv; phylogeny_predictor_scores.csv; resident_climate_scaling.rds; output/data/fig07_predictor_response_atlas_data.csv", "appendix_pev2_pev3_atlas_png", 20, 8.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_phylogeny_pcoa_summary.pdf", "Canonical resident-species phylogenetic coordinates and variation explained by the first ten PCoA axes", "phylogeny_predictor_scores.csv; pcoa_eigenvalue_summary.csv", "appendix_phylogeny_pcoa_summary_pdf", 20, 7.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_phylogeny_pcoa_summary.png", "Canonical resident-species phylogenetic coordinates and variation explained by the first ten PCoA axes", "phylogeny_predictor_scores.csv; pcoa_eigenvalue_summary.csv", "appendix_phylogeny_pcoa_summary_png", 20, 7.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig03_temporal_category_flows.pdf", "Resident temporal category transitions with source-conditional percentages", "temporal_linked_flows.csv", "figure03_temporal_category_flows_file", 18, 11, "FINAL_MANUSCRIPT",
+    "figures/manuscript/fig03_temporal_category_flows.png", "Resident temporal category transitions with source-conditional percentages", "temporal_linked_flows.csv", "figure03_temporal_category_flows_png", 18, 11, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_temporal_winning_losing_strength_correlations.pdf", "Temporal consistency of winning-losing strength for all residents and for winner/loser directions separately", "winner_loser_results.csv", "appendix_temporal_winning_losing_strength_correlations_file", 12, 5.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_temporal_winning_losing_strength_correlations.png", "Temporal consistency of winning-losing strength for all residents and for winner/loser directions separately", "winner_loser_results.csv", "appendix_temporal_winning_losing_strength_correlations_png", 12, 5.5, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_destination_climate_warming_gradient.pdf", "Continuous destination climate and experimental JJA warming without climate categories or cutoffs", "analysis_dataset.csv", "appendix_destination_climate_warming_gradient_file", 18, 12, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_destination_climate_warming_gradient.png", "Continuous destination climate and experimental JJA warming without climate categories or cutoffs", "analysis_dataset.csv", "appendix_destination_climate_warming_gradient_png", 18, 12, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_temporal_transition_matrices.pdf", "Resident-only temporal response composition and transition matrices", "temporal_transition_matrix.csv; temporal_category_composition.csv; winner_loser_results.csv", "appendix_temporal_transition_matrices_file", 17, 13, "FINAL_MANUSCRIPT",
+    "figures/manuscript/appendix_temporal_transition_matrices.png", "Resident-only temporal response composition and transition matrices", "temporal_transition_matrix.csv; temporal_category_composition.csv; winner_loser_results.csv", "appendix_temporal_transition_matrices_png", 17, 13, "FINAL_MANUSCRIPT",
+    "figures/candidates/destination_climate_warming_gradient.pdf", "Experimental warming across equal-width climate cells with reviewed experiment-level display assignments", "analysis_dataset.csv; climate_context_experiments.csv", "figure_destination_climate_warming_gradient", 18, 12, "CURRENT_ANALYSIS_FIGURE",
+    "figures/manuscript/compare_rel.abund_vs.sqrt.rel.abund.pdf", "Raw-versus-square-root sensitivity", "winner_loser_results.csv", "figure_sensitivity", 8, 6, "CURRENT_ANALYSIS_FIGURE",
+    "figures/retained/response_to_family_alluvial.pdf", "Significant response pools linked to responses, functional groups, and families", "analysis_dataset.csv", NA_character_, 28, 20, "KEEP_FOR_MANUSCRIPT",
+    "figures/retained/trait_categories_with_overall.pdf", "Significant loser, winner, and colonizer trait distributions across destination-climate backgrounds", "analysis_dataset.csv; climate_context_experiments.csv", NA_character_, 23, 8.5, "KEEP_FOR_MANUSCRIPT"
+  )
+  curated |>
+    dplyr::mutate(
+      script = dplyr::case_when(
+        grepl("^figure01_", .data$target) ~ "R/figures/winners_losers.R",
+        grepl("^figure02_|figure_sensitivity", .data$target) ~ "R/figures/consistency.R",
+        grepl("^figure03_|^appendix_temporal_", .data$target) ~ "R/figures/temporal.R",
+        grepl("^figure04_", .data$target) ~ "R/figures/species_context.R",
+        grepl("^figure06_", .data$target) ~ "R/figures/predictor_synthesis.R",
+        grepl("^appendix_model_predictive_", .data$target) ~ "R/evaluation/model_performance.R",
+        grepl("^appendix_model_fixed_", .data$target) ~ "R/evaluation/model_effects.R",
+        grepl("destination_climate", .data$target) ~ "R/figures/climate.R",
+        grepl("^figure05_|^figure07_|^appendix_family_|^appendix_pev|^appendix_phylogeny", .data$target) ~ "scripts/render_figure.R",
+        TRUE ~ NA_character_
+      )
+    )
+}
+
+#' Figure Manifest.
+#'
+#' @param root A project-relative or absolute filesystem path.
+#' @return The figure registry annotated with file and generation status.
+figure_manifest <- function(root) {
+  figure_registry() |>
+    dplyr::arrange(.data$filename) |>
+    dplyr::mutate(
+      file_exists = file.exists(file.path(root, .data$filename)),
+      generation_receipt = file.exists(paste0(file.path(root, .data$filename), ".generated")),
+      generated = dplyr::if_else(
+        is.na(.data$target), .data$file_exists,
+        .data$file_exists & .data$generation_receipt
+      ),
+      status = dplyr::case_when(
+        .data$generated ~ .data$status,
+        !is.na(.data$target) ~ "implemented target; not generated",
+        TRUE ~ "documented artifact; file missing"
+      ),
+      filename = file.path(root, .data$filename)
+    )
+}
+
+# Family-level consistency helpers retained for audited descriptive outputs.
+
+#' Signed Family Consistency.
+#'
+#' @param data A data frame whose required columns are checked before use.
+#' @return An R object described by the function name; its structure is validated before later stages use it.
+signed_family_consistency <- function(data) {
+  if (!"family" %in% names(data)) {
+    stop("Family consistency requires a reviewed family column.", call. = FALSE)
+  }
+  observations <- data |>
+    dplyr::transmute(
+      family = trimws(as.character(.data$family)),
+      species = dplyr::coalesce(.data$accepted_name, .data$species),
+      .data$experiment_id,
+      category = as.character(.data$category)
+    ) |>
+    dplyr::mutate(
+      family = dplyr::if_else(
+        is.na(.data$family) | .data$family == "", "Unresolved", .data$family
+      )
+    ) |>
+    dplyr::distinct(.data$family, .data$species, .data$experiment_id, .data$category)
+  unexpected_categories <- setdiff(unique(observations$category), names(category_palette))
+  if (length(unexpected_categories)) {
+    stop(
+      "Family consistency encountered unexpected categories: ",
+      paste(unexpected_categories, collapse = ", "), call. = FALSE
+    )
+  }
+  sampling <- observations |>
+    dplyr::summarise(
+      total_combinations = dplyr::n(),
+      n_species = dplyr::n_distinct(.data$species),
+      n_experiments = dplyr::n_distinct(.data$experiment_id),
+      .by = "family"
+    )
+  counts <- observations |>
+    dplyr::count(.data$family, .data$category, name = "n") |>
+    tidyr::pivot_wider(names_from = "category", values_from = "n", values_fill = 0) |>
+    dplyr::left_join(sampling, by = "family")
+  for (column in names(category_palette)) {
+    if (!column %in% names(counts)) counts[[column]] <- 0L
+  }
+  counts |>
+    dplyr::mutate(
+      significant_total = .data$loser + .data$winner + .data$colonizer,
+      neutral_total = .data$non_significant_loser + .data$no_change +
+        .data$non_significant_winner + .data$non_significant_colonizer,
+      loser_percent = 100 * .data$loser / .data$total_combinations,
+      neutral_percent = 100 * .data$neutral_total / .data$total_combinations,
+      winner_percent = 100 * .data$winner / .data$total_combinations,
+      colonizer_percent = 100 * .data$colonizer / .data$total_combinations,
+      neutral_low = -.data$neutral_percent / 2,
+      neutral_high = .data$neutral_percent / 2,
+      neutral_count_low = -.data$neutral_total / 2,
+      neutral_count_high = .data$neutral_total / 2,
+      significant_categories = (.data$loser > 0L) + (.data$winner > 0L) +
+        (.data$colonizer > 0L),
+      consistency_group = dplyr::case_when(
+        .data$loser > 0L & .data$winner == 0L & .data$colonizer == 0L ~ "Loser only",
+        .data$significant_categories > 1L ~ "Mixed significant responses",
+        .data$winner > 0L & .data$loser == 0L & .data$colonizer == 0L ~ "Winner only",
+        .data$colonizer > 0L & .data$loser == 0L & .data$winner == 0L ~ "Colonizer only",
+        TRUE ~ NA_character_
+      ),
+      loser_low = .data$neutral_low - .data$loser_percent,
+      winner_high = .data$neutral_high + .data$winner_percent,
+      colonizer_high = .data$winner_high + .data$colonizer_percent,
+      loser_count_low = .data$neutral_count_low - .data$loser,
+      winner_count_high = .data$neutral_count_high + .data$winner,
+      colonizer_count_high = .data$winner_count_high + .data$colonizer,
+      net_percent = .data$winner_percent + .data$colonizer_percent -
+        .data$loser_percent,
+      within_group_order = dplyr::case_when(
+        .data$consistency_group == "Loser only" ~ -.data$loser_percent,
+        .data$consistency_group == "Mixed significant responses" ~ .data$net_percent,
+        .data$consistency_group == "Winner only" ~ .data$winner_percent,
+        .data$consistency_group == "Colonizer only" ~ .data$colonizer_percent,
+        TRUE ~ 0
+      ),
+      consistency_group = factor(
+        .data$consistency_group,
+        levels = c(
+          "Loser only", "Mixed significant responses", "Winner only", "Colonizer only"
+        )
+      )
+    ) |>
+    dplyr::filter(.data$significant_total > 0L, !is.na(.data$consistency_group)) |>
+    dplyr::arrange(
+      .data$consistency_group, .data$within_group_order,
+      .data$significant_total, .data$family
+    ) |>
+    dplyr::mutate(
+      family_position = dplyr::row_number(),
+      family_label = .data$family
+    )
+}
+
+#' Family Consistency Plot Data.
+#'
+#' @param signed A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param metric A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @return An R object described by the function name; its structure is validated before later stages use it.
+family_consistency_plot_data <- function(signed, metric = c("percentage", "count")) {
+  metric <- match.arg(metric)
+  if (metric == "percentage") {
+    values <- signed |>
+      dplyr::transmute(
+        .data$family, .data$family_label, .data$consistency_group,
+        .data$total_combinations,
+        loser = -.data$loser_percent,
+        neutral_negative = -.data$neutral_percent / 2,
+        neutral_positive = .data$neutral_percent / 2,
+        winner = .data$winner_percent,
+        colonizer = .data$colonizer_percent
+      )
+  } else {
+    values <- signed |>
+      dplyr::transmute(
+        .data$family, .data$family_label, .data$consistency_group,
+        .data$total_combinations,
+        loser = -.data$loser,
+        neutral_negative = -.data$neutral_total / 2,
+        neutral_positive = .data$neutral_total / 2,
+        winner = .data$winner,
+        colonizer = .data$colonizer
+      )
+  }
+  stack_levels <- c(
+    "colonizer", "winner", "neutral_positive", "loser", "neutral_negative"
+  )
+  values |>
+    tidyr::pivot_longer(
+      dplyr::all_of(stack_levels), names_to = "stack_category", values_to = "value"
+    ) |>
+    dplyr::mutate(
+      family_axis = factor(.data$family_label, levels = signed$family_label),
+      stack_category = factor(.data$stack_category, levels = stack_levels)
+    ) |>
+    dplyr::filter(.data$value != 0)
+}

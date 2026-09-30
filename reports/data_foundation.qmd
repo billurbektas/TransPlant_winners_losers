@@ -1,0 +1,215 @@
+---
+title: "Data foundation"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+```{r}
+report_target_store <- Sys.getenv("TRANSPLANT_TARGET_STORE", "_targets")
+if (!grepl("^/", report_target_store)) {
+  report_target_store <- file.path(here::here(), report_target_store)
+}
+report_target_store <- normalizePath(report_target_store, winslash = "/", mustWork = TRUE)
+report_target_config <- tempfile(fileext = ".yaml")
+targets::tar_config_set(store = report_target_store, config = report_target_config)
+Sys.setenv(TAR_CONFIG = report_target_config)
+```
+
+## Inputs, configuration, and scope
+
+
+### Purpose
+
+Document configured sources, experiment scope, and frozen input-snapshot checks.
+
+### Inputs
+
+`config/analysis.R`, the configured network source, and the experiment registry.
+
+### Decisions and exclusions
+
+This stage inventories sources and defines scope; it makes no resident-model species exclusions.
+
+### Before/after counts and validation checks
+
+```{r}
+cfg <- targets::tar_read(config)
+inventory <- targets::tar_read(input_inventory)
+sources <- targets::tar_read(active_source_inventory)
+validation <- targets::tar_read(community_validation)
+experiments <- targets::tar_read(experiments)
+cat("Configured network input:", cfg$input_rdata, "\n\n")
+cat("Analysis experiments:", nrow(experiments), "\n\n")
+knitr::kable(inventory)
+knitr::kable(validation)
+knitr::kable(
+  sources |>
+    dplyr::count(.data$source_role, name = "files") |>
+    dplyr::arrange(.data$source_role)
+)
+knitr::kable(sources)
+```
+
+### Problems flagged
+
+Missing sources, invalid experiment identifiers, or failed input-snapshot checks stop the target.
+
+### Principal outputs
+
+`input_inventory`, `experiments`, `community_validation`, and
+`active_source_inventory`.
+
+### PASS/FAIL
+
+The report is produced only after the current input and experiment targets succeed.
+## Community import and cleaning
+
+
+### Purpose
+
+Summarize the network adapter, reviewed local mapping, and standardized community.
+
+### Inputs
+
+Network community objects, site/experiment metadata, and reviewed species mapping decisions.
+
+### Decisions and exclusions
+
+Only reviewed mapping rules are applied. No six-species resident-model exclusion occurs here.
+
+### Before/after counts and validation checks
+
+```{r}
+sites <- targets::tar_read(sites)
+experiments <- targets::tar_read(experiments)
+community <- targets::tar_read(community)
+mapping_review <- targets::tar_read(species_mapping_review)
+knitr::kable(data.frame(
+  object = c("sites", "experiments", "community rows", "mapped species keys"),
+  n = c(nrow(sites), nrow(experiments), nrow(community), nrow(mapping_review))
+))
+```
+
+### Problems flagged
+
+Non-unique mappings, missing identifiers, or failed community-interface checks stop construction.
+
+### Principal outputs
+
+`sites`, `experiments`, `species_mapping`, and `community`.
+
+### PASS/FAIL
+
+Canonical construction and mapping-review validation must complete before rendering.
+## Taxonomic harmonization
+
+
+### Purpose
+
+Document TNRS decisions and the species-resolution gate.
+
+### Inputs
+
+Canonical community names, TNRS responses, and reviewed taxonomy override files.
+
+### Decisions and exclusions
+
+Reviewed accepted names remain authoritative; non-species records are explicitly marked rather than silently coerced.
+
+### Before/after counts and validation checks
+
+```{r}
+review <- targets::tar_read(community_taxonomy_review)
+resolution <- targets::tar_read(vegetation_taxonomic_resolution)
+species <- targets::tar_read(community_taxonomy_species)
+knitr::kable(data.frame(
+  metric = c("TNRS review rows", "resolution decisions", "included species-level names",
+             "omitted non-species names"),
+  value = c(nrow(review), nrow(resolution), nrow(species),
+            sum(!resolution$include_species_level))
+))
+```
+
+### Problems flagged
+
+Unreviewed ambiguous matches, duplicated accepted names, and incomplete required taxonomy are release failures.
+
+### Principal outputs
+
+`community_taxonomy_review`, `vegetation_taxonomic_resolution`, and `community_taxonomy_species`.
+
+### PASS/FAIL
+
+Only reviewed species-level or infraspecific taxa enter the analysis community.
+## Climate covariates
+
+
+### Purpose
+
+Report the CHELSA coordinate audit and experiment-level coverage.
+
+### Inputs
+
+Validated site coordinates, experiment years, and the resumable CHELSA cache.
+
+### Decisions and exclusions
+
+Coordinate checks precede extraction. Missing source days or years remain visible as coverage flags.
+
+### Before/after counts and validation checks
+
+```{r}
+audit <- targets::tar_read(chelsa_coordinate_audit)
+coverage <- targets::tar_read(experiment_climate_coverage)
+knitr::kable(audit$summary)
+knitr::kable(coverage[, c("experiment_id", "climate_complete", "climate_summary_status")])
+```
+
+### Problems flagged
+
+Invalid coordinates and incomplete experiment climate are reported explicitly.
+
+### Principal outputs
+
+`site_year_climate`, `experiment_climate`, `chelsa_coordinate_audit`, and `experiment_climate_coverage`.
+
+### PASS/FAIL
+
+Coordinates are validated before extraction; incomplete years remain explicitly flagged.
+## Trait preparation
+
+
+### Purpose
+
+Summarize TRY filtering, range checks, and species-level trait availability.
+
+### Inputs
+
+TRY source data, trait dictionary, TNRS mapping, range rules, and climate-zone filters.
+
+### Decisions and exclusions
+
+Approved traits, units, taxonomic matches, and biological ranges are applied before species summaries.
+
+### Before/after counts and validation checks
+
+```{r}
+filter_audit <- targets::tar_read(try_climate_filtered)$audit
+range_validation <- targets::tar_read(try_range_validation)
+traits <- targets::tar_read(try_trait_outputs)$summary
+knitr::kable(filter_audit)
+knitr::kable(range_validation)
+knitr::kable(data.frame(species_trait_rows = nrow(traits)))
+```
+
+### Problems flagged
+
+Rejected units, out-of-range observations, taxonomic gaps, and missing species summaries remain in audit targets.
+
+### Principal outputs
+
+`try_cleaned`, `try_range_validation`, and `try_trait_outputs`.
+
+### PASS/FAIL
+
+Trait summaries are built only from approved traits, units, taxonomy, and climate zones.

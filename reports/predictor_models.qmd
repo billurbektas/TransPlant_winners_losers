@@ -1,0 +1,171 @@
+---
+title: "Trait, functional, and phylogenetic predictor models"
+format: html
+execute: {echo: false, warning: false, message: false}
+---
+
+```{r}
+report_target_store <- Sys.getenv("TRANSPLANT_TARGET_STORE", "_targets")
+if (!grepl("^/", report_target_store)) {
+  report_target_store <- file.path(here::here(), report_target_store)
+}
+report_target_store <- normalizePath(report_target_store, winslash = "/", mustWork = TRUE)
+report_target_config <- tempfile(fileext = ".yaml")
+targets::tar_config_set(store = report_target_store, config = report_target_config)
+Sys.setenv(TAR_CONFIG = report_target_config)
+```
+
+## Trait predictors
+
+
+### Question
+
+Do LDMC, LMA, or vegetative height explain systematic response or residual species heterogeneity?
+
+### Dataset and sample size
+
+Each trait uses its own complete-case species/effect subset; the scaling table records all sample sizes.
+
+### Exact model specification
+
+For each trait, compare climate-only `M0`, additive-trait `M1`, and full `Trait_z * T_z * P_z * W_z` models on identical rows and covariance.
+
+### Assumptions
+
+Positive species medians are natural-log transformed and standardized over unique trait-complete species before row expansion. Missing traits are not imputed.
+
+### Convergence and covariance diagnostics
+
+Matched-row/V checks and branch-specific numerical regression gates accompany the ML and full REML results.
+
+### Main numerical results
+
+```{r}
+scaling <- targets::tar_read(trait_scaling)
+tables <- targets::tar_read(trait_model_tables)
+knitr::kable(scaling)
+knitr::kable(tables$fit_statistics)
+knitr::kable(tables$comparisons)
+knitr::kable(tables$CR1)
+```
+
+### Interpretation boundary
+
+Each trait is fitted separately after log unique-species scaling; missing values are not imputed.
+
+### Principal objects
+
+`prepared_ldmc`, `prepared_lma`, `prepared_height`, and `trait_model_tables`.
+
+### PASS/FAIL
+
+Trait values, scaling, matched-row covariance checks, ML fits/comparisons, and
+full-REML robust-inference rows must pass their current checks.
+## Functional-group predictors
+
+
+### Question
+
+Do independently defined Graminoid status and Woodiness explain response structure?
+
+### Dataset and sample size
+
+Both predictors use the complete 1,604-effect, 526-species resident cohort; group coverage is shown below.
+
+### Exact model specification
+
+Each predictor is fitted separately as climate-only `M0`, additive-status `M1`, and full status-by-`T_z * P_z * W_z` interaction model.
+
+### Assumptions
+
+Graminoid and Woodiness assignments remain independent binary variables and
+share the exact ordered `V_auc`. TNRS-derived family rows supply 525 retained
+taxa; the shared resident-species override ledger augments the active functional
+target with the validated non-graminoid/non-woody assignment for *Viola
+palustris*.
+
+### Convergence and covariance diagnostics
+
+Branch-specific ML, CR1, assignment, source-coverage, and observed-support checks are shown below.
+
+### Main numerical results
+
+```{r}
+tables <- targets::tar_read(functional_model_tables)
+mask <- targets::tar_read(woodiness_support_mask_specification)
+mask_audit <- targets::tar_read(woodiness_support_mask_audit)
+coverage <- targets::tar_read(functional_climate_coverage)
+source_audit <- targets::tar_read(functional_source_coverage_audit)
+knitr::kable(tables$fit_statistics)
+knitr::kable(tables$comparisons)
+knitr::kable(tables$CR1)
+knitr::kable(as.data.frame(mask[c("status", "needs_group_specific_observed_climate_support_mask", "model_refit_permitted")]))
+knitr::kable(coverage)
+knitr::kable(mask_audit)
+knitr::kable(source_audit)
+```
+
+### Interpretation boundary
+
+The Woodiness support mask is calculated independently within the observed climate support of each group. It is a plotting-only refinement and cannot change the fitted model.
+
+### Principal objects
+
+`functional_species`, `graminoid_model_sequence`,
+`woodiness_model_sequence`, and `woodiness_support_mask`.
+
+### PASS/FAIL
+
+Assignments, source coverage, model tables, CR1 rows, and group-specific support construction must pass.
+## Phylogenetic predictors
+
+
+### Question
+
+Does response-independent phylogenetic position (PEV1–PEV3) explain response structure?
+
+### Dataset and sample size
+
+The tree and PCoA contain exactly the 526 resident-cohort species; the PEV model uses all 1,604 effects and 42 experiments.
+
+### Exact model specification
+
+The tree is built with pinned V.PhyloMaker2 scenario 3. The PEV sequence compares climate-only `M0`, additive PEV `M1`, and the anchored PEV-by-climate `M3`.
+
+### Assumptions
+
+Placement decisions and axis signs are response-independent. Shared parent placements retain zero patristic distance.
+
+### Convergence and covariance diagnostics
+
+PCoA eigenstructure, package provenance, model comparisons, and CR1 are shown below.
+
+### Main numerical results
+
+```{r}
+eigen <- targets::tar_read(pcoa_eigen_summary)
+package <- targets::tar_read(phylogeny_package_source_provenance)
+package_gate <- targets::tar_read(phylogeny_package_validation)
+tables <- targets::tar_read(phylogeny_model_tables)
+knitr::kable(eigen[seq_len(min(10, nrow(eigen))), ])
+knitr::kable(package)
+knitr::kable(package_gate)
+knitr::kable(tables$fit_statistics)
+knitr::kable(tables$comparisons)
+knitr::kable(tables$CR1)
+```
+
+### Interpretation boundary
+
+PEV1–PEV3 are selected and oriented without reference to Delta AUC. The active
+model receives the independently built and oriented coordinates.
+
+### Principal objects
+
+`resident_phylogeny_rebuild`, `resident_pcoa_candidate`,
+`resident_pev_scores_oriented`, `phylogeny_model_sequence`, and
+`phylogeny_model_tables`.
+
+### PASS/FAIL
+
+All placement, distance, zero-distance, PEV, eigenstructure, model, and CR1 checks must pass.

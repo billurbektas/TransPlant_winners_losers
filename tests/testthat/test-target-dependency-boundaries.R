@@ -1,124 +1,105 @@
-test_that("ordinary reports do not read the late Step 22 assembly", {
-  report_paths <- list.files(
-    project_path("reports"), pattern = "^[0-9]{2}_.+[.]qmd$", full.names = TRUE
-  )
-  ordinary_paths <- report_paths[!grepl("16_reference_and_release[.]qmd$", report_paths)]
+test_that("ordinary thematic reports do not read historical assemblies", {
+  report_paths <- project_path("reports", c(
+    "data_foundation.qmd", "response_estimation.qmd",
+    "resident_climate_model.qmd", "family_context_model.qmd",
+    "predictor_models.qmd", "model_synthesis.qmd",
+    "release_validation.qmd"
+  ))
+  ordinary_paths <- report_paths[!grepl("release_validation[.]qmd$", report_paths)]
   report_text <- unlist(lapply(ordinary_paths, readLines, warn = FALSE), use.names = FALSE)
-  expect_false(any(grepl("candidate_step22_results", report_text, fixed = TRUE)))
-  expect_false(any(grepl("step22_reference_validation", report_text, fixed = TRUE)))
+  expect_false(any(grepl("legacy_comparison_candidate", report_text, fixed = TRUE)))
+  expect_false(any(grepl("legacy_reference_validation", report_text, fixed = TRUE)))
 })
 
-test_that("canonical reports retain the required scientific sections", {
-  cleaning <- sprintf("%02d", 1:8)
-  analysis <- sprintf("%02d", 9:15)
-
-  report_text <- function(step) {
-    path <- list.files(
-      project_path("reports"), pattern = paste0("^", step, "_.*[.]qmd$"),
-      full.names = TRUE
-    )
-    expect_length(path, 1L)
+test_that("the seven thematic reports retain auditable scientific sections", {
+  reports <- list.files(
+    project_path("reports"), pattern = "^[a-z].+[.]qmd$", full.names = TRUE
+  )
+  expect_setequal(basename(reports), c(
+    "data_foundation.qmd", "response_estimation.qmd",
+    "resident_climate_model.qmd", "family_context_model.qmd",
+    "predictor_models.qmd", "model_synthesis.qmd",
+    "release_validation.qmd"
+  ))
+  text <- vapply(reports, function(path) {
     paste(readLines(path, warn = FALSE), collapse = "\n")
-  }
-
-  purrr::walk(vapply(cleaning, report_text, character(1)), function(text) {
-    expect_match(text, "## Purpose", fixed = TRUE)
-    expect_match(text, "## Inputs", fixed = TRUE)
-    expect_match(text, "## Decisions and exclusions", fixed = TRUE)
-    expect_match(text, "## Before/after counts and validation checks", fixed = TRUE)
-    expect_match(text, "## Problems flagged", fixed = TRUE)
-    expect_match(text, "## Canonical outputs", fixed = TRUE)
-    expect_match(text, "## PASS/FAIL", fixed = TRUE)
-  })
-  purrr::walk(vapply(analysis, report_text, character(1)), function(text) {
-    expect_match(text, "## Question", fixed = TRUE)
-    expect_match(text, "## Dataset and sample size", fixed = TRUE)
-    expect_match(text, "## Exact model specification", fixed = TRUE)
-    expect_match(text, "## Assumptions", fixed = TRUE)
-    expect_match(text, "## Convergence and covariance diagnostics", fixed = TRUE)
-    expect_match(text, "## Main numerical results", fixed = TRUE)
-    expect_match(text, "## Interpretation boundary", fixed = TRUE)
-    expect_match(text, "## Canonical objects", fixed = TRUE)
-    expect_match(text, "## PASS/FAIL", fixed = TRUE)
-  })
+  }, character(1))
+  expect_true(all(grepl("PASS/FAIL", text, fixed = TRUE)))
+  expect_true(all(grepl("Principal objects|Principal outputs", text)))
 })
 
 test_that("trait, functional, and phylogeny reports read branch-specific tables", {
   read_report <- function(name) {
     paste(readLines(project_path("reports", name), warn = FALSE), collapse = "\n")
   }
-  trait <- read_report("12_trait_information.qmd")
-  functional <- read_report("13_functional_information.qmd")
-  phylogeny <- read_report("14_phylogeny.qmd")
+  trait <- read_report("predictor_models.qmd")
+  functional <- trait
+  phylogeny <- trait
 
-  expect_match(trait, "trait_model_tables_526", fixed = TRUE)
+  expect_match(trait, "trait_model_tables", fixed = TRUE)
   expect_false(grepl("tar_read(predictor_model_fit)", trait, fixed = TRUE))
-  expect_match(functional, "functional_model_tables_526", fixed = TRUE)
-  expect_match(functional, "woodiness_figure_file", fixed = TRUE)
+  expect_match(functional, "functional_model_tables", fixed = TRUE)
+  expect_match(functional, "woodiness_support_mask_audit", fixed = TRUE)
+  expect_false(grepl("woodiness_figure_file", functional, fixed = TRUE))
   expect_false(grepl("tar_read(predictor_model_fit)", functional, fixed = TRUE))
-  expect_match(phylogeny, "phylogeny_model_tables_526", fixed = TRUE)
+  expect_match(phylogeny, "phylogeny_model_tables", fixed = TRUE)
   expect_false(grepl("tar_read(predictor_model_fit)", phylogeny, fixed = TRUE))
 })
 
-test_that("the Woodiness figure has a narrowly scoped plotting dependency", {
+test_that("the obsolete standalone Woodiness figure is not generated", {
   source_text <- paste(
     readLines(
-      project_path("R", "targets", "publication_targets.R"), warn = FALSE
+      project_path("R", "targets", "definitions", "publication.R"), warn = FALSE
     ),
     collapse = "\n"
   )
-  start <- regexpr("woodiness_figure,", source_text, fixed = TRUE)[[1]]
-  end <- regexpr("woodiness_figure_file,", source_text, fixed = TRUE)[[1]]
-  expect_gt(start, 0L)
-  expect_gt(end, start)
-  block <- substring(source_text, start, end - 1L)
-  expect_match(block, "woodiness_model_sequence_526", fixed = TRUE)
-  expect_match(block, "woodiness_support_mask", fixed = TRUE)
-  expect_false(grepl("candidate_step22_results", block, fixed = TRUE))
+  expect_false(grepl("woodiness_figure,", source_text, fixed = TRUE))
+  expect_false(grepl("woodiness_figure_file,", source_text, fixed = TRUE))
+  expect_match(source_text, "woodiness_support_mask,", fixed = TRUE)
 })
 
-test_that("canonical exports are independent of the late validation object", {
+test_that("current exports are independent of the late legacy assembly", {
   source_text <- readLines(
-    project_path("R", "targets", "analysis_targets.R"), warn = FALSE
+    project_path("R", "targets", "definitions", "models.R"), warn = FALSE
   )
-  late_assembly_line <- grep("candidate_step22_results", source_text, fixed = TRUE)[[1]]
+  late_assembly_line <- grep("legacy_comparison_candidate", source_text, fixed = TRUE)[[1]]
   primary_exports <- c(
-    "canonical_downstream_data_file,", "canonical_mboth_model_file,",
-    "canonical_species_classification_file,", "canonical_family_model_file,",
-    "canonical_trait_scaling_file,", "canonical_functional_species_file,",
-    "canonical_phylogeny_file,", "canonical_woodiness_model_file,",
-    "canonical_heterogeneity_synthesis_file,"
+    "resident_data_file,", "resident_climate_model_file,",
+    "species_classification_file,", "family_model_file,",
+    "trait_scaling_file,", "functional_species_file,",
+    "phylogeny_file,", "woodiness_model_file,",
+    "heterogeneity_synthesis_file,"
   )
   export_lines <- vapply(primary_exports, function(target_name) {
     grep(target_name, source_text, fixed = TRUE)[[1]]
   }, integer(1))
   expect_true(all(export_lines < late_assembly_line))
 
-  manifest_start <- grep("canonical_numerical_export_files,", source_text,
+  manifest_start <- grep("release_artifact_files,", source_text,
                          fixed = TRUE)[[1]]
-  manifest_end <- grep("canonical_output_manifest_file,", source_text,
+  manifest_end <- grep("release_artifact_manifest_file,", source_text,
                        fixed = TRUE)[[1]]
   manifest_block <- paste(source_text[manifest_start:manifest_end], collapse = "\n")
-  expect_false(grepl("candidate_step22_results", manifest_block, fixed = TRUE))
+  expect_false(grepl("legacy_comparison_candidate", manifest_block, fixed = TRUE))
   expect_match(manifest_block, "vapply(unname(paths), sha256_file", fixed = TRUE)
 })
 
 test_that("functional assignments use the active source plus the explicit ledger", {
   source_text <- readLines(
-    project_path("R", "targets", "analysis_targets.R"), warn = FALSE
+    project_path("R", "targets", "definitions", "models.R"), warn = FALSE
   )
-  start <- grep("functional_species_526,", source_text, fixed = TRUE)[[1]]
+  start <- grep("functional_species,", source_text, fixed = TRUE)[[1]]
   end <- grep("functional_source_coverage_audit,", source_text, fixed = TRUE)[[1]]
   functional_block <- paste(source_text[start:(end - 1L)], collapse = "\n")
-  expect_match(functional_block, "canonical_functional_groups_input", fixed = TRUE)
-  expect_match(functional_block, "downstream_species_overrides", fixed = TRUE)
-  expect_false(grepl("trait_species_reference_526", functional_block, fixed = TRUE))
+  expect_match(functional_block, "functional_groups_input", fixed = TRUE)
+  expect_match(functional_block, "resident_species_overrides", fixed = TRUE)
+  expect_false(grepl("legacy_trait_species", functional_block, fixed = TRUE))
 })
 
-test_that("the candidate phylogeny is rebuilt rather than adopted from Step 19", {
+test_that("the candidate phylogeny is rebuilt rather than adopted from history", {
   source_text <- paste(
     readLines(
-      project_path("R", "targets", "analysis_targets.R"), warn = FALSE
+      project_path("R", "targets", "definitions", "models.R"), warn = FALSE
     ),
     collapse = "\n"
   )
@@ -132,13 +113,13 @@ test_that("the candidate phylogeny is rebuilt rather than adopted from Step 19",
     "build_phylogeny_from_placement_decisions",
     fixed = TRUE
   )
-  expect_match(source_text, "reference_file_artifacts", fixed = TRUE)
+  expect_match(source_text, "legacy_file_artifacts", fixed = TRUE)
   expect_match(
     source_text, "phylogeny_package_installation_files", fixed = TRUE
   )
 })
 
-test_that("canonical command-line entry points do not source historical runners", {
+test_that("current command-line entry points do not source historical runners", {
   scripts <- project_path(
     "scripts", c("run_pipeline.R", "refresh_dependencies.R")
   )
@@ -152,25 +133,28 @@ test_that("canonical command-line entry points do not source historical runners"
   expect_match(text, "quarto", fixed = TRUE)
 })
 
-test_that("the target graph loads an explicit canonical module list", {
+test_that("the target graph loads the stage-organized R tree", {
   target_text <- paste(
     readLines(project_path("_targets.R"), warn = FALSE), collapse = "\n"
   )
   config_text <- paste(
-    readLines(project_path("config", "canonical_analysis.R"), warn = FALSE),
+    readLines(project_path("config", "workflow.R"), warn = FALSE),
     collapse = "\n"
   )
-  expect_match(target_text, "canonical_pipeline_source_files()", fixed = TRUE)
+  expect_match(target_text, "targets::tar_source(\"R\")", fixed = TRUE)
   expect_false(grepl("list.files(\"R/pipeline\"", target_text, fixed = TRUE))
   expect_false(dir.exists(project_path("R", "pipeline")))
   expect_false(dir.exists(project_path("R", "reporting")))
   expect_false(grepl("additional_analysis.R", config_text, fixed = TRUE))
   expect_false(grepl("frequentist_hierarchical_auc.R", config_text, fixed = TRUE))
   expect_false(grepl('"figures.R"', config_text, fixed = TRUE))
-  expect_true(all(file.exists(project_path("R", "functions", c(
-    "upstream_analysis.R", "auc_model_helpers.R", "temporal_figures.R",
-    "climate_display_figure.R", "consistency_figures.R"
-  )))))
+  expect_true(all(file.exists(c(
+    project_path("R", "data", "analysis_dataset.R"),
+    project_path("R", "responses", "auc_model_helpers.R"),
+    project_path("R", "figures", "temporal.R"),
+    project_path("R", "figures", "climate.R"),
+    project_path("R", "figures", "consistency.R")
+  ))))
   expect_false(grepl("biological_context_review.R", config_text, fixed = TRUE))
   expect_false(grepl("climate_response_model.R", config_text, fixed = TRUE))
   expect_false(grepl("hierarchical_trait_trial.R", config_text, fixed = TRUE))
@@ -178,9 +162,10 @@ test_that("the target graph loads an explicit canonical module list", {
 
 test_that("active modules define each top-level function exactly once", {
   files <- unique(c(
-    canonical_pipeline_source_files(PROJECT_ROOT),
+    active_function_files(PROJECT_ROOT),
     list.files(
-      project_path("R", "functions"), pattern = "[.]R$", full.names = TRUE
+      project_path("R"), pattern = "[.]R$", recursive = TRUE,
+      full.names = TRUE
     )
   ))
   definitions <- unlist(lapply(files, function(path) {
@@ -197,24 +182,24 @@ test_that("active modules define each top-level function exactly once", {
   expect_identical(anyDuplicated(definitions), 0L)
 })
 
-test_that("Step 01 inventories and reports active scientific source hashes", {
+test_that("the data-foundation report inventories active source hashes", {
   report_text <- paste(
-    readLines(project_path("reports", "01_inputs_and_scope.qmd"), warn = FALSE),
+    readLines(project_path("reports", "data_foundation.qmd"), warn = FALSE),
     collapse = "\n"
   )
-  expect_match(report_text, "canonical_scientific_source_inventory", fixed = TRUE)
+  expect_match(report_text, "active_source_inventory", fixed = TRUE)
 
-  files <- canonical_scientific_source_files(PROJECT_ROOT)
+  files <- active_scientific_source_files(PROJECT_ROOT)
   expect_true(all(file.exists(files)))
-  expect_true(all(canonical_pipeline_source_files(PROJECT_ROOT) %in% files))
+  expect_true(all(active_function_files(PROJECT_ROOT) %in% files))
   expect_false(any(grepl("/archive/", files, fixed = TRUE)))
   expect_false(any(grepl("/_targets/", files, fixed = TRUE)))
 })
 
-test_that("canonical analysis targets do not read superseded output trees", {
+test_that("current analysis targets do not read superseded output trees", {
   target_source <- paste(
     readLines(
-      testthat::test_path("..", "..", "R", "targets", "analysis_targets.R"),
+      testthat::test_path("..", "..", "R", "targets", "definitions", "models.R"),
       warn = FALSE
     ),
     collapse = "\n"

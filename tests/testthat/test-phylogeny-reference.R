@@ -1,5 +1,5 @@
-source(project_path("R", "functions", "phylogeny.R"))
-source(project_path("R", "functions", "provenance.R"))
+source(project_path("R", "models", "phylogeny.R"))
+source(project_path("R", "infrastructure", "provenance.R"))
 
 test_that("the reviewed phylogeny placement ledger is frozen and complete", {
   path <- project_path("config", "phylogeny_placement_decisions.csv")
@@ -37,9 +37,9 @@ test_that("the external-source ledger records the pinned phylogeny commit", {
 
 test_that("the current PEV orientation follows the documented convention", {
   path <- project_path(
-    "output", "data", "species_pev_scores_526.csv"
+    "output", "data", "phylogeny_predictor_scores.csv"
   )
-  expect_true(file.exists(path), info = "Build canonical_pev_scores_file")
+  expect_true(file.exists(path), info = "Build pev_scores_file")
   scores <- readr::read_csv(path, show_col_types = FALSE)
   oriented <- orient_pev_axes(scores)
   expect_gt(oriented$PEV1[oriented$species_id == "Poa trivialis"], 0)
@@ -50,10 +50,10 @@ test_that("the current PEV orientation follows the documented convention", {
 
 test_that("the current zero-distance pairs are intentional", {
   distance_path <- project_path(
-    "output", "data", "phylogenetic_distance_matrix_526.rds"
+    "output", "data", "phylogeny_distances.rds"
   )
   audit_path <- project_path(
-    "output", "audits", "zero_distance_pair_audit_526.csv"
+    "output", "audits", "zero_distance_pair_audit.csv"
   )
   expect_true(
     all(file.exists(c(distance_path, audit_path))),
@@ -77,15 +77,15 @@ test_that("the PEV modeling interface validates while retaining reconstructed va
   )
   recomputed <- reference
   recomputed$PEV1 <- recomputed$PEV1 + c(1e-14, 0, -1e-14)
-  interface <- build_anchored_pev_modeling_interface(recomputed, reference)
+  interface <- build_legacy_pev_validation_interface(recomputed, reference)
   expect_identical(interface$data, recomputed)
-  expect_false(interface$audit$exact_reference_values_used_for_step22_modeling)
+  expect_false(interface$audit$historical_values_used_for_modeling)
   expect_true(all(interface$audit$pass))
 
   drifted <- recomputed
   drifted$PEV1[[1]] <- drifted$PEV1[[1]] + 1e-4
   expect_error(
-    build_anchored_pev_modeling_interface(drifted, reference),
+    build_legacy_pev_validation_interface(drifted, reference),
     "PEV"
   )
 })

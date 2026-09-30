@@ -1,9 +1,9 @@
 test_that("the project dictionary contains only maintained traits", {
   dictionary <- readr::read_csv(project_path("config", "try_trait_map.csv"), show_col_types = FALSE)
-  expect_setequal(unique(dictionary$canonical_trait), c("LDMC", "SLA", "vegetative_height"))
-  expect_equal(sum(dictionary$canonical_trait == "LDMC"), 2L)
-  expect_equal(sum(dictionary$canonical_trait == "SLA"), 7L)
-  expect_equal(sum(dictionary$canonical_trait == "vegetative_height"), 2L)
+  expect_setequal(unique(dictionary$analysis_trait), c("LDMC", "SLA", "vegetative_height"))
+  expect_equal(sum(dictionary$analysis_trait == "LDMC"), 2L)
+  expect_equal(sum(dictionary$analysis_trait == "SLA"), 7L)
+  expect_equal(sum(dictionary$analysis_trait == "vegetative_height"), 2L)
 })
 
 test_that("LMA is the reciprocal of positive standardized SLA", {

@@ -1,4 +1,4 @@
-canonical_trait,try_trait_name
+analysis_trait,try_trait_name
 LDMC,"Leaf dry mass per leaf fresh mass (leaf dry matter content, LDMC)"
 LDMC,"Leaf dry mass per leaf fresh mass (LDMC)"
 SLA,"Leaf area per leaf dry mass (specific leaf area, SLA or 1/LMA): undefined if petiole is in- or excluded"

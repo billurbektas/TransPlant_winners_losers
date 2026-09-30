@@ -8,7 +8,7 @@ test_that("current adapter reproduces the reviewed snapshot", {
     col_types = readr::cols(.default = readr::col_character())
   )
   mapping <- resolve_local_species_mappings(input$cleanedspecies, decisions)
-  community <- canonical_community(input$dat, mapping, metadata)
+  community <- standardize_community(input$dat, mapping, metadata)
   sites <- build_sites(community, input$regional)
   experiments <- build_experiments(community, sites)
 

@@ -1,0 +1,14 @@
+field,value
+recorded_at_utc,2026-09-29 22:33:17 UTC
+git_branch,
+git_commit,
+git_worktree_dirty,TRUE
+r_version,R version 4.6.1 (2026-06-24)
+r_platform,aarch64-apple-darwin23
+operating_system,Darwin 25.6.0 arm64
+targets_version,1.12.0
+tarchetypes_version,0.14.1
+quarto_r_package_version,1.5.1
+v_phylomaker2_version,0.1.0
+renv_lock_sha256,a0049226384305e222e9a148eaa822a2405bf1137db5cffaa85ba124245449f9
+targets_script_sha256,504553b79effa2cd40bcb4602ae58387ab8e804f75020b7375e6e5718488d19c
