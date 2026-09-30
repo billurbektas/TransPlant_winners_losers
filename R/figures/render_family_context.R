@@ -15,7 +15,7 @@
 render_family_context_appendix <- function(arguments = character()) {
   
   # Figure-only family-resolution analogue of manuscript Figure 4. Existing
-  # canonical model and table exports are read; no model is fitted.
+  # current model and table exports are read; no model is fitted.
   
   required_packages <- c(
     "cowplot", "dplyr", "geometry", "ggplot2", "metafor", "readr",
@@ -65,7 +65,7 @@ render_family_context_appendix <- function(arguments = character()) {
     random = "output/tables/family_random_coefficients.csv"
   )
   if (any(!file.exists(input_files))) {
-    stop("Missing canonical family input(s): ",
+    stop("Missing current family input(s): ",
          paste(input_files[!file.exists(input_files)], collapse = ", "),
          call. = FALSE)
   }
@@ -97,10 +97,10 @@ render_family_context_appendix <- function(arguments = character()) {
   
   validation <- tibble::tribble(
     ~check, ~pass, ~detail,
-    "No model refit", inherits(fit, "rma.mv"), "Existing canonical family REML model read from disk; no fitting function is called",
-    "Canonical family scope", nrow(classification) == 33L, "33 eligible full-rank families in canonical classification export",
-    "Canonical classes", identical(sort(unique(classification$fitted_class)), sort(c("Consistent loser", "Context-dependent", "Consistent winner"))), "All three canonical family response classes are present",
-    "Canonical callouts", identical(as.character(bundle$selection$family_id), selected_families), "Four existing selected-for-surface families used",
+    "No model refit", inherits(fit, "rma.mv"), "Existing current family REML model read from disk; no fitting function is called",
+    "Current family scope", nrow(classification) == 33L, "33 eligible full-rank families in current classification export",
+    "Current classes", identical(sort(unique(classification$fitted_class)), sort(c("Consistent loser", "Context-dependent", "Consistent winner"))), "All three current family response classes are present",
+    "Current callouts", identical(as.character(bundle$selection$family_id), selected_families), "Four existing selected-for-surface families used",
     "Family support masks", all(bundle$surfaces$supported), "Every coloured callout cell lies inside that family's observed three-dimensional climate-warming hull",
     "Finite predictions", all(is.finite(bundle$surfaces$estimate)), "All displayed family predictions are finite"
   )

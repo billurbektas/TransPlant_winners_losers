@@ -36,7 +36,7 @@ experiment_community <- function(community, experiment) {
 #' @param data A data frame whose required columns are checked before use.
 #' @param minimum_observations A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-apply_legacy_observation_filter <- function(data, minimum_observations = 2L) {
+filter_minimum_plot_observations <- function(data, minimum_observations = 2L) {
   data |>
     dplyr::group_by(.data$ODT, .data$species) |>
     dplyr::filter(dplyr::n() >= minimum_observations) |>
@@ -156,7 +156,7 @@ calculate_auc_inputs <- function(community, experiments, horizons = 2L:9L) {
   results <- purrr::map(seq_len(nrow(included)), function(i) {
     experiment <- included[i, ]
     data <- experiment_community(community, experiment) |>
-      apply_legacy_observation_filter()
+      filter_minimum_plot_observations()
     fixed_pool <- experiment_pool(data)
     completed <- complete_horizon_community(data, fixed_pool)
     purrr::map(all_horizons, function(horizon) {
@@ -195,14 +195,16 @@ stable_contrast_seed <- function(experiment_id, horizon, transform) {
 #' Fit One Auc Model.
 #'
 #' @param data A data frame whose required columns are checked before use.
+#' @param formula Plot-AUC model formula.
+#' @param contrast_adjust Multiplicity adjustment used by `emmeans`.
 #' @param seed A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @return A fitted model bundle with diagnostics retained for validation.
-fit_one_auc_model <- function(data, seed = NULL) {
+fit_one_auc_model <- function(data, formula, contrast_adjust, seed = NULL) {
   if (!is.null(seed)) set.seed(seed)
   data <- data |>
     dplyr::filter(!is.na(.data$auc)) |>
     dplyr::mutate(ODT = factor(.data$ODT, levels = c("destination_controls", "origin_controls", "warmed")))
-  model <- stats::lm(auc ~ ODT * species, data = data)
+  model <- stats::lm(formula, data = data)
   means <- emmeans::emmeans(model, ~ ODT | species)
   contrasts <- emmeans::contrast(
     means,
@@ -211,7 +213,7 @@ fit_one_auc_model <- function(data, seed = NULL) {
       to_origin = c(0, -1, 1),
       to_destination = c(-1, 0, 1)
     ),
-    adjust = "mvt"
+    adjust = contrast_adjust
   )
   as.data.frame(summary(contrasts, infer = c(TRUE, TRUE))) |>
     tibble::as_tibble()
@@ -220,8 +222,10 @@ fit_one_auc_model <- function(data, seed = NULL) {
 #' Fit Auc Contrasts.
 #'
 #' @param auc A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param formula Plot-AUC model formula.
+#' @param contrast_adjust Multiplicity adjustment used by `emmeans`.
 #' @return A fitted model bundle with diagnostics retained for validation.
-fit_auc_contrasts <- function(auc) {
+fit_auc_contrasts <- function(auc, formula, contrast_adjust) {
   auc |>
     dplyr::group_by(.data$experiment_id, .data$horizon, .data$transform) |>
     tidyr::nest() |>
@@ -231,7 +235,9 @@ fit_auc_contrasts <- function(auc) {
         stable_contrast_seed
       ),
       result = purrr::map2(.data$data, .data$model_seed, ~ tryCatch(
-        fit_one_auc_model(.x, seed = .y),
+        fit_one_auc_model(
+          .x, formula = formula, contrast_adjust = contrast_adjust, seed = .y
+        ),
         error = function(e) tibble::tibble(model_error = conditionMessage(e))
       ))
     ) |>
@@ -344,13 +350,13 @@ validate_winner_loser_outputs <- function(classified, pools) {
            as.character(.data$analysis_category) != as.character(.data$category))
     )
   if (nrow(bad_analysis_merge)) {
-    stop("The reversible outsider-to-colonizer downstream mapping is invalid.", call. = FALSE)
+    stop("The reversible outsider-to-colonizer temporal mapping is invalid.", call. = FALSE)
   }
   tibble::tibble(
     check = c(
       "unique result keys", "all usable contrasts classified", "colonizers significant positive",
       "non-significant labels non-significant", "pools fixed across horizons",
-      "pool and category definitions compatible", "downstream outsider merge reversible"
+      "pool and category definitions compatible", "temporal outsider merge reversible"
     ),
     pass = c(nrow(duplicate_keys) == 0L,
              nrow(unclassified) == 0L,

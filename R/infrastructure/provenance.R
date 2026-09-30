@@ -338,16 +338,16 @@ figure_analysis_generation <- function(path) {
     ),
     path
   )) {
-    return("explicitly approved canonical manuscript figure")
+    return("explicitly approved current manuscript figure")
   }
   if (grepl("^figures/retained/", path)) {
     return("verified retained copy")
   }
   if (grepl("^figures/manuscript/", path)) {
-    return("current canonical targets analysis")
+    return("current current targets analysis")
   }
   if (grepl("^figures/candidates/", path)) {
-    return("current canonical targets figure candidate")
+    return("current current targets figure candidate")
   }
   "unknown"
 }

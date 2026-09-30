@@ -4,7 +4,7 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
-# Shared helpers for canonical and retained publication figures.
+# Shared helpers for current and retained publication figures.
 
 category_palette <- c(
   loser = "#E66101",

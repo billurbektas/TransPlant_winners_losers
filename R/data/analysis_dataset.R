@@ -4,7 +4,7 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
-# Canonical upstream analysis helpers extracted from the reviewed pipeline.
+# Analysis-dataset helpers extracted from the reviewed workflow.
 # Functions are object-in/object-out and contain no output-directory discovery.
 
 #' Tnrs Family Lookup.
@@ -79,7 +79,7 @@ derive_functional_groups <- function(taxonomy_family, overrides,
     )
     if (length(missing_species_override_columns)) {
       stop(
-        "Downstream species overrides are missing: ",
+        "Resident-species overrides are missing: ",
         paste(missing_species_override_columns, collapse = ", "),
         call. = FALSE
       )
@@ -103,7 +103,7 @@ derive_functional_groups <- function(taxonomy_family, overrides,
             c("woody", "non_woody"))
     if (invalid_species_override) {
       stop(
-        "Downstream species overrides are incomplete, invalid, or non-unique.",
+        "Resident-species overrides are incomplete, invalid, or non-unique.",
         call. = FALSE
       )
     }
@@ -159,7 +159,7 @@ derive_functional_groups <- function(taxonomy_family, overrides,
       ),
       graminoid_review_basis = dplyr::case_when(
         !is.na(.data$graminoid_species_override) ~
-          paste0("downstream species ledger: ", .data$species_override_basis),
+          paste0("resident-species decision table: ", .data$species_override_basis),
         .data$graminoid_override_supplied ~
           paste0("override: ", .data$note),
         .data$family %in% graminoid_families ~
@@ -169,7 +169,7 @@ derive_functional_groups <- function(taxonomy_family, overrides,
       ),
       woody_review_basis = dplyr::case_when(
         !is.na(.data$woody_species_override) ~
-          paste0("downstream species ledger: ", .data$species_override_basis),
+          paste0("resident-species decision table: ", .data$species_override_basis),
         .data$woody_override_supplied ~
           paste0("override: ", .data$note),
         .data$genus %in% woody_genera ~ "reviewed woody-genus rule",
@@ -188,7 +188,7 @@ derive_functional_groups <- function(taxonomy_family, overrides,
       ),
       review_basis = dplyr::case_when(
         !is.na(.data$species_override_basis) ~
-          paste0("downstream species ledger: ", .data$species_override_basis),
+          paste0("resident-species decision table: ", .data$species_override_basis),
         !is.na(.data$note) ~ paste0("override: ", .data$note),
         .data$family %in% graminoid_families ~ "reviewed graminoid-family rule",
         .data$family %in% fern_families ~ "fern-family exclusion",

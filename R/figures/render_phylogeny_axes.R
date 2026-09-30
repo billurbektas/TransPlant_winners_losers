@@ -14,7 +14,7 @@
 #' @return A character vector of generated artifact paths, invisibly.
 render_phylogeny_axis_atlas <- function(arguments = character()) {
   
-  # Appendix prediction atlas for PEV2 and PEV3 from the existing canonical
+  # Appendix prediction atlas for PEV2 and PEV3 from the existing current
   # joint PEV1--PEV3 full-REML model. This script performs no model fitting and
   # never invokes tar_make().
   
@@ -82,7 +82,7 @@ render_phylogeny_axis_atlas <- function(arguments = character()) {
   missing_inputs <- input_files[!file.exists(input_files)]
   if (length(missing_inputs) > 0L) {
     stop(
-      "Required canonical input(s) missing: ",
+      "Required current input(s) missing: ",
       paste(missing_inputs, collapse = ", "),
       call. = FALSE
     )
@@ -90,7 +90,7 @@ render_phylogeny_axis_atlas <- function(arguments = character()) {
   
   model <- readRDS(input_files[["phylogeny_model"]])
   if (!inherits(model, "rma.mv") || !is.data.frame(model$data)) {
-    stop("The phylogeny input must be the existing canonical rma.mv fit.",
+    stop("The phylogeny input must be the existing current rma.mv fit.",
          call. = FALSE)
   }
   climate_scaling <- readRDS(input_files[["climate_scaling"]])
@@ -208,7 +208,7 @@ render_phylogeny_axis_atlas <- function(arguments = character()) {
         scaling_center = center,
         scaling_scale = scale,
         n_unique = nrow(pev_scores),
-        weighting = "all 526 unique species from reconstructed canonical PCoA"
+        weighting = "all 526 unique species from reconstructed current PCoA"
       )
     }
   ))
@@ -240,7 +240,7 @@ render_phylogeny_axis_atlas <- function(arguments = character()) {
   ))
   if (any(standardization_checks$n_species != 526L) ||
       any(standardization_checks$maximum_error > 1e-10)) {
-    stop("Canonical PEV coordinates do not match the fitted-model columns.",
+    stop("Current PEV coordinates do not match the fitted-model columns.",
          call. = FALSE)
   }
   
@@ -264,7 +264,11 @@ render_phylogeny_axis_atlas <- function(arguments = character()) {
   )
   support_experiments <- reference_experiments |>
     dplyr::select("experiment_id", "T_z", "P_z", "W_z")
-  model_formula <- predictor_formulas()$Phylogeny_full
+  model_formula <- model$formula.mods
+  if (!inherits(model_formula, "formula")) {
+    stop("The fitted phylogeny model does not retain its fixed-effect formula.",
+         call. = FALSE)
+  }
   fixed_beta <- stats::coef(model)
   
   make_panel_data <- function(level_row, warming_index) {
@@ -530,12 +534,12 @@ render_phylogeny_axis_atlas <- function(arguments = character()) {
     dplyr::pull(.data$pass)
   validation <- tibble::tribble(
     ~check, ~pass, ~detail,
-    "No model refit", TRUE, "Existing canonical predictor_phylogeny_model.rds was read; no fitting function is called",
-    "Canonical model predictions", TRUE, "Predictions use model.matrix and fixed coefficients from the joint PEV1--PEV3 model",
+    "No model refit", TRUE, "Existing current predictor_phylogeny_model.rds was read; no fitting function is called",
+    "Current model predictions", TRUE, "Predictions use model.matrix and fixed coefficients from the joint PEV1--PEV3 model",
     "PEV quantile weighting", all(pev_quantiles$n_unique == 526L), "Q25/Q75 computed across 526 unique species",
     "Warming quantile weighting", nrow(reference_experiments) == 42L, "Q25/Q75 computed across 42 distinct experiments",
     "Frozen climate scaling", climate_scaling_error <= 1e-10, sprintf("maximum stored-versus-frozen scaling error %.3g", climate_scaling_error),
-    "Canonical reconstructed PEVs", all(standardization_checks$n_species == 526L) && all(standardization_checks$maximum_error <= 1e-10), paste(sprintf("%s maximum error %.3g", standardization_checks$PEV, standardization_checks$maximum_error), collapse = "; "),
+    "Current reconstructed PEVs", all(standardization_checks$n_species == 526L) && all(standardization_checks$maximum_error <= 1e-10), paste(sprintf("%s maximum error %.3g", standardization_checks$PEV, standardization_checks$maximum_error), collapse = "; "),
     "Other PEV axes at reference", reference_axes_zero, "For each varied PEV, the other two standardized PEV coordinates equal zero",
     "Support-mask enforcement", all(is.finite(predictions$predicted_delta_auc[predictions$supported])) && all(is.na(predictions$predicted_delta_auc[!predictions$supported])), "Only cells inside the observed three-dimensional climate-warming hull receive predictions",
     "Figure 7 colour scale", isTRUE(all.equal(global_limit, max(abs(figure07_values)))), sprintf("shared zero-centred limit +/- %.6f", global_limit),
@@ -552,7 +556,7 @@ render_phylogeny_axis_atlas <- function(arguments = character()) {
   caption <- paste0(
     "Predicted winning-losing strength (warmed minus origin-control AUC) across ",
     "destination summer climate for PEV2 and PEV3. Population-level fixed-effect ",
-    "predictions come from the existing canonical joint PEV1--PEV3 full model. ",
+    "predictions come from the existing current joint PEV1--PEV3 full model. ",
     "Low and High values are the 25th and 75th percentiles across all 526 unique ",
     "species: PEV2 ", sprintf("%.3f", pev_quantiles$raw_value[pev_quantiles$quantity == "PEV2"][[1]]),
     " and ", sprintf("%.3f", pev_quantiles$raw_value[pev_quantiles$quantity == "PEV2"][[2]]),

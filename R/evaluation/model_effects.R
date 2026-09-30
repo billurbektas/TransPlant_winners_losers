@@ -84,7 +84,7 @@ assemble_model_fixed_effects <- function(
   }
   samples <- fit_r2 |>
     dplyr::filter(
-      .data$aggregation == "equal_gradient",
+      .data$weighting == "equal_gradient",
       .data$candidate_role %in% c("standalone", "full")
     ) |>
     dplyr::select("model_key", "n_effects", "n_species", "n_gradients")
@@ -302,7 +302,7 @@ validate_model_effects <- function(fixed, random_profiles,
   fixed_p_support <- fixed$CR1_p_value < 0.05
   validation <- tibble::tribble(
     ~check, ~pass, ~detail,
-    "Seven canonical species models",
+    "Seven current species models",
     identical(sort(unique(fixed$model_key)), sort(key$model_key)) &&
       identical(sort(unique(random_profiles$model_key)), sort(key$model_key)),
     paste(nrow(key), "models represented in fixed and random summaries"),

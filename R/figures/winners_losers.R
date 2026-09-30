@@ -4,7 +4,7 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
-# Approved canonical manuscript Figure 01: resident winner/loser AUC responses with the
+# Approved current manuscript Figure 01: resident winner/loser AUC responses with the
 # approved context-dependent Festuca rubra examples.
 
 figure01_direction_colours <- c(
@@ -52,7 +52,7 @@ prepare_figure01_festuca_data <- function(
       festuca_classification$fitted_class[[1]] != "Context-dependent"
   ) {
     stop(
-      "Festuca rubra is not an eligible canonical context-dependent species.",
+      "Festuca rubra is not an eligible current context-dependent species.",
       call. = FALSE
     )
   }
@@ -116,7 +116,7 @@ prepare_figure01_festuca_data <- function(
   )
   if (!is.finite(scatter_difference) || scatter_difference > 1e-10) {
     stop(
-      "Mean AUC differences do not reproduce the canonical winner/loser contrasts.",
+      "Mean AUC differences do not reproduce the current winner/loser contrasts.",
       call. = FALSE
     )
   }
@@ -167,7 +167,7 @@ prepare_figure01_festuca_data <- function(
     }
 
     experiment_data <- experiment_community(community, experiment) |>
-      apply_legacy_observation_filter()
+      filter_minimum_plot_observations()
     completed <- complete_horizon_community(
       experiment_data,
       experiment_pool(experiment_data)

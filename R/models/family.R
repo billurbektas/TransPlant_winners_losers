@@ -63,7 +63,7 @@ family_overrides <- function(resident_species_overrides) {
   assert_columns(
     resident_species_overrides,
     c("species_id", "family_id", "decision_basis"),
-    "downstream species overrides"
+    "resident species overrides"
   )
   result <- resident_species_overrides |>
     dplyr::transmute(
@@ -73,7 +73,7 @@ family_overrides <- function(resident_species_overrides) {
     ) |>
     dplyr::filter(!is.na(.data$family_id), nzchar(trimws(.data$family_id)))
   if (anyDuplicated(result$species_id) || anyNA(result$species_id)) {
-    stop("Canonical family overrides are incomplete or non-unique.", call. = FALSE)
+    stop("Reviewed family overrides are incomplete or non-unique.", call. = FALSE)
   }
   result
 }
@@ -83,9 +83,11 @@ family_overrides <- function(resident_species_overrides) {
 #' @param winner_loser A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param analysis_data A data frame whose required columns are checked before use.
 #' @param family_overrides A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param excluded_species Species excluded at the resident-model boundary.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 build_family_resident_membership <- function(winner_loser, analysis_data,
-                                             family_overrides = NULL) {
+                                             family_overrides = NULL,
+                                             excluded_species) {
   species_results <- winner_loser |>
     dplyr::mutate(horizon = as.character(.data$horizon)) |>
     dplyr::filter(
@@ -110,10 +112,10 @@ build_family_resident_membership <- function(winner_loser, analysis_data,
   if (!is.null(family_overrides)) {
     assert_columns(
       family_overrides, c("species_id", "family_id", "decision_basis"),
-      "canonical family overrides"
+      "reviewed family overrides"
     )
     if (anyDuplicated(family_overrides$species_id)) {
-      stop("Canonical family overrides are non-unique.", call. = FALSE)
+      stop("Reviewed family overrides are non-unique.", call. = FALSE)
     }
     taxonomy <- taxonomy |>
       dplyr::left_join(
@@ -135,11 +137,11 @@ build_family_resident_membership <- function(winner_loser, analysis_data,
   }
   result <- species_results |>
     dplyr::left_join(taxonomy, by = "source_species") |>
-    filter_resident_model_species("species_id")
+    filter_resident_model_species("species_id", excluded_species)
   if (nrow(result) != 1604L ||
       dplyr::n_distinct(result$experiment_id) != 42L ||
       any(is.na(result$family_id) | result$family_id == "")) {
-    stop("The canonical 1,604-effect resident family membership was not recovered.",
+    stop("The expected 1,604-effect resident family membership was not recovered.",
          call. = FALSE)
   }
   result
@@ -233,7 +235,7 @@ build_family_plot_auc <- function(community, experiments, membership) {
     experiment <- experiments[index, ]
     experiment_id <- experiment$experiment_id[[1]]
     data <- experiment_community(community, experiment) |>
-      apply_legacy_observation_filter()
+      filter_minimum_plot_observations()
     experiment_membership <- membership |>
       dplyr::filter(.data$experiment_id == .env$experiment_id)
     if (!nrow(experiment_membership)) {
@@ -393,28 +395,29 @@ build_family_auc_effects <- function(plot_auc, membership, climate_data) {
 #' Fit Family Aggregated Model.
 #'
 #' @param family_auc_bundle A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param formula Fixed-effect formula.
+#' @param random Random intercept and slope formulas.
+#' @param struct Covariance structure passed to `metafor::rma.mv()`.
+#' @param method Estimation method.
+#' @param sparse Whether to use sparse matrix calculations.
 #' @return A fitted model bundle with diagnostics retained for validation.
-fit_family_aggregated_model <- function(family_auc_bundle) {
+fit_family_aggregated_model <- function(
+    family_auc_bundle, formula, random, struct, method, sparse = TRUE) {
   data <- family_auc_bundle$data |>
     dplyr::mutate(
       family_id = factor(.data$family_id),
       experiment_id = factor(.data$experiment_id)
     )
-  random <- list(
-    ~ 1 | family_id,
-    ~ 0 + W_z | family_id,
-    ~ 0 + T_z + P_z + TP_z | family_id
-  )
   fit_once <- function(control = NULL) {
     arguments <- list(
       yi = data$family_auc_effect,
       V = family_auc_bundle$sampling_variance_matrix,
-      mods = ~ T_z * P_z * W_z,
+      mods = formula,
       random = random,
-      struct = "GEN",
+      struct = struct,
       data = data,
-      method = "REML",
-      sparse = TRUE
+      method = method,
+      sparse = sparse
     )
     if (!is.null(control)) arguments$control <- control
     auc_capture(do.call(metafor::rma.mv, arguments))

@@ -7,7 +7,7 @@
 # Figure 6: predictor model support and residual heterogeneity synthesis.
 #
 # These helpers read exported summary tables only. They do not load
-# model objects, refit models, or recompute upstream scientific results.
+# model objects, refit models, or recompute earlier scientific results.
 
 #' Predictor Synthesis Key.
 #'

@@ -5,7 +5,7 @@
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
 # Figure-only helpers for the family-resolution analogue of manuscript Figure 4.
-# These functions consume existing canonical exports and never fit a model.
+# These functions consume existing current exports and never fit a model.
 
 #' Family Context Scaling Value.
 #'
@@ -101,11 +101,11 @@ prepare_family_context_callouts <- function(
   )
   if (!all(required_classification %in% names(classification)) ||
       !all(required_random %in% names(random_coefficients))) {
-    stop("Canonical family classification or random-coefficient export is incomplete.",
+    stop("Current family classification or random-coefficient export is incomplete.",
          call. = FALSE)
   }
   if (!inherits(fit, "rma.mv")) {
-    stop("The canonical family model must be an existing rma.mv fit.",
+    stop("The current family model must be an existing rma.mv fit.",
          call. = FALSE)
   }
   selected <- classification |>
@@ -118,7 +118,7 @@ prepare_family_context_callouts <- function(
     stop("The requested family callouts are not all available.", call. = FALSE)
   }
   if (!all(selected$selected_for_surface)) {
-    stop("Every appendix family must be selected in the canonical export.",
+    stop("Every appendix family must be selected in the current export.",
          call. = FALSE)
   }
   warming_experiments <- data |>

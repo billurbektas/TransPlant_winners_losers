@@ -51,7 +51,7 @@ build_functional_species <- function(functional_groups,
       resident_species_overrides,
       c("species_id", "family_id", "graminoid_status", "woodiness",
         "decision_basis"),
-      "downstream species overrides"
+      "resident species overrides"
     )
     functional_overrides <- resident_species_overrides |>
       dplyr::transmute(
@@ -62,7 +62,7 @@ build_functional_species <- function(functional_groups,
         woodiness_override = as.character(.data$woodiness)
       )
     if (anyDuplicated(functional_overrides$species_id)) {
-      stop("Canonical functional overrides are non-unique.", call. = FALSE)
+      stop("Reviewed functional overrides are non-unique.", call. = FALSE)
     }
     result <- dplyr::full_join(
       result, functional_overrides, by = "species_id"
@@ -91,7 +91,7 @@ build_functional_species <- function(functional_groups,
       anyDuplicated(result$species_id) ||
       anyNA(result[c("graminoid_status", "woodiness")]) ||
       !identical(result$species_id, retained_species)) {
-    stop("Canonical functional statuses are incomplete for retained species.",
+    stop("Reviewed functional statuses are incomplete for retained species.",
          call. = FALSE)
   }
   result
@@ -117,7 +117,7 @@ audit_functional_source_coverage <- function(functional_groups,
   missing <- setdiff(required_ids, available_ids)
   tibble::tibble(
     source = paste(
-      "active functional_groups target plus explicit downstream overrides",
+      "reviewed functional-group table plus explicit resident-species overrides",
       "versus the validated historical interface"
     ),
     expected_species = length(required_ids),
@@ -412,6 +412,16 @@ build_phylogeny_predictor_specification <- function(
 #' @param climate_formula A model formula or random-effects specification.
 #' @param full_climate_ML Shared complete-data climate-only ML fit, when used.
 #' @param full_climate_REML Shared complete-data climate-only REML fit, when used.
+#' @param random Random intercept and slope formulas passed to every fit.
+#' @param struct Covariance structure passed to `metafor::rma.mv()`.
+#' @param cluster_column Column used for experiment-clustered CR1 inference.
+#' @param robust_adjust Whether to apply the small-sample CR1 adjustment.
+#' @param club_sandwich Whether `metafor` should delegate to `clubSandwich`.
+#' @param comparison_method Estimation method for the nested comparison fits;
+#'   required to be `"ML"`.
+#' @param final_method Estimation method for final coefficient and variance
+#'   estimates; required to be `"REML"`.
+#' @param sparse Whether `metafor::rma.mv()` should use sparse matrices.
 #' @details The climate-only and full predictor-by-climate models use identical
 #' effect rows and sampling variances. ML provides the direct nested comparison;
 #' REML provides final estimates and response-heterogeneity summaries. No
@@ -419,7 +429,16 @@ build_phylogeny_predictor_specification <- function(
 #' @return A fitted model bundle with diagnostics retained for validation.
 fit_predictor_model_pair <- function(
     spec, climate_formula, full_climate_ML = NULL,
-    full_climate_REML = NULL) {
+    full_climate_REML = NULL, random, struct, cluster_column,
+    robust_adjust, club_sandwich, comparison_method = "ML",
+    final_method = "REML", sparse = TRUE) {
+  if (!identical(comparison_method, "ML") ||
+      !identical(final_method, "REML")) {
+    stop(
+      "Predictor comparisons require ML and final predictor fits require REML.",
+      call. = FALSE
+    )
+  }
   validate_predictor_specification(spec, climate_formula)
   if (isTRUE(spec$full_data)) {
     if (is.null(full_climate_ML) || is.null(full_climate_REML)) {
@@ -430,24 +449,35 @@ fit_predictor_model_pair <- function(
     climate_REML <- full_climate_REML
   } else {
     climate_ML <- fit_meta_regression(
-      spec$data, spec$sampling_variance_matrix, climate_formula, "ML",
-      paste(spec$label, "climate-only ML")
+      spec$data, spec$sampling_variance_matrix, climate_formula,
+      comparison_method,
+      paste(spec$label, "climate-only ML"),
+      random = random, struct = struct, sparse = sparse
     )
     climate_REML <- fit_meta_regression(
-      spec$data, spec$sampling_variance_matrix, climate_formula, "REML",
-      paste(spec$label, "climate-only REML")
+      spec$data, spec$sampling_variance_matrix, climate_formula,
+      final_method,
+      paste(spec$label, "climate-only REML"),
+      random = random, struct = struct, sparse = sparse
     )
   }
   full_ML <- fit_meta_regression(
-    spec$data, spec$sampling_variance_matrix, spec$full_formula, "ML",
-    paste(spec$label, "full predictor-climate ML"), spec$predictor_columns
+    spec$data, spec$sampling_variance_matrix, spec$full_formula,
+    comparison_method,
+    paste(spec$label, "full predictor-climate ML"), spec$predictor_columns,
+    random = random, struct = struct, sparse = sparse
   )
   full_REML <- fit_meta_regression(
-    spec$data, spec$sampling_variance_matrix, spec$full_formula, "REML",
-    paste(spec$label, "full predictor-climate REML"), spec$predictor_columns
+    spec$data, spec$sampling_variance_matrix, spec$full_formula,
+    final_method,
+    paste(spec$label, "full predictor-climate REML"), spec$predictor_columns,
+    random = random, struct = struct, sparse = sparse
   )
   cr1 <- cluster_robust_inference(
-    full_REML, spec$label, "full predictor-climate REML"
+    full_REML, spec$label, "full predictor-climate REML",
+    cluster_column = cluster_column,
+    adjust = robust_adjust,
+    club_sandwich = club_sandwich
   )
   statistics <- dplyr::bind_rows(
     model_fit_statistics(climate_ML, spec$label, "climate only", "ML"),

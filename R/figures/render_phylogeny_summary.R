@@ -14,7 +14,7 @@
 #' @return A character vector of generated artifact paths, invisibly.
 render_phylogeny_summary_appendix <- function(arguments = character()) {
   
-  # Figure-only appendix summary of the canonical resident phylogenetic PCoA.
+  # Figure-only appendix summary of the current resident phylogenetic PCoA.
   # This script reads exported PEV scores and eigenvalues only; it does not
   # reconstruct the phylogeny, rerun PCoA, fit a model, or invoke tar_make().
   
@@ -60,7 +60,7 @@ render_phylogeny_summary_appendix <- function(arguments = character()) {
   missing_inputs <- input_files[!file.exists(input_files)]
   if (length(missing_inputs) > 0L) {
     stop(
-      "Required canonical PCoA export(s) missing: ",
+      "Required current PCoA export(s) missing: ",
       paste(missing_inputs, collapse = ", "),
       call. = FALSE
     )
@@ -77,12 +77,12 @@ render_phylogeny_summary_appendix <- function(arguments = character()) {
   )
   if (!all(required_scores %in% names(scores)) ||
       !all(required_eigenvalues %in% names(eigenvalues))) {
-    stop("Canonical PCoA exports do not contain the required columns.",
+    stop("Current PCoA exports do not contain the required columns.",
          call. = FALSE)
   }
   if (nrow(scores) != 526L || anyDuplicated(scores$species_id) ||
       any(!stats::complete.cases(scores[required_scores]))) {
-    stop("Canonical PEV1--PEV3 scores must contain 526 complete unique species.",
+    stop("Current PEV1--PEV3 scores must contain 526 complete unique species.",
          call. = FALSE)
   }
   
@@ -281,8 +281,8 @@ render_phylogeny_summary_appendix <- function(arguments = character()) {
   
   validation <- tibble::tribble(
     ~check, ~pass, ~detail,
-    "No phylogeny or PCoA rerun", TRUE, "Figure reads canonical exported scores and eigenvalues only",
-    "Canonical species scope", nrow(scores) == 526L && !anyDuplicated(scores$species_id), "526 unique retained species",
+    "No phylogeny or PCoA rerun", TRUE, "Figure reads current exported scores and eigenvalues only",
+    "Current species scope", nrow(scores) == 526L && !anyDuplicated(scores$species_id), "526 unique retained species",
     "Complete first three axes", all(stats::complete.cases(scores[c("PEV1", "PEV2", "PEV3")])), "PEV1–PEV3 are finite and complete for every species",
     "First ten positive axes", identical(as.integer(first_ten$axis_number), 1:10), "Axes 1–10 from the selected uncorrected positive-eigenvalue solution",
     "First three axes marked", identical(first_ten$retained_in_model, c(rep(TRUE, 3), rep(FALSE, 7))), sprintf("PEV1–PEV3 cumulatively explain %.6f%%", cumulative_first_three),

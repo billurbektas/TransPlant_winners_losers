@@ -33,10 +33,12 @@ validate_auc_temporal_boundary <- function(response_auc, resident_auc, exclusion
 #' @param analysis_data A data frame whose required columns are checked before use.
 #' @param climate_context_experiments A data frame whose required columns are checked before use.
 #' @param horizons A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param excluded_species Species excluded at the resident-model boundary.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 build_resident_auc_data_from_objects <- function(winner_loser, analysis_data,
                                                  climate_context_experiments,
-                                                 horizons = "max") {
+                                                 horizons = "max",
+                                                 excluded_species) {
   results <- winner_loser |>
     dplyr::mutate(horizon = as.character(.data$horizon)) |>
     dplyr::filter(
@@ -105,7 +107,7 @@ build_resident_auc_data_from_objects <- function(winner_loser, analysis_data,
                         sep = "::")
     ) |>
     dplyr::arrange(.data$horizon, .data$experiment_id, .data$species_id) |>
-    filter_resident_model_species("species_id")
+    filter_resident_model_species("species_id", excluded_species)
 
   required_complete <- c(
     "species_id", "gradient_id", "auc_effect", "auc_se", "T", "P", "W",

@@ -14,8 +14,8 @@
 #' @return A character vector of generated artifact paths, invisibly.
 render_predictor_response_atlas <- function(arguments = character()) {
   
-  # Candidate prediction atlas for the six canonical 526-species predictor
-  # models. This script reads fitted model RDS files and canonical prediction
+  # Candidate prediction atlas for the six current 526-species predictor
+  # models. This script reads fitted model RDS files and current prediction
   # inputs only. It contains no model-fitting calls and never invokes tar_make().
   
   required_packages <- c(
@@ -83,7 +83,7 @@ render_predictor_response_atlas <- function(arguments = character()) {
   missing_inputs <- input_files[!file.exists(input_files)]
   if (length(missing_inputs) > 0L) {
     stop(
-      "Required canonical input(s) missing: ",
+      "Required current input(s) missing: ",
       paste(missing_inputs, collapse = ", "),
       call. = FALSE
     )
@@ -94,10 +94,10 @@ render_predictor_response_atlas <- function(arguments = character()) {
     stop("Every atlas model input must be an existing rma.mv fit.", call. = FALSE)
   }
   if (any(!vapply(models, function(x) is.data.frame(x$data), logical(1)))) {
-    stop("A fitted model is missing its canonical modeling data.", call. = FALSE)
+    stop("A fitted model is missing its current modeling data.", call. = FALSE)
   }
   
-  # Standalone candidate rendering reads the existing canonical target object.
+  # Standalone candidate rendering reads the existing current target object.
   # The anchored publication target instead supplies its declared scaling-file
   # dependency as the optional second command-line argument.
   climate_scaling <- if (!is.na(climate_scaling_file)) {
@@ -259,7 +259,7 @@ render_predictor_response_atlas <- function(arguments = character()) {
     scaling_center = PEV1_center,
     scaling_scale = PEV1_scale,
     n_unique = nrow(pev_scores),
-    weighting = "all 526 unique species from reconstructed canonical PCoA"
+    weighting = "all 526 unique species from reconstructed current PCoA"
   )
   
   model_pev <- models$Phylogeny$data |>
@@ -274,7 +274,7 @@ render_predictor_response_atlas <- function(arguments = character()) {
     pev_check$expected_PEV1_z - pev_check$PEV1_z
   ))
   if (nrow(pev_check) != 526L || pev_standardization_error > 1e-10) {
-    stop("Phylogeny model PEV1 does not match the canonical PCoA export.", call. = FALSE)
+    stop("Phylogeny model PEV1 does not match the current PCoA export.", call. = FALSE)
   }
   
   quantile_table <- dplyr::bind_rows(
@@ -329,15 +329,11 @@ render_predictor_response_atlas <- function(arguments = character()) {
     "Woodiness" = "Woodiness",
     "Phylogenetic position (PEV1 shown)" = "Phylogenetic\nposition"
   )
-  formula_map <- predictor_formulas()
-  model_formula <- list(
-    LDMC = formula_map$continuous_full,
-    LMA = formula_map$continuous_full,
-    Height = formula_map$continuous_full,
-    Graminoid = formula_map$Graminoid_full,
-    Woodiness = formula_map$Woodiness_full,
-    Phylogeny = formula_map$Phylogeny_full
-  )
+  model_formula <- lapply(models, `[[`, "formula.mods")
+  if (any(!vapply(model_formula, inherits, logical(1), what = "formula"))) {
+    stop("Every fitted predictor model must retain its fixed-effect formula.",
+         call. = FALSE)
+  }
   
   T_grid <- seq(
     min(reference_experiments$T_z), max(reference_experiments$T_z),
@@ -707,14 +703,14 @@ render_predictor_response_atlas <- function(arguments = character()) {
   
   validation <- tibble::tribble(
     ~check, ~pass, ~detail,
-    "No model refit", TRUE, "Six existing canonical full-REML model RDS files were read; no fitting function is called",
-    "Canonical model predictions", TRUE, "Predictions use model.matrix and fixed coefficients only",
+    "No model refit", TRUE, "Six existing current full-REML model RDS files were read; no fitting function is called",
+    "Current model predictions", TRUE, "Predictions use model.matrix and fixed coefficients only",
     "Trait quantile weighting", all(vapply(trait_quantile_rows, function(x) all(x$n_unique == unique(x$n_unique)), logical(1))), "Q25/Q75 computed after distinct species_id within each fitted trait model",
     "Warming quantile weighting", nrow(reference_experiments) == 42L, "Q25/Q75 computed across 42 distinct experiment_id values",
     "Frozen climate scaling", climate_scaling_error <= 1e-10, sprintf("maximum stored-versus-frozen scaling error %.3g", climate_scaling_error),
     "Support-mask enforcement", all(is.finite(predictions$predicted_delta_auc[predictions$supported])) && all(is.na(predictions$predicted_delta_auc[!predictions$supported])), "Only cells inside the applicable observed three-dimensional climate-warming hull receive predictions; unsupported cells remain NA and cannot be drawn",
     "Woodiness group support", all(predictions$support_scope[predictions$predictor == "Woodiness"] == "group-specific observed three-dimensional climate hull"), "Non-woody and woody support hulls are constructed separately",
-    "Canonical reconstructed PEV1", nrow(pev_check) == 526L && pev_standardization_error <= 1e-10, sprintf("526 species; maximum standardized-coordinate error %.3g", pev_standardization_error),
+    "Current reconstructed PEV1", nrow(pev_check) == 526L && pev_standardization_error <= 1e-10, sprintf("526 species; maximum standardized-coordinate error %.3g", pev_standardization_error),
     "PEV2 and PEV3 reference values", all(predictions$PEV2_z[predictions$predictor == "Phylogenetic position (PEV1 shown)"] == 0) && all(predictions$PEV3_z[predictions$predictor == "Phylogenetic position (PEV1 shown)"] == 0), "PEV2_z = 0 and PEV3_z = 0 in every phylogeny prediction row",
     "Common response sign", TRUE, "Every model predicts auc_effect: warmed minus origin-control AUC",
     "Colour-scale assessment", !use_separate_woodiness_scale, sprintf("single zero-centred scale; Woodiness/other maximum-absolute range ratio %.3f", wood_to_other_ratio)
@@ -730,7 +726,7 @@ render_predictor_response_atlas <- function(arguments = character()) {
   caption <- paste0(
     "Predicted change in area under the relative-cover curve (Δ AUC; warmed minus ",
     "origin-control) across destination summer climate. Predictions are ",
-    "population-level fixed-effect values from the canonical full models. Low and ",
+    "population-level fixed-effect values from the current full models. Low and ",
     "High continuous traits are the 25th and 75th percentiles across unique ",
     "trait-complete species: LDMC ", sprintf("%.4f", trait_quantile_rows[[1]]$raw_value[[1]]),
     " and ", sprintf("%.4f", trait_quantile_rows[[1]]$raw_value[[2]]), " g/g; LMA ",

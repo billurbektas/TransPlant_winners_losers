@@ -27,6 +27,43 @@ pipeline_target_definitions <- local({
   }
 })
 
+# Target names are read directly from `tar_tangle()` rather than copied into a
+# second workflow registry. The cache only avoids reparsing the QMD once per
+# stage factory while the old factory files remain during migration review.
+tangled_scientific_target_names <- local({
+  cache <- NULL
+  function(path = "analysis_workflow.qmd") {
+    if (is.null(cache)) {
+      targets <- tarchetypes::tar_tangle(path)
+      cache <<- vapply(targets, function(target) target$name, character(1))
+    }
+    cache
+  }
+})
+
+# These replaced reports, pass-through inputs, hidden formula registry, and
+# approved performance outputs remain on disk until the migration map is
+# approved, but they are no longer part of the active dependency graph.
+#' Factory targets disconnected while migration is reviewed
+#'
+#' @return Character target names excluded from every active stage factory.
+disconnected_factory_target_names <- function() {
+  c(
+    "report_data_foundation", "report_response_estimation",
+    "report_resident_climate_model", "report_family_context_model",
+    "report_predictor_models", "report_model_synthesis",
+    "report_release_validation", "published_report_data_foundation",
+    "published_report_response_estimation",
+    "published_report_resident_climate_model",
+    "published_report_family_context_model", "published_report_predictor_models",
+    "published_report_model_synthesis", "published_report_release_validation",
+    "winner_loser_input", "analysis_data_input", "climate_context_input",
+    "predictor_formula_registry", "model_cross_validation_predictions",
+    "model_predictive_skill", "model_cross_validation_predictions_file",
+    "model_predictive_skill_file"
+  )
+}
+
 #' Assign a target name to its workflow stage.
 #'
 #' Historical comparisons are deliberately assigned to `legacy` before any
@@ -162,7 +199,10 @@ pipeline_target_stage_table <- function() {
 targets_for_stage <- function(stage) {
   definitions <- pipeline_target_definitions()
   inventory <- pipeline_target_stage_table()
-  definitions[inventory$stage == stage]
+  keep <- inventory$stage == stage &
+    !inventory$target %in% tangled_scientific_target_names() &
+    !inventory$target %in% disconnected_factory_target_names()
+  definitions[keep]
 }
 
 #' Define source and configuration targets.

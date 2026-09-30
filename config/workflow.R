@@ -13,12 +13,17 @@
 active_function_files <- function(root = ".") {
   stage_directories <- c(
     "infrastructure", "data", "responses", "models", "evaluation",
-    "figures", "validation"
+    "figures", "validation", "targets"
   )
-  sort(unlist(lapply(stage_directories, function(directory) {
+  files <- sort(unlist(lapply(stage_directories, function(directory) {
     path <- file.path(root, "R", directory)
     list.files(path, pattern = "[.]R$", recursive = TRUE, full.names = TRUE)
   }), use.names = FALSE))
+  historical_validation_files <- file.path(
+    root, "R", "validation",
+    c("legacy_artifacts.R", "legacy_phylogeny.R", "legacy_reference.R")
+  )
+  setdiff(files, historical_validation_files)
 }
 
 #' Active Scientific Source Files.
@@ -53,7 +58,22 @@ active_scientific_source_files <- function(root = ".") {
       files[file.exists(files) & !dir.exists(files)]
     }, names(inventory_trees), unname(inventory_trees)
   ), use.names = FALSE)
-  sort(unique(c(fixed[file.exists(fixed)], active_function_files(root), trees)))
+  files <- sort(unique(c(
+    fixed[file.exists(fixed)], active_function_files(root), trees
+  )))
+  allowlist_path <- file.path(root, "config", "historical_path_allowlist.csv")
+  if (!file.exists(allowlist_path)) return(files)
+  allowlist <- utils::read.csv(
+    allowlist_path, stringsAsFactors = FALSE, check.names = FALSE
+  )
+  allowlist <- allowlist$path[allowlist$exclude_from_active_inventory]
+  relative <- sub("^[.]/", "", files)
+  disconnected <- vapply(relative, function(path) {
+    any(vapply(allowlist, function(entry) {
+      if (endsWith(entry, "/")) startsWith(path, entry) else identical(path, entry)
+    }, logical(1)))
+  }, logical(1))
+  files[!disconnected]
 }
 
 #' Resident Analysis Spec.
@@ -65,13 +85,6 @@ resident_analysis_spec <- function(root = here::here()) {
     response = "maximum-duration raw relative-cover Delta AUC (warmed minus origin)",
     exclusions = resident_model_exclusions(),
     expected = list(effects = 1604L, species = 526L, experiments = 42L),
-    climate_formula = stats::as.formula("~ T_z * P_z * W_z"),
-    species_random = list(
-      stats::as.formula("~ 1 | species_id"),
-      stats::as.formula("~ 0 + W_z | species_id"),
-      stats::as.formula("~ 0 + T_z + P_z + TP_z | species_id")
-    ),
-    random_structure = "GEN",
     classification = list(
       minimum_experiments = 4L,
       required_context_rank = 4L,

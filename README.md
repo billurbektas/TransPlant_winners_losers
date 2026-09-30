@@ -1,9 +1,10 @@
 # TransPlant winners–losers analysis
 
 This repository contains the reproducible TransPlant community-response and
-resident-model workflow. Active code is organized by scientific domain under
-`R/`, the executable graph is defined in `_targets.R`, and the analysis is
-reported in seven stage-level Quarto documents.
+resident-model workflow. Start with [`analysis_workflow.qmd`](analysis_workflow.qmd):
+it follows the science from the original data through response calculation,
+explicit model specifications, inference, figures, and tables. Its main
+analytical assignments are genuine targets through `tarchetypes::tar_tangle()`.
 
 The authoritative architecture, target-stage table, naming rules, commands,
 failure behavior, and two-phase history-retirement procedure are documented in
@@ -16,12 +17,17 @@ Rscript -e 'renv::restore()'
 Rscript scripts/run_pipeline.R
 ```
 
+Those commands are for the approved clean rebuild. The current review stage is
+inspection-only; no scientific target should be run yet.
+
 Figure renderers are available through one dispatcher:
 
 ```sh
 Rscript scripts/render_figure.R --list
 ```
 
-The refactor is currently in Phase 1. Historical fixtures and `archive/` are
-retained only for certification and will not be deleted until the rebuilt
-workflow is cleanly validated and explicitly accepted.
+The historical branch is preserved under the annotated recovery tag
+`pre-reviewable-workflow-with-history-2026-09-30` and is disconnected from the
+active target graph. The archive, fixtures, and old reports remain physically
+present until the QMD, target manifest, dependency graphs, and complete
+migration map are explicitly accepted. No clean rebuild has been run yet.

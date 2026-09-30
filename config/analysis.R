@@ -52,16 +52,19 @@ resident_model_exclusions <- function() {
 #'
 #' @param data A data frame whose required columns are checked before use.
 #' @param species_column A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param excluded_species Species excluded at the resident-model boundary.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-filter_resident_model_species <- function(data, species_column) {
+filter_resident_model_species <- function(data, species_column, excluded_species) {
   if (length(species_column) != 1L || !species_column %in% names(data)) {
     stop("A valid species column is required for the resident-model exclusion.",
          call. = FALSE)
   }
-  keep <- !as.character(data[[species_column]]) %in%
-    resident_model_exclusions()
+  if (!is.character(excluded_species) || anyNA(excluded_species)) {
+    stop("Resident-model exclusions must be an explicit character vector.",
+         call. = FALSE)
+  }
+  keep <- !as.character(data[[species_column]]) %in% excluded_species
   result <- data[keep, , drop = FALSE]
-  attr(result, "resident_model_exclusions") <-
-    resident_model_exclusions()
+  attr(result, "resident_model_exclusions") <- excluded_species
   result
 }

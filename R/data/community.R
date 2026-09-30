@@ -407,7 +407,7 @@ validate_community_snapshot <- function(sites, community, experiments) {
   ) |>
     dplyr::mutate(pass = .data$observed == .data$expected)
   if (any(!checks$pass)) {
-    stop("Canonical input validation failed: ", paste(checks$check[!checks$pass], collapse = "; "), call. = FALSE)
+    stop("Community input validation failed: ", paste(checks$check[!checks$pass], collapse = "; "), call. = FALSE)
   }
   checks
 }

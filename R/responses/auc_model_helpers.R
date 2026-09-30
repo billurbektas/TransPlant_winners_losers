@@ -4,7 +4,7 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
-# Canonical AUC model helpers extracted from the reviewed pipeline.
+# Current AUC model helpers extracted from the reviewed pipeline.
 # These functions preserve the validated response-model implementations.
 
 #' Auc Capture.

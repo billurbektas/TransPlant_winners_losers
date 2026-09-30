@@ -69,7 +69,7 @@ test_that("the Woodiness figure fails closed without a group-specific mask", {
     deparse(body(build_woodiness_response_surface_figure)), collapse = "\n"
   )
   expect_match(function_text, "group-specific observed climate support", fixed = TRUE)
-  expect_match(function_text, "predictor_formulas()$Woodiness_full", fixed = TRUE)
+  expect_match(function_text, "fit$formula.mods", fixed = TRUE)
 })
 
 test_that("all currently retained figures match their approved checksums", {
@@ -103,9 +103,9 @@ test_that("figure provenance exposes source and duplicate relationships", {
   ))
 })
 
-test_that("regeneratable upstream figures use canonical manuscript paths", {
+test_that("regeneratable figures use current manuscript paths", {
   manifest <- figure_manifest(PROJECT_ROOT)
-  canonical_names <- c(
+  current_names <- c(
     "compare_rel.abund_vs.sqrt.rel.abund.pdf",
     "appendix_destination_climate_warming_gradient.pdf",
     "appendix_destination_climate_warming_gradient.png",
@@ -134,11 +134,11 @@ test_that("regeneratable upstream figures use canonical manuscript paths", {
     "appendix_temporal_transition_matrices.pdf",
     "appendix_temporal_transition_matrices.png"
   )
-  canonical <- manifest[basename(manifest$filename) %in% canonical_names, ]
-  expect_setequal(basename(canonical$filename), canonical_names)
-  expect_true(all(grepl("/figures/manuscript/", canonical$filename, fixed = TRUE)))
+  current <- manifest[basename(manifest$filename) %in% current_names, ]
+  expect_setequal(basename(current$filename), current_names)
+  expect_true(all(grepl("/figures/manuscript/", current$filename, fixed = TRUE)))
   expect_true(all(
-    canonical$status %in% c(
+    current$status %in% c(
       "CURRENT_ANALYSIS_FIGURE",
       "FINAL_MANUSCRIPT",
       "implemented target; not generated"
@@ -182,7 +182,7 @@ test_that("Figure 5 climate-only renderer is fixed-effect-only and support-maske
   expect_false(grepl("targets::tar_make(", renderer_text, fixed = TRUE))
   expect_false(grepl("rma.mv(", renderer_text, fixed = TRUE))
   expect_match(renderer_text, "Fixed-effect predictions", fixed = TRUE)
-  expect_match(renderer_text, "Canonical elevation labels", fixed = TRUE)
+  expect_match(renderer_text, "Current elevation labels", fixed = TRUE)
   expect_match(renderer_text, "Support-mask enforcement", fixed = TRUE)
   expect_match(renderer_text, "All experiments annotated", fixed = TRUE)
 })

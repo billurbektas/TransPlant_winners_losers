@@ -1,8 +1,8 @@
 library(targets)
 
-source("config/analysis.R")
 source("config/workflow.R")
-targets::tar_source("R")
+source("config/analysis.R")
+targets::tar_source(active_function_files("."))
 
 if (!nzchar(Sys.which("quarto"))) {
   bundled_quarto <- "/Applications/RStudio.app/Contents/Resources/app/quarto/bin/quarto"
@@ -29,6 +29,7 @@ tar_option_set(
 )
 
 c(
+  tarchetypes::tar_tangle("analysis_workflow.qmd"),
   source_targets(),
   community_targets(),
   covariate_targets(),
@@ -37,6 +38,5 @@ c(
   predictor_model_targets(),
   evaluation_targets(),
   publication_targets(),
-  release_targets(),
-  legacy_certification_targets()
+  release_targets()
 )

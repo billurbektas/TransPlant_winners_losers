@@ -1200,7 +1200,11 @@ model_target_definitions <- function() {
         model_random_effect_correlations_file
         model_effects_validation_file
         assert_model_effects_validation(model_effects_validation)
-      }
+      },
+      description = paste(
+        "Current fixed-effect CR1 and random-effect profile checks for the",
+        "resident climate and six full predictor models"
+      )
     ),
     tar_target(
       model_performance_release_validation,
@@ -1398,6 +1402,10 @@ model_target_definitions <- function() {
         zero_distance_audit,
         heterogeneity_components,
         heterogeneity_synthesis
+      ),
+      description = paste(
+        "Current cohort model family phylogeny predictor and heterogeneity",
+        "checks with no historical comparison inputs"
       )
     ),
     tar_target(
@@ -2053,12 +2061,9 @@ model_target_definitions <- function() {
         predictor_audit_file = predictor_audit_file,
         heterogeneity_components_file = heterogeneity_components_file,
         heterogeneity_synthesis_file = heterogeneity_synthesis_file,
-        model_cross_validation_predictions_file =
-          model_cross_validation_predictions_file,
         model_fit_r2_file = model_fit_r2_file,
         model_cross_validation_metrics_file =
           model_cross_validation_metrics_file,
-        model_predictive_skill_file = model_predictive_skill_file,
         model_performance_validation_file =
           model_performance_validation_file,
         model_fixed_effects_file = model_fixed_effects_file,

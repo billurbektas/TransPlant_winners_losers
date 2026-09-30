@@ -66,7 +66,7 @@ build_woodiness_response_surface_figure <- function(
   group_levels <- levels(model_pair$data$Woodiness)
   expected_levels <- c("non_woody", "woody")
   if (!identical(group_levels, expected_levels)) {
-    stop("Woodiness model levels are not the canonical binary levels.",
+    stop("Woodiness model levels are not the current binary levels.",
          call. = FALSE)
   }
   required_mask <- c(
@@ -113,7 +113,7 @@ build_woodiness_response_surface_figure <- function(
     ) |>
     dplyr::ungroup()
   design <- auc_design_matrix(
-    predictor_formulas()$Woodiness_full,
+    fit$formula.mods,
     grid,
     names(stats::coef(fit))
   )
@@ -286,7 +286,7 @@ build_species_context_callout_figure <- function(
     classification_label_size = 4.8, inset_base_size = 14) {
   requested_species <- callout_species()
   if (!identical(as.character(selection$species_id), requested_species)) {
-    stop("Callout examples are not in the canonical display order.", call. = FALSE)
+    stop("Callout examples are not in the current display order.", call. = FALSE)
   }
   classification <- classification |>
     dplyr::mutate(

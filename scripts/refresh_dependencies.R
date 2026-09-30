@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Explicit dependency refresh for the canonical targets workflow. Ordinary
+# Explicit dependency refresh for the current targets workflow. Ordinary
 # targets runs never update packages, GitHub sources, or renv.lock.
 
 if (!requireNamespace("renv", quietly = TRUE)) {

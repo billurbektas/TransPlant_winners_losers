@@ -15,7 +15,7 @@ testthat::test_that("fixed-effect labels retain variables and interactions", {
   )
 })
 
-testthat::test_that("the fixed-effect table retains all seven canonical models", {
+testthat::test_that("the fixed-effect table retains all seven current models", {
   climate_path <- project_path("output", "tables", "resident_climate_robust_inference.csv")
   predictor_path <- project_path(
     "output", "tables", "predictor_model_robust_inference.csv"
@@ -24,10 +24,15 @@ testthat::test_that("the fixed-effect table retains all seven canonical models",
   testthat::skip_if_not(all(file.exists(c(
     climate_path, predictor_path, r2_path
   ))))
+  stored_r2 <- readr::read_csv(r2_path, show_col_types = FALSE)
+  testthat::skip_if_not(
+    "weighting" %in% names(stored_r2),
+    "Stored model_fit_r2.csv predates the approved Figure S7 revision."
+  )
   fixed <- assemble_model_fixed_effects(
     readr::read_csv(climate_path, show_col_types = FALSE),
     readr::read_csv(predictor_path, show_col_types = FALSE),
-    readr::read_csv(r2_path, show_col_types = FALSE)
+    stored_r2
   )
   testthat::expect_equal(nrow(fixed), 111L)
   testthat::expect_identical(

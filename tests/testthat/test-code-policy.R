@@ -56,27 +56,23 @@ test_that("active function and target names follow the semantic naming policy", 
   expect_false(any(grepl(forbidden, target_names, ignore.case = TRUE)))
 })
 
-test_that("the public scripts and reports are the consolidated interfaces", {
+test_that("the public scripts and review document are the consolidated interfaces", {
   expect_setequal(
     basename(list.files(project_path("scripts"), pattern = "[.]R$")),
     c("run_pipeline.R", "render_figure.R", "refresh_dependencies.R")
   )
-  expect_setequal(
-    basename(list.files(project_path("reports"), pattern = "[.]qmd$")),
-    c(
-      "data_foundation.qmd", "response_estimation.qmd",
-      "resident_climate_model.qmd", "family_context_model.qmd",
-      "predictor_models.qmd", "model_synthesis.qmd",
-      "release_validation.qmd"
-    )
-  )
+  expect_true(file.exists(project_path("analysis_workflow.qmd")))
+  previous_directory <- setwd(PROJECT_ROOT)
+  on.exit(setwd(previous_directory), add = TRUE)
+  manifest <- targets::tar_manifest(callr_function = NULL)
+  active_reports <- manifest$name[startsWith(manifest$name, "report_")]
+  expect_identical(active_reports, "report_analysis_workflow")
 })
 
-test_that("current reports and artifact names have no historical identifiers", {
-  reports <- list.files(
-    project_path("reports"), pattern = "[.]qmd$", full.names = TRUE
+test_that("the active review QMD and artifact names have no historical identifiers", {
+  report_text <- readLines(
+    project_path("analysis_workflow.qmd"), warn = FALSE
   )
-  report_text <- unlist(lapply(reports, readLines, warn = FALSE), use.names = FALSE)
   expect_false(any(grepl("tar_read\\((legacy_|.*equivalence)", report_text)))
   expect_false(any(grepl("_526|M_both|Step (19|22)", report_text)))
 

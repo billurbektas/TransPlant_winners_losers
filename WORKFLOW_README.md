@@ -1,9 +1,12 @@
 # TransPlant winners–losers workflow
 
-This is the authoritative guide to the analysis. The workflow is organized by
-scientific stage, and `_targets.R` is the executable definition of the graph.
-The workflow documents formulas, exclusions, sampling-variance assumptions,
-classification rules, and other scientific decisions explicitly.
+Open [`analysis_workflow.qmd`](analysis_workflow.qmd) first to review the
+analysis in scientific order. Its top-level analytical assignments become
+targets through `tarchetypes::tar_tangle()`. `_targets.R` sources supporting
+functions and combines those QMD targets with temporary supporting/file targets.
+
+This guide describes execution, naming, failure behavior, and the controlled
+retirement of the disconnected historical workflow.
 
 ## Analysis flow
 
@@ -16,9 +19,10 @@ flowchart TD
   external["TRY export + CHELSA cache/downloads"] --> covariates["climate, traits, functional groups, and phylogeny inputs"]
   taxonomy --> covariates
   taxonomy --> responses["plot AUC + sampling variances + winner/loser + temporal analysis"]
+  covariates --> analysisDataset["join responses to taxonomy, traits, functional groups, experiments, and climate"]
+  responses --> analysisDataset
 
-  covariates --> cohortGate["resident-cohort validation"]
-  responses --> cohortGate
+  analysisDataset --> cohortGate["resident-cohort validation"]
   cohortGate --> cohort["resident modeling cohort"]
 
   cohort --> climateModel["resident climate meta-regression"]
@@ -39,29 +43,25 @@ flowchart TD
   releaseGate -->|fail| audits
 ```
 
-During Phase 1, a separate `legacy_certification_targets()` branch compares the
-rebuilt results with frozen historical references. It is deliberately absent
-from the diagram because it is not part of the scientific or release flow and
-will be deleted after explicit acceptance.
+Historical comparison targets are deliberately absent from the diagram and
+from the active manifest. Their source files and fixtures remain on disk during
+migration review but have no ancestry into current science or release targets.
 
 ## Stages
 
-| # | Stage | Report | Target factory | Principal targets | Main outputs | Gate |
+| # | Stage | Review section | Target definition | Principal targets | Main outputs | Check |
 |---:|---|---|---|---|---|---|
-| 1 | Sources and configuration | [data foundation](reports/data_foundation.qmd) | `source_targets()` | `config`, input files, decision ledgers, `active_source_inventory` | source inventory and checksums | required files and configuration parse |
-| 2 | Community and taxonomy | [data foundation](reports/data_foundation.qmd) | `community_targets()` | `community`, `sites`, `experiments`, taxonomy review | standardized community/site/experiment tables | `community_validation` |
-| 3 | Covariates | [data foundation](reports/data_foundation.qmd) | `covariate_targets()` | CHELSA summaries, TRY summaries, functional groups, analysis data | climate, trait, taxonomy, and analysis tables | coordinate, unit, range, and join validation |
-| 4 | Responses | [response estimation](reports/response_estimation.qmd) | `response_targets()` | `auc_inputs`, `winner_loser`, temporal transitions | plot AUC, effect SEs, response classifications | contrast and flow checks |
-| 5 | Resident climate and family models | [resident climate model](reports/resident_climate_model.qmd), [family context model](reports/family_context_model.qmd) | `resident_model_targets()` | `resident_model_data`, `resident_sampling_variance_matrix`, `resident_climate_model`, `species_classification`, `family_model_bundle` | resident effects and diagonal sampling variances, climate model, species/family classifications | resident scope, sampling-variance order, and model diagnostics |
-| 6 | Predictor models | [predictor models](reports/predictor_models.qmd) | `predictor_model_targets()` | trait, functional, and phylogenetic model pairs | climate-only/full model objects, robust inference, phylogeny and PEV tables | matched-row/sampling-variance and fit diagnostics |
-| 7 | Evaluation | [model synthesis](reports/model_synthesis.qmd) | `evaluation_targets()` | `heterogeneity_synthesis`, cross-validation, model-effect profiles | heterogeneity, predictive performance, and diagnostic tables | evaluation release validations |
-| 8 | Publication | all seven reports | `publication_targets()` | figure objects, renderer targets, Quarto targets | registered PDF/PNG figures and rendered reports | figure registry and retained-copy audit |
-| 9 | Release | [release validation](reports/release_validation.qmd) | `release_targets()` | `current_scientific_release_validation`, `release_validation`, manifests | release tables, provenance, checksums | current release gate |
-| 10 | Temporary historical certification | none | `legacy_certification_targets()` | equivalence checks and `refactor_certification` | Phase 1-only audit tables | historical equivalence plus current release gate |
+| 1 | Raw data | [Raw data](analysis_workflow.qmd#raw-data) | tangled QMD targets plus file inputs | `current_input`, `community`, `sites`, `experiments` | imported and standardised source tables | `community_validation` |
+| 2 | Data preparation | [Data preparation](analysis_workflow.qmd#data-preparation) | tangled QMD targets plus external-data support | `analysis_community`, taxonomy, climate, and trait targets | reviewed community, taxonomy, TRY, CHELSA, and functional groups | range, coordinate, join, and missing-data checks |
+| 3 | Responses and final analysis data | [Response calculation](analysis_workflow.qmd#response-calculation) | tangled QMD targets | `auc_inputs`, `auc_contrasts`, `winner_loser`, `analysis_data`, `resident_auc_data`, `resident_sampling_variance_matrix` | Delta AUC, joined analysis data, classifications, diagonal sampling variances | response, join, cohort, and sampling-variance validation |
+| 4 | Models | [Model specifications](analysis_workflow.qmd#model-specifications) | tangled QMD targets with literal formulas and random structures | resident, family, trait, functional, and phylogenetic fits | ML comparisons, REML fits, CR1 tables | rank, ordering, convergence, and matched-data checks |
+| 5 | Inference and diagnostics | [Inference and diagnostics](analysis_workflow.qmd#inference-and-diagnostics) | tangled QMD targets plus repeated-fit support | classifications, heterogeneity, `model_fit_r2`, cross-validation | heterogeneity and the four Appendix Figure S7 measures | evaluation validations |
+| 6 | Figures, tables, and release | [Figures and tables](analysis_workflow.qmd#figures-and-tables) | supporting publication/release targets | registered figures, tables, `release_validation` | PDF/PNG, CSV/RDS, HTML, provenance | figure and current-release checks |
 
-The code-level assignment of every target to one factory is implemented in
-[`R/targets/stages.R`](R/targets/stages.R). It intentionally avoids documenting
-a target total because the graph can grow without changing this interface.
+The temporary split between QMD-owned targets and supporting factory targets is
+implemented in [`R/targets/stages.R`](R/targets/stages.R). The factories will
+not be removed until every contained component has an approved disposition in
+[`docs/workflow_migration_map.csv`](docs/workflow_migration_map.csv).
 
 ## Code layout
 
@@ -73,7 +73,7 @@ R/
   models/           meta-regression, species, family, predictors, phylogeny
   evaluation/       heterogeneity, cross-validation, diagnostics
   figures/          shared styles, figure builders, export renderers
-  validation/       current release checks and temporary legacy certification
+  validation/       current release and dependency checks; disconnected historical files pending removal
   targets/          stage registry and target definitions
 ```
 
@@ -89,7 +89,8 @@ in-memory objects.
   `predictor`) rather than their old position in the graph.
 - Sample sizes such as 526 species, 1,604 effects, and 42 experiments appear as
   validated results, never as identifiers.
-- `legacy_*` is reserved for the temporary Phase 1 certification branch.
+- Historical names are permitted only in disconnected files listed in
+  `config/historical_path_allowlist.csv` while migration is under review.
 - There are no compatibility aliases. Renames are recorded in
   [`docs/name_migration.csv`](docs/name_migration.csv).
 - Generated model, table, audit, and figure names contain their subject and
@@ -108,6 +109,10 @@ Run the complete graph:
 ```sh
 Rscript scripts/run_pipeline.R
 ```
+
+The run commands above are for the post-approval rebuild. During the present
+migration-review stage, use `tar_manifest()`, `tar_glimpse()`,
+`tar_visnetwork()`, and `tar_outdated()` only.
 
 Set `TRANSPLANT_WORKERS` to control local parallelism (the default is 2), for
 example `TRANSPLANT_WORKERS=5 Rscript scripts/run_pipeline.R`.
@@ -139,41 +144,35 @@ sampling-variance ordering, non-finite model results, failed classifications, or
 failed release check stop the affected branch. Per-stage audit tables remain in
 `output/audits/` when they were successfully written before the failure.
 
-Historical fixtures are read only in `legacy_certification_targets()`. The
-automated ancestry audit fails if a current scientific, figure, report, or
-release target acquires a historical ancestor.
+Historical validation modules are excluded from active sourcing, and the
+legacy target factory is not included in `_targets.R`. Dependency inspection
+must show that current science, figures, and release targets have no historical
+ancestor before any historical file can be removed.
 
-## Reports and figures
+## Review document and figures
 
-The seven Quarto sources are the only active reports:
+`analysis_workflow.qmd` is the active reviewer-facing report and target source.
+Analytical chunks inherit `eval = FALSE` from the opening setup chunk, as
+recommended by `tar_tangle()`; assignment-free display chunks explicitly use
+`eval: true` and `tar_read()` only after results exist. The seven former QMD
+reports and their HTML files remain on disk, disconnected, until their
+migration rows are approved.
 
-1. `data_foundation.qmd`
-2. `response_estimation.qmd`
-3. `resident_climate_model.qmd`
-4. `family_context_model.qmd`
-5. `predictor_models.qmd`
-6. `model_synthesis.qmd`
-7. `release_validation.qmd`
-
-Reports read completed targets and never fit models. Figures are built by
-functions in `R/figures/`; export-based figures are dispatched through the
-registry in `R/figures/registry.R`. Paired PDF/PNG files share one scientific
-figure object or one renderer invocation.
+Figures are built by functions in `R/figures/`; export-based figures are
+dispatched through the registry in `R/figures/registry.R`. Paired PDF/PNG files
+share one scientific figure object or one renderer invocation.
 
 ## Release and certification
 
-Phase 1 is complete only when all source files parse, the unit suite passes, a
-fresh-store build succeeds, all reports and registered figures render, current
-outputs pass the release gate, historical equivalence passes, and the dependency
-and migration manifests pass. Automated success does not authorize deletion.
+The preserved state is tagged
+`pre-reviewable-workflow-with-history-2026-09-30`. The recovery manifest records
+checksums and also identifies Git-ignored archive files that are not recoverable
+from the tag alone.
 
-Phase 2 requires explicit user acceptance. Only then will the accepted state be
-committed, tagged as `validated-refactor-with-history-YYYY-MM-DD`, recorded in
-`docs/history_retirement_manifest.csv`, and used to create
-`output/reference/release_reference_results.rds` plus
-`config/release_reference.csv`. The archive, old fixtures, adapters, reports,
-tests, and `legacy_certification_targets()` will then be removed. A second clean
-build with those files physically absent is mandatory.
-
-At present the project is in Phase 1, so the archive and historical fixtures
-remain recoverable in the active tree and no retirement tag has been created.
+Before any rebuild, the QMD, `tar_manifest()`, dependency graphs,
+[`docs/workflow_migration_map.csv`](docs/workflow_migration_map.csv), and focused
+synthetic tests must be reviewed. Only after explicit approval will mapped
+historical files be removed and a clean store built. After the rebuilt outputs
+are accepted, the sole current baseline will be written to
+`output/reference/release_reference_results.rds` and registered in
+`config/release_reference.csv`.

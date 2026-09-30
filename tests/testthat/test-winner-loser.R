@@ -49,7 +49,7 @@ test_that("legacy observation filter removes singleton species-treatment groups"
     relative_year = c(1, 2, 1),
     relative_cover = c(0.1, 0.2, 0.3)
   )
-  filtered <- apply_legacy_observation_filter(fixture)
+  filtered <- filter_minimum_plot_observations(fixture)
   expect_equal(unique(filtered$species), "replicated")
 })
 
@@ -183,7 +183,7 @@ test_that("alluvial pair percentages exactly match transition-matrix rows", {
   expect_equal(comparison$flow_proportion, comparison$matrix_proportion)
 })
 
-test_that("temporal analysis uses the merged downstream category", {
+test_that("temporal analysis uses the merged analysis category", {
   classified <- tibble::tribble(
     ~transform, ~experiment_id, ~species, ~horizon, ~category, ~analysis_category, ~pool,
     "raw", "experiment", "species", "2", "non_significant_outsider", "non_significant_colonizer", "outsider",
@@ -286,7 +286,7 @@ test_that("contrast seeds are stable and group-specific", {
   expect_true(first > 0L)
 })
 
-test_that("canonical predictor formulas retain the settled interaction structures", {
+test_that("current predictor formulas retain the settled interaction structures", {
   formulas <- predictor_formulas()
   continuous_terms <- attr(stats::terms(formulas$continuous_full), "term.labels")
   phylogeny_terms <- attr(stats::terms(formulas$Phylogeny_full), "term.labels")

@@ -99,7 +99,7 @@ test_that("the sole family correction is explicit and documented", {
   expect_identical(nrow(override), 1L)
   expect_identical(override$species_id, "Viola palustris")
   expect_identical(override$family_id, "Violaceae")
-  expect_match(override$decision_basis, "Step 19, Step 20, and Step 22")
+  expect_match(override$decision_basis, "resident-species decision table")
   expect_identical(ledger$graminoid_status, "non_graminoid")
   expect_identical(ledger$woodiness, "non_woody")
 })

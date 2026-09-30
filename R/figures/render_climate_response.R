@@ -15,7 +15,7 @@
 render_climate_response_figure <- function(arguments = character()) {
   
   # Figure 5 general fixed-effect prediction surfaces across species ×
-  # experiment combinations from the canonical
+  # experiment combinations from the current
   # resident climate model. This function only reads existing exported
   # results and does not fit models or invoke the targets pipeline.
   
@@ -70,7 +70,7 @@ render_climate_response_figure <- function(arguments = character()) {
   missing_inputs <- input_files[!file.exists(input_files)]
   if (length(missing_inputs) > 0L) {
     stop(
-      "Required canonical input(s) missing: ",
+      "Required current input(s) missing: ",
       paste(missing_inputs, collapse = ", "),
       call. = FALSE
     )
@@ -93,7 +93,7 @@ render_climate_response_figure <- function(arguments = character()) {
     "P_z:W_z", "T_z:P_z:W_z"
   )
   if (!identical(names(stats::coef(model)), expected_terms)) {
-    stop("The canonical climate-only coefficient terms changed.", call. = FALSE)
+    stop("The current climate-only coefficient terms changed.", call. = FALSE)
   }
   coefficient_export <- coefficient_export |>
     dplyr::arrange(match(.data$term, .env$expected_terms))
@@ -129,7 +129,7 @@ render_climate_response_figure <- function(arguments = character()) {
     dplyr::mutate(experiment_id = as.character(.data$experiment_id)) |>
     dplyr::arrange(.data$experiment_id)
   if (nrow(reference_experiments) != 42L) {
-    stop("The canonical climate model no longer contains 42 experiments.",
+    stop("The current climate model no longer contains 42 experiments.",
          call. = FALSE)
   }
   
@@ -142,7 +142,7 @@ render_climate_response_figure <- function(arguments = character()) {
           (reference_experiments$W - W_center) / W_scale)
   ))
   if (!is.finite(climate_scaling_error) || climate_scaling_error > 1e-10) {
-    stop("Stored climate columns do not match the canonical scaling export.",
+    stop("Stored climate columns do not match the current scaling export.",
          call. = FALSE)
   }
   
@@ -185,7 +185,7 @@ render_climate_response_figure <- function(arguments = character()) {
       any(!is.finite(experiment_elevations$origin_elevation)) ||
       any(!is.finite(experiment_elevations$destination_elevation))) {
     stop(
-      "Every canonical experiment must resolve to one finite elevation pair.",
+      "Every current experiment must resolve to one finite elevation pair.",
       call. = FALSE
     )
   }
@@ -454,10 +454,10 @@ render_climate_response_figure <- function(arguments = character()) {
     ~check, ~pass, ~detail,
     "No model refit", TRUE,
     "Read output/models/resident_climate_model.rds; the script contains no fitting call and does not invoke targets",
-    "Canonical coefficient identity", coefficient_error <= 1e-12,
+    "Current coefficient identity", coefficient_error <= 1e-12,
     paste("Maximum difference from exported fixed coefficients:",
           format(coefficient_error, scientific = TRUE)),
-    "Canonical analysis scope",
+    "Current analysis scope",
     model$k == 1604L &&
       dplyr::n_distinct(model$data$species_id) == 526L &&
       nrow(reference_experiments) == 42L,
@@ -468,7 +468,7 @@ render_climate_response_figure <- function(arguments = character()) {
     "Climate scaling identity", climate_scaling_error <= 1e-10,
     paste("Maximum standardized-climate reconstruction error:",
           format(climate_scaling_error, scientific = TRUE)),
-    "Canonical elevation labels",
+    "Current elevation labels",
     nrow(experiment_elevations) == 42L &&
       !anyDuplicated(experiment_elevations$experiment_id) &&
       all(is.finite(experiment_elevations$origin_elevation)) &&
@@ -494,7 +494,7 @@ render_climate_response_figure <- function(arguments = character()) {
       dplyr::count(observed, .data$warming_level)$n == 42L
     ) && all(!is.na(observed$experiment_label)) &&
       all(nzchar(observed$experiment_label)),
-    "Each warming panel contains a non-empty two-line site and elevation-change label for all 42 canonical experiments"
+    "Each warming panel contains a non-empty two-line site and elevation-change label for all 42 current experiments"
   )
   if (!all(validation$pass)) {
     stop("One or more candidate-figure validation checks failed.", call. = FALSE)

@@ -21,7 +21,11 @@ publication_target_definitions <- function() {
     ),
     tar_target(
       figure01_winners_losers,
-      build_figure01_winners_losers(figure01_festuca_data)
+      build_figure01_winners_losers(figure01_festuca_data),
+      description = paste(
+        "Main winner-loser figure showing the focal Festuca example and",
+        "network-wide response classification"
+      )
     ),
     tar_target(
       figure01_winners_losers_pdf,
@@ -208,6 +212,10 @@ publication_target_definitions <- function() {
         classification_base_size = 14,
         classification_label_size = 4.8,
         inset_base_size = 14
+      ),
+      description = paste(
+        "Species winner loser and context-dependent classifications with",
+        "selected fitted climate-response examples"
       )
     ),
     tar_target(
@@ -342,7 +350,11 @@ publication_target_definitions <- function() {
         build_predictor_synthesis_figure(
           figure06_predictor_synthesis_data
         )
-      }
+      },
+      description = paste(
+        "Direct climate-only versus full predictor comparisons and changes",
+        "in fitted response heterogeneity"
+      )
     ),
     tar_target(
       figure06_predictor_synthesis_pdf,
@@ -387,7 +399,11 @@ publication_target_definitions <- function() {
           model_fit_r2,
           model_cross_validation_metrics
         )
-      }
+      },
+      description = paste(
+        "Appendix Figure S7 with equal-gradient marginal and conditional R2",
+        "and leave-gradient-out predictive R2 and RMSE"
+      )
     ),
     tar_target(
       appendix_model_predictive_performance_pdf,
@@ -913,7 +929,11 @@ publication_target_definitions <- function() {
         predictive_performance = model_performance_release_validation,
         model_effects = model_effects_release_validation,
         retained_figures = retained_figure_validation
-      )))
+      ))),
+      description = paste(
+        "Final current-workflow checks for scientific results Figure S7",
+        "model diagnostics and registered retained figures"
+      )
     ),
     tar_target(
       release_validation_file,
@@ -930,6 +950,16 @@ publication_target_definitions <- function() {
         historical_equivalence = legacy_certification_validation,
         historical_fixture_equivalence = legacy_reference_validation
       )))
+    ),
+    tarchetypes::tar_quarto(
+      report_analysis_workflow,
+      "analysis_workflow.qmd",
+      output_file = "analysis_workflow.html",
+      working_directory = ".",
+      description = paste(
+        "Linear reviewer-facing analysis with cached data checks, explicit",
+        "model specifications, figures, and targets inspection"
+      )
     ),
     tarchetypes::tar_quarto(
       report_data_foundation, "reports/data_foundation.qmd",

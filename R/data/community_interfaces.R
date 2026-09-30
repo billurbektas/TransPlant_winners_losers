@@ -4,7 +4,7 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
-# Narrow validation interfaces for upstream community and taxonomy targets.
+# Focused validation functions for community and taxonomy targets.
 
 #' Validate Community Interface.
 #'
@@ -14,7 +14,7 @@ validate_community_interface <- function(community) {
   required <- c("source_id", "destination_id", "species_id")
   missing <- setdiff(required, names(community))
   if (length(missing)) {
-    stop("Canonical community is missing: ", paste(missing, collapse = ", "))
+    stop("Community data are missing: ", paste(missing, collapse = ", "))
   }
   tibble::tibble(rows = nrow(community), species = dplyr::n_distinct(community$species_id), pass = TRUE)
 }
@@ -26,6 +26,6 @@ validate_community_interface <- function(community) {
 validate_taxonomy_interface <- function(taxonomy) {
   required <- c("accepted_name", "family")
   missing <- setdiff(required, names(taxonomy))
-  if (length(missing)) stop("Canonical taxonomy is missing: ", paste(missing, collapse = ", "))
+  if (length(missing)) stop("Taxonomy data are missing: ", paste(missing, collapse = ", "))
   tibble::tibble(rows = nrow(taxonomy), duplicated_names = anyDuplicated(taxonomy$accepted_name), pass = !anyDuplicated(taxonomy$accepted_name))
 }

@@ -1,41 +1,23 @@
 # Module: R/validation/dependency_audit
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Confirm that the active target graph is disconnected from
+# historical code, fixtures, reports, and reference results.
+# Inputs: The active `_targets.R` manifest.
+# Outputs: One review row for target names and one for target commands.
+# Side effects: Reads target definitions but never executes a target.
 
-# Executable audit of target ancestry at the current/history boundary.
-
-#' Target Ancestors.
+#' Audit disconnection from historical workflow material
 #'
-#' @param target A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param edges A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
-target_ancestors <- function(target, edges) {
-  visited <- character()
-  frontier <- target
-  while (length(frontier)) {
-    upstream <- unique(edges$from[edges$to %in% frontier])
-    upstream <- setdiff(upstream, visited)
-    if (!length(upstream)) break
-    visited <- c(visited, upstream)
-    frontier <- upstream
-  }
-  unique(visited)
-}
-
-#' Audit Legacy Fixture Dependencies.
-#'
-#' @param root A project-relative or absolute filesystem path.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-audit_legacy_fixture_dependencies <- function(root = NULL) {
+#' @param root Repository root containing `_targets.R`.
+#' @return A two-row table checking active target names and commands.
+audit_historical_dependency_disconnection <- function(root = NULL) {
   if (is.null(root)) {
     root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
     repeat {
       if (file.exists(file.path(root, "_targets.R"))) break
       parent <- dirname(root)
       if (identical(parent, root)) {
-        stop("Could not locate _targets.R from the current directory.", call. = FALSE)
+        stop("Could not locate _targets.R from the current directory.",
+             call. = FALSE)
       }
       root <- parent
     }
@@ -43,48 +25,44 @@ audit_legacy_fixture_dependencies <- function(root = NULL) {
   root <- normalizePath(root, winslash = "/", mustWork = TRUE)
   previous_directory <- setwd(root)
   on.exit(setwd(previous_directory), add = TRUE)
-  network <- targets::tar_network(
-    targets_only = TRUE,
-    outdated = FALSE,
+  manifest <- targets::tar_manifest(
+    fields = c("name", "command"),
     callr_function = NULL,
-    script = file.path(root, "_targets.R"),
-    store = file.path(root, "_targets")
+    script = file.path(root, "_targets.R")
   )
-  edges <- network$edges
-  inventory <- pipeline_target_stage_table()
-  historical_seed <- inventory$target[
-    inventory$stage == "legacy" &
-      grepl(
-        "^(legacy_|frozen_release_reference)|equivalence|migration|reproduction|resident_consistency_checks",
-        inventory$target
-      )
+  historical_name_pattern <- paste(
+    "(^legacy_|equivalence|step(19|22)|transition_reference|",
+    "frozen_release_reference|resident_consistency_checks)",
+    sep = ""
+  )
+  historical_command_pattern <- paste(
+    "(archive/|reports/reference_text|tests/fixtures|",
+    "reference_artifacts[.]csv|legacy_|step(19|22)|transition_reference)",
+    sep = ""
+  )
+  name_hits <- manifest$name[
+    grepl(historical_name_pattern, manifest$name, ignore.case = TRUE)
   ]
-  result <- dplyr::bind_rows(lapply(inventory$target, function(target) {
-    direct <- sort(unique(edges$from[edges$to == target]))
-    ancestors <- target_ancestors(target, edges)
-    stage <- inventory$stage[inventory$target == target][[1]]
-    observed_fixture_ancestry <- target %in% historical_seed ||
-      any(ancestors %in% historical_seed)
-    role <- if (stage == "legacy") "LEGACY_CERTIFICATION" else
-      "CURRENT_WORKFLOW"
-    tibble::tibble(
-      target = target,
-      stage = stage,
-      role = role,
-      direct_dependencies = paste(direct, collapse = "; "),
-      fixture_ancestor = observed_fixture_ancestry,
-      pass = stage == "legacy" || !observed_fixture_ancestry,
-      detail = if (stage == "legacy") {
-        "Historical ancestry is quarantined in the temporary certification factory."
-      } else {
-        "Current workflow targets must have no historical-reference ancestry."
-      }
+  command_hits <- manifest$name[
+    grepl(historical_command_pattern, manifest$command, ignore.case = TRUE)
+  ]
+  result <- tibble::tibble(
+    check = c(
+      "No historical targets in active manifest",
+      "No historical paths or objects in active commands"
+    ),
+    pass = c(!length(name_hits), !length(command_hits)),
+    detail = c(
+      if (length(name_hits)) paste(name_hits, collapse = "; ") else
+        paste(nrow(manifest), "active target names checked"),
+      if (length(command_hits)) paste(command_hits, collapse = "; ") else
+        paste(nrow(manifest), "active target commands checked")
     )
-  }))
+  )
   if (any(!result$pass)) {
     stop(
-      "Current/history dependency boundary failed for: ",
-      paste(result$target[!result$pass], collapse = ", "),
+      "Historical material remains connected to the active target graph: ",
+      paste(result$detail[!result$pass], collapse = " | "),
       call. = FALSE
     )
   }

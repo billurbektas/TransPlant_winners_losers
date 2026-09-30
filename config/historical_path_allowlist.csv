@@ -1,0 +1,29 @@
+path,reason,temporary_status,exclude_from_active_inventory
+archive/,Historical workflow and generated artifacts retained during migration,disconnected_pending_approval,TRUE
+reports/reference_text/,Historical step-number reports retained during migration,disconnected_pending_approval,TRUE
+tests/fixtures/,Frozen old-workflow result fixtures retained during migration,disconnected_pending_approval,TRUE
+R/validation/legacy_artifacts.R,Historical artifact adapters excluded from active sourcing,disconnected_pending_approval,TRUE
+R/validation/legacy_phylogeny.R,Historical phylogeny comparisons excluded from active sourcing,disconnected_pending_approval,TRUE
+R/validation/legacy_reference.R,Historical result comparisons excluded from active sourcing,disconnected_pending_approval,TRUE
+config/reference_artifacts.csv,Historical checksum ledger retained during migration,disconnected_pending_approval,TRUE
+docs/model_analysis_review.R,Temporary user-reviewed analysis summary preserved until its QMD migration is approved,disconnected_pending_approval,TRUE
+reports/data_foundation.qmd,Replaced report source retained until QMD migration approval,disconnected_pending_approval,TRUE
+reports/response_estimation.qmd,Replaced report source retained until QMD migration approval,disconnected_pending_approval,TRUE
+reports/resident_climate_model.qmd,Replaced report source retained until QMD migration approval,disconnected_pending_approval,TRUE
+reports/family_context_model.qmd,Replaced report source retained until QMD migration approval,disconnected_pending_approval,TRUE
+reports/predictor_models.qmd,Replaced report source retained until QMD migration approval,disconnected_pending_approval,TRUE
+reports/model_synthesis.qmd,Replaced report source retained until QMD migration approval,disconnected_pending_approval,TRUE
+reports/release_validation.qmd,Replaced report source retained until QMD migration approval,disconnected_pending_approval,TRUE
+tests/testthat/test-legacy-reference-equivalence.R,Historical equivalence test retained until migration approval,disconnected_pending_approval,TRUE
+tests/testthat/test-legacy-release-reference.R,Historical release-reference test retained until migration approval,disconnected_pending_approval,TRUE
+tests/testthat/test-reference-boundary-and-text-reports.R,Historical report-boundary test retained until migration approval,disconnected_pending_approval,TRUE
+tests/testthat/test-target-dependency-boundaries.R,Historical combined-graph test retained until migration approval,disconnected_pending_approval,TRUE
+tests/testthat/test-phylogeny-reference.R,Historical phylogeny-equivalence test retained until migration approval,disconnected_pending_approval,TRUE
+tests/testthat/test-resident-analysis-scope.R,Transition-fixture scope test retained until migration approval,disconnected_pending_approval,TRUE
+R/targets/definitions/data.R,Current definitions plus disconnected historical targets pending approved physical removal,mixed_active_and_disconnected,FALSE
+R/targets/definitions/models.R,Current definitions plus disconnected historical targets pending approved physical removal,mixed_active_and_disconnected,FALSE
+R/targets/definitions/publication.R,Current definitions plus disconnected old reports and certification target pending approved physical removal,mixed_active_and_disconnected,FALSE
+R/targets/stages.R,Current stage selection plus the uncalled historical factory pending approved physical removal,mixed_active_and_disconnected,FALSE
+tests/testthat/test-model-interfaces.R,Current synthetic checks plus old-reference adapter checks pending approved physical removal,mixed_active_and_disconnected,FALSE
+tests/testthat/test-code-policy.R,Current policy checks being migrated from the seven-report workflow,mixed_active_and_disconnected,FALSE
+tests/testthat/test-model-performance.R,Current Figure S7 checks replacing approved obsolete performance tests,migrated_active,FALSE

@@ -4,7 +4,7 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
-# Canonical destination-climate display figure functions.
+# Current destination-climate display figure functions.
 
 #' Destination Climate Display Context.
 #'

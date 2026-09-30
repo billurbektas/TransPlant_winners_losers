@@ -63,15 +63,17 @@ model_fit_signature <- function(data, formula, method,
 #' @param label A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param predictor_columns A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param random A model formula or random-effects specification.
+#' @param struct Covariance structure passed to `metafor::rma.mv()`.
+#' @param sparse Whether to use sparse matrix calculations.
 #' @details `data` must contain `effect_id`, `auc_effect`, the grouping fields,
 #' and every variable referenced by `formula` and `random`. Row and column names
 #' of `sampling_variance_matrix` must exactly equal `effect_id` order. The registered `GEN` random
 #' structure and supplied ML/REML method are not simplified on failure; fit
 #' errors and warnings are retained in the returned bundle.
 #' @return A fitted model bundle with diagnostics retained for validation.
-fit_meta_regression <- function(data, sampling_variance_matrix, formula, method, label,
-                                predictor_columns = character(),
-                                random = resident_analysis_spec()$species_random) {
+fit_meta_regression <- function(
+    data, sampling_variance_matrix, formula, method, label,
+    predictor_columns = character(), random, struct, sparse = TRUE) {
   if (!identical(
         rownames(sampling_variance_matrix), as.character(data$effect_id)
       ) ||
@@ -84,8 +86,8 @@ fit_meta_regression <- function(data, sampling_variance_matrix, formula, method,
   captured <- capture_model_fit(
     metafor::rma.mv(
       yi = auc_effect, V = sampling_variance_matrix, mods = formula,
-      random = random, struct = "GEN", data = data,
-      method = method, sparse = TRUE
+      random = random, struct = struct, data = data,
+      method = method, sparse = sparse
     ),
     label
   )
@@ -162,16 +164,25 @@ nested_model_lrt <- function(smaller, larger, predictor, comparison) {
 #' @param captured A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param predictor A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param model_name A fitted model object with the structure checked by this function.
+#' @param cluster_column Column identifying independent experiment clusters.
+#' @param adjust Whether to apply the small-sample CR1 adjustment.
+#' @param club_sandwich Whether `metafor` should delegate to `clubSandwich`.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-cluster_robust_inference <- function(captured, predictor, model_name) {
+cluster_robust_inference <- function(
+    captured, predictor, model_name, cluster_column,
+    adjust, club_sandwich) {
   fit <- captured$fit
+  if (!cluster_column %in% names(fit$data)) {
+    stop("Robust inference is missing cluster column `", cluster_column, "`.",
+         call. = FALSE)
+  }
   warnings <- character()
   robust <- withCallingHandlers(
     metafor::robust(
       fit,
-      cluster = fit$data$experiment_id,
-      adjust = TRUE,
-      clubSandwich = FALSE
+      cluster = fit$data[[cluster_column]],
+      adjust = adjust,
+      clubSandwich = club_sandwich
     ),
     warning = function(w) {
       warnings <<- c(warnings, conditionMessage(w))
@@ -513,12 +524,19 @@ compare_model_fit <- function(candidate, reference) {
 #'
 #' @param captured A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param variance_profiles A value supplied by the calling workflow; admissible values are checked in the function body.
+#' @param cluster_column Column identifying independent experiment clusters.
+#' @param adjust Whether to apply the small-sample CR1 adjustment.
+#' @param club_sandwich Whether `metafor` should delegate to `clubSandwich`.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
-assemble_climate_model_results <- function(captured, variance_profiles) {
+assemble_climate_model_results <- function(
+    captured, variance_profiles, cluster_column, adjust, club_sandwich) {
   list(
     fixed = fixed_effect_table(captured$fit),
     CR1 = cluster_robust_inference(
-      captured, "resident_climate", "resident_climate"
+      captured, "resident_climate", "resident_climate",
+      cluster_column = cluster_column,
+      adjust = adjust,
+      club_sandwich = club_sandwich
     )$table,
     random = random_effect_diagnostics(
       captured, "resident_climate", "resident_climate"
