@@ -26,8 +26,8 @@ Figure renderers are available through one dispatcher:
 Rscript scripts/render_figure.R --list
 ```
 
-The historical branch is preserved under the annotated recovery tag
-`pre-reviewable-workflow-with-history-2026-09-30` and is disconnected from the
-active target graph. The archive, fixtures, and old reports remain physically
-present until the QMD, target manifest, dependency graphs, and complete
-migration map are explicitly accepted. No clean rebuild has been run yet.
+Tracked historical sources are preserved under the annotated recovery tag
+`pre-reviewable-workflow-with-history-2026-09-30`. The archive, fixtures, and
+old reports have been retired from the working tree. Current generated results
+and target stores were preserved in the verified ZIP recorded in
+`docs/pre_rebuild_output_snapshot.csv`. No clean rebuild has been run yet.

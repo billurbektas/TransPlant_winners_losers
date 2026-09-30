@@ -30,12 +30,12 @@ testthat::test_that("declared taxa remain in community results but are excluded 
   )
   testthat::expect_equal(sum(upstream$species_id %in% exclusions), 21L)
 
-  downstream <- readRDS(project_path(
-    "tests", "fixtures", "canonical_transition_reference.rds"
-  ))$downstream_auc_data
-  testthat::expect_equal(nrow(downstream), 1604L)
-  testthat::expect_equal(dplyr::n_distinct(downstream$species_id), 526L)
-  testthat::expect_false(any(downstream$species_id %in% exclusions))
+  resident_path <- project_path("output", "data", "resident_effects.csv")
+  testthat::skip_if_not(file.exists(resident_path))
+  resident_effects <- readr::read_csv(resident_path, show_col_types = FALSE)
+  testthat::expect_equal(nrow(resident_effects), 1604L)
+  testthat::expect_equal(dplyr::n_distinct(resident_effects$species_id), 526L)
+  testthat::expect_false(any(resident_effects$species_id %in% exclusions))
 })
 
 testthat::test_that("graminoid and woody status are independent binary fields", {
@@ -87,14 +87,14 @@ testthat::test_that("functional-information models test both statuses separately
   testthat::expect_false(any(grepl("FunctionalGroup", all_formulas, fixed = TRUE)))
 })
 
-testthat::test_that("updated phylogeny exactly represents the downstream set", {
-  fixture <- readRDS(project_path(
-    "tests", "fixtures", "canonical_transition_reference.rds"
-  ))$phylogeny
-  tree <- fixture$tree_rds
-  scores <- fixture$pev_scores
-  species_order <- fixture$species_order
-  zero_distance <- fixture$zero_distance_audit
+testthat::test_that("rebuilt phylogeny represents the resident species", {
+  tree_path <- project_path("output", "models", "phylogeny_tree.rds")
+  score_path <- project_path("output", "data", "phylogeny_predictor_scores.csv")
+  audit_path <- project_path("output", "audits", "zero_distance_pair_audit.csv")
+  testthat::skip_if_not(all(file.exists(c(tree_path, score_path, audit_path))))
+  tree <- readRDS(tree_path)
+  scores <- readr::read_csv(score_path, show_col_types = FALSE)
+  zero_distance <- readr::read_csv(audit_path, show_col_types = FALSE)
   placement <- readr::read_csv(
     project_path("config", "phylogeny_placement_decisions.csv"),
     show_col_types = FALSE
@@ -103,9 +103,9 @@ testthat::test_that("updated phylogeny exactly represents the downstream set", {
   testthat::expect_equal(length(tree$tip.label), 526L)
   testthat::expect_setequal(
     tree$tip.label,
-    gsub("_", " ", species_order$newick_tip_label, fixed = TRUE)
+    scores$species_id
   )
-  testthat::expect_false(any(species_order$species_id %in%
+  testthat::expect_false(any(scores$species_id %in%
                                resident_model_exclusions()))
   testthat::expect_equal(
     sum(placement$match_type ==

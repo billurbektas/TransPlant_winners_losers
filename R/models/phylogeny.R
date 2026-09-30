@@ -4,6 +4,19 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
+#' Read the positive phylogenetic variation represented by PEV1–PEV3
+#'
+#' @param eigen_summary PCoA eigenvalue summary with `PEV` and
+#'   `cumulative_percent` columns.
+#' @return The finite cumulative percentage at PEV3; errors if absent.
+validated_phylogenetic_variation <- function(eigen_summary) {
+  value <- eigen_summary$cumulative_percent[eigen_summary$PEV == "PEV3"]
+  if (length(value) != 1L || !is.finite(value)) {
+    stop("PEV1-PEV3 cumulative positive variation is unavailable.", call. = FALSE)
+  }
+  as.numeric(value)
+}
+
 # Response-independent phylogeny/PCoA validation and orientation.
 
 #' Phylogenetic Broken Stick.
@@ -54,7 +67,6 @@ phylogenetic_eigen_summary <- function(pcoa_object, solution,
     correction = if (corrected) "Lingoes" else "none"
   )
 }
-
 #' Snap Zero Distance Coordinates.
 #'
 #' @param coordinates A value supplied by the calling workflow; admissible values are checked in the function body.
@@ -189,25 +201,6 @@ pev_orientation_anchors <- function() {
     "PEV3", "Euphrasia minima", 1
   )
 }
-
-#' Restore Phylogeny Tip Labels.
-#'
-#' @param tree A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param species_order A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
-restore_phylogeny_tip_labels <- function(tree, species_order) {
-  mapping <- stats::setNames(
-    as.character(species_order$species_id),
-    as.character(species_order$newick_tip_label)
-  )
-  restored <- unname(mapping[tree$tip.label])
-  if (anyNA(restored) || anyDuplicated(restored)) {
-    stop("Newick labels do not map uniquely to ecological species IDs.", call. = FALSE)
-  }
-  tree$tip.label <- restored
-  tree
-}
-
 #' Build Phylogeny Species Order.
 #'
 #' @param tree A value supplied by the calling workflow; admissible values are checked in the function body.
@@ -556,105 +549,8 @@ orient_pev_axes <- function(scores, anchors = pev_orientation_anchors()) {
   result
 }
 
-#' Compare Phylogenetic Distance.
-#'
-#' @param candidate A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param tolerance A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_phylogenetic_distance <- function(candidate, reference,
-                                           tolerance = 1e-6) {
-  candidate <- as.matrix(candidate)
-  reference <- as.matrix(reference)
-  order_equal <- identical(rownames(candidate), rownames(reference)) &&
-    identical(colnames(candidate), colnames(reference))
-  maximum_error <- if (order_equal) max(abs(candidate - reference)) else Inf
-  tibble::tibble(
-    check = c("distance species order", "phylogenetic distances"),
-    pass = c(order_equal, order_equal && maximum_error <= tolerance),
-    detail = c(
-      paste(nrow(candidate), "candidate and", nrow(reference), "reference taxa"),
-      paste("maximum absolute error", format(maximum_error, digits = 8),
-            "with tolerance", format(tolerance, scientific = TRUE))
-    )
-  )
-}
 
-#' Compare Pcoa Eigenstructure.
-#'
-#' @param candidate A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param tolerance A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_pcoa_eigenstructure <- function(candidate, reference,
-                                        tolerance = 1e-8) {
-  key <- c("solution", "axis_number", "PEV")
-  candidate <- candidate |>
-    dplyr::arrange(.data$solution, .data$axis_number)
-  reference <- reference |>
-    dplyr::arrange(.data$solution, .data$axis_number)
-  keys_equal <- identical(as.character(candidate$solution), as.character(reference$solution)) &&
-    identical(as.numeric(candidate$axis_number), as.numeric(reference$axis_number)) &&
-    identical(as.character(candidate$PEV), as.character(reference$PEV))
-  positive_equal <- keys_equal && identical(
-    as.logical(candidate$positive_eigenvalue),
-    as.logical(reference$positive_eigenvalue)
-  )
-  numeric_columns <- c(
-    "eigenvalue", "percent_positive_variation", "cumulative_percent",
-    "broken_stick_expectation_percent"
-  )
-  numeric_equal <- keys_equal && all(vapply(numeric_columns, function(column) {
-    numeric_values_equal(
-      candidate[[column]], reference[[column]],
-      c(absolute = tolerance, relative = 1e-6)
-    )
-  }, logical(1)))
-  tibble::tibble(
-    check = c("PCoA eigenvalue keys", "positive-axis flags", "PCoA eigenstructure"),
-    pass = c(keys_equal, positive_equal, numeric_equal),
-    detail = c(
-      paste(nrow(candidate), "candidate and", nrow(reference), "reference axes"),
-      "Positive/negative axis identity is exact.",
-      paste("absolute tolerance", format(tolerance, scientific = TRUE))
-    )
-  )
-}
 
-#' Compare Phylogeny.
-#'
-#' @param candidate_tree A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference_tree A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param candidate_order A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference_order A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param tolerance A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_phylogeny <- function(candidate_tree, reference_tree, candidate_order,
-                              reference_order, tolerance = 1e-6) {
-  candidate_species <- as.character(candidate_order$species_id)
-  reference_species <- as.character(reference_order$species_id)
-  order_equal <- identical(candidate_species, reference_species)
-  tips_equal <- setequal(candidate_tree$tip.label, reference_tree$tip.label)
-  topology_equal <- isTRUE(ape::all.equal.phylo(
-    candidate_tree, reference_tree, use.edge.length = FALSE
-  ))
-  topology_and_lengths_equal <- isTRUE(ape::all.equal.phylo(
-    candidate_tree, reference_tree, use.edge.length = TRUE, tolerance = tolerance
-  ))
-  tibble::tibble(
-    check = c(
-      "species order mapping", "tree tip set", "tree topology",
-      "topology-aligned branch lengths"
-    ),
-    pass = c(order_equal, tips_equal, topology_equal, topology_and_lengths_equal),
-    detail = c(
-      paste(length(candidate_species), "species"),
-      paste(length(candidate_tree$tip.label), "tips"),
-      "ape::all.equal.phylo without edge lengths",
-      paste("ape::all.equal.phylo tolerance", format(tolerance, scientific = TRUE))
-    )
-  )
-}
 
 #' Validate Zero Distance Placements.
 #'
@@ -679,59 +575,4 @@ validate_zero_distance_placements <- function(distance_matrix, audit) {
     detail = c(paste(length(pairs), "matrix pairs and", length(audited), "audit rows"),
                paste(sum(audit$classification == "intentional shared placement"), "documented"))
   )
-}
-
-#' Compare Zero Distance Audit.
-#'
-#' @param candidate A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param tolerance A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_zero_distance_audit <- function(candidate, reference,
-                                        tolerance = 1e-12) {
-  keys <- c("species_id_1", "species_id_2")
-  candidate <- dplyr::arrange(candidate, .data$species_id_1, .data$species_id_2)
-  reference <- dplyr::arrange(reference, .data$species_id_1, .data$species_id_2)
-  pair_equal <- identical(candidate[keys], reference[keys])
-  distance_equal <- pair_equal && numeric_values_equal(
-    candidate$phylogenetic_distance,
-    reference$phylogenetic_distance,
-    c(absolute = tolerance, relative = 1e-10)
-  )
-  classification_equal <- pair_equal && identical(
-    as.character(candidate$classification),
-    as.character(reference$classification)
-  )
-  reason_equal <- pair_equal && identical(
-    as.character(candidate$reason),
-    as.character(reference$reason)
-  )
-  tibble::tibble(
-    check = c(
-      "reference zero-distance pair identities",
-      "reference zero-distance values",
-      "reference zero-distance classifications",
-      "reference zero-distance reasons"
-    ),
-    pass = c(pair_equal, distance_equal, classification_equal, reason_equal),
-    detail = c(
-      paste(nrow(candidate), "candidate and", nrow(reference), "reference pairs"),
-      paste("absolute tolerance", format(tolerance, scientific = TRUE)),
-      "Semantic classification values compared as character.",
-      "Documented placement explanations compared exactly."
-    )
-  )
-}
-
-#' Assert Phylogeny Validation.
-#'
-#' @param ... Additional arguments forwarded to the delegated operation.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-assert_phylogeny_validation <- function(...) {
-  checks <- dplyr::bind_rows(...)
-  if (any(!checks$pass)) {
-    stop("Phylogeny/PCoA regression failed: ",
-         paste(checks$check[!checks$pass], collapse = "; "), call. = FALSE)
-  }
-  checks
 }

@@ -48,7 +48,7 @@ filter_minimum_plot_observations <- function(data, minimum_observations = 2L) {
 #' @param data A data frame whose required columns are checked before use.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 experiment_pool <- function(data) {
-  # Match the legacy analysis: pool membership is assigned once from all
+  # Pool membership is assigned once from all
   # observations over the complete experiment, after the n > 1 filter.
   present <- data |>
     dplyr::filter(!is.na(.data$species)) |>
@@ -365,38 +365,5 @@ validate_winner_loser_outputs <- function(classified, pools) {
              nrow(changing_pools) == 0L,
              nrow(incompatible_categories) == 0L,
              nrow(bad_analysis_merge) == 0L)
-  )
-}
-
-#' Compare Legacy Auc.
-#'
-#' @param classified A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param legacy_path A project-relative or absolute filesystem path.
-#' @param tolerance A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_legacy_auc <- function(classified, legacy_path, tolerance = 1e-8) {
-  if (!file.exists(legacy_path)) {
-    return(tibble::tibble(check = "legacy AUC comparison", pass = NA, n = 0L,
-                          max_absolute_difference = NA_real_, note = "legacy result file absent"))
-  }
-  legacy <- readRDS(legacy_path) |>
-    dplyr::filter(.data$rel_abund == "auc.trap", as.character(.data$step) == "max", .data$contrast == "to_origin") |>
-    dplyr::transmute(
-      experiment_id = paste(.data$Region, .data$originSiteID, .data$destSiteID, sep = "::"),
-      species = .data$SpeciesName,
-      legacy_estimate = .data$estimate
-    )
-  comparison <- classified |>
-    dplyr::filter(.data$transform == "raw", .data$horizon == "max") |>
-    dplyr::select(experiment_id, species, revised_estimate = estimate) |>
-    dplyr::inner_join(legacy, by = c("experiment_id", "species")) |>
-    dplyr::mutate(absolute_difference = abs(.data$revised_estimate - .data$legacy_estimate))
-  maximum <- max(comparison$absolute_difference, na.rm = TRUE)
-  tibble::tibble(
-    check = "legacy AUC comparison",
-    pass = is.finite(maximum) && maximum <= tolerance,
-    n = nrow(comparison),
-    max_absolute_difference = maximum,
-    note = paste0("tolerance=", tolerance)
   )
 }

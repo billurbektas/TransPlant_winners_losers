@@ -943,14 +943,6 @@ publication_target_definitions <- function() {
       ),
       format = "file"
     ),
-    tar_target(
-      refactor_certification,
-      assert_release_validation(assemble_release_validation(list(
-        current_release = release_validation,
-        historical_equivalence = legacy_certification_validation,
-        historical_fixture_equivalence = legacy_reference_validation
-      )))
-    ),
     tarchetypes::tar_quarto(
       report_analysis_workflow,
       "analysis_workflow.qmd",
@@ -960,84 +952,6 @@ publication_target_definitions <- function() {
         "Linear reviewer-facing analysis with cached data checks, explicit",
         "model specifications, figures, and targets inspection"
       )
-    ),
-    tarchetypes::tar_quarto(
-      report_data_foundation, "reports/data_foundation.qmd",
-      output_file = "data_foundation.html", working_directory = "."
-    ),
-    tarchetypes::tar_quarto(
-      report_response_estimation, "reports/response_estimation.qmd",
-      output_file = "response_estimation.html", working_directory = "."
-    ),
-    tarchetypes::tar_quarto(
-      report_resident_climate_model, "reports/resident_climate_model.qmd",
-      output_file = "resident_climate_model.html", working_directory = "."
-    ),
-    tarchetypes::tar_quarto(
-      report_family_context_model, "reports/family_context_model.qmd",
-      output_file = "family_context_model.html", working_directory = "."
-    ),
-    tarchetypes::tar_quarto(
-      report_predictor_models, "reports/predictor_models.qmd",
-      output_file = "predictor_models.html", working_directory = "."
-    ),
-    tarchetypes::tar_quarto(
-      report_model_synthesis, "reports/model_synthesis.qmd",
-      output_file = "model_synthesis.html", working_directory = ".",
-      quarto_args = c("--execute-dir", ".")
-    ),
-    tarchetypes::tar_quarto(
-      report_release_validation, "reports/release_validation.qmd",
-      output_file = "release_validation.html", working_directory = "."
-    ),
-    tar_target(
-      published_report_data_foundation,
-      copy_file_atomic_verified(
-        report_data_foundation,
-        file.path(config$root, "reports", "rendered", "data_foundation.html")
-      ), format = "file"
-    ),
-    tar_target(
-      published_report_response_estimation,
-      copy_file_atomic_verified(
-        report_response_estimation,
-        file.path(config$root, "reports", "rendered", "response_estimation.html")
-      ), format = "file"
-    ),
-    tar_target(
-      published_report_resident_climate_model,
-      copy_file_atomic_verified(
-        report_resident_climate_model,
-        file.path(config$root, "reports", "rendered", "resident_climate_model.html")
-      ), format = "file"
-    ),
-    tar_target(
-      published_report_family_context_model,
-      copy_file_atomic_verified(
-        report_family_context_model,
-        file.path(config$root, "reports", "rendered", "family_context_model.html")
-      ), format = "file"
-    ),
-    tar_target(
-      published_report_predictor_models,
-      copy_file_atomic_verified(
-        report_predictor_models,
-        file.path(config$root, "reports", "rendered", "predictor_models.html")
-      ), format = "file"
-    ),
-    tar_target(
-      published_report_model_synthesis,
-      copy_file_atomic_verified(
-        report_model_synthesis,
-        file.path(config$root, "reports", "rendered", "model_synthesis.html")
-      ), format = "file"
-    ),
-    tar_target(
-      published_report_release_validation,
-      copy_file_atomic_verified(
-        report_release_validation,
-        file.path(config$root, "reports", "rendered", "release_validation.html")
-      ), format = "file"
     )
   )
 }

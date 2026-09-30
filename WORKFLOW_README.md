@@ -5,8 +5,8 @@ analysis in scientific order. Its top-level analytical assignments become
 targets through `tarchetypes::tar_tangle()`. `_targets.R` sources supporting
 functions and combines those QMD targets with temporary supporting/file targets.
 
-This guide describes execution, naming, failure behavior, and the controlled
-retirement of the disconnected historical workflow.
+This guide describes execution, naming, failure behavior, and the historical
+retirement record.
 
 ## Analysis flow
 
@@ -43,9 +43,8 @@ flowchart TD
   releaseGate -->|fail| audits
 ```
 
-Historical comparison targets are deliberately absent from the diagram and
-from the active manifest. Their source files and fixtures remain on disk during
-migration review but have no ancestry into current science or release targets.
+Historical comparison targets, source files, and fixtures have been removed
+from the active workflow. Generated results remain until the clean rebuild.
 
 ## Stages
 
@@ -58,9 +57,9 @@ migration review but have no ancestry into current science or release targets.
 | 5 | Inference and diagnostics | [Inference and diagnostics](analysis_workflow.qmd#inference-and-diagnostics) | tangled QMD targets plus repeated-fit support | classifications, heterogeneity, `model_fit_r2`, cross-validation | heterogeneity and the four Appendix Figure S7 measures | evaluation validations |
 | 6 | Figures, tables, and release | [Figures and tables](analysis_workflow.qmd#figures-and-tables) | supporting publication/release targets | registered figures, tables, `release_validation` | PDF/PNG, CSV/RDS, HTML, provenance | figure and current-release checks |
 
-The temporary split between QMD-owned targets and supporting factory targets is
-implemented in [`R/targets/stages.R`](R/targets/stages.R). The factories will
-not be removed until every contained component has an approved disposition in
+The temporary split between QMD-owned targets and supporting targets is
+implemented in [`R/targets/stages.R`](R/targets/stages.R). The support targets
+are being regrouped by scientific step; dispositions are recorded in
 [`docs/workflow_migration_map.csv`](docs/workflow_migration_map.csv).
 
 ## Code layout
@@ -73,7 +72,7 @@ R/
   models/           meta-regression, species, family, predictors, phylogeny
   evaluation/       heterogeneity, cross-validation, diagnostics
   figures/          shared styles, figure builders, export renderers
-  validation/       current release and dependency checks; disconnected historical files pending removal
+  validation/       current resident-cohort and release checks
   targets/          stage registry and target definitions
 ```
 
@@ -89,8 +88,7 @@ in-memory objects.
   `predictor`) rather than their old position in the graph.
 - Sample sizes such as 526 species, 1,604 effects, and 42 experiments appear as
   validated results, never as identifiers.
-- Historical names are permitted only in disconnected files listed in
-  `config/historical_path_allowlist.csv` while migration is under review.
+- Historical names remain only in the migration and retirement records.
 - There are no compatibility aliases. Renames are recorded in
   [`docs/name_migration.csv`](docs/name_migration.csv).
 - Generated model, table, audit, and figure names contain their subject and
@@ -144,10 +142,9 @@ sampling-variance ordering, non-finite model results, failed classifications, or
 failed release check stop the affected branch. Per-stage audit tables remain in
 `output/audits/` when they were successfully written before the failure.
 
-Historical validation modules are excluded from active sourcing, and the
-legacy target factory is not included in `_targets.R`. Dependency inspection
-must show that current science, figures, and release targets have no historical
-ancestor before any historical file can be removed.
+The historical validation modules and targets are retired. Dependency
+inspection must show that current science, figures, and release targets have no
+historical input.
 
 ## Review document and figures
 
@@ -155,8 +152,8 @@ ancestor before any historical file can be removed.
 Analytical chunks inherit `eval = FALSE` from the opening setup chunk, as
 recommended by `tar_tangle()`; assignment-free display chunks explicitly use
 `eval: true` and `tar_read()` only after results exist. The seven former QMD
-reports and their HTML files remain on disk, disconnected, until their
-migration rows are approved.
+reports and their old HTML renders have been removed; their scientific content
+is mapped to this document in the migration record.
 
 Figures are built by functions in `R/figures/`; export-based figures are
 dispatched through the registry in `R/figures/registry.R`. Paired PDF/PNG files
@@ -164,15 +161,16 @@ share one scientific figure object or one renderer invocation.
 
 ## Release and certification
 
-The preserved state is tagged
-`pre-reviewable-workflow-with-history-2026-09-30`. The recovery manifest records
-checksums and also identifies Git-ignored archive files that are not recoverable
-from the tag alone.
+The tracked historical state is tagged
+`pre-reviewable-workflow-with-history-2026-09-30`. The retirement manifest
+records checksums. Git-ignored files from `archive/` were deleted with the
+user's approval and are not recoverable from the tag. Current generated
+results and target stores are preserved in the verified ZIP recorded in
+[`docs/pre_rebuild_output_snapshot.csv`](docs/pre_rebuild_output_snapshot.csv).
 
-Before any rebuild, the QMD, `tar_manifest()`, dependency graphs,
+Before any rebuild, the regrouped QMD, `tar_manifest()`, dependency graphs,
 [`docs/workflow_migration_map.csv`](docs/workflow_migration_map.csv), and focused
-synthetic tests must be reviewed. Only after explicit approval will mapped
-historical files be removed and a clean store built. After the rebuilt outputs
-are accepted, the sole current baseline will be written to
+synthetic tests must be reviewed. After the rebuilt outputs are accepted, the
+sole current baseline will be written to
 `output/reference/release_reference_results.rds` and registered in
 `config/release_reference.csv`.

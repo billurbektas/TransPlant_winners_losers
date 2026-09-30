@@ -42,7 +42,7 @@ test_that("validation rejects resident categories for nonresident pools", {
   )
 })
 
-test_that("legacy observation filter removes singleton species-treatment groups", {
+test_that("minimum plot-observation filter removes singleton species-treatment groups", {
   fixture <- tibble::tibble(
     ODT = c("warmed", "warmed", "origin_controls"),
     species = c("replicated", "replicated", "singleton"),

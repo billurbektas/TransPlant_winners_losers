@@ -50,8 +50,8 @@ validate_family_bundle <- function(
 #' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
 compare_classification_resolutions <- function(species, family) {
   dplyr::bind_rows(
-    summarize_reference_classification(species, "Species"),
-    summarize_reference_classification(family, "Family")
+    summarize_context_classification(species, "Species"),
+    summarize_context_classification(family, "Family")
   )
 }
 
@@ -834,84 +834,5 @@ summarize_family_model <- function(model_bundle) {
     minimum_sampling_variance = validation$minimum_sampling_variance,
     sampling_variance_valid = validation$valid,
     contrast_warnings = paste(model_bundle$contrast_warnings, collapse = " | ")
-  )
-}
-
-#' Compare family sampling variances with the historical matrix.
-#'
-#' @param candidate A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param absolute A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param relative A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_family_sampling_variances <- function(candidate, reference,
-                                              absolute = 1e-10,
-                                              relative = 1e-8) {
-  reference_matrix <- if (is.list(reference) && !is.null(reference$V_family_auc)) {
-    as.matrix(reference$V_family_auc)
-  } else {
-    as.matrix(reference)
-  }
-  candidate_matrix <- as.matrix(candidate)
-  same_dimensions <- identical(dim(candidate_matrix), dim(reference_matrix))
-  same_names <- identical(dimnames(candidate_matrix), dimnames(reference_matrix))
-  maximum_error <- if (same_dimensions) {
-    max(abs(candidate_matrix - reference_matrix))
-  } else {
-    Inf
-  }
-  maximum_limit <- if (same_dimensions) {
-    max(absolute + relative * abs(reference_matrix))
-  } else {
-    NA_real_
-  }
-  result <- tibble::tibble(
-    check = c(
-      "family_sampling_variance_dimensions",
-      "family_sampling_variance_order",
-      "family_sampling_variance_values"
-    ),
-    pass = c(
-      same_dimensions, same_names,
-      same_dimensions && maximum_error <= maximum_limit
-    ),
-    detail = c(
-      paste(dim(candidate_matrix), collapse = " x "),
-      if (same_names) "Row and column identifiers are identical." else
-        "Row or column identifiers differ.",
-      paste0(
-        "maximum absolute error = ", format(maximum_error, digits = 16),
-        "; maximum allowed = ", format(maximum_limit, digits = 16)
-      )
-    )
-  )
-  if (any(!result$pass)) {
-    stop(
-      "Family sampling-variance regression failed: ",
-      paste(result$check[!result$pass], collapse = ", "), call. = FALSE
-    )
-  }
-  result
-}
-
-#' Compare the scientific family-model summary with its historical reference.
-#'
-#' Sampling-matrix descriptions changed intentionally from reconstructed full
-#' covariance to explicit diagonal variances. All shared model-result fields
-#' must remain equivalent.
-#'
-#' @param candidate Current family-model summary.
-#' @param reference Historical family-model summary.
-#' @return A validation table from `assert_reference_table()`.
-compare_family_model_summary_reference <- function(candidate, reference) {
-  shared <- intersect(names(candidate), names(reference))
-  shared <- setdiff(shared, c(
-    "V_source", "V_maximum_diagonal_variance_error",
-    "V_maximum_symmetry_error", "V_minimum_eigenvalue", "V_valid"
-  ))
-  assert_reference_table(
-    candidate[, shared, drop = FALSE],
-    reference[, shared, drop = FALSE],
-    "family_model_summary", "model"
   )
 }

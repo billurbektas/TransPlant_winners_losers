@@ -6,6 +6,30 @@
 
 # Pure species-context classification and callout-selection helpers.
 
+#' Summarize eligible species or families by fitted response class
+#'
+#' @param classification Table containing one `fitted_class` per eligible unit.
+#' @param resolution Label for the summarized taxonomic resolution.
+#' @return One row with counts and percentages for each response class.
+summarize_context_classification <- function(classification, resolution) {
+  classes <- c("Consistent winner", "Consistent loser", "Context-dependent")
+  counts <- table(factor(classification$fitted_class, levels = classes))
+  total <- nrow(classification)
+  winner_n <- as.integer(counts[["Consistent winner"]])
+  loser_n <- as.integer(counts[["Consistent loser"]])
+  context_n <- as.integer(counts[["Context-dependent"]])
+  tibble::tibble(
+    Resolution = resolution,
+    `N eligible units` = as.integer(total),
+    `Winner N` = winner_n,
+    `Winner %` = 100 * winner_n / total,
+    `Loser N` = loser_n,
+    `Loser %` = 100 * loser_n / total,
+    `Context-dependent N` = context_n,
+    `Context-dependent %` = 100 * context_n / total
+  )
+}
+
 #' Extract Conditional Species Coefficients.
 #'
 #' @param fit A fitted model object with the structure checked by this function.
@@ -214,37 +238,6 @@ build_species_context_bundle <- function(captured, data, formula, points = 81L) 
   )
 }
 
-#' Compare Classification Reference.
-#'
-#' @param candidate A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param id_column A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_classification_reference <- function(candidate, reference, id_column) {
-  candidate <- candidate |>
-    dplyr::arrange(.data[[id_column]])
-  reference <- reference |>
-    dplyr::arrange(.data[[id_column]])
-  failures <- compare_reference_node(candidate, reference, c("classification"))
-  result <- tibble::tibble(
-    check = c("classification identifiers", "classification values"),
-    pass = c(
-      identical(as.character(candidate[[id_column]]),
-                as.character(reference[[id_column]])),
-      !length(failures)
-    ),
-    detail = c(
-      paste(nrow(candidate), "candidate and", nrow(reference), "reference rows"),
-      if (length(failures)) paste(failures, collapse = " | ") else
-        "All classification fields pass the historical-reference tolerance policy."
-    )
-  )
-  if (any(!result$pass)) {
-    stop("Classification regression failed: ",
-         paste(result$detail[!result$pass], collapse = " | "), call. = FALSE)
-  }
-  result
-}
 
 #' Classify Supported Extrema.
 #'

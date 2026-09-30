@@ -7,6 +7,69 @@
 # Human-readable current model report assembled only from active scientific
 # objects. Frozen reports and transition fixtures are not inputs.
 
+#' Summarize one named release check
+#'
+#' @param name Name of the check.
+#' @param check Data frame containing a logical `pass` column.
+#' @return One row with the number of passing checks and failure details.
+release_check_summary <- function(name, check) {
+  if (!is.data.frame(check) || !"pass" %in% names(check)) {
+    stop("Release check '", name, "' must be a data frame with a pass column.",
+         call. = FALSE)
+  }
+  pass <- as.logical(check$pass)
+  failed_rows <- which(is.na(pass) | !pass)
+  detail_column <- intersect(c("detail", "check", "note"), names(check))
+  failure_detail <- if (!length(failed_rows)) {
+    paste(nrow(check), "of", nrow(check), "checks passed")
+  } else if (length(detail_column)) {
+    paste(
+      as.character(check[[detail_column[[1]]]][failed_rows]),
+      collapse = " | "
+    )
+  } else {
+    paste("failed rows", paste(failed_rows, collapse = ", "))
+  }
+  tibble::tibble(
+    gate = name,
+    checks = nrow(check),
+    passed = sum(pass %in% TRUE),
+    pass = length(failed_rows) == 0L,
+    detail = failure_detail
+  )
+}
+
+#' Collect named current-release checks
+#'
+#' @param checks Uniquely named list of validation data frames.
+#' @return A table with one summary row per check.
+assemble_release_validation <- function(checks) {
+  if (!is.list(checks) || is.null(names(checks)) ||
+      any(!nzchar(names(checks))) || anyDuplicated(names(checks))) {
+    stop("Release checks require a uniquely named list.", call. = FALSE)
+  }
+  dplyr::bind_rows(Map(release_check_summary, names(checks), checks))
+}
+
+#' Require every current-release check to pass
+#'
+#' @param validation Release-check table with `gate` and logical `pass`.
+#' @return The unchanged table; stops with failed gate names if any fail.
+assert_release_validation <- function(validation) {
+  if (!is.data.frame(validation) || !"pass" %in% names(validation)) {
+    stop("Release validation must contain a pass column.", call. = FALSE)
+  }
+  failed <- is.na(validation$pass) | !validation$pass
+  if (any(failed)) {
+    stop(
+      "Release validation failed: ",
+      paste(validation$gate[failed], collapse = ", "),
+      call. = FALSE
+    )
+  }
+  validation
+}
+
 #' Report Number.
 #'
 #' @param x A value supplied by the calling workflow; admissible values are checked in the function body.

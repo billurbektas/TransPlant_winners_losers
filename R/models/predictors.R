@@ -118,7 +118,7 @@ audit_functional_source_coverage <- function(functional_groups,
   tibble::tibble(
     source = paste(
       "reviewed functional-group table plus explicit resident-species overrides",
-      "versus the validated historical interface"
+      "for the resident-species functional analysis"
     ),
     expected_species = length(required_ids),
     active_species_found = sum(required_ids %in% active_ids),
@@ -131,30 +131,6 @@ audit_functional_source_coverage <- function(functional_groups,
   )
 }
 
-#' Compare Functional Species Reference.
-#'
-#' @param candidate A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_functional_species_reference <- function(candidate, reference) {
-  candidate <- candidate |> dplyr::arrange(.data$species_id)
-  reference <- reference |> dplyr::arrange(.data$species_id)
-  failures <- compare_reference_node(
-    candidate, reference, c("functional_species")
-  )
-  pass <- !length(failures)
-  result <- tibble::tibble(
-    check = "functional species assignments",
-    pass = pass,
-    detail = if (pass) {
-      paste(nrow(candidate), "Graminoid/Woodiness assignments are exact.")
-    } else {
-      paste(failures, collapse = " | ")
-    }
-  )
-  if (!pass) stop(result$detail[[1]], call. = FALSE)
-  result
-}
 
 #' Predictor Formulas.
 #'

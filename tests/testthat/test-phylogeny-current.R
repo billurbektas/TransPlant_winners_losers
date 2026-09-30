@@ -45,7 +45,8 @@ test_that("the current PEV orientation follows the documented convention", {
   expect_gt(oriented$PEV1[oriented$species_id == "Poa trivialis"], 0)
   expect_lt(oriented$PEV2[oriented$species_id == "Erigeron formosissimus"], 0)
   expect_gt(oriented$PEV3[oriented$species_id == "Euphrasia minima"], 0)
-  expect_true(all(compare_pev_coordinates(oriented, scores)$pass))
+  expect_equal(oriented[c("PEV1", "PEV2", "PEV3")],
+               scores[c("PEV1", "PEV2", "PEV3")])
 })
 
 test_that("the current zero-distance pairs are intentional", {
@@ -64,28 +65,4 @@ test_that("the current zero-distance pairs are intentional", {
     readr::read_csv(audit_path, show_col_types = FALSE)
   )
   expect_true(all(checks$pass))
-})
-
-test_that("the PEV modeling interface validates while retaining reconstructed values", {
-  reference <- tibble::tibble(
-    species_id = c(
-      "Poa trivialis", "Erigeron formosissimus", "Euphrasia minima"
-    ),
-    PEV1 = c(1, 0, -1),
-    PEV2 = c(2, -2, 0),
-    PEV3 = c(-2, -1, 3)
-  )
-  recomputed <- reference
-  recomputed$PEV1 <- recomputed$PEV1 + c(1e-14, 0, -1e-14)
-  interface <- build_legacy_pev_validation_interface(recomputed, reference)
-  expect_identical(interface$data, recomputed)
-  expect_false(interface$audit$historical_values_used_for_modeling)
-  expect_true(all(interface$audit$pass))
-
-  drifted <- recomputed
-  drifted$PEV1[[1]] <- drifted$PEV1[[1]] + 1e-4
-  expect_error(
-    build_legacy_pev_validation_interface(drifted, reference),
-    "PEV"
-  )
 })

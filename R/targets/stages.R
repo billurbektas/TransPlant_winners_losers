@@ -28,8 +28,8 @@ pipeline_target_definitions <- local({
 })
 
 # Target names are read directly from `tar_tangle()` rather than copied into a
-# second workflow registry. The cache only avoids reparsing the QMD once per
-# stage factory while the old factory files remain during migration review.
+# second workflow registry. The cache avoids reparsing the QMD for each
+# support-target group.
 tangled_scientific_target_names <- local({
   cache <- NULL
   function(path = "analysis_workflow.qmd") {
@@ -41,57 +41,12 @@ tangled_scientific_target_names <- local({
   }
 })
 
-# These replaced reports, pass-through inputs, hidden formula registry, and
-# approved performance outputs remain on disk until the migration map is
-# approved, but they are no longer part of the active dependency graph.
-#' Factory targets disconnected while migration is reviewed
-#'
-#' @return Character target names excluded from every active stage factory.
-disconnected_factory_target_names <- function() {
-  c(
-    "report_data_foundation", "report_response_estimation",
-    "report_resident_climate_model", "report_family_context_model",
-    "report_predictor_models", "report_model_synthesis",
-    "report_release_validation", "published_report_data_foundation",
-    "published_report_response_estimation",
-    "published_report_resident_climate_model",
-    "published_report_family_context_model", "published_report_predictor_models",
-    "published_report_model_synthesis", "published_report_release_validation",
-    "winner_loser_input", "analysis_data_input", "climate_context_input",
-    "predictor_formula_registry", "model_cross_validation_predictions",
-    "model_predictive_skill", "model_cross_validation_predictions_file",
-    "model_predictive_skill_file"
-  )
-}
-
 #' Assign a target name to its workflow stage.
-#'
-#' Historical comparisons are deliberately assigned to `legacy` before any
-#' scientific-name matching. The temporary legacy stage is removed only after
-#' the clean rebuild is explicitly accepted.
 #'
 #' @param name A single target name.
 #' @return One stage identifier.
 pipeline_target_stage <- function(name) {
   stopifnot(length(name) == 1L, is.character(name), nzchar(name))
-
-  if (
-    startsWith(name, "legacy_") ||
-      grepl("equivalence|migration", name) ||
-      name %in% c(
-        "resident_consistency_checks", "legacy_certification_validation",
-        "legacy_certification_validation_file",
-        "refactor_certification",
-        "phylogeny_reproduction_validation",
-        "phylogeny_reproduction_validation_file",
-        "phylogeny_reference_artifact_validation",
-        "phylogeny_reference_artifact_validation_file",
-        "frozen_release_reference_file",
-        "frozen_release_reference_validation"
-      )
-  ) {
-    return("legacy")
-  }
 
   if (
     grepl(
@@ -200,8 +155,7 @@ targets_for_stage <- function(stage) {
   definitions <- pipeline_target_definitions()
   inventory <- pipeline_target_stage_table()
   keep <- inventory$stage == stage &
-    !inventory$target %in% tangled_scientific_target_names() &
-    !inventory$target %in% disconnected_factory_target_names()
+    !inventory$target %in% tangled_scientific_target_names()
   definitions[keep]
 }
 
@@ -240,11 +194,3 @@ publication_targets <- function() targets_for_stage("publication")
 #' Define current release targets with no historical inputs.
 #' @return Current release-stage target definitions.
 release_targets <- function() targets_for_stage("release")
-
-#' Define temporary historical-certification targets.
-#'
-#' These targets are the only permitted consumers of frozen historical result
-#' fixtures. The entire factory is deleted after explicit Phase 2 acceptance.
-#'
-#' @return Temporary legacy-certification target definitions.
-legacy_certification_targets <- function() targets_for_stage("legacy")

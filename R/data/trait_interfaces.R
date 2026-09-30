@@ -27,34 +27,6 @@ build_trait_species <- function(try_summary, retained_species) {
   result
 }
 
-#' Compare Trait Species Reference.
-#'
-#' @param candidate A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param reference A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-compare_trait_species_reference <- function(candidate, reference) {
-  columns <- c("species_id", "LDMC", "LMA", "vegetative_height")
-  candidate <- candidate[, columns] |> dplyr::arrange(.data$species_id)
-  reference <- reference[, columns] |> dplyr::arrange(.data$species_id)
-  failures <- compare_reference_node(candidate, reference, c("trait_species"))
-  result <- tibble::tibble(
-    check = c("trait species identifiers", "trait species values"),
-    pass = c(
-      identical(candidate$species_id, reference$species_id),
-      !length(failures)
-    ),
-    detail = c(
-      paste(nrow(candidate), "candidate and", nrow(reference), "reference species"),
-      if (length(failures)) paste(failures, collapse = " | ") else
-        "All trait values pass the preprocessing tolerance."
-    )
-  )
-  if (any(!result$pass)) {
-    stop("Trait-species regression failed: ",
-         paste(result$detail[!result$pass], collapse = " | "), call. = FALSE)
-  }
-  result
-}
 
 #' Validate Trait Species Interface.
 #'

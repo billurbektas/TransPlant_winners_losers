@@ -4,6 +4,23 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
+#' Read a pipeline CSV without changing empty diagnostic text
+#'
+#' @param path Existing CSV path.
+#' @details Missing diagnostic text becomes an empty string, matching the
+#'   established CSV read-back used for resident-model inputs.
+#' @return A tibble with the established CSV parsing behavior.
+read_pipeline_csv <- function(path) {
+  result <- readr::read_csv(path, show_col_types = FALSE)
+  empty_text_fields <- intersect(
+    names(result), c("warnings", "error", "CR1_warnings", "contrast_warnings")
+  )
+  for (field in empty_text_fields) {
+    result[[field]][is.na(result[[field]])] <- ""
+  }
+  result
+}
+
 #' Normalize Name.
 #'
 #' @param x A value supplied by the calling workflow; admissible values are checked in the function body.

@@ -19,11 +19,7 @@ active_function_files <- function(root = ".") {
     path <- file.path(root, "R", directory)
     list.files(path, pattern = "[.]R$", recursive = TRUE, full.names = TRUE)
   }), use.names = FALSE))
-  historical_validation_files <- file.path(
-    root, "R", "validation",
-    c("legacy_artifacts.R", "legacy_phylogeny.R", "legacy_reference.R")
-  )
-  setdiff(files, historical_validation_files)
+  files
 }
 
 #' Active Scientific Source Files.
@@ -34,7 +30,7 @@ active_scientific_source_files <- function(root = ".") {
   fixed <- file.path(
     root,
     c(
-      "_targets.R", ".gitignore", "README.md", "renv.lock",
+      "_targets.R", "analysis_workflow.qmd", ".gitignore", "README.md", "renv.lock",
       "TransPlant_winners_losers.Rproj", "external/get_chelsa.R",
       "data/README.md", "data/source_manifest.csv"
     )
@@ -43,7 +39,6 @@ active_scientific_source_files <- function(root = ".") {
     "R" = "[.]R$",
     "R/targets" = "[.]R$",
     "config" = "[.](R|csv)$",
-    "reports" = "[.]qmd$",
     "scripts" = "[.]R$",
     "tests" = "[.](R|rds|csv|md)$"
   )
@@ -58,22 +53,9 @@ active_scientific_source_files <- function(root = ".") {
       files[file.exists(files) & !dir.exists(files)]
     }, names(inventory_trees), unname(inventory_trees)
   ), use.names = FALSE)
-  files <- sort(unique(c(
+  sort(unique(c(
     fixed[file.exists(fixed)], active_function_files(root), trees
   )))
-  allowlist_path <- file.path(root, "config", "historical_path_allowlist.csv")
-  if (!file.exists(allowlist_path)) return(files)
-  allowlist <- utils::read.csv(
-    allowlist_path, stringsAsFactors = FALSE, check.names = FALSE
-  )
-  allowlist <- allowlist$path[allowlist$exclude_from_active_inventory]
-  relative <- sub("^[.]/", "", files)
-  disconnected <- vapply(relative, function(path) {
-    any(vapply(allowlist, function(entry) {
-      if (endsWith(entry, "/")) startsWith(path, entry) else identical(path, entry)
-    }, logical(1)))
-  }, logical(1))
-  files[!disconnected]
 }
 
 #' Resident Analysis Spec.

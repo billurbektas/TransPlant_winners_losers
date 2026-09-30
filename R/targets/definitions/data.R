@@ -4,14 +4,12 @@
 # Outputs: Validated in-memory objects and declared workflow artifacts.
 # Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
 
-# Canonical upstream data, temporal, and descriptive targets. Target names and
-# expressions are preserved from the pre-refactor graph.
+# File exports and support targets for community, climate, and response data.
 #' Data Target Definitions.
 #'
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 data_target_definitions <- function() {
 list(
-  tar_target(config, transplant_config()),
   tar_target(
     active_source_files_input,
     active_scientific_source_files(config$root),
@@ -34,48 +32,17 @@ list(
     ),
     format = "file"
   ),
-  tar_target(
-    resident_species_overrides_input,
-    file.path(config$root, "config", "resident_species_overrides.csv"),
-    format = "file"
-  ),
-  tar_target(
-    resident_species_overrides,
-    readr::read_csv(
-      resident_species_overrides_input,
-      show_col_types = FALSE,
-      col_types = readr::cols(.default = readr::col_character())
-    )
-  ),
-  tar_target(input_rdata_file, config$input_rdata, format = "file"),
-  tar_target(current_input, read_current_transplant_input(input_rdata_file)),
   tar_target(input_inventory, current_input_inventory(current_input)),
   tar_target(
     input_inventory_file,
     write_csv_atomic(input_inventory, file.path(config$output_dir, "tables", "input_inventory.csv")),
     format = "file"
   ),
-  tar_target(site_metadata, site_metadata_from_regions(current_input$regional)),
-  tar_target(species_mapping_decisions_input, file.path(config$root, "config", "species_mapping_decisions.csv"), format = "file"),
-  tar_target(
-    species_mapping_decisions,
-    readr::read_csv(species_mapping_decisions_input, show_col_types = FALSE,
-                    col_types = readr::cols(.default = readr::col_character()))
-  ),
-  tar_target(
-    species_mapping_review,
-    local_species_mapping_review(current_input$cleanedspecies, species_mapping_decisions)
-  ),
   tar_target(
     species_mapping_review_file,
     write_csv_atomic(species_mapping_review, file.path(config$output_dir, "tables", "species_mapping_review.csv")),
     format = "file"
   ),
-  tar_target(species_mapping, resolve_local_species_mappings(current_input$cleanedspecies, species_mapping_decisions)),
-  tar_target(community, standardize_community(current_input$dat, species_mapping, site_metadata)),
-  tar_target(sites, build_sites(community, current_input$regional)),
-  tar_target(experiments, build_experiments(community, sites)),
-  tar_target(community_validation, validate_community_snapshot(sites, community, experiments)),
   tar_target(
     sites_file,
     write_csv_atomic(sites, file.path(config$output_dir, "tables", "sites.csv")),
@@ -97,30 +64,16 @@ list(
     format = "file"
   ),
 
-  tar_target(taxonomy_overrides_input, file.path(config$root, "config", "taxonomy_overrides.csv"), format = "file"),
-  tar_target(
-    taxonomy_overrides,
-    readr::read_csv(taxonomy_overrides_input, show_col_types = FALSE,
-                    col_types = readr::cols(.default = readr::col_character()))
-  ),
-  tar_target(vegetation_species, sort(unique(community$species))),
-  tar_target(community_taxonomy_response, taxonomy_response(vegetation_species)),
   tar_target(
     community_taxonomy_response_file,
     write_csv_atomic(community_taxonomy_response, file.path(config$output_dir, "tables", "tnrs_vegetation_full.csv")),
     format = "file"
   ),
   tar_target(
-    community_taxonomy_review,
-    apply_taxonomy_review(community_taxonomy_response, taxonomy_overrides, config$taxonomy_min_score)
-  ),
-  tar_target(
     community_taxonomy_review_file,
     write_csv_atomic(community_taxonomy_review, file.path(config$output_dir, "tables", "tnrs_vegetation_review.csv")),
     format = "file"
   ),
-  tar_target(community_taxonomy, validate_taxonomy_review(community_taxonomy_review, "vegetation taxonomy")),
-  tar_target(vegetation_taxonomic_resolution, taxonomic_resolution_review(community_taxonomy)),
   tar_target(
     vegetation_taxonomic_resolution_file,
     write_csv_atomic(
@@ -137,7 +90,6 @@ list(
     ),
     format = "file"
   ),
-  tar_target(community_taxonomy_species, filter_species_level_taxonomy(vegetation_taxonomic_resolution)),
   tar_target(
     included_vegetation_species_file,
     write_csv_atomic(
@@ -150,41 +102,17 @@ list(
     ),
     format = "file"
   ),
-  tar_target(analysis_community, filter_community_to_reviewed_taxa(community, community_taxonomy_species)),
 
-  tar_target(try_export_file, config$try_file, format = "file"),
-  tar_target(try_dictionary_input, file.path(config$root, "config", "try_trait_map.csv"), format = "file"),
-  tar_target(try_dictionary, readr::read_csv(try_dictionary_input, show_col_types = FALSE)),
-  tar_target(
-    try_filter_names,
-    unique(c(community_taxonomy_species$name_original, community_taxonomy_species$accepted_name_reviewed))
-  ),
-  tar_target(
-    try_cleaned,
-    clean_try_export(try_export_file, try_filter_names, try_dictionary, config$error_risk_max)
-  ),
-  tar_target(try_taxonomy_response, taxonomy_response(try_side_species(try_cleaned))),
   tar_target(
     try_taxonomy_response_file,
     write_csv_atomic(try_taxonomy_response, file.path(config$output_dir, "tables", "tnrs_try_full.csv")),
     format = "file"
   ),
   tar_target(
-    try_taxonomy_review,
-    apply_taxonomy_review(try_taxonomy_response, taxonomy_overrides, config$taxonomy_min_score)
-  ),
-  tar_target(
     try_taxonomy_review_file,
     write_csv_atomic(try_taxonomy_review, file.path(config$output_dir, "tables", "tnrs_try_review.csv")),
     format = "file"
   ),
-  tar_target(try_taxonomy, validate_taxonomy_review(try_taxonomy_review, "TRY taxonomy")),
-  tar_target(
-    try_climate_filtered,
-    filter_try_climate(try_cleaned, try_taxonomy, config$excluded_try_climates)
-  ),
-  tar_target(try_range_validation, validate_trait_ranges(try_climate_filtered$observations)),
-  tar_target(try_trait_outputs, summarise_try_traits(try_climate_filtered$observations)),
   tar_target(
     try_audit_file,
     write_csv_atomic(try_climate_filtered$audit, file.path(config$output_dir, "tables", "try_filter_audit.csv")),
@@ -206,7 +134,6 @@ list(
     format = "file"
   ),
 
-  tar_target(chelsa_coordinate_audit, audit_chelsa_coordinates(sites, experiments)),
   tar_target(
     chelsa_coordinate_validation_file,
     write_csv_atomic(
@@ -232,37 +159,6 @@ list(
     format = "file"
   ),
   tar_target(
-    chelsa_site_coordinates,
-    {
-      chelsa_coordinate_audit
-      validate_site_coordinates(sites)
-    }
-  ),
-  tar_target(chelsa_job_list, chelsa_jobs(config$climate_download_years, config$climate_variables), iteration = "list"),
-  tar_target(chelsa_job, chelsa_job_list, pattern = map(chelsa_job_list), iteration = "list"),
-  tar_target(
-    chelsa_monthly_file,
-    run_chelsa_job(
-      chelsa_job, chelsa_site_coordinates, config$chelsa_cache,
-      config$chelsa_retries, config$chelsa_backoff_seconds
-    ),
-    pattern = map(chelsa_job),
-    format = "file"
-  ),
-  tar_target(chelsa_consolidated, consolidate_chelsa(chelsa_monthly_file, sites, config$climate_download_years)),
-  tar_target(site_year_climate, summarise_site_climate(chelsa_consolidated$monthly)),
-  tar_target(experiment_climate, summarise_experiment_climate(site_year_climate, experiments)),
-  tar_target(
-    experiment_climate_coverage,
-    experiment_climate |>
-      dplyr::select(
-        experiment_id, first_year, last_year, years_expected,
-        origin_years_available, destination_years_available,
-        origin_missing_years, destination_missing_years,
-        climate_complete, climate_summary_status, climate_coverage_note
-      )
-  ),
-  tar_target(
     site_year_climate_file,
     write_csv_atomic(site_year_climate, file.path(config$output_dir, "tables", "site_year_climate.csv")),
     format = "file"
@@ -281,18 +177,6 @@ list(
     format = "file"
   ),
 
-  tar_target(auc_inputs, calculate_auc_inputs(analysis_community, experiments, config$horizons)),
-  tar_target(auc_contrasts, fit_auc_contrasts(auc_inputs$auc)),
-  tar_target(winner_loser, classify_winners_losers(auc_contrasts, auc_inputs$pools)),
-  tar_target(winner_loser_validation, validate_winner_loser_outputs(winner_loser, auc_inputs$pools)),
-  tar_target(
-    legacy_auc_validation,
-    compare_legacy_auc(
-      winner_loser,
-      file.path(config$root, "tests", "fixtures", "legacy_wl_determined.rds"),
-      tolerance = 1e-8
-    )
-  ),
   tar_target(
     winner_loser_file,
     write_csv_atomic(winner_loser, file.path(config$output_dir, "tables", "winner_loser_results.csv")),
@@ -372,39 +256,11 @@ list(
     format = "file"
   ),
 
-  tar_target(taxonomy_family, tnrs_family_lookup(community_taxonomy_species$accepted_name_reviewed)),
-  tar_target(functional_group_overrides_input, file.path(config$root, "config", "functional_group_overrides.csv"), format = "file"),
-  tar_target(
-    functional_group_overrides,
-    readr::read_csv(functional_group_overrides_input, show_col_types = FALSE,
-                    col_types = readr::cols(.default = readr::col_character()))
-  ),
-  tar_target(
-    functional_groups,
-    derive_functional_groups(
-      taxonomy_family, functional_group_overrides,
-      resident_species_overrides
-    )
-  ),
   tar_target(
     functional_groups_file,
     write_csv_atomic(functional_groups, file.path(config$output_dir, "tables", "functional_groups.csv")),
     format = "file"
   ),
-  tar_target(
-    descriptive_analysis_data,
-    analysis_dataset(
-      winner_loser, community_taxonomy_species, try_trait_outputs$summary,
-      functional_groups, experiments
-    )
-  ),
-  tar_target(
-    analysis_data,
-    join_experiment_climate(descriptive_analysis_data, experiment_climate) |>
-      transform_model_predictors()
-  ),
-  tar_target(climate_context_result, reviewed_five_climate_contexts(analysis_data)),
-  tar_target(climate_context_experiments, climate_context_result$assigned),
   tar_target(
     climate_context_gate,
     validate_five_climate_contexts(climate_context_result),

@@ -21,18 +21,6 @@ sha256_file <- function(path) {
   strsplit(output[[1]], "  ", fixed = TRUE)[[1]][[1]]
 }
 
-#' Sha256 Serialized Object.
-#'
-#' @param object A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param serialization_version A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
-sha256_serialized_object <- function(object, serialization_version = 3L) {
-  temporary_file <- tempfile(fileext = ".serialized")
-  on.exit(unlink(temporary_file), add = TRUE)
-  writeBin(serialize(object, NULL, version = serialization_version), temporary_file)
-  sha256_file(temporary_file)
-}
-
 #' Git Provenance Value.
 #'
 #' @param root A project-relative or absolute filesystem path.
@@ -166,12 +154,12 @@ known_figure_producer <- function(path) {
       TRUE ~ "R/figures/consistency.R"
     )
   }
-  historical_script_map <- c(
+  additional_script_map <- c(
     "repeated_species_consistency.pdf" = "R/figures/consistency.R",
     "temporal_transition_matrices.pdf" = "R/figures/temporal.R"
   )
-  if (filename %in% names(historical_script_map) && is.na(script)) {
-    script <- unname(historical_script_map[[filename]])
+  if (filename %in% names(additional_script_map) && is.na(script)) {
+    script <- unname(additional_script_map[[filename]])
   }
 
   if (grepl("^figures/manuscript/fig04_species_minmax_classification[.]pdf$", path)) {
@@ -601,42 +589,6 @@ build_scientific_source_inventory <- function(paths, root = getwd()) {
     sha256 = vapply(normalized, sha256_file, character(1)),
     stringsAsFactors = FALSE
   )
-}
-
-#' Verify Reference Artifacts.
-#'
-#' @param root A project-relative or absolute filesystem path.
-#' @param references A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param config_path A project-relative or absolute filesystem path.
-#' @return A structured validation result; fail-closed checks raise an error when an invariant is violated.
-verify_reference_artifacts <- function(
-    root = getwd(), references = NULL,
-    config_path = "config/reference_artifacts.csv") {
-  if (is.null(references)) {
-    references <- read.csv(
-      file.path(root, config_path), stringsAsFactors = FALSE,
-      check.names = FALSE
-    )
-  }
-  installed_phylo <- requireNamespace("V.PhyloMaker2", quietly = TRUE)
-
-  observed <- vapply(seq_len(nrow(references)), function(index) {
-    method <- references$checksum_method[[index]]
-    artifact <- references$artifact[[index]]
-    path <- references$path[[index]]
-    if (identical(method, "file_sha256")) {
-      sha256_file(file.path(root, path))
-    } else if (identical(method, "R_serialize_v3_sha256") && installed_phylo) {
-      object_name <- sub("^V.PhyloMaker2::", "", path)
-      sha256_serialized_object(getExportedValue("V.PhyloMaker2", object_name), 3L)
-    } else {
-      NA_character_
-    }
-  }, character(1))
-
-  references$observed_sha256 <- observed
-  references$hash_matches <- references$expected_sha256 == references$observed_sha256
-  references
 }
 
 #' Phylogeny Package Provenance.

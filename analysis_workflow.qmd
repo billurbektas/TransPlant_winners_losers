@@ -661,17 +661,17 @@ that round trip visible.
 
 ```{r}
 #| description: Stored winner-loser table used to construct resident effects.
-resident_winner_loser_data <- read_reference_csv(winner_loser_file)
+resident_winner_loser_data <- read_pipeline_csv(winner_loser_file)
 ```
 
 ```{r}
 #| description: Stored ecological analysis table used to construct resident effects.
-resident_analysis_dataset <- read_reference_csv(analysis_data_file)
+resident_analysis_dataset <- read_pipeline_csv(analysis_data_file)
 ```
 
 ```{r}
 #| description: Stored experiment climate-context table used to construct resident effects.
-resident_climate_context_data <- read_reference_csv(
+resident_climate_context_data <- read_pipeline_csv(
   climate_context_experiments_file
 )
 ```
@@ -743,7 +743,7 @@ analysis_settings <- resident_analysis_spec(config$root)
 
 ```{r}
 #| description: Validation of resident effects, species, experiments, and sampling-variance order.
-resident_scope <- validate_resident_scope_artifacts(
+resident_scope <- validate_resident_model_scope(
   resident_auc_data,
   resident_sampling_variance_matrix,
   analysis_settings
@@ -892,7 +892,7 @@ species_classification <- species_context_bundle$classification
 
 ```{r}
 #| description: Counts and proportions of the three species context classes.
-species_classification_summary <- summarize_reference_classification(
+species_classification_summary <- summarize_context_classification(
   species_classification,
   "Species"
 )
@@ -912,7 +912,7 @@ family_community_input <- readRDS(community_file)
 
 ```{r}
 #| description: Stored experiment definitions used to reconstruct family cover.
-family_experiments_input <- read_reference_csv(experiments_file)
+family_experiments_input <- read_pipeline_csv(experiments_file)
 ```
 
 ```{r}
@@ -1007,7 +1007,7 @@ from the reviewed tree, patristic distances, and the first three PCoA axes.
 
 ```{r}
 #| description: Stored TRY species summaries read at the model-input boundary.
-trait_summary_input <- read_reference_csv(try_summary_file)
+trait_summary_input <- read_pipeline_csv(try_summary_file)
 ```
 
 ```{r}
@@ -1059,7 +1059,7 @@ trait_scaling <- dplyr::bind_rows(
 
 ```{r}
 #| description: Stored functional-group assignments read at the model-input boundary.
-functional_groups_input <- read_reference_csv(functional_groups_file)
+functional_groups_input <- read_pipeline_csv(functional_groups_file)
 ```
 
 ```{r}
@@ -1081,7 +1081,7 @@ functional_auc_data <- prepare_functional_predictors(
 
 ```{r}
 #| description: Reviewed phylogenetic placement decisions read as character data.
-phylogeny_placement_decisions <- read_reference_csv(
+phylogeny_placement_decisions <- read_pipeline_csv(
   phylogeny_placement_decisions_file
 )
 ```
@@ -1631,12 +1631,6 @@ approved clean rebuild; they do not calculate models while rendering this
 document.
 
 ```{r}
-#| description: Static audit proving that active target names and commands contain no historical dependency.
-historical_dependency_disconnection <-
-  audit_historical_dependency_disconnection(config$root)
-```
-
-```{r}
 #| eval: true
 tar_read(figure01_winners_losers)
 ```
@@ -1659,11 +1653,6 @@ tar_read(appendix_model_predictive_performance)
 ```{r}
 #| eval: true
 knitr::kable(tar_read(release_validation))
-```
-
-```{r}
-#| eval: true
-knitr::kable(tar_read(historical_dependency_disconnection))
 ```
 
 ## Target manifest
