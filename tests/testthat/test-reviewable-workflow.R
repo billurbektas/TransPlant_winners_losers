@@ -70,6 +70,31 @@ testthat::test_that("the manifest contains the review workflow and no history", 
   ))
 })
 
+testthat::test_that("community audit counts experiments before IDs are created", {
+  previous_directory <- setwd(PROJECT_ROOT)
+  on.exit(setwd(previous_directory), add = TRUE)
+  manifest <- targets::tar_manifest(callr_function = NULL)
+  command <- manifest$command[manifest$name == "analysis_data_audit"]
+
+  community <- tibble::tibble(
+    region = c("A", "A", "A", "B"),
+    origin_site = c("x", "x", "x", "m"),
+    destination_site = c("y", "y", "x", "n"),
+    treatment = c("Warm", "Warm", "Control", "Warm"),
+    species = c("a", "a", "a", "b")
+  )
+  analysis_community <- community[1:3, , drop = FALSE]
+  descriptive_analysis_data <- tibble::tibble(
+    species = "a", experiment_id = "A::x::y"
+  )
+  analysis_data <- descriptive_analysis_data
+
+  testthat::expect_silent(
+    audit <- eval(parse(text = command), envir = environment())
+  )
+  testthat::expect_identical(audit$experiments, c(2L, 1L, 1L, 1L))
+})
+
 testthat::test_that("regrouped results keep their separate scientific exports", {
   previous_directory <- setwd(PROJECT_ROOT)
   on.exit(setwd(previous_directory), add = TRUE)

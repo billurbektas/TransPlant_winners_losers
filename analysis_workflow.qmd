@@ -555,6 +555,9 @@ climate_context_result <- reviewed_five_climate_contexts(analysis_data)
 
 This compact audit makes the main changes in data size visible without making
 every filter or join a separate target.
+The community tables precede creation of `experiment_id`, so their experiment
+counts use the same distinct warmed region–origin–destination combinations as
+the experiment table.
 
 ```{r}
 #| description: Row, species, and experiment counts at the principal raw-to-analysis boundaries.
@@ -564,14 +567,30 @@ analysis_data_audit <- dplyr::bind_rows(
     record_type = "plot-year observation",
     rows = nrow(community),
     species = dplyr::n_distinct(community$species),
-    experiments = dplyr::n_distinct(community$experiment_id)
+    experiments = community |>
+      dplyr::filter(
+        .data$treatment == "Warm",
+        .data$origin_site != .data$destination_site
+      ) |>
+      dplyr::distinct(
+        .data$region, .data$origin_site, .data$destination_site
+      ) |>
+      nrow()
   ),
   tibble::tibble(
     stage = "species-level taxonomy retained",
     record_type = "plot-year observation",
     rows = nrow(analysis_community),
     species = dplyr::n_distinct(analysis_community$species),
-    experiments = dplyr::n_distinct(analysis_community$experiment_id)
+    experiments = analysis_community |>
+      dplyr::filter(
+        .data$treatment == "Warm",
+        .data$origin_site != .data$destination_site
+      ) |>
+      dplyr::distinct(
+        .data$region, .data$origin_site, .data$destination_site
+      ) |>
+      nrow()
   ),
   tibble::tibble(
     stage = "winner-loser data with ecological information",
