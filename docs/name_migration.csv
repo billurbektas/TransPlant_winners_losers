@@ -423,7 +423,7 @@
 "target","climate_context_input","resident_climate_context_data","ecologist-first workflow","implemented","stored climate-context table used at the resident-model boundary"
 "target","predictor_formula_registry","literal formula targets in analysis_workflow.qmd","ecologist-first workflow","implemented","fitted formulas are visible beside their model calls"
 "report","reports/data_foundation.qmd through reports/release_validation.qmd","analysis_workflow.qmd","ecologist-first workflow","implemented","seven report sources were retired after content was mapped into the reviewer-facing workflow"
-"report","docs/model_analysis_review.R","analysis_workflow.qmd sections 3 through 5","ecologist-first workflow","migration review","the completed review file remains on disk until its content migration is approved"
+"report","docs/model_analysis_review.R","analysis_workflow.qmd sections 3 through 5","ecologist-first workflow","preserved review copy","the user-edited review file remains on disk unchanged as a review reference"
 "function","read_reference_csv","read_pipeline_csv","history retirement","implemented","same CSV parsing behavior moved to active infrastructure"
 "function","summarize_reference_classification","summarize_context_classification","history retirement","implemented","same classification summary moved to active model module"
 "function","validate_resident_scope_artifacts","validate_resident_model_scope","history retirement","implemented","same resident-scope checks moved to active validation"
@@ -443,3 +443,4 @@
 "target","resident_phylogeny_candidate","resident_phylogeny_rebuild$tree","scientific regrouping","implemented","tree remains in the phylogeny result and both tree exports"
 "target","pcoa_eigen_summary","resident_pcoa_candidate$eigen_summary","scientific regrouping","implemented","eigenvalues remain in the PCoA result and CSV export"
 "target","phylogenetic_distance","resident_pcoa_candidate$distance","scientific regrouping","implemented","distances remain in the PCoA result and RDS export"
+"artifact","reports/rendered/current_model_results.txt","output/reports/current_model_results.txt","pre-rebuild cleanup","implemented","same generated text report; moved out of retired reports directory"

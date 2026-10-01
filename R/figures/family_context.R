@@ -1,8 +1,8 @@
 # Module: R/figures/family_context
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Prepare family-level climate predictions and callout plots.
+# Inputs: Family fit, species membership, and climate grids.
+# Outputs: Family context figure data and plot.
+# Side effects: None.
 
 # Figure-only helpers for the family-resolution analogue of manuscript Figure 4.
 # These functions consume existing current exports and never fit a model.

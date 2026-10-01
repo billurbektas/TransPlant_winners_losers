@@ -1,8 +1,8 @@
 # Module: R/infrastructure/file_operations
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Write text artifacts atomically.
+# Inputs: Text content and destination path.
+# Outputs: Completed text file path.
+# Side effects: Writes a temporary file and replaces the destination.
 
 # Explicit file-export helpers used only by file targets.
 

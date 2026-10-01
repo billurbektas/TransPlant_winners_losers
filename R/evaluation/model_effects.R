@@ -1,8 +1,8 @@
 # Module: R/evaluation/model_effects
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Summarize fixed coefficients and random-component uncertainty for the appendix.
+# Inputs: Fitted resident and predictor models plus profile settings.
+# Outputs: Model-effect tables, profile results, and figure data.
+# Side effects: Profile calculations fit evaluation models; no files written here.
 
 # Fixed-effect coefficients and species-level random-effect heterogeneity for
 # the seven registered resident and predictor models.

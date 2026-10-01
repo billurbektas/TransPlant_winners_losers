@@ -1,8 +1,8 @@
 # Module: R/responses/temporal
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Summarize changes in winner/loser categories and strengths over time.
+# Inputs: Repeated species observations and response categories.
+# Outputs: Temporal transitions, persistence, agreement, and strength analyses.
+# Side effects: May fit evaluation models; writes no files.
 
 #' Temporal Transitions.
 #'

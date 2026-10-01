@@ -1,8 +1,8 @@
 # Module: R/models/phylogeny
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Reconstruct resident phylogeny and derive PEV predictor coordinates.
+# Inputs: Reviewed placement decisions and pinned V.PhyloMaker2 reference data.
+# Outputs: Tree, patristic distances, PCoA axes, and placement checks.
+# Side effects: Computes a tree and ordination; writes no files.
 
 #' Read the positive phylogenetic variation represented by PEV1–PEV3
 #'

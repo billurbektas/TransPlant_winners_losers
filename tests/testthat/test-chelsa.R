@@ -30,6 +30,20 @@ test_that("a valid monthly checkpoint is reused without network access", {
   write_rds_atomic(checkpoint, path)
   expect_true(valid_chelsa_checkpoint(path, sites, "tas", 2012, 7))
   expect_identical(checkpoint_chelsa_month(sites, "tas", 2012, 7, cache), path)
+  expect_identical(checkpoint_chelsa_month(sites, "tas", 2012, 7, cache,
+                                           offline = TRUE), path)
+  changed_site <- dplyr::mutate(sites, longitude = 8.5)
+  expect_false(valid_chelsa_checkpoint(path, changed_site, "tas", 2012, 7))
+  expect_error(
+    checkpoint_chelsa_month(changed_site, "tas", 2012, 7, cache, offline = TRUE),
+    "2012-07-tas"
+  )
+  expect_true(file.exists(path))
+  expect_error(
+    checkpoint_chelsa_month(sites, "pr", 2012, 7, cache, offline = TRUE),
+    "2012-07-pr"
+  )
+  expect_false(file.exists(chelsa_checkpoint_path(cache, "pr", 2012, 7)))
 })
 
 test_that("CHELSA URLs and coordinate gates are deterministic", {

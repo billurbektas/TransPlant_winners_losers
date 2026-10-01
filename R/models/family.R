@@ -1,8 +1,8 @@
 # Module: R/models/family
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Build family-level AUC contrasts, fit the family model, and classify context.
+# Inputs: Community/AUC data, family overrides, climate covariates, sampling variances.
+# Outputs: Family effects, model fit, classification, and support tables.
+# Side effects: Model fitting only; no file writes.
 
 # Family-resolution validation and summaries. Plot-cover aggregation remains
 # distinct from species-effect averaging by construction.

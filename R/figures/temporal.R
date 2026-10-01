@@ -1,8 +1,8 @@
 # Module: R/figures/temporal
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Plot temporal winner/loser transitions and strength changes.
+# Inputs: Temporal response categories and effect estimates.
+# Outputs: Temporal flow, transition, and correlation figures.
+# Side effects: None.
 
 # Canonical temporal figure functions.
 # Each function receives explicit scientific objects and an explicit output path.

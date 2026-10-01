@@ -1,8 +1,8 @@
 # Module: R/models/meta_regression
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Fit and summarize multilevel climate and predictor meta-regressions.
+# Inputs: Explicit fixed formulas, random structures, sampling variances, and clusters.
+# Outputs: ML/REML fits, robust inference, diagnostics, and model summaries.
+# Side effects: Fits models but writes no files.
 
 # Model helpers for the resident-species meta-regressions.
 

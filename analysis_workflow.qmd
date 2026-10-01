@@ -246,7 +246,11 @@ analysis_community <- filter_community_to_reviewed_taxa(
 
 TRY records are restricted to the study species, harmonised through the same
 taxonomy review, screened with the registered climate and range rules, and
-then summarised to species-level trait values.
+then summarised to species-level trait values. TRY observations do not arrive
+with the climate codes used here. Their coordinates are classified by
+`tidyTRY::extract_climate_zones()` using the pinned package's bundled
+Köppen–Geiger raster; the workflow verifies that raster's SHA-256 before
+filtering. The former local raster is not an analysis input.
 
 ```{r}
 #| description: TRY variable dictionary used to select and name the three focal traits.
@@ -294,11 +298,12 @@ try_taxonomy <- validate_taxonomy_review(try_taxonomy_review, "TRY taxonomy")
 ```
 
 ```{r}
-#| description: TRY observations after registered climate exclusions and range checks.
+#| description: TRY observations classified with tidyTRY's verified bundled raster and filtered by registered climate codes.
 try_climate_filtered <- filter_try_climate(
   try_cleaned,
   try_taxonomy,
-  config$excluded_try_climates
+  config$excluded_try_climates,
+  config$try_raster_sha256
 )
 ```
 
@@ -353,8 +358,11 @@ functional_groups <- derive_functional_groups(
 )
 ```
 
-The CHELSA jobs remain dynamically branched because each year-variable file is
-downloaded or read from cache independently. The scientific sequence—check
+The CHELSA jobs remain dynamically branched because each month is
+downloaded or read from cache independently. Set
+`TRANSPLANT_CHELSA_OFFLINE=true` for the approved clean rebuild: all 336
+required monthly checkpoints must then match the current site coordinates,
+or the affected month stops without a download. The scientific sequence—check
 coordinates, retrieve monthly climate, then summarise by site and experiment—
 is kept visible here.
 
@@ -396,7 +404,8 @@ chelsa_monthly_file <- run_chelsa_job(
   chelsa_site_coordinates,
   config$chelsa_cache,
   config$chelsa_retries,
-  config$chelsa_backoff_seconds
+  config$chelsa_backoff_seconds,
+  offline = config$chelsa_offline
 )
 ```
 

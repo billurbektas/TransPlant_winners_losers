@@ -1,8 +1,8 @@
 # Module: R/figures/render_family_context
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Render the family-context appendix figure from exports.
+# Inputs: Family model summaries and prediction surfaces.
+# Outputs: Registered family appendix figure files.
+# Side effects: Writes figure files.
 
 # Render the family-context appendix
 #

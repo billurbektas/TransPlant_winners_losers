@@ -1,8 +1,8 @@
 # Module: R/figures/climate
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Prepare and plot experiment climate contexts.
+# Inputs: Experiment coordinates, climate summaries, and treatment data.
+# Outputs: Climate-gradient maps and response figures.
+# Side effects: None.
 
 # Current destination-climate display figure functions.
 

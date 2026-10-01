@@ -1,8 +1,8 @@
 # Module: R/data/analysis_dataset
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Join reviewed ecological covariates to response data and scale model predictors.
+# Inputs: Reviewed taxonomy, traits, functional groups, experiments, and climate.
+# Outputs: Analysis table and validated climate-context fields.
+# Side effects: None.
 
 # Analysis-dataset helpers extracted from the reviewed workflow.
 # Functions are object-in/object-out and contain no output-directory discovery.

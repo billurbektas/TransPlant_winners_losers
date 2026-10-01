@@ -1,21 +1,27 @@
 # Module: config/analysis
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Declare input paths, fixed scientific settings, and resident-model exclusions.
+# Inputs: Project root and the optional CHELSA runtime environment settings.
+# Outputs: Analysis configuration and explicit excluded-species names.
+# Side effects: None.
 
-#' Transplant Config.
+#' Paths and settings for the TransPlant analysis.
 #'
-#' @param root A project-relative or absolute filesystem path.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
+#' @param root Project directory containing data/, config/, and output/.
+#' @return A list of input paths, ecological thresholds, climate years, and
+#'   runtime settings. `chelsa_offline` is TRUE only when the environment
+#'   variable `TRANSPLANT_CHELSA_OFFLINE` is set to `true` or `1`.
 transplant_config <- function(root = here::here()) {
+  offline_setting <- tolower(Sys.getenv("TRANSPLANT_CHELSA_OFFLINE", "false"))
+  if (!offline_setting %in% c("true", "false", "1", "0")) {
+    stop("TRANSPLANT_CHELSA_OFFLINE must be true, false, 1, or 0.", call. = FALSE)
+  }
   list(
     root = root,
     input_rdata = file.path(root, "data", "TransPlantNetwork_060824.RData"),
     try_file = file.path(root, "data", "try_47163.txt"),
     chelsa_cache = file.path(root, "data", "cache", "chelsa_monthly"),
     output_dir = file.path(root, "output"),
-    plot_dir = file.path(root, "plot"), # reserved output location; currently unused
+    try_raster_sha256 = "59b749fe6711e72c720ff903044eb0efb4373524ee434740ed7384a0284c155b",
     taxonomy_min_score = 0.90,
     error_risk_max = 4,
     excluded_try_climates = c("Af", "Am", "Aw", "BWh", "BWk", "BSh", "BSk"),
@@ -26,6 +32,7 @@ transplant_config <- function(root = here::here()) {
     chelsa_workers = as.integer(Sys.getenv("TRANSPLANT_CHELSA_WORKERS", "2")),
     chelsa_retries = as.integer(Sys.getenv("TRANSPLANT_CHELSA_RETRIES", "4")),
     chelsa_backoff_seconds = as.numeric(Sys.getenv("TRANSPLANT_CHELSA_BACKOFF", "2")),
+    chelsa_offline = offline_setting %in% c("true", "1"),
     seed = 20260824L
   )
 }

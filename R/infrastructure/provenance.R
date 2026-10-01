@@ -1,8 +1,8 @@
 # Module: R/infrastructure/provenance
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Record source, package, figure, and release provenance.
+# Inputs: Source paths, Git state, registered figures, and retained originals.
+# Outputs: Checksums, manifests, provenance and retained-figure checks.
+# Side effects: Reads files and Git metadata; explicit copy helper writes retained copies.
 
 # Provenance helpers for the stage-based targets workflow.
 
@@ -580,7 +580,7 @@ build_scientific_source_inventory <- function(paths, root = getwd()) {
         "active_function",
       startsWith(relative, "R/targets/") ~ "target_stage",
       startsWith(relative, "config/") ~ "configuration_or_decision_ledger",
-      startsWith(relative, "reports/") ~ "report_source",
+      relative == "analysis_workflow.qmd" ~ "analysis_and_report_source",
       startsWith(relative, "scripts/") ~ "command_line_entry_or_maintenance",
       startsWith(relative, "tests/") ~ "test_or_regression_fixture",
       TRUE ~ "project_documentation_or_environment"

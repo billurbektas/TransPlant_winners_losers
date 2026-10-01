@@ -1,8 +1,8 @@
 # Module: R/evaluation/heterogeneity
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Compare fitted resident-species response variation across models.
+# Inputs: Climate-only and full REML variance components.
+# Outputs: Heterogeneity components and full-minus-climate summaries.
+# Side effects: None.
 
 # Response-scale species heterogeneity summaries for model synthesis.
 

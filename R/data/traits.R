@@ -1,8 +1,8 @@
 # Module: R/data/traits
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Review TRY taxonomy and prepare focal trait observations.
+# Inputs: TRY export, study species, trait dictionary, taxonomy review, and climate exclusions.
+# Outputs: Audited observations and species-level LDMC, LMA, and height summaries.
+# Side effects: The export reader reads the licensed TRY file; these functions write no files.
 
 #' Taxonomy Response.
 #'
@@ -95,8 +95,9 @@ try_stage_counts <- function(data, stage) {
 #' @param max_error_risk A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param chunk_size A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @details Reads the external TRY export in chunks, retains requested species
-#' and registered trait names, applies the error-risk threshold and reviewed
-#' taxonomy, and preserves unit information for the later unit/range gates. It
+#' and registered trait names, applies the error-risk threshold, and preserves
+#' unit information for later unit/range checks. Taxonomy review is a separate
+#' subsequent step; this function does not apply reviewed names. It
 #' writes no files. Missing exports or malformed dictionary fields fail closed.
 #' @return An R object described by the function name; its structure is validated before later stages use it.
 clean_try_export <- function(try_file, species_names, dictionary, max_error_risk = 4L,
@@ -167,13 +168,25 @@ join_try_taxonomy <- function(quantitative, try_taxonomy) {
     dplyr::select(-accepted_name_reviewed, -accepted_from_species)
 }
 
-#' Filter Try Climate.
+#' Classify TRY coordinates using tidyTRY's bundled Köppen–Geiger raster.
 #'
-#' @param cleaned_try A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param try_taxonomy A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @param excluded_climates A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
-filter_try_climate <- function(cleaned_try, try_taxonomy, excluded_climates) {
+#' @param cleaned_try Result of `clean_try_export()`, including coordinate and
+#'   quantitative observation tables linked by ObservationID.
+#' @param try_taxonomy Reviewed TRY species-name matches.
+#' @param excluded_climates Köppen–Geiger codes excluded by the analysis plan.
+#' @param expected_raster_sha256 Registered SHA-256 of tidyTRY's bundled raster.
+#' @return Observations with reviewed names and retained climate codes, the
+#'   coordinate classification, and counts before and after filtering.
+#' @details Fails before filtering if the installed tidyTRY raster differs from
+#'   the registered file. Climate codes come from the raster, not the TRY export
+#'   and not the retired local data/koppen_geiger_0p1.tif file.
+filter_try_climate <- function(cleaned_try, try_taxonomy, excluded_climates,
+                               expected_raster_sha256) {
+  raster <- system.file("extdata", "koppen_geiger_0p1.tif", package = "tidyTRY")
+  if (!nzchar(raster) || !identical(sha256_file(raster), expected_raster_sha256)) {
+    stop("The installed tidyTRY Köppen–Geiger raster does not match the registered SHA-256.",
+         call. = FALSE)
+  }
   climate <- tidyTRY::extract_climate_zones(cleaned_try$coordinates)
   climate_column <- intersect(c("climate_code", "Climate_code"), names(climate))[[1]]
   climate <- climate |>

@@ -1,8 +1,8 @@
 # Module: R/targets/definitions/data
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Declare supporting file and data targets not defined in the QMD.
+# Inputs: Configuration, current inputs, and QMD scientific targets.
+# Outputs: targets definitions for scientific data and audits.
+# Side effects: None when sourced; target commands write declared artifacts during builds.
 
 # File exports and support targets for community, climate, and response data.
 #' Data Target Definitions.

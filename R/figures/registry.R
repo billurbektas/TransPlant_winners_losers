@@ -1,8 +1,8 @@
 # Module: R/figures/registry
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Dispatch registered export-based publication figures.
+# Inputs: Figure key and existing target exports.
+# Outputs: PDF/PNG manuscript figures.
+# Side effects: Renderer calls write registered figure files.
 
 # Semantic registry shared by the publication graph and figure-only CLI.
 

@@ -1,8 +1,8 @@
 # Module: R/data/climate_interfaces
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Check completeness and relationships in experiment climate outputs.
+# Inputs: Site and experiment climate tables.
+# Outputs: Validated climate interface.
+# Side effects: None.
 
 # Narrow validation interface for experiment-level climate targets.
 

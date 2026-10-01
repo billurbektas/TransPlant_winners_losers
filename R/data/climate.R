@@ -1,8 +1,8 @@
 # Module: R/data/climate
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Validate sites and derive CHELSA site and experiment climate.
+# Inputs: Site coordinates, monthly checkpoints or CHELSA service, and experiment dates.
+# Outputs: Validated monthly, annual, summer, and experiment climate tables.
+# Side effects: Online mode may download CHELSA months and write cache or missing-month reports; offline mode only reads.
 
 #' Validate Site Coordinates.
 #'
@@ -142,14 +142,15 @@ chelsa_checkpoint_path <- function(cache_dir, variable, year, month) {
   )
 }
 
-#' Valid Chelsa Checkpoint.
+#' Check that a saved CHELSA month matches the current sites and coordinates.
 #'
 #' @param path A project-relative or absolute filesystem path.
 #' @param sites A data frame whose required columns are checked before use.
 #' @param variable A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param year A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param month A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
+#' @return TRUE only for a readable month with one finite value per current
+#'   site, matching site keys and coordinates; otherwise FALSE.
 valid_chelsa_checkpoint <- function(path, sites, variable, year, month) {
   if (!file.exists(path)) return(FALSE)
   value <- tryCatch(readRDS(path), error = function(e) NULL)
@@ -159,13 +160,23 @@ valid_chelsa_checkpoint <- function(path, sites, variable, year, month) {
     "days_in_month", "unit", "value"
   )
   if (!all(needed %in% names(value)) || nrow(value) != nrow(sites)) return(FALSE)
-  identical(sort(value$site_key), sort(sites$site_key)) &&
+  if (!identical(sort(value$site_key), sort(sites$site_key))) return(FALSE)
+  site_order <- match(sites$site_key, value$site_key)
+  if (anyNA(site_order)) return(FALSE)
+  same_coordinates <- isTRUE(all.equal(
+    as.numeric(value$longitude[site_order]), as.numeric(sites$longitude),
+    tolerance = 0
+  )) && isTRUE(all.equal(
+    as.numeric(value$latitude[site_order]), as.numeric(sites$latitude),
+    tolerance = 0
+  ))
+  isTRUE(same_coordinates &&
     all(value$variable == variable) &&
     all(value$year == as.integer(year)) &&
     all(value$month == as.integer(month)) &&
     all(value$days_in_month %in% 28:31) &&
     dplyr::n_distinct(value$site_key) == nrow(sites) &&
-    all(is.finite(value$value))
+    all(is.finite(value$value)))
 }
 
 #' Extract Chelsa Month.
@@ -199,7 +210,7 @@ extract_chelsa_month <- function(sites, variable, year, month) {
   )
 }
 
-#' Checkpoint Chelsa Month.
+#' Reuse or download one CHELSA monthly checkpoint.
 #'
 #' @param sites A data frame whose required columns are checked before use.
 #' @param variable A value supplied by the calling workflow; admissible values are checked in the function body.
@@ -208,11 +219,21 @@ extract_chelsa_month <- function(sites, variable, year, month) {
 #' @param cache_dir A project-relative or absolute filesystem path.
 #' @param retries A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param backoff_seconds A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return The path or paths written by the declared side effect.
+#' @param offline If TRUE, reject a missing or invalid checkpoint without
+#'   modifying the cache or contacting CHELSA.
+#' @return Path to a verified RDS checkpoint, or NA with download-error
+#'   attributes after bounded retries in online mode.
 checkpoint_chelsa_month <- function(sites, variable, year, month, cache_dir, retries = 4L,
-                                    backoff_seconds = 2) {
+                                    backoff_seconds = 2, offline = FALSE) {
   path <- chelsa_checkpoint_path(cache_dir, variable, year, month)
   if (valid_chelsa_checkpoint(path, sites, variable, year, month)) return(path)
+  if (isTRUE(offline)) {
+    stop(
+      "Offline CHELSA checkpoint missing or invalid: ",
+      sprintf("%04d-%02d-%s", as.integer(year), as.integer(month), variable),
+      " (", path, ")", call. = FALSE
+    )
+  }
   if (file.exists(path)) {
     quarantine <- paste0(path, ".invalid-", format(Sys.time(), "%Y%m%d%H%M%S"))
     file.rename(path, quarantine)
@@ -236,7 +257,7 @@ checkpoint_chelsa_month <- function(sites, variable, year, month, cache_dir, ret
   structure(NA_character_, url = chelsa_monthly_url(variable, year, month), error = last_error)
 }
 
-#' Run Chelsa Job.
+#' Verify or retrieve one CHELSA month for a pipeline branch.
 #'
 #' @param job A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param sites A data frame whose required columns are checked before use.
@@ -244,16 +265,21 @@ checkpoint_chelsa_month <- function(sites, variable, year, month, cache_dir, ret
 #' @param retries A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param backoff_seconds A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param missing_report_dir A project-relative or absolute filesystem path.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
+#' @param offline Reuse only validated monthly cache files when TRUE; fail with
+#'   the affected year-month-variable and do not download.
+#' @return Path to the validated monthly RDS file. Online download failure
+#'   writes a missing-month report and stops; offline failure writes nothing.
 run_chelsa_job <- function(job, sites, cache_dir, retries = 4L, backoff_seconds = 2,
-                           missing_report_dir = file.path(dirname(cache_dir), "missing_monthly")) {
+                           missing_report_dir = file.path(dirname(cache_dir), "missing_monthly"),
+                           offline = FALSE) {
   sites <- validate_site_coordinates(sites)
   year <- job$year[[1]]
   month <- job$month[[1]]
   variable <- job$variable[[1]]
   report_path <- file.path(missing_report_dir, sprintf("%04d-%02d-%s.csv", year, month, variable))
   checkpoint <- checkpoint_chelsa_month(
-    sites, variable, year, month, cache_dir, retries, backoff_seconds
+    sites, variable, year, month, cache_dir, retries, backoff_seconds,
+    offline = offline
   )
   if (is.na(checkpoint[[1]])) {
     report <- tibble::tibble(
@@ -266,7 +292,7 @@ run_chelsa_job <- function(job, sites, cache_dir, retries = 4L, backoff_seconds 
     write_csv_atomic(report, report_path)
     stop("CHELSA branch failed after bounded retries; see ", report_path, call. = FALSE)
   }
-  if (file.exists(report_path)) unlink(report_path)
+  if (!isTRUE(offline) && file.exists(report_path)) unlink(report_path)
   checkpoint
 }
 

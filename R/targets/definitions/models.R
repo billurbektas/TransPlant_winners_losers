@@ -1,8 +1,8 @@
 # Module: R/targets/definitions/models
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Declare supporting fitted-model and evaluation targets.
+# Inputs: QMD model specifications and prepared scientific datasets.
+# Outputs: targets definitions for model summaries and diagnostics.
+# Side effects: None when sourced; target commands fit models during builds.
 
 #' Model Target Definitions.
 #'

@@ -1,8 +1,8 @@
 # Module: R/validation/release_summary
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Assemble current scientific release checks and readable model report.
+# Inputs: Validated models, classifications, comparisons, and figures.
+# Outputs: Release-validation result and current model text.
+# Side effects: None; the publication target writes the returned text.
 
 # Human-readable current model report assembled only from active scientific
 # objects. Frozen reports and transition fixtures are not inputs.

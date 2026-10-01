@@ -1,8 +1,8 @@
 # Module: R/figures/species_context
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Prepare species and functional-group climate-response callouts.
+# Inputs: Resident climate model and supported species climates.
+# Outputs: Classification panels, support summaries, and plots.
+# Side effects: Explicit writer helpers export figures and example tables.
 
 # Plotting data helpers. Model fitting is deliberately absent from this file.
 

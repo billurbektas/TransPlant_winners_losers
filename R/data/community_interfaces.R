@@ -1,8 +1,8 @@
 # Module: R/data/community_interfaces
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Validate community and taxonomy tables before analysis joins.
+# Inputs: Standardized community and reviewed taxonomy tables.
+# Outputs: Fail-closed interface checks.
+# Side effects: None.
 
 # Focused validation functions for community and taxonomy targets.
 

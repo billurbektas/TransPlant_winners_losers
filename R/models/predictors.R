@@ -1,8 +1,8 @@
 # Module: R/models/predictors
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Prepare six ecological predictors and their climate/full model comparisons.
+# Inputs: Resident effects, traits, functional groups, PEV axes, and model formulas.
+# Outputs: Matched predictor datasets, fits, comparisons, and checks.
+# Side effects: Fits models but writes no files.
 
 # Predictor-specific data preparation and the validated model specifications.
 

@@ -1,8 +1,8 @@
 # Module: R/targets/definitions/publication
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Declare figure, table, report, and release targets.
+# Inputs: Model results, figure registry, and validated release inputs.
+# Outputs: targets definitions for publication artifacts and checks.
+# Side effects: None when sourced; target commands write declared outputs during builds.
 
 #' Publication Target Definitions.
 #'
@@ -916,11 +916,12 @@ publication_target_definitions <- function() {
       write_text_atomic(
         current_model_report,
         file.path(
-          config$root, "reports", "rendered",
+          config$root, "output", "reports",
           "current_model_results.txt"
         )
       ),
-      format = "file"
+      format = "file",
+      description = "Current model results written as a text report in output/reports"
     ),
     tar_target(
       release_validation,

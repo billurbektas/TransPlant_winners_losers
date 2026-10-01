@@ -1,8 +1,8 @@
 # Module: R/figures/render_climate_response
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Render the climate-response publication figure from exports.
+# Inputs: Climate-model tables and prediction surfaces.
+# Outputs: Registered climate-response figure files.
+# Side effects: Writes figure files.
 
 # Render the resident climate-response surface figure
 #

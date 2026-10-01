@@ -1,8 +1,8 @@
 # Module: R/data/trait_interfaces
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Join species-level trait summaries and validate model inputs.
+# Inputs: Reviewed TRY trait summaries and study species.
+# Outputs: Trait-by-species model table and validation result.
+# Side effects: None.
 
 # Narrow validation interface for audited species-level traits.
 

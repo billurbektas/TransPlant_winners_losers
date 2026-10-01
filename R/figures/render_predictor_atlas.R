@@ -1,8 +1,8 @@
 # Module: R/figures/render_predictor_atlas
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Render the six-predictor response atlas from exports.
+# Inputs: Predictor estimates and fitted response surfaces.
+# Outputs: Registered predictor atlas files.
+# Side effects: Writes figure files.
 
 # Render the predictor-response atlas
 #

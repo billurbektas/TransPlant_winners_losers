@@ -1,8 +1,8 @@
 # Module: R/figures/render_phylogeny_summary
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Render the phylogeny and PCoA appendix summary.
+# Inputs: Reconstructed tree, distances, and PCoA summaries.
+# Outputs: Registered phylogeny summary files.
+# Side effects: Writes figure files.
 
 # Render the phylogenetic-coordinate summary appendix
 #

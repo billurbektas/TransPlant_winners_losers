@@ -1,8 +1,8 @@
 # Module: R/responses/auc
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Calculate plot AUC and species warming-minus-origin contrasts.
+# Inputs: Community cover, experiments, durations, and plot covariates.
+# Outputs: Plot AUC, effect estimates, SEs, and winner/loser labels.
+# Side effects: Fits experiment-level AUC models; writes no files.
 
 #' Experiment Community.
 #'
@@ -31,11 +31,11 @@ experiment_community <- function(community, experiment) {
     )
 }
 
-#' Apply Legacy Observation Filter.
+#' Retain species observed at least twice within each experiment treatment.
 #'
-#' @param data A data frame whose required columns are checked before use.
-#' @param minimum_observations A value supplied by the calling workflow; admissible values are checked in the function body.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
+#' @param data One experiment's community observations with `ODT` and `species`.
+#' @param minimum_observations Minimum rows per treatment-by-species group.
+#' @return The same columns, restricted to groups meeting that count.
 filter_minimum_plot_observations <- function(data, minimum_observations = 2L) {
   data |>
     dplyr::group_by(.data$ODT, .data$species) |>
@@ -148,7 +148,9 @@ auc_by_plot <- function(completed, horizon, experiment_id) {
 #' reviewed inclusion decision. The fixed species pools and trapezoidal AUC
 #' definitions are scientific invariants; the function returns plot AUC and
 #' pool objects without changing the registered horizons.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
+#' @return A list with `auc` (plot-level trapezoidal AUC for every eligible
+#'   experiment and horizon) and `pools` (species membership assigned once per
+#'   experiment and then carried unchanged across its horizons).
 calculate_auc_inputs <- function(community, experiments, horizons = 2L:9L) {
   included <- experiments |>
     dplyr::filter(.data$included)

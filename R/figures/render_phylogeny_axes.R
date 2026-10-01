@@ -1,8 +1,8 @@
 # Module: R/figures/render_phylogeny_axes
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Render the phylogenetic-axis response atlas from exports.
+# Inputs: PEV scores, model effects, and prediction tables.
+# Outputs: Registered PEV atlas files.
+# Side effects: Writes figure files.
 
 # Render the secondary phylogenetic-axis atlas
 #

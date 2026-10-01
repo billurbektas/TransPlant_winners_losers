@@ -19,11 +19,13 @@ test_that("active modules and functions carry documentation contracts", {
     ]
     for (line in function_lines) {
       previous <- line - 1L
-      while (previous > 0L && !nzchar(trimws(lines[[previous]]))) {
+      roxygen <- character()
+      while (previous > 0L && startsWith(trimws(lines[[previous]]), "#'")) {
+        roxygen <- c(lines[[previous]], roxygen)
         previous <- previous - 1L
       }
       expect_true(
-        previous > 0L && startsWith(trimws(lines[[previous]]), "#' @return"),
+        any(grepl("^#' @return", roxygen)),
         info = paste("missing Roxygen return contract:", path, lines[[line]])
       )
     }

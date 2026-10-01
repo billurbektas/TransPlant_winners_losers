@@ -1,8 +1,8 @@
 # Module: R/infrastructure/io
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Read configuration and write validated tabular/model artifacts.
+# Inputs: CSV/RDS paths and in-memory data.
+# Outputs: Parsed data, normalized names, and written file paths.
+# Side effects: Explicit read/write helpers access the filesystem.
 
 #' Read a pipeline CSV without changing empty diagnostic text
 #'

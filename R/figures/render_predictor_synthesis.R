@@ -1,8 +1,8 @@
 # Module: R/figures/render_predictor_synthesis
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Render the climate/full comparison and heterogeneity figure.
+# Inputs: Comparison and heterogeneity exports.
+# Outputs: Registered predictor synthesis files.
+# Side effects: Writes figure files.
 
 # Render the predictor-synthesis figure
 #

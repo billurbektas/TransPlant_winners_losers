@@ -6,6 +6,21 @@ test_that("the project dictionary contains only maintained traits", {
   expect_equal(sum(dictionary$analysis_trait == "vegetative_height"), 2L)
 })
 
+test_that("TRY climate classification uses the pinned bundled raster", {
+  raster <- system.file("extdata", "koppen_geiger_0p1.tif", package = "tidyTRY")
+  manifest <- readr::read_csv(project_path("data", "source_manifest.csv"),
+                              show_col_types = FALSE)
+  row <- manifest[manifest$path == "tidyTRY::extdata/koppen_geiger_0p1.tif", ]
+  expect_equal(nrow(row), 1L)
+  expect_true(nzchar(raster))
+  expect_identical(sha256_file(raster), row$sha256[[1]])
+  expect_identical(transplant_config()$try_raster_sha256, row$sha256[[1]])
+  expect_error(
+    filter_try_climate(list(), NULL, character(), "wrong checksum"),
+    "does not match"
+  )
+})
+
 test_that("LMA is the reciprocal of positive standardized SLA", {
   observations <- tibble::tibble(
     accepted_name = c("Species one", "Species one", "Species one"),

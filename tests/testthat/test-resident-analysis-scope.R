@@ -4,7 +4,7 @@ testthat::test_that("declared taxa remain in community results but are excluded 
   exclusions <- resident_model_exclusions()
   testthat::expect_equal(length(exclusions), 6L)
 
-  upstream <- readr::read_csv(results_path, show_col_types = FALSE) |>
+  classified_effects <- readr::read_csv(results_path, show_col_types = FALSE) |>
     dplyr::mutate(horizon = as.character(.data$horizon)) |>
     dplyr::filter(
       .data$transform == "raw", .data$contrast == "to_origin",
@@ -19,16 +19,16 @@ testthat::test_that("declared taxa remain in community results but are excluded 
       source_species = as.character(.data$species),
       species_id = as.character(.data$accepted_name)
     )
-  upstream <- upstream |>
+  classified_effects <- classified_effects |>
     dplyr::transmute(
       experiment_id = as.character(.data$experiment_id),
       source_species = as.character(.data$species)
     ) |>
     dplyr::left_join(taxonomy, by = c("experiment_id", "source_species"))
   testthat::expect_setequal(
-    intersect(unique(upstream$species_id), exclusions), exclusions
+    intersect(unique(classified_effects$species_id), exclusions), exclusions
   )
-  testthat::expect_equal(sum(upstream$species_id %in% exclusions), 21L)
+  testthat::expect_equal(sum(classified_effects$species_id %in% exclusions), 21L)
 
   resident_path <- project_path("output", "data", "resident_effects.csv")
   testthat::skip_if_not(file.exists(resident_path))
@@ -48,13 +48,13 @@ testthat::test_that("graminoid and woody status are independent binary fields", 
     override_path, show_col_types = FALSE,
     col_types = readr::cols(.default = readr::col_character())
   )
-  downstream_overrides <- readr::read_csv(
+  resident_overrides <- readr::read_csv(
     project_path("config", "resident_species_overrides.csv"),
     show_col_types = FALSE,
     col_types = readr::cols(.default = readr::col_character())
   )
   statuses <- derive_functional_groups(
-    taxonomy, overrides, downstream_overrides
+    taxonomy, overrides, resident_overrides
   )
   testthat::expect_setequal(
     unique(statuses$graminoid_status), c("graminoid", "non_graminoid")

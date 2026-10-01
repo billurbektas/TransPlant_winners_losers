@@ -1,8 +1,8 @@
 # Module: R/responses/auc_model_helpers
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Support AUC models and construct diagonal sampling variances.
+# Inputs: AUC effects, SEs, and model-data ordering.
+# Outputs: Diagnostics, design matrices, and effect-ordered diagonal variances.
+# Side effects: None.
 
 # Current AUC model helpers extracted from the reviewed pipeline.
 # These functions preserve the validated response-model implementations.

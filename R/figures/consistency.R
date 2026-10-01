@@ -1,8 +1,8 @@
 # Module: R/figures/consistency
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Plot signed species/family consistency and define retained figure metadata.
+# Inputs: Response and classification summaries.
+# Outputs: Consistency plots and figure registry tables.
+# Side effects: None.
 
 # Current consistency, sensitivity, and figure-ledger functions.
 

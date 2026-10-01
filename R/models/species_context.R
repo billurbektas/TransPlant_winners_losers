@@ -1,8 +1,8 @@
 # Module: R/models/species_context
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Classify supported species as winners, losers, or context-dependent.
+# Inputs: Resident climate fit and observed species climate support.
+# Outputs: Species coefficient summaries, supported predictions, and classes.
+# Side effects: None.
 
 # Pure species-context classification and callout-selection helpers.
 

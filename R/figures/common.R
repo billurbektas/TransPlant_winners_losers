@@ -1,8 +1,8 @@
 # Module: R/figures/common
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Share figure labels, style, and atomic export operations.
+# Inputs: ggplot objects and output paths.
+# Outputs: Styled plots and PDF/PNG files.
+# Side effects: Export helpers write figure files.
 
 # Shared helpers for current and retained publication figures.
 

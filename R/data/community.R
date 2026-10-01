@@ -1,8 +1,8 @@
 # Module: R/data/community
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Import and standardize the TransPlant community, sites, and experiments.
+# Inputs: Raw TransPlant RData and reviewed local species-name decisions.
+# Outputs: Community, site, experiment, and taxonomy-review tables.
+# Side effects: Reads the raw RData; writes no files.
 
 #' Read Current Transplant Input.
 #'
@@ -154,11 +154,15 @@ local_species_mapping_review <- function(cleanedspecies, decisions) {
 #' @param species_mapping A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @param site_metadata A value supplied by the calling workflow; admissible values are checked in the function body.
 #' @details `dat` must contain region, year, origin/destination site and plot,
-#' treatment, species, and cover fields. Reviewed species mappings must be
+#' treatment, species, and cover fields. The caller supplies a resolved mapping
 #' unique by region/site/local code. The function constructs stable identifiers
-#' and relative cover but does not apply resident-model exclusions. Missing
-#' required columns, ambiguous mappings, or invalid cover totals raise errors.
-#' @return An R object described by the function name; its structure is validated before later stages use it.
+#' and relative cover, applies the registered site-year and repeated-observation
+#' filters, but does not apply resident-model exclusions. It explicitly checks
+#' core raw columns; missing mapped names and non-finite/non-positive relative
+#' cover are filtered. Subsequent community validation checks the resulting
+#' identifiers and relationships.
+#' @return Standardised community rows with stable plot/year IDs, treatment,
+#'   accepted species name, relative cover, and relative year.
 standardize_community <- function(dat, species_mapping, site_metadata = NULL) {
   assert_columns(dat, c("Region", "Year", "originSiteID", "destSiteID", "destPlotID", "Treatment", "SpeciesName", "Cover"), "dat")
   out <- dat |>

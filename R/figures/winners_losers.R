@@ -1,8 +1,8 @@
 # Module: R/figures/winners_losers
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Prepare the main winner/loser response illustration.
+# Inputs: Selected experiment observations and AUC contrasts.
+# Outputs: Figure 1 data and plot.
+# Side effects: None.
 
 # Approved current manuscript Figure 01: resident winner/loser AUC responses with the
 # approved context-dependent Festuca rubra examples.

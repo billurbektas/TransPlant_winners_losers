@@ -6,8 +6,8 @@ it follows the science from the original data through response calculation,
 explicit model specifications, inference, figures, and tables. Its main
 analytical assignments are genuine targets through `tarchetypes::tar_tangle()`.
 
-The authoritative architecture, target-stage table, naming rules, commands,
-failure behavior, and two-phase history-retirement procedure are documented in
+The target-stage table, naming rules, commands, failure behavior, and backup
+records are documented in
 [`WORKFLOW_README.md`](WORKFLOW_README.md).
 
 Quick start:
@@ -17,8 +17,10 @@ Rscript -e 'renv::restore()'
 Rscript scripts/run_pipeline.R
 ```
 
-Those commands are for the approved clean rebuild. The current review stage is
-inspection-only; no scientific target should be run yet.
+Do not run the pipeline yet: the old outputs have been backed up and removed,
+and the clean rebuild awaits approval. For that rebuild, set
+`TRANSPLANT_CHELSA_OFFLINE=true` to require the 336 validated monthly files
+without downloading any CHELSA data.
 
 Figure renderers are available through one dispatcher:
 
@@ -28,6 +30,7 @@ Rscript scripts/render_figure.R --list
 
 Tracked historical sources are preserved under the annotated recovery tag
 `pre-reviewable-workflow-with-history-2026-09-30`. The archive, fixtures, and
-old reports have been retired from the working tree. Current generated results
-and target stores were preserved in the verified ZIP recorded in
-`docs/pre_rebuild_output_snapshot.csv`. No clean rebuild has been run yet.
+old reports have been retired from the working tree. Previous generated results
+and target stores are recoverable from the verified ZIP recorded in
+[`docs/pre_rebuild_backup_receipts.csv`](docs/pre_rebuild_backup_receipts.csv).
+No clean rebuild has been run yet.

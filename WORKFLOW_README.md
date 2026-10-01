@@ -45,7 +45,8 @@ flowchart TD
 ```
 
 Historical comparison targets, source files, and fixtures have been removed
-from the active workflow. Generated results remain until the clean rebuild.
+from the active workflow. Previous generated results have been backed up and
+removed; no new results exist until the approved clean rebuild.
 
 ## Stages
 
@@ -77,11 +78,10 @@ R/
   targets/          supporting data, model, and publication target definitions
 ```
 
-Every active R module starts with its responsibility, inputs, outputs, and
-permitted side effects. Every top-level function has a Roxygen-style purpose,
-parameter contract, and return contract. Functions that write files are kept in
-infrastructure or explicit renderer modules; analytical functions return
-in-memory objects.
+Active R modules state their responsibility, inputs, outputs, and permitted
+side effects. Stage-facing functions document the scientific operations and
+failure conditions; small internal helpers have shorter contracts. Functions
+that write files are identified by their contracts and targets.
 
 ## Naming policy
 
@@ -115,6 +115,11 @@ migration-review stage, use `tar_manifest()`, `tar_glimpse()`,
 
 Set `TRANSPLANT_WORKERS` to control local parallelism (the default is 2), for
 example `TRANSPLANT_WORKERS=5 Rscript scripts/run_pipeline.R`.
+
+For the clean rebuild, set `TRANSPLANT_CHELSA_OFFLINE=true`. In offline mode a
+missing or invalid monthly file stops with its year, month, and variable; no
+download or cache quarantine is attempted. The 336 monthly files remain in
+`data/cache/chelsa_monthly/` and are checked against current site coordinates.
 
 List or render a registered export-based figure:
 
@@ -152,7 +157,7 @@ historical input.
 `analysis_workflow.qmd` is the active reviewer-facing report and target source.
 Analytical chunks inherit `eval = FALSE` from the opening setup chunk, as
 recommended by `tar_tangle()`; assignment-free display chunks explicitly use
-`eval: true` and `tar_read()` only after results exist. The seven former QMD
+`eval: true` and `tar_read()` only after rebuilt results exist. The seven former QMD
 reports and their old HTML renders have been removed; their scientific content
 is mapped to this document in the migration record.
 
@@ -165,9 +170,19 @@ share one scientific figure object or one renderer invocation.
 The tracked historical state is tagged
 `pre-reviewable-workflow-with-history-2026-09-30`. The retirement manifest
 records checksums. Git-ignored files from `archive/` were deleted with the
-user's approval and are not recoverable from the tag. Current generated
-results and target stores are preserved in the verified ZIP recorded in
-[`docs/pre_rebuild_output_snapshot.csv`](docs/pre_rebuild_output_snapshot.csv).
+user's approval and are not recoverable from the tag. Previous generated
+results and target stores are recoverable from the verified output ZIP. A
+second verified ZIP contains retired `data/` files, the old daily CHELSA cache,
+and a backup copy of the active monthly cache. Their checksums and locations
+are in [`docs/pre_rebuild_backup_receipts.csv`](docs/pre_rebuild_backup_receipts.csv);
+per-file data checksums are in
+[`docs/pre_rebuild_data_snapshot.csv`](docs/pre_rebuild_data_snapshot.csv).
+
+TRY climate codes are assigned from observation coordinates using the bundled
+Köppen–Geiger raster in pinned `tidyTRY` revision
+`3352199fc99f72170a8983c522d63aa9029d0e9f`. The workflow checks the
+raster SHA-256 before filtering; the former local raster was different and is
+retired, not silently substituted. It is recoverable from the data ZIP.
 
 Before any rebuild, the regrouped QMD, `tar_manifest()`, dependency graphs,
 [`docs/workflow_migration_map.csv`](docs/workflow_migration_map.csv), and focused

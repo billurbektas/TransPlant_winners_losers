@@ -1,8 +1,8 @@
 # Module: R/figures/predictor_synthesis
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Prepare the predictor comparison and heterogeneity synthesis figure.
+# Inputs: Climate/full comparisons and REML heterogeneity summaries.
+# Outputs: Checked Figure 6 panel data and plot.
+# Side effects: None.
 
 # Figure 6: predictor model support and residual heterogeneity synthesis.
 #

@@ -1,8 +1,8 @@
 # Module: config/workflow
-# Responsibility: Implement the named scientific workflow stage or shared infrastructure.
-# Inputs: Function arguments and explicitly declared target dependencies.
-# Outputs: Validated in-memory objects and declared workflow artifacts.
-# Side effects: Limited to functions whose contracts explicitly write, copy, or render files.
+# Responsibility: Select active R source files and record analysis expectations.
+# Inputs: Project root and the current source-tree layout.
+# Outputs: Source inventory and resident-analysis specification.
+# Side effects: None.
 
 # Active workflow configuration and source inventory.
 

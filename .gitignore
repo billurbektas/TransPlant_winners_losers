@@ -60,61 +60,17 @@ data/*
 !data/README.md
 !data/source_manifest.csv
 
-# Reconstructable milestone data (documented in README)
-output/intermediate/
-output/models/
+# Generated results are rebuilt from the analysis workflow.
 output/*
-!output/reference/
-!output/reference/canonical_reference_results.rds
-!output/manifests/
-!output/manifests/**
 
-# Historical/generated plot trees stay local. Verified retained originals are
-# copied into figures/retained and tracked there.
-plot/
+# Manuscript exports are generated; the three approved originals in
+# figures/retained/ remain tracked separately.
 figures/candidates/
-figures/manuscript/*
-!figures/manuscript/fig01_winners_losers.pdf
-!figures/manuscript/fig01_winners_losers.png
-!figures/manuscript/fig02_repeated_species_consistency.pdf
-!figures/manuscript/fig02_repeated_species_consistency.png
-!figures/manuscript/fig03_temporal_category_flows.pdf
-!figures/manuscript/fig03_temporal_category_flows.png
-!figures/manuscript/fig04_species_minmax_classification.pdf
-!figures/manuscript/fig04_species_minmax_classification.png
-!figures/manuscript/fig05_climate_only_fixed_effect_prediction_surfaces.pdf
-!figures/manuscript/fig05_climate_only_fixed_effect_prediction_surfaces.png
-!figures/manuscript/fig06_predictor_synthesis_support_and_heterogeneity.pdf
-!figures/manuscript/fig06_predictor_synthesis_support_and_heterogeneity.png
-!figures/manuscript/fig07_predictor_response_atlas.pdf
-!figures/manuscript/fig07_predictor_response_atlas.png
-!figures/manuscript/appendix_family_minmax_classification.pdf
-!figures/manuscript/appendix_family_minmax_classification.png
-!figures/manuscript/appendix_model_fixed_and_random_effects.pdf
-!figures/manuscript/appendix_model_fixed_and_random_effects.png
-!figures/manuscript/appendix_model_predictive_performance.pdf
-!figures/manuscript/appendix_model_predictive_performance.png
-!figures/manuscript/appendix_pev2_pev3_prediction_atlas.pdf
-!figures/manuscript/appendix_pev2_pev3_prediction_atlas.png
-!figures/manuscript/appendix_phylogeny_pcoa_summary.pdf
-!figures/manuscript/appendix_phylogeny_pcoa_summary.png
-!figures/manuscript/appendix_temporal_winning_losing_strength_correlations.pdf
-!figures/manuscript/appendix_temporal_winning_losing_strength_correlations.png
-!figures/manuscript/appendix_destination_climate_warming_gradient.pdf
-!figures/manuscript/appendix_destination_climate_warming_gradient.png
-!figures/manuscript/appendix_temporal_transition_matrices.pdf
-!figures/manuscript/appendix_temporal_transition_matrices.png
-reports/rendered/
-reports/*.html
-reports/*_files/
-reports/.quarto/
-reports/reports/
+figures/manuscript/
+analysis_workflow.html
+analysis_workflow_files/
+.quarto/
 _targets_refactor_validation/
-
-# Checksum-recorded generated history remains present in the in-repository
-# archive but is not added to Git. Scientific source snapshots and archive
-# manifests remain trackable.
-archive/**/output/
 
 # Interrupted atomic writes
 *.tmp
