@@ -39,11 +39,45 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-# pkgdown site
-docs/
+# Project documentation is source-controlled. If a pkgdown site is added,
+# ignore its generated subdirectory explicitly rather than the whole folder.
 
 # translation temp files
 po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Reproducible pipeline state and machine-specific libraries
+_targets/
+renv/library/
+renv/staging/
+
+# Large/reconstructable source data and caches
+data/try_47163.txt
+data/cache/
+data/*
+!data/README.md
+!data/source_manifest.csv
+
+# Generated results are rebuilt from the analysis workflow.
+output/*
+
+# Manuscript exports are generated; the three approved originals in
+# figures/retained/ remain tracked separately.
+figures/candidates/
+figures/manuscript/
+analysis_workflow.html
+analysis_workflow_files/
+.quarto/
+_targets_refactor_validation/
+
+# Interrupted atomic writes
+*.tmp
+
+# Local receipts used to distinguish regenerated figures from legacy files
+*.pdf.generated
+*.png.generated
+
+# Legacy whole-session snapshots are not pipeline inputs
+Environment_Save_*.RData

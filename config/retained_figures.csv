@@ -1,0 +1,4 @@
+figure_path,expected_sha256,status,reason
+figures/retained/compare_rel.abund_vs.sqrt.rel.abund.pdf,2a5b8694da07f9e4337e6dfd54676541336b220ffff018b9f2c00172acea75a5,KEEP_FOR_MANUSCRIPT,User explicitly retained the raw-versus-square-root sensitivity figure
+figures/retained/response_to_family_alluvial.pdf,b41d9ae24153c8509a73525f08ed5962a1ef97cbd3c7d68edba18b1b2daf100f,KEEP_FOR_MANUSCRIPT,User explicitly retained the response-to-family alluvial figure
+figures/retained/trait_categories_with_overall.pdf,44052488dee1dd1ac1bd171921c83e4274d77f8984acbc8ca43bdc5d1fd52cb4,KEEP_FOR_MANUSCRIPT,User explicitly retained the trait-category summary figure

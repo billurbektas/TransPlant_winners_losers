@@ -1,0 +1,1772 @@
+---
+title: "TransPlant winners and losers: analysis workflow"
+subtitle: "From the original community data to models, figures, and tables"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    number-sections: true
+execute:
+  warning: false
+  message: false
+---
+
+This is the file to open first when reviewing the analysis. The code is shown
+in the order in which the ecological analysis proceeds. The workflow itself is
+run by `targets`; the code chunks below define the main targets through
+`tarchetypes::tar_tangle()`.
+
+Analytical chunks are not executed by Quarto: the first code chunk sets
+`eval = FALSE` for the document, which is the method recommended by
+`tarchetypes::tar_tangle()`. (`eval` cannot be repeated as a target-chunk
+option because `tar_tangle()` would pass it to `tar_target()`.) After the
+pipeline has been built, the clearly marked **Stored result** chunks read
+already-built objects from the target store. Those display chunks override
+the document setting with `eval: true`, contain no top-level assignments, and
+therefore cannot accidentally become targets.
+
+```{r}
+library(targets)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+# Raw data
+
+The starting point is the TransPlant RData file, together with the reviewed
+configuration tables for species names, taxonomy, functional groups, climate,
+traits, and phylogeny. Importing the RData file does not alter its contents.
+
+```{r}
+#| description: Project paths and fixed analysis settings.
+config <- transplant_config()
+```
+
+```{r}
+#| description: Original TransPlant RData file supplied to the workflow.
+#| format: file
+input_rdata_file <- config$input_rdata
+```
+
+```{r}
+#| description: Reviewed decisions linking local vegetation names to analysis names.
+#| format: file
+species_mapping_decisions_input <- file.path(
+  config$root, "config", "species_mapping_decisions.csv"
+)
+```
+
+```{r}
+#| description: Reviewed decisions applied after TNRS name matching.
+#| format: file
+taxonomy_overrides_input <- file.path(
+  config$root, "config", "taxonomy_overrides.csv"
+)
+```
+
+```{r}
+#| description: Licensed TRY trait export used by the analysis.
+#| format: file
+try_export_file <- config$try_file
+```
+
+```{r}
+#| description: Dictionary connecting TRY variables to LDMC, LMA, and vegetative height.
+#| format: file
+try_dictionary_input <- file.path(config$root, "config", "try_trait_map.csv")
+```
+
+```{r}
+#| description: Reviewed functional-group corrections.
+#| format: file
+functional_group_overrides_input <- file.path(
+  config$root, "config", "functional_group_overrides.csv"
+)
+```
+
+```{r}
+#| description: Reviewed family and functional-group decisions for resident species.
+#| format: file
+resident_species_overrides_input <- file.path(
+  config$root, "config", "resident_species_overrides.csv"
+)
+```
+
+```{r}
+#| description: Reviewed decisions used to place resident species in the phylogeny.
+#| format: file
+phylogeny_placement_decisions_file <- file.path(
+  config$root, "config", "phylogeny_placement_decisions.csv"
+)
+```
+
+```{r}
+#| description: Original TransPlant objects read from the registered RData file.
+current_input <- read_current_transplant_input(input_rdata_file)
+```
+
+The community table is standardised with the reviewed local species-name map
+and site metadata. The next two targets then define sites and experiments from
+that same community table.
+
+```{r}
+#| description: Site coordinates and regions reconstructed from the original regional table.
+site_metadata <- site_metadata_from_regions(current_input$regional)
+```
+
+```{r}
+#| description: Local species-name decisions read as character data for reviewable matching.
+species_mapping_decisions <- readr::read_csv(
+  species_mapping_decisions_input,
+  show_col_types = FALSE,
+  col_types = readr::cols(.default = readr::col_character())
+)
+```
+
+```{r}
+#| description: Audit of every local vegetation name against the reviewed mapping decisions.
+species_mapping_review <- local_species_mapping_review(
+  current_input$cleanedspecies,
+  species_mapping_decisions
+)
+```
+
+```{r}
+#| description: Final one-to-one local vegetation-name mapping used to standardise the community table.
+species_mapping <- resolve_local_species_mappings(
+  current_input$cleanedspecies,
+  species_mapping_decisions
+)
+```
+
+```{r}
+#| description: Standardised plot-by-year community observations with reviewed local species names.
+community <- standardize_community(
+  current_input$dat,
+  species_mapping,
+  site_metadata
+)
+```
+
+```{r}
+#| description: Site table reconstructed from the standardised community data and regional metadata.
+sites <- build_sites(community, current_input$regional)
+```
+
+```{r}
+#| description: Experiment table defining origin, destination, treatment, duration, and inclusion.
+experiments <- build_experiments(community, sites)
+```
+
+```{r}
+#| description: Initial checks of site, community, and experiment identifiers and expected relationships.
+community_validation <- validate_community_snapshot(
+  sites,
+  community,
+  experiments
+)
+```
+
+## Stored raw-data checks
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(input_inventory))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(community_validation))
+```
+
+# Data preparation
+
+The vegetation names are reviewed through the local mapping table and TNRS.
+Only records accepted at species level enter the analysis community. The
+records excluded here, together with the reason, remain available in
+`vegetation_taxonomic_resolution`.
+
+```{r}
+#| description: Reviewed TNRS corrections read as character data.
+taxonomy_overrides <- readr::read_csv(
+  taxonomy_overrides_input,
+  show_col_types = FALSE,
+  col_types = readr::cols(.default = readr::col_character())
+)
+```
+
+```{r}
+#| description: Distinct vegetation names submitted for taxonomic harmonisation.
+vegetation_species <- sort(unique(community$species))
+```
+
+```{r}
+#| description: TNRS response for all vegetation names in the community data.
+community_taxonomy_response <- taxonomy_response(vegetation_species)
+```
+
+```{r}
+#| description: TNRS matches combined with reviewed corrections and the registered minimum score.
+community_taxonomy_review <- apply_taxonomy_review(
+  community_taxonomy_response,
+  taxonomy_overrides,
+  config$taxonomy_min_score
+)
+```
+
+```{r}
+#| description: Validated vegetation taxonomy after TNRS and manual review.
+community_taxonomy <- validate_taxonomy_review(
+  community_taxonomy_review,
+  "vegetation taxonomy"
+)
+```
+
+```{r}
+#| description: Explicit inclusion or exclusion decision for every reviewed vegetation name.
+vegetation_taxonomic_resolution <- taxonomic_resolution_review(
+  community_taxonomy
+)
+```
+
+```{r}
+#| description: Taxonomy table restricted to names accepted at species level.
+community_taxonomy_species <- filter_species_level_taxonomy(
+  vegetation_taxonomic_resolution
+)
+```
+
+```{r}
+#| description: Community observations restricted to vegetation names reviewed and retained at species level.
+analysis_community <- filter_community_to_reviewed_taxa(
+  community,
+  community_taxonomy_species
+)
+```
+
+TRY records are restricted to the study species, harmonised through the same
+taxonomy review, screened with the registered climate and range rules, and
+then summarised to species-level trait values. TRY observations do not arrive
+with the climate codes used here. Their coordinates are classified by
+`tidyTRY::extract_climate_zones()` using the pinned package's bundled
+Köppen–Geiger raster; the workflow verifies that raster's SHA-256 before
+filtering. The former local raster is not an analysis input.
+
+```{r}
+#| description: TRY variable dictionary used to select and name the three focal traits.
+try_dictionary <- readr::read_csv(
+  try_dictionary_input,
+  show_col_types = FALSE
+)
+```
+
+```{r}
+#| description: Original and accepted study-species names used to restrict the TRY export.
+try_filter_names <- unique(c(
+  community_taxonomy_species$name_original,
+  community_taxonomy_species$accepted_name_reviewed
+))
+```
+
+```{r}
+#| description: TRY observations restricted to study species and focal trait variables.
+try_cleaned <- clean_try_export(
+  try_export_file,
+  try_filter_names,
+  try_dictionary,
+  config$error_risk_max
+)
+```
+
+```{r}
+#| description: TNRS response for species names occurring in the restricted TRY observations.
+try_taxonomy_response <- taxonomy_response(try_side_species(try_cleaned))
+```
+
+```{r}
+#| description: TRY taxonomic matches combined with the reviewed corrections.
+try_taxonomy_review <- apply_taxonomy_review(
+  try_taxonomy_response,
+  taxonomy_overrides,
+  config$taxonomy_min_score
+)
+```
+
+```{r}
+#| description: Validated TRY taxonomy after TNRS and manual review.
+try_taxonomy <- validate_taxonomy_review(try_taxonomy_review, "TRY taxonomy")
+```
+
+```{r}
+#| description: TRY observations classified with tidyTRY's verified bundled raster and filtered by registered climate codes.
+try_climate_filtered <- filter_try_climate(
+  try_cleaned,
+  try_taxonomy,
+  config$excluded_try_climates,
+  config$try_raster_sha256
+)
+```
+
+```{r}
+#| description: Plausible-range checks for all retained LDMC, LMA, and height observations.
+try_range_validation <- validate_trait_ranges(
+  try_climate_filtered$observations
+)
+```
+
+```{r}
+#| description: Species-level LDMC, LMA, and vegetative-height summaries used in the models.
+try_trait_outputs <- summarise_try_traits(
+  try_climate_filtered$observations
+)
+```
+
+Family and functional groups are reconstructed from the reviewed taxonomy and
+the two explicit decision tables.
+
+```{r}
+#| description: Plant-family lookup for every accepted vegetation species.
+taxonomy_family <- tnrs_family_lookup(
+  community_taxonomy_species$accepted_name_reviewed
+)
+```
+
+```{r}
+#| description: General functional-group corrections read as character data.
+functional_group_overrides <- readr::read_csv(
+  functional_group_overrides_input,
+  show_col_types = FALSE,
+  col_types = readr::cols(.default = readr::col_character())
+)
+```
+
+```{r}
+#| description: Resident-species family and functional-group decisions read as character data.
+resident_species_overrides <- readr::read_csv(
+  resident_species_overrides_input,
+  show_col_types = FALSE,
+  col_types = readr::cols(.default = readr::col_character())
+)
+```
+
+```{r}
+#| description: Family, graminoid, and woodiness assignments used in the analysis.
+functional_groups <- derive_functional_groups(
+  taxonomy_family,
+  functional_group_overrides,
+  resident_species_overrides
+)
+```
+
+The CHELSA jobs remain dynamically branched because each month is
+downloaded or read from cache independently. With
+`TRANSPLANT_CHELSA_OFFLINE=true`, all 336 required monthly checkpoints must
+match the current site coordinates,
+or the affected month stops without a download. The scientific sequence—check
+coordinates, retrieve monthly climate, then summarise by site and experiment—
+is kept visible here.
+
+```{r}
+#| description: Checks for missing, duplicated, or reused site coordinates before climate extraction.
+chelsa_coordinate_audit <- audit_chelsa_coordinates(sites, experiments)
+```
+
+```{r}
+#| description: Validated site coordinates supplied to every CHELSA extraction job.
+chelsa_site_coordinates <- {
+  chelsa_coordinate_audit
+  validate_site_coordinates(sites)
+}
+```
+
+```{r}
+#| description: Requested CHELSA year-variable combinations.
+#| iteration: list
+chelsa_job_list <- chelsa_jobs(
+  config$climate_download_years,
+  config$climate_variables
+)
+```
+
+```{r}
+#| description: One CHELSA year-variable job selected for dynamic branching.
+#| pattern: map(chelsa_job_list)
+#| iteration: list
+chelsa_job <- chelsa_job_list
+```
+
+```{r}
+#| description: Cached or downloaded monthly CHELSA values for one year-variable job.
+#| pattern: map(chelsa_job)
+#| format: file
+chelsa_monthly_file <- run_chelsa_job(
+  chelsa_job,
+  chelsa_site_coordinates,
+  config$chelsa_cache,
+  config$chelsa_retries,
+  config$chelsa_backoff_seconds,
+  offline = config$chelsa_offline
+)
+```
+
+```{r}
+#| description: All monthly CHELSA files combined and checked for complete site-year coverage.
+chelsa_consolidated <- consolidate_chelsa(
+  chelsa_monthly_file,
+  sites,
+  config$climate_download_years
+)
+```
+
+```{r}
+#| description: Annual and summer climate summaries for each study site and year.
+site_year_climate <- summarise_site_climate(chelsa_consolidated$monthly)
+```
+
+```{r}
+#| description: Origin, destination, and warming climate summaries for every experiment.
+experiment_climate <- summarise_experiment_climate(
+  site_year_climate,
+  experiments
+)
+```
+
+```{r}
+#| description: Climate-year completeness for every experiment.
+experiment_climate_coverage <- experiment_climate |>
+  dplyr::select(
+    experiment_id, first_year, last_year, years_expected,
+    origin_years_available, destination_years_available,
+    origin_missing_years, destination_missing_years,
+    climate_complete, climate_summary_status, climate_coverage_note
+  )
+```
+
+## Stored preparation checks
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(vegetation_taxonomic_resolution))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(try_range_validation))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(experiment_climate_coverage))
+```
+
+# Response calculation
+
+Relative cover is integrated through time within plots. For every experiment,
+horizon, and transformation, plot AUC is modelled as:
+
+\[
+\mathrm{AUC} = \mathrm{ODT} * \mathrm{species}.
+\]
+
+`ODT` distinguishes destination controls, origin controls, and warmed plots.
+The warmed-minus-origin contrast is the resident response used below. The
+multivariate-*t* adjustment belongs to the original within-experiment contrast
+classification; it is separate from the sampling variances used in the later
+meta-regressions.
+
+```{r}
+#| description: Plot-level AUC model fitted separately within experiment, horizon, and transformation.
+plot_auc_formula <- auc ~ ODT * species
+```
+
+```{r}
+#| description: Multiplicity adjustment used for the three planned ODT contrasts within each species.
+plot_auc_contrast_adjustment <- "mvt"
+```
+
+```{r}
+#| description: Significance level used to classify original winner-loser contrasts.
+winner_loser_alpha <- 0.05
+```
+
+```{r}
+#| description: Plot-level temporal AUC values and fixed species-pool membership for all registered horizons.
+auc_inputs <- calculate_auc_inputs(
+  analysis_community,
+  experiments,
+  config$horizons
+)
+```
+
+```{r}
+#| description: Within-experiment species AUC contrasts from the explicit ODT-by-species model.
+auc_contrasts <- fit_auc_contrasts(
+  auc_inputs$auc,
+  formula = plot_auc_formula,
+  contrast_adjust = plot_auc_contrast_adjustment
+)
+```
+
+```{r}
+#| description: Winner-loser classifications from warmed-minus-origin contrasts and fixed species pools.
+winner_loser <- classify_winners_losers(
+  auc_contrasts,
+  auc_inputs$pools,
+  alpha = winner_loser_alpha
+)
+```
+
+```{r}
+#| description: Completeness and consistency checks for winner-loser effects and classifications.
+winner_loser_validation <- validate_winner_loser_outputs(
+  winner_loser,
+  auc_inputs$pools
+)
+```
+
+The winner/loser results are now joined to the reviewed taxonomy, TRY traits,
+functional groups, and experiment table. Climate is joined afterwards so the
+descriptive data and the model-ready data remain distinguishable.
+
+```{r}
+#| description: Winner-loser observations annotated with taxonomy, traits, functional groups, and experiment metadata.
+descriptive_analysis_data <- analysis_dataset(
+  winner_loser,
+  community_taxonomy_species,
+  try_trait_outputs$summary,
+  functional_groups,
+  experiments
+)
+```
+
+```{r}
+#| description: Final analysis dataset with experiment climate and registered predictor transformations.
+analysis_data <- join_experiment_climate(
+  descriptive_analysis_data,
+  experiment_climate
+) |>
+  transform_model_predictors()
+```
+
+```{r}
+#| description: Reviewed five-context assignment calculated from the final experiment climate variables.
+climate_context_result <- reviewed_five_climate_contexts(analysis_data)
+```
+
+This compact audit makes the main changes in data size visible without making
+every filter or join a separate target.
+The community tables precede creation of `experiment_id`, so their experiment
+counts use the same distinct warmed region–origin–destination combinations as
+the experiment table.
+
+```{r}
+#| description: Row, species, and experiment counts at the principal raw-to-analysis boundaries.
+analysis_data_audit <- dplyr::bind_rows(
+  tibble::tibble(
+    stage = "standardised community",
+    record_type = "plot-year observation",
+    rows = nrow(community),
+    species = dplyr::n_distinct(community$species),
+    experiments = community |>
+      dplyr::filter(
+        .data$treatment == "Warm",
+        .data$origin_site != .data$destination_site
+      ) |>
+      dplyr::distinct(
+        .data$region, .data$origin_site, .data$destination_site
+      ) |>
+      nrow()
+  ),
+  tibble::tibble(
+    stage = "species-level taxonomy retained",
+    record_type = "plot-year observation",
+    rows = nrow(analysis_community),
+    species = dplyr::n_distinct(analysis_community$species),
+    experiments = analysis_community |>
+      dplyr::filter(
+        .data$treatment == "Warm",
+        .data$origin_site != .data$destination_site
+      ) |>
+      dplyr::distinct(
+        .data$region, .data$origin_site, .data$destination_site
+      ) |>
+      nrow()
+  ),
+  tibble::tibble(
+    stage = "winner-loser data with ecological information",
+    record_type = "species response",
+    rows = nrow(descriptive_analysis_data),
+    species = dplyr::n_distinct(descriptive_analysis_data$species),
+    experiments = dplyr::n_distinct(descriptive_analysis_data$experiment_id)
+  ),
+  tibble::tibble(
+    stage = "final analysis dataset with climate",
+    record_type = "species response",
+    rows = nrow(analysis_data),
+    species = dplyr::n_distinct(analysis_data$species),
+    experiments = dplyr::n_distinct(analysis_data$experiment_id)
+  )
+) |>
+  dplyr::mutate(
+    comparable_to_previous = .data$record_type == dplyr::lag(.data$record_type),
+    rows_removed_since_previous = dplyr::if_else(
+      .data$comparable_to_previous,
+      dplyr::lag(.data$rows) - .data$rows,
+      NA_integer_
+    ),
+    species_removed_since_previous =
+      dplyr::if_else(
+        .data$comparable_to_previous,
+        dplyr::lag(.data$species) - .data$species,
+        NA_integer_
+      ),
+    experiments_removed_since_previous =
+      dplyr::if_else(
+        .data$comparable_to_previous,
+        dplyr::lag(.data$experiments) - .data$experiments,
+        NA_integer_
+      )
+  )
+```
+
+```{r}
+#| description: Missing values in ecological fields needed to understand model-specific row loss.
+analysis_data_missingness <- {
+  fields <- c(
+    "accepted_name", "family", "graminoid_status", "woody_status",
+    "LDMC", "LMA", "vegetative_height", "destination_T_JJA",
+    "destination_P_JJA", "diff_T_JJA"
+  )
+  tibble::tibble(
+    field = fields,
+    missing_rows = vapply(
+      analysis_data[fields], function(value) sum(is.na(value)), integer(1)
+    ),
+    available_rows = vapply(
+      analysis_data[fields], function(value) sum(!is.na(value)), integer(1)
+    ),
+    total_rows = nrow(analysis_data)
+  )
+}
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(analysis_data_audit))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(analysis_data_missingness))
+```
+
+The six taxa below remain in the community and response calculations. They are
+excluded only when defining the resident modeling cohort because they are
+outside the focal vascular functional comparison or strongly determine the
+early phylogenetic axes. `Juniperus communis` is the only gymnosperm in the
+analyzed vegetation.
+
+```{r}
+#| description: Taxa excluded explicitly at the resident-model boundary, not during response calculation.
+resident_species_exclusions <- c(
+  "Gymnocarpium dryopteris",
+  "Athyrium spinulosum",
+  "Botrychium lunaria",
+  "Equisetum arvense",
+  "Selaginella selaginoides",
+  "Juniperus communis"
+)
+```
+
+The three inputs below deliberately read the registered CSV artifacts. This
+preserves the exact numeric boundary used by the current analysis while making
+that round trip visible.
+
+```{r}
+#| description: Stored winner-loser table used to construct resident effects.
+resident_winner_loser_data <- read_pipeline_csv(winner_loser_file)
+```
+
+```{r}
+#| description: Stored ecological analysis table used to construct resident effects.
+resident_analysis_dataset <- read_pipeline_csv(analysis_data_file)
+```
+
+```{r}
+#| description: Stored experiment climate-context table used to construct resident effects.
+resident_climate_context_data <- read_pipeline_csv(
+  climate_context_experiments_file
+)
+```
+
+```{r}
+#| description: Maximum-duration raw warmed-minus-origin resident effects before climate standardisation.
+resident_auc_unscaled <- build_resident_auc_data_from_objects(
+  resident_winner_loser_data,
+  resident_analysis_dataset,
+  resident_climate_context_data,
+  horizons = "max",
+  excluded_species = resident_species_exclusions
+)
+```
+
+```{r}
+#| description: Resident effects with destination temperature, precipitation, and warming standardised across experiments.
+resident_scaled <- scale_resident_auc_data(resident_auc_unscaled)
+```
+
+```{r}
+#| description: Final resident effect table used by climate, trait, functional, and phylogenetic models.
+resident_auc_data <- resident_scaled$data |>
+  dplyr::mutate(TP_z = .data$T_z * .data$P_z)
+```
+
+```{r}
+#| description: Climate standardisation values used in the resident analysis.
+resident_climate_scaling <- resident_scaled$scaling |>
+  dplyr::filter(.data$scaled_field %in% c("T_z", "P_z", "W_z")) |>
+  dplyr::mutate(
+    n_distinct_experiments = dplyr::n_distinct(
+      resident_auc_data$experiment_id
+    )
+  )
+```
+
+Sampling error is represented as independent between effect estimates. The
+matrix is diagonal, in the exact effect-row order, with
+`sampling variance = auc_se^2`. Experiment-clustered CR1 uncertainty is a
+separate calculation for fixed-effect inference.
+
+```{r}
+#| description: Diagonal resident sampling-variance matrix with auc_se squared in exact effect order.
+resident_sampling_variance_matrix <- build_sampling_variance_matrix(
+  resident_auc_data,
+  se_column = "auc_se"
+)
+```
+
+```{r}
+#| description: Checks that resident sampling variances are positive, diagonal, and exactly effect ordered.
+resident_sampling_variance_check <- validate_sampling_variance_matrix(
+  resident_sampling_variance_matrix,
+  resident_auc_data,
+  se_column = "auc_se"
+)
+```
+
+```{r}
+#| description: Fixed sample-size and completeness checks for the resident modeling cohort.
+analysis_settings <- resident_analysis_spec(config$root)
+```
+
+```{r}
+#| description: Validation of resident effects, species, experiments, and sampling-variance order.
+resident_scope <- validate_resident_model_scope(
+  resident_auc_data,
+  resident_sampling_variance_matrix,
+  analysis_settings
+)
+```
+
+```{r}
+#| description: Release check for the diagonal resident sampling-variance matrix.
+resident_sampling_variance_validation <- resident_sampling_variance_release_check(
+  resident_scope$sampling_variance_validation
+)
+```
+
+## Stored response checks
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(winner_loser_validation))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(resident_scope))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(resident_sampling_variance_check))
+```
+
+# Model specifications
+
+The response in the resident and predictor meta-regressions is maximum-duration
+raw relative-cover Delta AUC: warmed minus origin. Final coefficients and
+variance components are estimated with REML. ML versions are fitted only when
+comparing nested climate-only and full predictor models.
+
+All species-level models use the same random structure:
+
+- a species random intercept;
+- an independent species random slope for warming (`W_z`);
+- correlated species random slopes for destination temperature (`T_z`), log
+  precipitation (`P_z`), and their product (`TP_z`), using `struct = "GEN"`.
+
+Fixed-effect uncertainty reported for final models uses CR1 clustered by
+experiment, with the small-sample adjustment enabled.
+
+```{r}
+#| description: Climate-only fixed-effect formula used by resident and matched baseline models.
+resident_climate_formula <- ~ T_z * P_z * W_z
+```
+
+```{r}
+#| description: Species random intercept, warming slope, and correlated T-P-TP slopes used by every species model.
+resident_species_random_effects <- list(
+  ~ 1 | species_id,
+  ~ 0 + W_z | species_id,
+  ~ 0 + T_z + P_z + TP_z | species_id
+)
+```
+
+```{r}
+#| description: General covariance structure for the correlated T-P-TP random slopes.
+model_random_covariance_structure <- "GEN"
+```
+
+```{r}
+#| description: Experiment identifier used for cluster-robust fixed-effect uncertainty.
+robust_cluster_column <- "experiment_id"
+```
+
+```{r}
+#| description: Small-sample adjustment used for experiment-clustered CR1 inference.
+robust_small_sample_adjustment <- TRUE
+```
+
+```{r}
+#| description: Metafor CR1 implementation is used directly rather than clubSandwich delegation.
+robust_uses_club_sandwich <- FALSE
+```
+
+## Resident climate model
+
+```{r}
+#| description: Resident climate model fitted by ML only for later nested model comparisons.
+resident_climate_model_ML <- fit_meta_regression(
+  data = resident_auc_data,
+  sampling_variance_matrix = resident_sampling_variance_matrix,
+  formula = resident_climate_formula,
+  method = "ML",
+  label = "resident climate ML",
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Final resident climate meta-regression fitted by REML with the explicit species random structure.
+resident_climate_model <- fit_meta_regression(
+  data = resident_auc_data,
+  sampling_variance_matrix = resident_sampling_variance_matrix,
+  formula = resident_climate_formula,
+  method = "REML",
+  label = "resident climate REML",
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Resident climate coefficients, CR1 inference, random effects, variance profiles, and fit statistics.
+resident_climate_model_results <- assemble_climate_model_results(
+  resident_climate_model,
+  resident_climate_variance_profiles,
+  cluster_column = robust_cluster_column,
+  adjust = robust_small_sample_adjustment,
+  club_sandwich = robust_uses_club_sandwich
+)
+```
+
+## Species context classification
+
+A species is classified only when it occurs in at least four experiments and
+its observed climates identify the intercept, `T_z`, `P_z`, and `T_z:P_z`
+terms. Predictions are restricted to the convex hull of climates in which that
+species occurred, with warming fixed at the median across experiments. A
+species is a consistent winner when its minimum fitted Delta AUC is above zero,
+a consistent loser when its maximum is below zero, and context-dependent
+otherwise. The class uses fitted extrema, not p-values or confidence intervals.
+
+```{r}
+#| description: Species predictions over each eligible species observed climate range and fitted-extrema classification.
+species_context_bundle <- build_species_context_bundle(
+  resident_climate_model,
+  resident_auc_data,
+  resident_climate_formula
+)
+```
+
+```{r}
+#| description: Counts and proportions of the three species context classes.
+species_classification_summary <- summarize_context_classification(
+  species_context_bundle$classification,
+  "Species"
+)
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(species_classification_summary))
+```
+
+## Family reconstruction and model
+
+Family cover is reconstructed from the same retained resident species before
+calculating family AUC contrasts. Squared family contrast SEs form a diagonal
+sampling-variance matrix. The family model uses the same fixed climate formula
+and analogous family-level random intercept and slopes.
+
+```{r}
+#| description: Stored standardised community table used to reconstruct family cover.
+family_community_input <- readRDS(community_file)
+```
+
+```{r}
+#| description: Stored experiment definitions used to reconstruct family cover.
+family_experiments_input <- read_pipeline_csv(experiments_file)
+```
+
+```{r}
+#| description: Reviewed family corrections for resident species.
+family_override_table <- family_overrides(resident_species_overrides)
+```
+
+```{r}
+#| description: Resident species-to-family membership using the reviewed taxonomy and explicit resident exclusions.
+family_resident_membership <- build_family_resident_membership(
+  resident_winner_loser_data,
+  resident_analysis_dataset,
+  family_override_table,
+  excluded_species = resident_species_exclusions
+)
+```
+
+```{r}
+#| description: Reconstructed family relative cover and plot-level family AUC values.
+family_plot_auc_bundle <- build_family_plot_auc(
+  family_community_input,
+  family_experiments_input,
+  family_resident_membership
+)
+```
+
+```{r}
+#| description: Family warmed-minus-origin AUC effects and their direct diagonal sampling variances.
+family_auc_bundle <- build_family_auc_effects(
+  family_plot_auc_bundle$plot_auc,
+  family_resident_membership,
+  resident_auc_data
+)
+```
+
+```{r}
+#| description: Family climate fixed-effect formula.
+family_climate_formula <- ~ T_z * P_z * W_z
+```
+
+```{r}
+#| description: Family random intercept, warming slope, and correlated T-P-TP slopes.
+family_random_effects <- list(
+  ~ 1 | family_id,
+  ~ 0 + W_z | family_id,
+  ~ 0 + T_z + P_z + TP_z | family_id
+)
+```
+
+```{r}
+#| description: Final family climate meta-regression fitted by REML.
+family_model_bundle <- fit_family_aggregated_model(
+  family_auc_bundle,
+  formula = family_climate_formula,
+  random = family_random_effects,
+  struct = model_random_covariance_structure,
+  method = "REML",
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Family fixed effects, random variation, convergence, and classification summary.
+family_model_summary <- summarize_family_model(family_model_bundle)
+```
+
+The family contrast result keeps the effect rows and their sampling variances
+together. The first rows and matrix dimensions can be checked after rebuilding:
+
+```{r}
+#| eval: true
+knitr::kable(utils::head(tar_read(family_auc_bundle)$data))
+```
+
+```{r}
+#| eval: true
+print(dim(tar_read(family_auc_bundle)$sampling_variance_matrix))
+```
+
+## Trait, functional-group, and phylogenetic models
+
+Each predictor is compared with a climate-only model fitted to exactly the same
+effect rows and sampling variances. Trait models therefore have their own
+matched climate-only fits because missing traits reduce their datasets. The
+functional-group and phylogenetic predictors use the complete resident cohort
+and share the complete-data climate-only fits.
+
+There is no intermediate additive predictor model.
+
+The following targets show exactly where the three model datasets come from.
+Trait values are summarised once per species, log-transformed and standardised
+by `prepare_trait_data()`, and then joined to the resident effects. Functional
+groups use the reviewed species assignments. Phylogenetic position is obtained
+from the reviewed tree, patristic distances, and the first three PCoA axes.
+
+```{r}
+#| description: Stored TRY species summaries read at the model-input boundary.
+trait_summary_input <- read_pipeline_csv(try_summary_file)
+```
+
+```{r}
+#| description: One reviewed LDMC, LMA, and vegetative-height value per resident species.
+trait_species <- build_trait_species(
+  trait_summary_input,
+  resident_auc_data$species_id
+)
+```
+
+```{r}
+#| description: Resident effects with complete, log-scaled, and standardised LDMC.
+prepared_ldmc <- prepare_trait_data(
+  trait_species,
+  resident_auc_data,
+  resident_sampling_variance_matrix,
+  "LDMC"
+)
+```
+
+```{r}
+#| description: Resident effects with complete, log-scaled, and standardised LMA.
+prepared_lma <- prepare_trait_data(
+  trait_species,
+  resident_auc_data,
+  resident_sampling_variance_matrix,
+  "LMA"
+)
+```
+
+```{r}
+#| description: Resident effects with complete, log-scaled, and standardised vegetative height.
+prepared_height <- prepare_trait_data(
+  trait_species,
+  resident_auc_data,
+  resident_sampling_variance_matrix,
+  "vegetative_height"
+)
+```
+
+```{r}
+#| description: Trait scaling values and the model-specific effect counts retained after missing traits.
+trait_scaling <- dplyr::bind_rows(
+  prepared_ldmc$scaling,
+  prepared_lma$scaling,
+  prepared_height$scaling
+)
+```
+
+```{r}
+#| description: Stored functional-group assignments read at the model-input boundary.
+functional_groups_input <- read_pipeline_csv(functional_groups_file)
+```
+
+```{r}
+#| description: Reviewed graminoid and woodiness status for every resident species.
+functional_species <- build_functional_species(
+  functional_groups_input,
+  resident_auc_data$species_id,
+  resident_species_overrides
+)
+```
+
+```{r}
+#| description: Resident effects joined to graminoid and woodiness status.
+functional_auc_data <- prepare_functional_predictors(
+  resident_auc_data,
+  functional_species
+)
+```
+
+```{r}
+#| description: Reviewed phylogenetic placement decisions read as character data.
+phylogeny_placement_decisions <- read_pipeline_csv(
+  phylogeny_placement_decisions_file
+)
+```
+
+```{r}
+#| description: Resident-species phylogeny reconstructed from the pinned backbone and reviewed placements.
+resident_phylogeny_rebuild <- build_phylogeny_from_placement_decisions(
+  phylogeny_placement_decisions,
+  resident_auc_data$species_id
+)
+```
+
+```{r}
+#| description: Exact resident-species tip order used for phylogenetic distances and PCoA.
+phylogeny_species_order <- build_phylogeny_species_order(
+  resident_phylogeny_rebuild$tree,
+  phylogeny_placement_decisions,
+  resident_auc_data$species_id
+)
+```
+
+```{r}
+#| description: Patristic-distance PCoA for the retained resident species in fixed tip order.
+resident_pcoa_candidate <- recompute_phylogenetic_pcoa(
+  resident_phylogeny_rebuild$tree,
+  metadata = NULL,
+  tip_order = phylogeny_species_order$species_id
+)
+```
+
+```{r}
+#| description: First three oriented phylogenetic PCoA coordinates for every resident species.
+resident_pev_scores_oriented <- resident_pcoa_candidate$scores |>
+  dplyr::select("species_id", "PEV1", "PEV2", "PEV3")
+```
+
+```{r}
+#| description: PEV1-PEV3 standardised once across unique resident species.
+standardized_pev_species <- standardize_unique_species_predictors(
+  resident_pev_scores_oriented,
+  c("PEV1", "PEV2", "PEV3")
+)
+```
+
+```{r}
+#| description: Resident effects joined to standardised PEV1-PEV3 coordinates.
+phylogeny_auc_data <- resident_auc_data |>
+  dplyr::left_join(
+    standardized_pev_species$data |>
+      dplyr::select("species_id", "PEV1_z", "PEV2_z", "PEV3_z"),
+    by = "species_id"
+  )
+```
+
+```{r}
+#| description: Full continuous-trait-by-climate formula used separately for LDMC, LMA, and vegetative height.
+trait_full_formula <- ~ Trait_z * T_z * P_z * W_z
+```
+
+```{r}
+#| description: Full graminoid-status-by-climate formula.
+graminoid_full_formula <- ~ GraminoidStatus * T_z * P_z * W_z
+```
+
+```{r}
+#| description: Full woodiness-by-climate formula.
+woodiness_full_formula <- ~ Woodiness * T_z * P_z * W_z
+```
+
+```{r}
+#| description: Full phylogenetic-position formula with PEV main effects and their W-T-P-TP interactions.
+phylogeny_full_formula <- ~ T_z * P_z * W_z +
+  PEV1_z + PEV2_z + PEV3_z +
+  PEV1_z:W_z + PEV2_z:W_z + PEV3_z:W_z +
+  PEV1_z:T_z + PEV2_z:T_z + PEV3_z:T_z +
+  PEV1_z:P_z + PEV2_z:P_z + PEV3_z:P_z +
+  PEV1_z:TP_z + PEV2_z:TP_z + PEV3_z:TP_z
+```
+
+```{r}
+#| description: LDMC model data, direct sampling variances, and explicit full formula.
+ldmc_predictor_specification <- list(
+  key = "LDMC",
+  label = "LDMC",
+  data = prepared_ldmc$data,
+  sampling_variance_matrix = prepared_ldmc$sampling_variance_matrix,
+  full_formula = trait_full_formula,
+  predictor_columns = "Trait_z",
+  full_data = FALSE
+)
+```
+
+```{r}
+#| description: LMA model data, direct sampling variances, and explicit full formula.
+lma_predictor_specification <- list(
+  key = "LMA",
+  label = "LMA",
+  data = prepared_lma$data,
+  sampling_variance_matrix = prepared_lma$sampling_variance_matrix,
+  full_formula = trait_full_formula,
+  predictor_columns = "Trait_z",
+  full_data = FALSE
+)
+```
+
+```{r}
+#| description: Vegetative-height model data, direct sampling variances, and explicit full formula.
+height_predictor_specification <- list(
+  key = "Height",
+  label = "Height",
+  data = prepared_height$data,
+  sampling_variance_matrix = prepared_height$sampling_variance_matrix,
+  full_formula = trait_full_formula,
+  predictor_columns = "Trait_z",
+  full_data = FALSE
+)
+```
+
+```{r}
+#| description: Graminoid-status model data, direct sampling variances, and explicit full formula.
+graminoid_predictor_specification <- list(
+  key = "Graminoid",
+  label = "Graminoid status",
+  data = functional_auc_data,
+  sampling_variance_matrix = resident_sampling_variance_matrix,
+  full_formula = graminoid_full_formula,
+  predictor_columns = "GraminoidStatus",
+  full_data = TRUE
+)
+```
+
+```{r}
+#| description: Woodiness model data, direct sampling variances, and explicit full formula.
+woodiness_predictor_specification <- list(
+  key = "Woodiness",
+  label = "Woodiness",
+  data = functional_auc_data,
+  sampling_variance_matrix = resident_sampling_variance_matrix,
+  full_formula = woodiness_full_formula,
+  predictor_columns = "Woodiness",
+  full_data = TRUE
+)
+```
+
+```{r}
+#| description: Phylogenetic-position model data, direct sampling variances, and explicit full formula.
+phylogeny_predictor_specification <- list(
+  key = "Phylogeny",
+  label = "Phylogenetic position (PEV1-PEV3)",
+  data = phylogeny_auc_data,
+  sampling_variance_matrix = resident_sampling_variance_matrix,
+  full_formula = phylogeny_full_formula,
+  predictor_columns = c("PEV1_z", "PEV2_z", "PEV3_z"),
+  full_data = TRUE
+)
+```
+
+```{r}
+#| description: Six explicit predictor specifications used in fitting and leave-gradient-out evaluation.
+predictor_specifications <- list(
+  LDMC = ldmc_predictor_specification,
+  LMA = lma_predictor_specification,
+  Height = height_predictor_specification,
+  Graminoid = graminoid_predictor_specification,
+  Woodiness = woodiness_predictor_specification,
+  Phylogeny = phylogeny_predictor_specification
+)
+```
+
+```{r}
+#| description: Rank, row-matching, and sampling-variance checks for all predictor specifications.
+predictor_specification_validation <- dplyr::bind_rows(
+  lapply(predictor_specifications, function(specification) {
+    validate_predictor_specification(
+      specification,
+      resident_climate_formula,
+      resident_auc_data$effect_id
+    )
+  })
+)
+```
+
+The six fitting calls below expose the fixed formulas through their
+specifications, the common random structure, ML/REML roles, sampling variances,
+experiment clustering, and CR1 adjustment. The helper only avoids repeating
+the mechanical four-fit and table-extraction code.
+
+```{r}
+#| description: Matched climate-only and full LDMC models fitted by ML and REML, with final CR1 inference.
+ldmc_model_pair <- fit_predictor_model_pair(
+  ldmc_predictor_specification,
+  climate_formula = resident_climate_formula,
+  full_climate_ML = NULL,
+  full_climate_REML = NULL,
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  cluster_column = robust_cluster_column,
+  robust_adjust = robust_small_sample_adjustment,
+  club_sandwich = robust_uses_club_sandwich,
+  comparison_method = "ML",
+  final_method = "REML",
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Matched climate-only and full LMA models fitted by ML and REML, with final CR1 inference.
+lma_model_pair <- fit_predictor_model_pair(
+  lma_predictor_specification,
+  climate_formula = resident_climate_formula,
+  full_climate_ML = NULL,
+  full_climate_REML = NULL,
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  cluster_column = robust_cluster_column,
+  robust_adjust = robust_small_sample_adjustment,
+  club_sandwich = robust_uses_club_sandwich,
+  comparison_method = "ML",
+  final_method = "REML",
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Matched climate-only and full vegetative-height models fitted by ML and REML, with final CR1 inference.
+height_model_pair <- fit_predictor_model_pair(
+  height_predictor_specification,
+  climate_formula = resident_climate_formula,
+  full_climate_ML = NULL,
+  full_climate_REML = NULL,
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  cluster_column = robust_cluster_column,
+  robust_adjust = robust_small_sample_adjustment,
+  club_sandwich = robust_uses_club_sandwich,
+  comparison_method = "ML",
+  final_method = "REML",
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Climate-only and full graminoid-status models fitted by ML and REML, with final CR1 inference.
+graminoid_model_pair <- fit_predictor_model_pair(
+  graminoid_predictor_specification,
+  climate_formula = resident_climate_formula,
+  full_climate_ML = resident_climate_model_ML,
+  full_climate_REML = resident_climate_model,
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  cluster_column = robust_cluster_column,
+  robust_adjust = robust_small_sample_adjustment,
+  club_sandwich = robust_uses_club_sandwich,
+  comparison_method = "ML",
+  final_method = "REML",
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Climate-only and full woodiness models fitted by ML and REML, with final CR1 inference.
+woodiness_model_pair <- fit_predictor_model_pair(
+  woodiness_predictor_specification,
+  climate_formula = resident_climate_formula,
+  full_climate_ML = resident_climate_model_ML,
+  full_climate_REML = resident_climate_model,
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  cluster_column = robust_cluster_column,
+  robust_adjust = robust_small_sample_adjustment,
+  club_sandwich = robust_uses_club_sandwich,
+  comparison_method = "ML",
+  final_method = "REML",
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Climate-only and full phylogenetic-position models fitted by ML and REML, with final CR1 inference.
+phylogeny_model_pair <- fit_predictor_model_pair(
+  phylogeny_predictor_specification,
+  climate_formula = resident_climate_formula,
+  full_climate_ML = resident_climate_model_ML,
+  full_climate_REML = resident_climate_model,
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  cluster_column = robust_cluster_column,
+  robust_adjust = robust_small_sample_adjustment,
+  club_sandwich = robust_uses_club_sandwich,
+  comparison_method = "ML",
+  final_method = "REML",
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Fit statistics, direct ML comparisons, random-effect summaries, audits, and CR1 results for all predictors.
+predictor_model_tables <- assemble_predictor_model_tables(
+  ldmc_model_pair,
+  lma_model_pair,
+  height_model_pair,
+  graminoid_model_pair,
+  woodiness_model_pair,
+  phylogeny_model_pair
+)
+```
+
+This compact table is generated from the literal objects above; it is not a
+second specification system.
+
+```{r}
+#| description: Reviewer table assembled from the literal formulas and random structures used above.
+model_specification_table <- tibble::tribble(
+  ~model, ~response, ~fixed_formula, ~random_intercept, ~random_slopes, ~covariance, ~sampling_variance, ~final_method, ~comparison_method, ~robust_inference,
+  "Plot AUC contrasts", "plot AUC", paste(deparse(plot_auc_formula), collapse = " "), "none", "none", "ordinary lm residual covariance within experiment", "contrast SE estimated within experiment", "ordinary least squares", "not applicable", paste0("emmeans contrasts; adjust = ", plot_auc_contrast_adjustment),
+  "Resident climate", "Delta AUC", paste(deparse(resident_climate_formula), collapse = " "), "species", "species W; correlated species T, P, T:P", model_random_covariance_structure, "diagonal auc_se^2", "REML", "ML", "CR1 by experiment; adjust = TRUE",
+  "Family climate", "family Delta AUC", paste(deparse(family_climate_formula), collapse = " "), "family", "family W; correlated family T, P, T:P", model_random_covariance_structure, "diagonal family_auc_se^2", "REML", "not used", "model-based family uncertainty",
+  "LDMC", "Delta AUC", paste(deparse(trait_full_formula), collapse = " "), "species", "species W; correlated species T, P, T:P", model_random_covariance_structure, "diagonal auc_se^2 on LDMC-complete rows", "REML", "ML climate-only vs full", "CR1 by experiment; adjust = TRUE",
+  "LMA", "Delta AUC", paste(deparse(trait_full_formula), collapse = " "), "species", "species W; correlated species T, P, T:P", model_random_covariance_structure, "diagonal auc_se^2 on LMA-complete rows", "REML", "ML climate-only vs full", "CR1 by experiment; adjust = TRUE",
+  "Vegetative height", "Delta AUC", paste(deparse(trait_full_formula), collapse = " "), "species", "species W; correlated species T, P, T:P", model_random_covariance_structure, "diagonal auc_se^2 on height-complete rows", "REML", "ML climate-only vs full", "CR1 by experiment; adjust = TRUE",
+  "Graminoid status", "Delta AUC", paste(deparse(graminoid_full_formula), collapse = " "), "species", "species W; correlated species T, P, T:P", model_random_covariance_structure, "diagonal auc_se^2", "REML", "ML climate-only vs full", "CR1 by experiment; adjust = TRUE",
+  "Woodiness", "Delta AUC", paste(deparse(woodiness_full_formula), collapse = " "), "species", "species W; correlated species T, P, T:P", model_random_covariance_structure, "diagonal auc_se^2", "REML", "ML climate-only vs full", "CR1 by experiment; adjust = TRUE",
+  "Phylogenetic position", "Delta AUC", paste(deparse(phylogeny_full_formula), collapse = " "), "species", "species W; correlated species T, P, T:P", model_random_covariance_structure, "diagonal auc_se^2", "REML", "ML climate-only vs full", "CR1 by experiment; adjust = TRUE"
+)
+```
+
+## Stored model specifications and results
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(model_specification_table))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(predictor_model_tables)$fit_statistics)
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(predictor_model_tables)$comparisons)
+```
+
+# Inference and diagnostics
+
+## Random-effect uncertainty
+
+The appendix compares species-level random-effect estimates across the resident
+climate model and the six full predictor models. Profile-likelihood intervals
+are calculated separately for their five variance components; they are a
+diagnostic of uncertainty in those components, not part of fitting the main
+models. One interval in the current rebuild is incomplete: the LMA model's
+species-specific precipitation-slope variance has no lower bound because its
+profile refits did not converge. The result is shown without a confidence bar,
+and no claim is made that its interval includes or excludes zero. The release
+check permits this documented case only; see
+[the deferred diagnostic note](docs/rebuild_known_issues.md).
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(model_effects_validation))
+```
+
+```{r}
+#| eval: true
+knitr::kable(
+  dplyr::filter(tar_read(model_random_effect_profiles), is.na(CI_low))
+)
+```
+
+## Heterogeneity
+
+For each climate-only and full REML fit, response-scale heterogeneity is the
+sum of the fitted species intercept variation, the warming-slope variation
+expressed at each experiment's warming value, and the correlated T/P/T:P slope
+variation expressed at each experiment's destination climate. The reported
+percentage compares those components between the matched climate-only and full
+fits. A negative percentage means that the fitted random component is larger
+in the full model. This does not contradict a significant ML comparison: the
+fixed predictor can improve the mean relationship while remaining differences
+among species are re-estimated and may become larger.
+
+```{r}
+#| description: Response-scale heterogeneity components and matched climate-versus-full percentages for six predictors.
+heterogeneity_bundle <- assemble_heterogeneity_synthesis(
+  ldmc_model_pair,
+  lma_model_pair,
+  height_model_pair,
+  graminoid_model_pair,
+  woodiness_model_pair,
+  phylogeny_model_pair
+)
+```
+
+## Appendix Figure S7: model R2 and leave-gradient-out RMSE
+
+Marginal and conditional R2 are calculated from the final REML fits, giving
+each geographic gradient equal influence. Marginal R2 is the share of total
+response-scale variation assigned to fixed effects. Conditional R2 includes
+both fixed effects and fitted among-species variation. Sampling variance is
+included in the denominator of both.
+
+Writing the three variance parts as fixed-effect variation, among-species
+variation, and sampling variation, the two reported quantities are:
+
+\[
+\mathrm{marginal\_R2} =
+\frac{V_{fixed}}{V_{fixed} + V_{species} + V_{sampling}}
+\]
+
+\[
+\mathrm{conditional\_R2} =
+\frac{V_{fixed} + V_{species}}
+{V_{fixed} + V_{species} + V_{sampling}}.
+\]
+
+For predictive evaluation, each of the 20 gradients is omitted in turn. Models
+are fitted to the other 19 gradients and fixed effects predict Delta AUC in the
+omitted gradient. RMSE and predictive R2 first calculate error within each
+gradient and then give all gradients equal influence. Complete gradients are
+resampled 5,000 times for 95% intervals.
+
+For gradient \(g\), the squared errors are first averaged within that gradient
+to obtain \(MSE_g\). With \(G\) gradients, the displayed calculations are:
+
+\[
+\mathrm{RMSE} = \sqrt{\frac{1}{G}\sum_g MSE_g}
+\]
+
+\[
+\mathrm{predictive\_R2} = 1 -
+\frac{G^{-1}\sum_g MSE_g}
+{G^{-1}\sum_g \overline{y^2}_g -
+ (G^{-1}\sum_g \bar{y}_g)^2}.
+\]
+
+Thus a large gradient and a small gradient have the same influence. The
+bootstrap resamples whole gradients, never individual effect rows. The stored
+columns are `marginal_R2`, `conditional_R2`, `predictive_R2`, and `RMSE`.
+
+```{r}
+#| description: Equal-gradient marginal and conditional R2 for climate-only and six full predictor models.
+model_fit_r2 <- assemble_model_fit_r2(
+  resident_climate_model,
+  ldmc_model_pair,
+  lma_model_pair,
+  height_model_pair,
+  graminoid_model_pair,
+  woodiness_model_pair,
+  phylogeny_model_pair
+)
+```
+
+```{r}
+#| description: Geographic gradients omitted one at a time for Appendix Figure S7.
+#| iteration: vector
+model_performance_gradient <- sort(
+  unique(as.character(resident_auc_data$gradient_id))
+)
+```
+
+```{r}
+#| description: REML fits and fixed-effect predictions for one omitted geographic gradient.
+#| pattern: map(model_performance_gradient)
+#| iteration: list
+model_performance_fold <- run_model_performance_gradient_fold(
+  heldout_gradient = model_performance_gradient,
+  predictor_specifications = predictor_specifications,
+  full_data = resident_auc_data,
+  full_sampling_variance_matrix = resident_sampling_variance_matrix,
+  climate_formula = resident_climate_formula,
+  random = resident_species_random_effects,
+  struct = model_random_covariance_structure,
+  method = "REML",
+  sparse = TRUE
+)
+```
+
+```{r}
+#| description: Combined fold-level mean squared errors and numerical fit audits.
+model_performance_cv <- combine_model_performance_folds(
+  model_performance_fold
+)
+```
+
+```{r}
+#| description: Equal-gradient RMSE and predictive R2 with 5000 complete-gradient bootstrap intervals.
+model_cross_validation_metrics <- summarise_model_cross_validation(
+  model_performance_cv$fold_statistics,
+  bootstrap_replicates = 5000L,
+  seed = 20260914L
+)
+```
+
+```{r}
+#| description: Convergence, rank, partition, R2, RMSE, and predictive-R2 checks for Appendix Figure S7.
+model_performance_validation <- validate_model_performance(
+  model_performance_fold,
+  model_performance_cv,
+  model_fit_r2,
+  model_cross_validation_metrics
+)
+```
+
+```{r}
+#| description: Release check requiring the four Appendix Figure S7 measures and their stored validation to pass.
+model_performance_release_validation <- {
+  model_fit_r2_file
+  model_cross_validation_metrics_file
+  model_performance_validation_file
+  assert_model_performance_validation(model_performance_validation)
+}
+```
+
+## Stored inference and diagnostics
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(heterogeneity_bundle)$components)
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(heterogeneity_bundle)$synthesis)
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(model_fit_r2))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(model_cross_validation_metrics))
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(model_performance_validation))
+```
+
+# Figures and tables
+
+The publication figures and tables remain separate targets because they are
+generated artifacts. The chunks below read stored plot objects; they do not
+calculate models while rendering this document.
+
+```{r}
+#| eval: true
+tar_read(figure01_winners_losers)
+```
+
+```{r}
+#| eval: true
+tar_read(species_context_figure)
+```
+
+```{r}
+#| eval: true
+tar_read(figure06_predictor_synthesis)
+```
+
+```{r}
+#| eval: true
+tar_read(appendix_model_predictive_performance)
+```
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(release_validation))
+```
+
+## Target manifest
+
+This is `targets`' own manifest, not a separately maintained workflow table.
+
+```{r}
+#| eval: true
+knitr::kable(
+  tar_manifest(fields = c("name", "command", "pattern", "description"))
+)
+```
+
+## Scientific dependency spine
+
+This compact view follows one connected route from the original data to the
+release check. Graminoid status is shown as one example of the six predictor
+fits; all six formulas and fitting calls are displayed above.
+
+```{r}
+#| eval: true
+tar_glimpse(
+  targets_only = TRUE,
+  names = c(
+    "current_input", "community", "analysis_community", "auc_inputs",
+    "auc_contrasts", "winner_loser", "descriptive_analysis_data",
+    "analysis_data", "analysis_data_file", "resident_analysis_dataset",
+    "resident_auc_unscaled", "resident_scaled", "resident_auc_data",
+    "resident_climate_model", "graminoid_model_pair",
+    "heterogeneity_bundle", "current_scientific_release_validation",
+    "release_validation"
+  ),
+  shortcut = TRUE,
+  degree_from = 0L,
+  degree_to = 0L
+)
+```
+
+## Raw data to responses
+
+```{r}
+#| eval: true
+tar_visnetwork(
+  targets_only = TRUE,
+  names = c(
+    "current_input", "community", "analysis_community", "auc_inputs",
+    "auc_contrasts", "winner_loser", "descriptive_analysis_data",
+    "analysis_data", "analysis_data_file", "resident_analysis_dataset",
+    "resident_auc_unscaled", "resident_scaled", "resident_auc_data",
+    "resident_sampling_variance_matrix"
+  ),
+  shortcut = TRUE,
+  outdated = FALSE,
+  degree_from = 0L,
+  degree_to = 0L
+)
+```
+
+## Resident models to Figure 6 and release
+
+This focused view shows the resident climate, family, one example predictor,
+heterogeneity, and Figure 6 branches. The full workflow has analogous branches
+for the other five predictors and for all other figures.
+
+```{r}
+#| eval: true
+tar_visnetwork(
+  targets_only = TRUE,
+  names = c(
+    "resident_auc_data", "resident_climate_model", "species_context_bundle",
+    "family_auc_bundle", "family_model_bundle", "family_model_summary",
+    "graminoid_model_pair", "heterogeneity_bundle",
+    "heterogeneity_synthesis_file", "figure06_predictor_synthesis_data",
+    "figure06_predictor_synthesis", "current_scientific_release_validation",
+    "release_validation"
+  ),
+  shortcut = TRUE,
+  outdated = FALSE,
+  degree_from = 0L,
+  degree_to = 0L
+)
+```
+
+## Parts that remain less direct to audit
+
+Four parts necessarily retain more supporting code than the central analysis:
+
+1. TNRS harmonisation depends on an external service response plus the reviewed
+   override table.
+2. TRY processing depends on the licensed export and its trait dictionary.
+3. CHELSA processing performs repeated file downloads and spatial extraction,
+   so those jobs remain dynamically branched.
+4. Phylogeny reconstruction uses pinned `V.PhyloMaker2` reference data,
+   reviewed placements, branch lengths, and PCoA orientation checks.
+
+Their inputs, audits, and final objects remain visible in the target graph, but
+their low-level file and package operations stay in tested helper functions.

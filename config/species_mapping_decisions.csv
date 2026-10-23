@@ -1,0 +1,10 @@
+region,site_id,local_species_code,decision,accepted_name,note
+SE_Abisko,High,Ant alp,accept,Antennaria alpina,"Legacy code rejected the competing Anthoxanthum mapping"
+SE_Abisko,High,Equ pal/pra,exclude,,"Ambiguous Equisetum palustre/pratense aggregate"
+SE_Abisko,Low,Equ pal/pra,exclude,,"Ambiguous Equisetum palustre/pratense aggregate"
+SE_Abisko,Mid,Equ pal/pra,exclude,,"Ambiguous Equisetum palustre/pratense aggregate"
+SE_Abisko,High,Rum ace subsp lap,accept,Rumex acetosa,"Legacy code rejected the competing subspecies mapping"
+SE_Abisko,Low,Rum ace subsp lap,accept,Rumex acetosa,"Legacy code rejected the competing subspecies mapping"
+SE_Abisko,Mid,Rum ace subsp lap,accept,Rumex acetosa,"Legacy code rejected the competing subspecies mapping"
+SE_Abisko,Low,Ver alp,accept,Veronica alpina,"Legacy code rejected the competing subspecies mapping"
+SE_Abisko,Mid,Sal gla,accept,Salix glauca,"Legacy code rejected the competing subspecies mapping"

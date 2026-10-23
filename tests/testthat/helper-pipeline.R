@@ -1,0 +1,5 @@
+PROJECT_ROOT <- normalizePath(testthat::test_path("..", ".."))
+project_path <- function(...) file.path(PROJECT_ROOT, ...)
+source(project_path("config", "analysis.R"))
+source(project_path("config", "workflow.R"))
+targets::tar_source(project_path("R"))
