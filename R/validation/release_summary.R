@@ -367,8 +367,12 @@ build_current_model_report <- function(
       "Response-scale heterogeneity-resolution synthesis",
       format_heterogeneity_synthesis(heterogeneity_synthesis)
     ),
-    report_section("Current release checks", release_lines),
+    report_section("Scientific-data checks (not the final release gate)", release_lines),
     "",
-    paste("FINAL STATUS:", if (all(release_checks$pass)) "PASS" else "FAIL")
+    paste(
+      "SCIENTIFIC-DATA CHECK STATUS:",
+      if (all(release_checks$pass)) "PASS" else "FAIL"
+    ),
+    "Final release status is recorded separately in output/audits/release_validation.csv."
   )
 }

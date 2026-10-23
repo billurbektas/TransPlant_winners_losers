@@ -359,9 +359,9 @@ functional_groups <- derive_functional_groups(
 ```
 
 The CHELSA jobs remain dynamically branched because each month is
-downloaded or read from cache independently. Set
-`TRANSPLANT_CHELSA_OFFLINE=true` for the approved clean rebuild: all 336
-required monthly checkpoints must then match the current site coordinates,
+downloaded or read from cache independently. With
+`TRANSPLANT_CHELSA_OFFLINE=true`, all 336 required monthly checkpoints must
+match the current site coordinates,
 or the affected month stops without a download. The scientific sequence—check
 coordinates, retrieve monthly climate, then summarise by site and experiment—
 is kept visible here.
@@ -1448,6 +1448,31 @@ knitr::kable(tar_read(predictor_model_tables)$comparisons)
 
 # Inference and diagnostics
 
+## Random-effect uncertainty
+
+The appendix compares species-level random-effect estimates across the resident
+climate model and the six full predictor models. Profile-likelihood intervals
+are calculated separately for their five variance components; they are a
+diagnostic of uncertainty in those components, not part of fitting the main
+models. One interval in the current rebuild is incomplete: the LMA model's
+species-specific precipitation-slope variance has no lower bound because its
+profile refits did not converge. The result is shown without a confidence bar,
+and no claim is made that its interval includes or excludes zero. The release
+check permits this documented case only; see
+[the deferred diagnostic note](docs/rebuild_known_issues.md).
+
+```{r}
+#| eval: true
+knitr::kable(tar_read(model_effects_validation))
+```
+
+```{r}
+#| eval: true
+knitr::kable(
+  dplyr::filter(tar_read(model_random_effect_profiles), is.na(CI_low))
+)
+```
+
 ## Heterogeneity
 
 For each climate-only and full REML fit, response-scale heterogeneity is the
@@ -1622,9 +1647,8 @@ knitr::kable(tar_read(model_performance_validation))
 # Figures and tables
 
 The publication figures and tables remain separate targets because they are
-generated artifacts. The chunks below read the stored plot objects after the
-approved clean rebuild; they do not calculate models while rendering this
-document.
+generated artifacts. The chunks below read stored plot objects; they do not
+calculate models while rendering this document.
 
 ```{r}
 #| eval: true

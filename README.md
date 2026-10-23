@@ -14,13 +14,16 @@ Quick start:
 
 ```sh
 Rscript -e 'renv::restore()'
-Rscript scripts/run_pipeline.R
+TRANSPLANT_CHELSA_OFFLINE=true Rscript scripts/run_pipeline.R
 ```
 
-Do not run the pipeline yet: the old outputs have been backed up and removed,
-and the clean rebuild awaits approval. For that rebuild, set
-`TRANSPLANT_CHELSA_OFFLINE=true` to require the 336 validated monthly files
-without downloading any CHELSA data.
+The clean rebuild completed on 2 October 2026 using the validated monthly
+CHELSA cache. The final release checks and test suite passed with one explicitly
+documented, unresolved model-profile interval; see
+[`docs/rebuild_known_issues.md`](docs/rebuild_known_issues.md). The rebuilt
+scientific outputs still await review and acceptance before a new release
+reference is frozen. `TRANSPLANT_CHELSA_OFFLINE=true` requires the 336 monthly
+checkpoints and prevents new CHELSA downloads.
 
 Figure renderers are available through one dispatcher:
 
@@ -33,4 +36,3 @@ Tracked historical sources are preserved under the annotated recovery tag
 old reports have been retired from the working tree. Previous generated results
 and target stores are recoverable from the verified ZIP recorded in
 [`docs/pre_rebuild_backup_receipts.csv`](docs/pre_rebuild_backup_receipts.csv).
-No clean rebuild has been run yet.

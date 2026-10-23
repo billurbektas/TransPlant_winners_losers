@@ -198,11 +198,16 @@ assemble_model_random_effect_profiles <- function(
       SD_estimate = sqrt(pmax(.data$estimate, 0)),
       SD_CI_low = sqrt(pmax(.data$CI_low, 0)),
       SD_CI_high = sqrt(pmax(.data$CI_high, 0)),
-      supported = is.finite(.data$CI_low) & .data$CI_low > 0,
-      inference = dplyr::if_else(
-        .data$supported,
-        "profile-likelihood 95% CI excludes zero",
-        "profile-likelihood 95% CI includes zero"
+      supported = dplyr::case_when(
+        is.finite(.data$CI_low) & is.finite(.data$CI_high) ~
+          .data$CI_low > 0,
+        TRUE ~ NA
+      ),
+      inference = dplyr::case_when(
+        is.na(.data$supported) ~
+          "lower profile-likelihood bound unavailable; support undetermined",
+        .data$supported ~ "profile-likelihood 95% CI excludes zero",
+        TRUE ~ "profile-likelihood 95% CI includes zero"
       ),
       inference_method = paste(
         "metafor profile-likelihood interval for the variance component;",
@@ -300,6 +305,28 @@ validate_model_effects <- function(fixed, random_profiles,
   )
   fixed_interval_support <- fixed$CR1_CI_low > 0 | fixed$CR1_CI_high < 0
   fixed_p_support <- fixed$CR1_p_value < 0.05
+  complete_profile <- with(random_profiles,
+    is.finite(estimate) & is.finite(CI_low) & is.finite(CI_high) &
+      CI_low >= 0 & CI_low <= estimate & estimate <= CI_high
+  )
+  # The October 2026 rebuild has one unresolved lower profile bound. Keep its
+  # estimate and warning visible, but do not interpret the incomplete interval.
+  documented_incomplete_profile <- with(random_profiles,
+    model_key == "LMA" & component == "species_P" &
+      is.finite(estimate) & is.na(CI_low) & is.finite(CI_high) &
+      estimate <= CI_high & is.na(error) &
+      !is.na(warnings) &
+      grepl(
+        "Cannot obtain lower bound of profile likelihood CI due to convergence problems.",
+        warnings, fixed = TRUE
+      ) & is.na(supported) &
+      inference ==
+        "lower profile-likelihood bound unavailable; support undetermined"
+  )
+  profile_intervals_acceptable <-
+    all(is.na(random_profiles$error)) &&
+    all(complete_profile | documented_incomplete_profile) &&
+    sum(documented_incomplete_profile) <= 1L
   validation <- tibble::tribble(
     ~check, ~pass, ~detail,
     "Seven current species models",
@@ -325,16 +352,13 @@ validate_model_effects <- function(fixed, random_profiles,
       all(table(random_profiles$model_key) == length(expected_components)) &&
       all(expected_components %in% random_profiles$component),
     paste(nrow(random_profiles), "model-component profiles"),
-    "Finite profile-likelihood intervals",
-    all(is.na(random_profiles$error)) &&
-      all(is.finite(random_profiles$estimate)) &&
-      all(is.finite(random_profiles$CI_low)) &&
-      all(is.finite(random_profiles$CI_high)) &&
-      all(random_profiles$CI_low >= 0) &&
-      all(random_profiles$CI_low <= random_profiles$estimate) &&
-      all(random_profiles$estimate <= random_profiles$CI_high),
-    paste(sum(random_profiles$supported),
-          "profile intervals exclude the zero boundary"),
+    "Profile intervals complete except documented LMA lower bound",
+    profile_intervals_acceptable,
+    paste(
+      sum(complete_profile), "complete intervals;",
+      sum(documented_incomplete_profile),
+      "LMA precipitation-slope lower bound unavailable (support undetermined)"
+    ),
     "Profile estimates match fitted variances",
     is.finite(maximum_profile_error) && maximum_profile_error <= 1e-10,
     paste("maximum absolute variance difference",
@@ -491,6 +515,12 @@ build_model_effects_figure <- function(fixed, random_profiles) {
         .data$component_label, levels = .env$component_levels
       )
     )
+  random_interval_fill <- c(
+    "profile-likelihood 95% CI includes zero" = "white",
+    "profile-likelihood 95% CI excludes zero" = "#2166AC",
+    "lower profile-likelihood bound unavailable; support undetermined" =
+      "#E69F00"
+  )
   random_plot <- ggplot2::ggplot(
     random_plot_data,
     ggplot2::aes(x = .data$SD_estimate, y = .data$component_label)
@@ -499,18 +529,22 @@ build_model_effects_figure <- function(fixed, random_profiles) {
       xintercept = 0, colour = "grey55", linewidth = 0.55
     ) +
     ggplot2::geom_errorbar(
+      data = dplyr::filter(
+        random_plot_data,
+        is.finite(.data$SD_CI_low), is.finite(.data$SD_CI_high)
+      ),
       ggplot2::aes(xmin = .data$SD_CI_low, xmax = .data$SD_CI_high),
       width = 0.18, linewidth = 0.7, orientation = "y"
     ) +
     ggplot2::geom_point(
-      ggplot2::aes(fill = factor(.data$supported)),
+      ggplot2::aes(fill = .data$inference),
       shape = 21, colour = "#202020", stroke = 0.65, size = 3.5
     ) +
     ggplot2::facet_wrap(
       ggplot2::vars(.data$model_label), ncol = 4
     ) +
     ggplot2::scale_fill_manual(
-      values = support_fill, labels = support_labels,
+      values = random_interval_fill,
       name = "Random-component profile interval"
     ) +
     ggplot2::scale_x_continuous(

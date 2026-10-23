@@ -45,8 +45,11 @@ flowchart TD
 ```
 
 Historical comparison targets, source files, and fixtures have been removed
-from the active workflow. Previous generated results have been backed up and
-removed; no new results exist until the approved clean rebuild.
+from the active workflow. Previous generated results were backed up and removed.
+The new build completed on 2 October 2026; its scientific outputs await review
+and acceptance before a release reference is frozen. One incomplete model
+profile interval remains explicitly documented in
+[`docs/rebuild_known_issues.md`](docs/rebuild_known_issues.md).
 
 ## Stages
 
@@ -109,14 +112,15 @@ Run the complete graph:
 Rscript scripts/run_pipeline.R
 ```
 
-The run commands above are for the post-approval rebuild. During the present
-migration-review stage, use `tar_manifest()`, `tar_glimpse()`,
-`tar_visnetwork()`, and `tar_outdated()` only.
+The current build is available in the target store. Use `tar_manifest()`,
+`tar_glimpse()`, and focused `tar_visnetwork()` views to inspect its structure;
+`tar_read()` opens cached scientific results. A later `tar_make()` reuses
+unchanged targets rather than refitting them.
 
 Set `TRANSPLANT_WORKERS` to control local parallelism (the default is 2), for
 example `TRANSPLANT_WORKERS=5 Rscript scripts/run_pipeline.R`.
 
-For the clean rebuild, set `TRANSPLANT_CHELSA_OFFLINE=true`. In offline mode a
+For a rebuild, set `TRANSPLANT_CHELSA_OFFLINE=true`. In offline mode a
 missing or invalid monthly file stops with its year, month, and variable; no
 download or cache quarantine is attempted. The 336 monthly files remain in
 `data/cache/chelsa_monthly/` and are checked against current site coordinates.
@@ -147,6 +151,11 @@ Validation is fail-closed. Missing columns, duplicate identifiers, invalid
 sampling-variance ordering, non-finite model results, failed classifications, or a
 failed release check stop the affected branch. Per-stage audit tables remain in
 `output/audits/` when they were successfully written before the failure.
+
+The sole current exception is the unavailable lower profile-likelihood bound
+for the LMA model's species-specific precipitation slope. Its support is marked
+undetermined, not interpreted as including zero; any other incomplete profile
+interval still fails release validation. See the linked known-issues note above.
 
 The historical validation modules and targets are retired. Dependency
 inspection must show that current science, figures, and release targets have no
@@ -184,9 +193,9 @@ Köppen–Geiger raster in pinned `tidyTRY` revision
 raster SHA-256 before filtering; the former local raster was different and is
 retired, not silently substituted. It is recoverable from the data ZIP.
 
-Before any rebuild, the regrouped QMD, `tar_manifest()`, dependency graphs,
+The regrouped QMD, `tar_manifest()`, dependency graphs,
 [`docs/workflow_migration_map.csv`](docs/workflow_migration_map.csv), and focused
-synthetic tests must be reviewed. After the rebuilt outputs are accepted, the
-sole current baseline will be written to
+synthetic tests were checked before the rebuild. The rebuilt outputs now need
+scientific review. After acceptance, the sole current baseline will be written to
 `output/reference/release_reference_results.rds` and registered in
 `config/release_reference.csv`.

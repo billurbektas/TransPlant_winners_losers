@@ -102,6 +102,69 @@ testthat::test_that("variance profiles are displayed on the SD scale", {
   testthat::expect_true(all(profiles$supported))
 })
 
+testthat::test_that("only the documented incomplete LMA profile is exempted", {
+  model_keys <- model_performance_key()$model_key
+  components <- c(
+    "species_intercept", "species_W", "species_T", "species_P",
+    "species_TP"
+  )
+  fixed <- tibble::tibble(
+    model_key = rep(model_keys, length.out = 111L),
+    term = paste0("term_", seq_len(111L)),
+    estimate = 0, CR1_SE = 1,
+    CR1_CI_low = -1, CR1_CI_high = 1,
+    CR1_p_value = 0.5, supported = FALSE
+  )
+  profiles <- tidyr::expand_grid(
+    model_key = model_keys, component = components
+  ) |>
+    dplyr::mutate(
+      estimate = 0.01, CI_low = 0.001, CI_high = 0.02,
+      warnings = NA_character_, error = NA_character_, supported = TRUE,
+      inference = "profile-likelihood 95% CI excludes zero"
+    )
+  diagnostics <- tibble::tibble(
+    model_key = model_keys,
+    species_intercept_variance = 0.01,
+    species_W_variance = 0.01,
+    species_T_variance = 0.01,
+    species_P_variance = 0.01,
+    species_TP_variance = 0.01,
+    T_P_correlation = 0,
+    T_TP_correlation = 0,
+    P_TP_correlation = 0
+  )
+  lma_row <- which(
+    profiles$model_key == "LMA" & profiles$component == "species_P"
+  )
+  profiles$CI_low[lma_row] <- NA_real_
+  profiles$warnings[lma_row] <- paste(
+    "Cannot obtain lower bound of profile likelihood CI",
+    "due to convergence problems."
+  )
+  profiles$supported[lma_row] <- NA
+  profiles$inference[lma_row] <- paste(
+    "lower profile-likelihood bound unavailable;",
+    "support undetermined"
+  )
+  validation <- validate_model_effects(fixed, profiles, diagnostics)
+  testthat::expect_true(all(validation$pass))
+  testthat::expect_match(
+    validation$detail[grepl("Profile intervals", validation$check)],
+    "34 complete intervals; 1 LMA"
+  )
+
+  other_row <- which(
+    profiles$model_key == "Height" & profiles$component == "species_P"
+  )
+  profiles$CI_low[other_row] <- NA_real_
+  profiles$warnings[other_row] <- profiles$warnings[lma_row]
+  profiles$supported[other_row] <- NA
+  profiles$inference[other_row] <- profiles$inference[lma_row]
+  validation <- validate_model_effects(fixed, profiles, diagnostics)
+  testthat::expect_false(all(validation$pass))
+})
+
 testthat::test_that("model-effect targets keep profiling separate from primary fits", {
   target_text <- paste(
     readLines(project_path("R", "targets", "definitions", "models.R")),
