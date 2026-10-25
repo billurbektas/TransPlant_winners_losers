@@ -261,6 +261,11 @@ report <- c(
   "", "## Key results", "", "### Manifest", "", md_table(manifest),
   "", "### Community (`analysis_community`, legacy `relative_cover` dropped)", "",
   md_table(community_summary),
+  "", sprintf(paste(
+    "The %d rows without cover are US_Arizona, which recorded relative cover only; it is carried",
+    "in `supplied_relative_cover` (%d of these rows filled), not in `cover`. US_Arizona is removed",
+    "in step 01 by the pool-size rule."),
+    nrow(na_cover), sum(!is.na(na_cover$supplied_relative_cover))),
   "", "### Climate of the 42 included experiments",
   "", paste("T = destination JJA temperature (degC), W = destination minus origin JJA temperature,",
             "P_summer = log destination JJA precipitation, P_annual = log destination annual precipitation",

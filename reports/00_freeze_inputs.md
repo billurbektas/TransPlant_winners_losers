@@ -50,6 +50,8 @@ Experiments excluded by the legacy pipeline (kept in `experiments.rds` with `inc
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 22 | 763 | 2961 | 797 | 1 to 9 | 244 | 84 | 1024 |
 
+The 244 rows without cover are US_Arizona, which recorded relative cover only; it is carried in `supplied_relative_cover` (244 of these rows filled), not in `cover`. US_Arizona is removed in step 01 by the pool-size rule.
+
 ### Climate of the 42 included experiments
 
 T = destination JJA temperature (degC), W = destination minus origin JJA temperature, P_summer = log destination JJA precipitation, P_annual = log destination annual precipitation (legacy sum of monthly CHELSA precipitation per year, averaged over the experiment's years; `legacy/R/data/climate.R:346`, not recomputed here). Not standardised.
