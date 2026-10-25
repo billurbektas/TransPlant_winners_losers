@@ -81,3 +81,20 @@ _targets_refactor_validation/
 
 # Legacy whole-session snapshots are not pipeline inputs
 Environment_Save_*.RData
+
+# derived data: regenerable, keep only small csv summaries
+data/derived/**
+!data/derived/**/
+!data/derived/**/*.csv
+
+# local working files for Claude Code, never pushed
+CLAUDE.md
+MILESTONES.md
+PLAN.md
+KICKOFF_PROMPT.md
+plan_figures/
+.claude/
+
+# generated figures from the retired targets pipeline, ignored as at their old paths
+legacy/figures/candidates/
+legacy/figures/manuscript/
