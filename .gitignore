@@ -83,6 +83,7 @@ _targets_refactor_validation/
 Environment_Save_*.RData
 
 # derived data: regenerable, keep only small csv summaries
+!data/derived/
 data/derived/**
 !data/derived/**/
 !data/derived/**/*.csv
