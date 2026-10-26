@@ -9,12 +9,6 @@
     ]
   },
   "Packages": {
-    "ape": {
-      "Package": "ape",
-      "Version": "5.8-1",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "DBI": {
       "Package": "DBI",
       "Version": "1.3.0",
@@ -691,6 +685,12 @@
       "License": "MIT + file LICENSE",
       "NeedsCompilation": "no",
       "Author": "Tony Plate [aut, cre], Richard Heiberger [aut]",
+      "Repository": "CRAN"
+    },
+    "ape": {
+      "Package": "ape",
+      "Version": "5.8-1",
+      "Source": "Repository",
       "Repository": "CRAN"
     },
     "askpass": {
@@ -7277,15 +7277,17 @@
     },
     "tidyTRY": {
       "Package": "tidyTRY",
-      "Version": "0.1.0",
+      "Version": "0.2.0",
       "Source": "GitHub",
       "Title": "Read, Clean, and Process Plant Trait Data from the TRY Database",
-      "Authors@R": "person(\"Billur\", \"Bektas\", role = c(\"aut\", \"cre\"), email = \"billur.bektas@example.com\")",
-      "Description": "Provides a pipeline for processing plant trait data downloaded from the TRY database (<https://www.try-db.org/>). Handles reading large tab-delimited TRY data files with chunked processing, filtering by species lists, resolving taxonomy via TNRS or WorldFlora, removing experimental datasets, cleaning quantitative traits by error risk, renaming long TRY trait names to short codes, extracting geolocation data, and generating diagnostic summaries and plots.",
+      "Authors@R": "person(\"Billur\", \"Bektas\", role = c(\"aut\", \"cre\"), email = \"billur.bektas@gmail.com\")",
+      "Description": "Provides a pipeline for processing plant trait data downloaded from the TRY database (<https://www.try-db.org/>). Handles reading large tab-delimited TRY data files with chunked processing, filtering by species lists or TRY species IDs, resolving taxonomy via TNRS (legitimate names only) or WorldFlora, removing experimental observations, cleaning quantitative traits by error risk, renaming long TRY trait names to short codes, extracting geolocation data, and generating diagnostic summaries and plots.",
+      "Depends": [
+        "R (>= 4.1.0)"
+      ],
       "License": "MIT + file LICENSE",
       "Encoding": "UTF-8",
       "Roxygen": "list(markdown = TRUE)",
-      "RoxygenNote": "7.3.2",
       "Imports": [
         "readr (>= 2.0.0)",
         "dplyr (>= 1.1.0)",
@@ -7294,10 +7296,13 @@
         "stringr (>= 1.5.0)",
         "rlang (>= 1.1.0)",
         "cli (>= 3.6.0)",
-        "tibble (>= 3.2.0)"
+        "tibble (>= 3.2.0)",
+        "stats",
+        "utils",
+        "grDevices"
       ],
       "Suggests": [
-        "TNRS",
+        "TNRS (>= 0.3.6)",
         "WorldFlora",
         "readxl (>= 1.4.0)",
         "ggplot2 (>= 3.4.0)",
@@ -7312,14 +7317,13 @@
       "Config/testthat/edition": "3",
       "URL": "https://github.com/billurbektas/tidyTRY",
       "BugReports": "https://github.com/billurbektas/tidyTRY/issues",
-      "Author": "Billur Bektas [aut, cre]",
-      "Maintainer": "Billur Bektas <billur.bektas@example.com>",
+      "Config/roxygen2/version": "8.0.0",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "billurbektas",
       "RemoteRepo": "tidyTRY",
-      "RemoteRef": "main",
-      "RemoteSha": "3352199fc99f72170a8983c522d63aa9029d0e9f"
+      "RemoteRef": "2d29a04c45ffeb30679c8719714e7f4462d49c74",
+      "RemoteSha": "2d29a04c45ffeb30679c8719714e7f4462d49c74"
     },
     "tidyr": {
       "Package": "tidyr",
