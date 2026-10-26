@@ -99,3 +99,6 @@ plan_figures/
 # generated figures from the retired targets pipeline, ignored as at their old paths
 legacy/figures/candidates/
 legacy/figures/manuscript/
+
+# prep pipeline store (targets), regenerable
+prep/_targets/
