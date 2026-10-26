@@ -24,6 +24,12 @@ list(
   tar_target(try_dictionary_file, "prep/config/try_trait_map.csv", format = "file"),
   tar_target(natural_values_file, "prep/config/try_natural_values.csv", format = "file"),
   tar_target(frozen_traits_file, "data/derived/00_inputs/traits.rds", format = "file"),
+  tar_target(frozen_groups_file, "data/derived/00_inputs/functional_groups.rds", format = "file"),
+  tar_target(frozen_axes_file, "data/derived/00_inputs/phylogeny_axes.rds", format = "file"),
+  tar_target(woodiness_file, "prep/config/woodiness.csv", format = "file"),
+  tar_target(genus_map_file, "prep/config/phylogeny_genus_map.csv", format = "file"),
+  tar_target(legacy_placements_file, "prep/config/phylogeny_placements_legacy.csv", format = "file"),
+  tar_target(placements_file, "prep/config/phylogeny_placements.csv", format = "file"),
   tar_target(site_edits, read_ledger(site_edits_file)),
   tar_target(community_edits, read_ledger(community_edits_file)),
   tar_target(mapping_decisions, read_ledger(mapping_decisions_file)),
@@ -79,5 +85,22 @@ list(
   tar_target(p2_report,
              write_p2_report(try_ids, try_attached, try_clean, try_climate, trait_summary, try_name_map,
                              taxonomy, natural_values, frozen_traits_file),
+             format = "file"),
+
+  # P3: functional groups and phylogeny
+  tar_target(study_species, build_study_species(taxonomy)),
+  tar_target(functional_groups, build_functional_groups(study_species, read_ledger(woodiness_file))),
+  # rule-based draft of the placement ledger, kept to show hand edits; the
+  # tree is built from the reviewed ledger only
+  tar_target(placement_draft_tbl,
+             placement_draft(study_species, read_ledger(legacy_placements_file), read_ledger(genus_map_file),
+                             taxonomy, readRDS(frozen_taxonomy_file))),
+  tar_target(placements, read_placements(placements_file, study_species)),
+  tar_target(phylogeny, build_phylogeny(placements)),
+  tar_target(phylogeny_axes, phylogeny_pcoa(phylogeny)),
+  tar_target(p3_outputs, write_p3_outputs(functional_groups, phylogeny, phylogeny_axes, placements), format = "file"),
+  tar_target(p3_report,
+             write_p3_report(study_species, functional_groups, placements, placement_draft_tbl, phylogeny,
+                             phylogeny_axes, frozen_groups_file, frozen_axes_file),
              format = "file")
 )

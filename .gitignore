@@ -102,3 +102,7 @@ legacy/figures/manuscript/
 
 # prep pipeline store (targets), regenerable
 prep/_targets/
+
+# prep working files rewritten by the pipeline
+prep/phylogeny_placements_draft.csv
+prep/unresolved_names.csv

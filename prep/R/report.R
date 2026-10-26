@@ -298,3 +298,75 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
   writeLines(report, path)
   path
 }
+
+write_p3_outputs <- function(functional_groups, phylogeny, phylogeny_axes, placements, dir = "data/derived/prep") {
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  files <- file.path(dir, c("functional_groups.rds", "phylogeny_axes.rds", "phylogeny_tree.rds", "phylogeny_placements.csv"))
+  saveRDS(functional_groups, files[1])
+  saveRDS(list(scores = phylogeny_axes$scores, eigenvalues = phylogeny_axes$eigenvalues), files[2])
+  saveRDS(phylogeny$tree, files[3])
+  utils::write.csv(dplyr::select(placements, species, placement, backbone_label, sp_genus, sp_family, source),
+                   files[4], row.names = FALSE, na = "")
+  files
+}
+
+write_p3_report <- function(study_species, functional_groups, placements, placement_draft_tbl, phylogeny,
+                            phylogeny_axes, frozen_groups_file, frozen_axes_file,
+                            path = "reports/P3_groups_phylogeny.md") {
+  fg <- functional_groups
+  eig <- phylogeny_axes$eigenvalues
+  n_bs <- sum(eig$exceeds_broken_stick)
+  woody_tab <- dplyr::select(dplyr::filter(fg, woody), species, family, woody_basis)
+  ptab <- dplyr::count(placements, placement, name = "species")
+  family_grafts <- placements$species[placements$placement == "grafted within family"]
+  edited <- dplyr::inner_join(dplyr::select(placements, species, ledger = backbone_label, ledger_placement = placement),
+                              dplyr::select(placement_draft_tbl, species, draft = backbone_label, draft_placement = placement),
+                              by = "species") |>
+    dplyr::filter(!mapply(identical, ledger, draft) | ledger_placement != draft_placement)
+
+  # against step 00
+  frozen_fg <- readRDS(frozen_groups_file)
+  fg_change <- dplyr::inner_join(dplyr::select(fg, species, graminoid, woody),
+                                 dplyr::select(frozen_fg, species, graminoid_00 = graminoid, woody_00 = woody), by = "species") |>
+    dplyr::filter(graminoid != graminoid_00 | woody != woody_00)
+  frozen_ax <- readRDS(frozen_axes_file)$scores
+  common <- intersect(phylogeny_axes$scores$species, frozen_ax$species)
+  cors <- vapply(paste0("PEV", 1:3), function(ax) {
+    stats::cor(phylogeny_axes$scores[[ax]][match(common, phylogeny_axes$scores$species)],
+               frozen_ax[[ax]][match(common, frozen_ax$species)])
+  }, numeric(1))
+
+  report <- c(
+    "# P3: Functional groups and phylogeny", "",
+    paste0("Graminoid and woody status and a phylogeny with its PCoA axes for all ", nrow(study_species),
+           " study species (residents and destination pool), on the P1 accepted species. The tree is cut from the ",
+           "V.PhyloMaker2 mega-tree GBOTB.extended.LCVP (scenario S3); each species' place is set by the reviewed ",
+           "ledger `prep/config/phylogeny_placements.csv`, which reuses the legacy hand-checked labels for the same species ",
+           "(and for renamed species whose epithet is unchanged), and places new species by rule."),
+    "", "## Functional groups", "",
+    sprintf("Graminoid (Poaceae, Cyperaceae, Juncaceae): %d species. Woody (`prep/config/woodiness.csv`): %d species. Family taken from the backbone genus (no family in P1): %s.",
+            sum(fg$graminoid), sum(fg$woody), paste(study_species$species[study_species$family_source == "backbone genus"], collapse = ", ")),
+    "", md_table(woody_tab),
+    "", sprintf("Species whose graminoid or woody status differs from step 00 (%d):", nrow(fg_change)), "",
+    if (nrow(fg_change)) md_table(fg_change) else "None.",
+    "", "## Placements", "", md_table(ptab), "",
+    sprintf("Grafted at family level, their genus being absent from the mega-tree (%d): %s.", length(family_grafts), paste(family_grafts, collapse = ", ")),
+    "", sprintf("Ledger rows edited by hand relative to the rule-based draft: %d.", nrow(edited)),
+    if (nrow(edited)) c("", md_table(edited)) else character(),
+    "", "## Tree and axes", "",
+    sprintf("Tips: %d, rooted and ultrametric. PCoA on cophenetic distances: %d positive axes; %s (negative/positive eigenvalue ratio %.2g). %d axes exceed the broken-stick expectation; PEV1 to PEV3 carry %.1f%% of the positive variation. Orientation anchors: Poa trivialis +PEV1, Erigeron formosissimus -PEV2, Euphrasia minima +PEV3.",
+            length(phylogeny$tree$tip.label), nrow(eig), if (phylogeny_axes$corrected) "Lingoes correction" else "no correction needed",
+            phylogeny_axes$negative_ratio, n_bs, eig$cumulative_percent[3]),
+    "", md_table(dplyr::mutate(utils::head(eig, 6), dplyr::across(dplyr::where(is.numeric), ~ round(.x, 2)))),
+    "", sprintf("Against step 00 (%d resident species in both): correlation of scores PEV1 %.3f, PEV2 %.3f, PEV3 %.3f.",
+                length(common), cors[1], cors[2], cors[3]),
+    "", "## Warnings captured", "",
+    if (length(phylogeny$warnings)) paste("-", unique(phylogeny$warnings)) else "None.",
+    "", "## Deviations from the plan", "",
+    paste("The genus map gained three rows found while checking the draft (Eriocoma -> Stipa instead of Achnatherum, Ptilagrostis -> Stipa,",
+          "Cherleria -> Minuartia): V.PhyloMaker2 binds only into genera listed in its node table, and Achnatherum, Ptilagrostis and",
+          "Cherleria have tips but no node there.")
+  )
+  writeLines(report, path)
+  path
+}

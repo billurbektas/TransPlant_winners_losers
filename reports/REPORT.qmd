@@ -10,3 +10,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include P1_community_taxonomy.md >}}
 
 {{< include P2_traits.md >}}
+
+{{< include P3_groups_phylogeny.md >}}

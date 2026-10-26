@@ -1,0 +1,39 @@
+level,name,woody,reason
+genus,Acer,TRUE,tree (added 26 Oct; legacy genus list lacked it)
+genus,Arctous,TRUE,dwarf shrub (legacy listed it as Arctostaphylos)
+genus,Berberis,TRUE,shrub (legacy list)
+genus,Betula,TRUE,tree or shrub (legacy list)
+genus,Calluna,TRUE,dwarf shrub (legacy list)
+genus,Daphne,TRUE,shrub (legacy list)
+genus,Dasiphora,TRUE,shrub (legacy list)
+genus,Dryas,TRUE,dwarf shrub (legacy list)
+genus,Empetrum,TRUE,dwarf shrub (legacy list)
+genus,Fargesia,TRUE,woody bamboo; also graminoid (added 26 Oct)
+genus,Genista,TRUE,dwarf shrub (added 26 Oct)
+genus,Helianthemum,TRUE,dwarf subshrub (legacy list)
+genus,Hippophae,TRUE,shrub (legacy list)
+genus,Juniperus,TRUE,shrub (legacy list)
+genus,Kalmia,TRUE,dwarf shrub (legacy list)
+genus,Larix,TRUE,tree (added 26 Oct)
+genus,Phyllodoce,TRUE,dwarf shrub (legacy list)
+genus,Picea,TRUE,tree (added 26 Oct)
+genus,Pinus,TRUE,tree (added 26 Oct)
+genus,Polygaloides,TRUE,dwarf shrub (added 26 Oct)
+genus,Quercus,TRUE,tree (added 26 Oct)
+genus,Rhododendron,TRUE,shrub (legacy list)
+genus,Rosa,TRUE,shrub (legacy list)
+genus,Salix,TRUE,tree or shrub (legacy list)
+genus,Sorbus,TRUE,tree or shrub (legacy list)
+genus,Spiraea,TRUE,shrub (legacy list)
+genus,Symphoricarpos,TRUE,shrub (legacy list)
+genus,Thymus,TRUE,dwarf subshrub (legacy list)
+genus,Vaccinium,TRUE,dwarf shrub (legacy list)
+species,Rubus idaeus,TRUE,shrub; Rubus is mixed
+species,Rubus parviflorus,TRUE,shrub; Rubus is mixed
+species,Rubus chamaemorus,FALSE,herbaceous perennial; Rubus is mixed
+species,Rubus saxatilis,FALSE,herbaceous perennial; Rubus is mixed
+species,Artemisia tridentata,TRUE,shrub; Artemisia is mixed
+species,Artemisia hedinii,FALSE,herb; Artemisia is mixed
+species,Artemisia fulgens,FALSE,unsure; non-woody (decided 26 Oct BB)
+species,Ajania przewalskii,FALSE,unsure; non-woody (decided 26 Oct BB)
+species,Sibbaldianthe bifurca,FALSE,woody only at the base; non-woody (decided 26 Oct BB)
