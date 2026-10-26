@@ -12,3 +12,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include P2_traits.md >}}
 
 {{< include P3_groups_phylogeny.md >}}
+
+{{< include P4_climate_niche.md >}}

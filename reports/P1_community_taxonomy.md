@@ -50,7 +50,7 @@ Every community name gets one of three origins (`decided_by`) and one identifica
 
 Identification level (legacy rule, `legacy/R/data/community.R:252-285`): **species_or_lower** when the recorded and the accepted name both have at least two words; **genus_only** when either has one word or the recorded name ends in sp./spp./spec./indet.; **family_only** when the name ends in -aceae and has one word. Only species_or_lower names enter the analysis; the others keep their records with a `drop_reason`.
 
-After the rule and the decisions, these accepted names are replaced in every table (`prep/config/accepted_renames.csv`): Taraxacum sect. Taraxacum -> Taraxacum officinale.
+After the rule and the decisions, these accepted names are replaced in every table (`prep/config/accepted_renames.csv`): Taraxacum sect. Taraxacum -> Taraxacum officinale; Alopecurus gerardii -> Alopecurus gerardi.
 
 **needs_review** in the table below counts the names the rule could not settle on its own (the reasons above). For community names every one of them is decided in the ledger before the pipeline continues; for TRY and Lynn names they are counted here and handled where those names are used (P2, P4).
 

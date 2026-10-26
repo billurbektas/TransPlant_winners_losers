@@ -30,6 +30,9 @@ list(
   tar_target(genus_map_file, "prep/config/phylogeny_genus_map.csv", format = "file"),
   tar_target(legacy_placements_file, "prep/config/phylogeny_placements_legacy.csv", format = "file"),
   tar_target(placements_file, "prep/config/phylogeny_placements.csv", format = "file"),
+  tar_target(chelsa_files, chelsa_cache_files(), format = "file"),
+  tar_target(frozen_climate_file, "data/derived/00_inputs/experiment_climate.rds", format = "file"),
+  tar_target(frozen_niche_file, "data/derived/00_inputs/niche_optima.rds", format = "file"),
   tar_target(site_edits, read_ledger(site_edits_file)),
   tar_target(community_edits, read_ledger(community_edits_file)),
   tar_target(mapping_decisions, read_ledger(mapping_decisions_file)),
@@ -102,5 +105,19 @@ list(
   tar_target(p3_report,
              write_p3_report(study_species, functional_groups, placements, placement_draft_tbl, phylogeny,
                              phylogeny_axes, frozen_groups_file, frozen_axes_file),
+             format = "file"),
+
+  # P4: climate and niche
+  tar_target(chelsa_monthly, read_chelsa(chelsa_files, sites)),
+  tar_target(site_year_climate, summarise_site_years(chelsa_monthly)),
+  tar_target(experiment_climate, summarise_experiment_climate(experiments, site_year_climate)),
+  tar_target(site_bio10, bio10_check(niche_file, experiment_climate, experiments)),
+  tar_target(lynn, lynn_table(niche_file, name_resolution)),
+  tar_target(niche_optima, build_niche_optima(lynn, study_species)),
+  tar_target(lynn_disagree, lynn_code_disagreements(niche_file, lynn, community_named, taxonomy)),
+  tar_target(p4_outputs, write_p4_outputs(experiment_climate, niche_optima, site_bio10), format = "file"),
+  tar_target(p4_report,
+             write_p4_report(experiment_climate, experiments, site_bio10, niche_optima, lynn, lynn_disagree,
+                             study_species, frozen_climate_file, frozen_niche_file),
              format = "file")
 )

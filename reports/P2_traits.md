@@ -7,10 +7,10 @@ TRY records were read by TRY species ID (1340 IDs whose contributor or TRY name 
 | stage | rows | observations |
 | --- | --- | --- |
 | read by TRY species ID (1340 IDs) | 2877931 | 179998 |
-| rows of study species (by our name or TRY's) | 2832159 | 177072 |
-| experimental observations removed | 2516897 | 156228 |
-| TRY duplicates removed | 2457021 | 154330 |
-| quantitative, ErrorRisk < 3 | 145913 | 96779 |
+| rows of study species (by our name or TRY's) | 2832174 | 177075 |
+| experimental observations removed | 2516912 | 156231 |
+| TRY duplicates removed | 2457036 | 154333 |
+| quantitative, ErrorRisk < 3 | 145916 | 96782 |
 | LDMC, SLA and vegetative height | 89236 | 61254 |
 | with coordinates and a climate zone | 77869 | 50106 |
 | outside the excluded zones Af, Am, Aw, BWh, BWk, BSh, BSk | 77385 | 49694 |
@@ -182,7 +182,7 @@ A flagged TRY name is used when its accepted species is a study species and the 
 | --- | --- | --- |
 | FALSE | fallback source wfo | 3 |
 | FALSE | fuzzy match | 11 |
-| TRUE | fallback source wfo | 165 |
+| TRUE | fallback source wfo | 167 |
 | TRUE | fallback source wfo; fuzzy match | 30 |
 | TRUE | fuzzy match | 369 |
 
