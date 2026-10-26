@@ -8,8 +8,8 @@ The prep pipeline read the network SQLite (64876 records, 22 regions) and the lo
 | --- | --- |
 | SQLite community rows | 64876 |
 | dropped: establishment year | 6053 |
-| dropped: year edit | 798 |
-| rows kept (all vegetation records) | 58025 |
+| dropped: year edit | 0 |
+| rows kept (all vegetation records) | 58823 |
 |   of which set aside: ambiguous code excluded | 14 |
 |   of which set aside: community edit C1 | 56 |
 |   of which set aside: community edit C2 | 21 |
@@ -18,10 +18,10 @@ The prep pipeline read the network SQLite (64876 records, 22 regions) and the lo
 |   of which set aside: community edit C5 | 2 |
 |   of which set aside: excluded by decision | 2 |
 |   of which set aside: family_only | 24 |
-|   of which set aside: genus_only | 3156 |
-|   of which set aside: unidentified | 320 |
-| analysis records before collapsing | 54419 |
-| analysis rows (plot-year x species) | 54399 |
+|   of which set aside: genus_only | 3339 |
+|   of which set aside: unidentified | 354 |
+| analysis records before collapsing | 55000 |
+| analysis rows (plot-year x species) | 54980 |
 
 ## Reconciliation with the RData
 
@@ -236,7 +236,6 @@ Community names by identification level and how they were decided:
 | C3 | CN_Damxung | local_species_code | Polygonaceae | 7 | legacy/R/data/community.R:210-223 |
 | C4 | DE_Susalps | name_original | Festuca pratensis | 4 | legacy/R/data/community.R:210-223 |
 | C5 | DE_Susalps | name_original | Elymus repens | 2 | legacy/R/data/community.R:210-223 |
-| C6 | CH_Calanda2 | year | 2020 | 798 | legacy/R/data/community.R:224-227 |
 
 ## Codes not in the dictionary (recorded name kept)
 
@@ -250,7 +249,7 @@ Community names by identification level and how they were decided:
 | --- | --- | --- | --- | --- | --- |
 | CH_Calanda::Cal::Nes | 2013 | 2018 | 6 | TRUE |  |
 | CH_Calanda::Pea::Cal | 2013 | 2018 | 6 | TRUE |  |
-| CH_Calanda2::Cal::Nes | 2017 | 2019 | 3 | TRUE |  |
+| CH_Calanda2::Cal::Nes | 2017 | 2020 | 4 | TRUE |  |
 | CH_Lavey::RIO::CRE | 2017 | 2019 | 3 | TRUE |  |
 | CH_Lavey::RIO::MAR | 2017 | 2019 | 3 | TRUE |  |
 | CH_Lavey::RIO::PRA | 2017 | 2019 | 3 | TRUE |  |
