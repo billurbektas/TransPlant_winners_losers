@@ -7325,7 +7325,7 @@
     },
     "tidyTRY": {
       "Package": "tidyTRY",
-      "Version": "0.2.0",
+      "Version": "0.2.1",
       "Source": "GitHub",
       "Title": "Read, Clean, and Process Plant Trait Data from the TRY Database",
       "Authors@R": "person(\"Billur\", \"Bektas\", role = c(\"aut\", \"cre\"), email = \"billur.bektas@gmail.com\")",
@@ -7370,8 +7370,8 @@
       "RemoteHost": "api.github.com",
       "RemoteUsername": "billurbektas",
       "RemoteRepo": "tidyTRY",
-      "RemoteRef": "2d29a04c45ffeb30679c8719714e7f4462d49c74",
-      "RemoteSha": "2d29a04c45ffeb30679c8719714e7f4462d49c74"
+      "RemoteRef": "0169b2f69f1ac5151ddec957e0ade0a6145fba82",
+      "RemoteSha": "0169b2f69f1ac5151ddec957e0ade0a6145fba82"
     },
     "tidyr": {
       "Package": "tidyr",
