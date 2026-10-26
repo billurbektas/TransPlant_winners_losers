@@ -21,12 +21,17 @@ list(
   tar_target(unidentified_file, "prep/config/unidentified_taxa.csv", format = "file"),
   tar_target(taxonomy_decisions_file, "prep/config/taxonomy_decisions.csv", format = "file"),
   tar_target(accepted_renames_file, "prep/config/accepted_renames.csv", format = "file"),
+  tar_target(try_dictionary_file, "prep/config/try_trait_map.csv", format = "file"),
+  tar_target(natural_values_file, "prep/config/try_natural_values.csv", format = "file"),
+  tar_target(frozen_traits_file, "data/derived/00_inputs/traits.rds", format = "file"),
   tar_target(site_edits, read_ledger(site_edits_file)),
   tar_target(community_edits, read_ledger(community_edits_file)),
   tar_target(mapping_decisions, read_ledger(mapping_decisions_file)),
   tar_target(unidentified, read_ledger(unidentified_file)),
   tar_target(taxonomy_decisions, read_ledger(taxonomy_decisions_file)),
   tar_target(accepted_renames, read_ledger(accepted_renames_file)),
+  tar_target(try_dictionary, read_ledger(try_dictionary_file)),
+  tar_target(natural_values, read_ledger(natural_values_file)),
 
   # P1: community and taxonomy
   tar_target(community_raw, read_community(sqlite_file)),
@@ -58,5 +63,21 @@ list(
                              experiments, taxonomy, name_resolution_study, name_resolution_try, names_all,
                              name_resolution, try_candidate_names, try_names, species_merges,
                              community_edits, accepted_renames, rdata_file, frozen_taxonomy_file),
+             format = "file"),
+
+  # P2: TRY traits
+  tar_target(try_name_map, build_try_name_map(name_resolution, taxonomy)),
+  tar_target(try_ids, select_try_ids(try_names, try_name_map)),
+  tar_target(try_raw, read_try_ids(try_file, try_ids)),
+  tar_target(try_attached, attach_try_names(try_raw, try_name_map)),
+  # ErrorRisk < 3 rather than the legacy < 4 (decided 26 Oct): records 3-4 SD
+  # from TRY's species mean gave implausible medians (Viola canina 1.2 m tall)
+  tar_target(try_clean, clean_try(try_attached, try_dictionary, natural_values, max_error_risk = 3)),
+  tar_target(try_climate, filter_try_climate(try_clean)),
+  tar_target(trait_summary, summarise_traits(try_climate, taxonomy)),
+  tar_target(trait_outputs, write_trait_outputs(trait_summary), format = "file"),
+  tar_target(p2_report,
+             write_p2_report(try_ids, try_attached, try_clean, try_climate, trait_summary, try_name_map,
+                             taxonomy, natural_values, frozen_traits_file),
              format = "file")
 )

@@ -183,3 +183,118 @@ write_p1_report <- function(community_raw, community_named, community_dated, com
   writeLines(report, path)
   path
 }
+
+write_trait_outputs <- function(trait_summary, dir = "data/derived/prep") {
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  files <- file.path(dir, c("traits.rds", "traits_long.rds"))
+  saveRDS(trait_summary$traits, files[1])
+  saveRDS(dplyr::filter(trait_summary$long, species %in% trait_summary$traits$species), files[2])
+  files
+}
+
+write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait_summary, try_name_map,
+                            taxonomy, natural_values, frozen_traits_file, path = "reports/P2_traits.md") {
+  traits <- trait_summary$traits
+  long <- trait_summary$long
+  study <- unique(stats::na.omit(taxonomy$accepted_species[taxonomy$identification_level %in% "species_or_lower"]))
+  read <- attr(try_attached, "rows_read")
+  counts <- dplyr::bind_rows(
+    tibble::tibble(stage = sprintf("read by TRY species ID (%d IDs)", length(try_ids)),
+                   rows = read[["rows"]], observations = read[["observations"]]),
+    try_climate$counts)
+
+  removed <- try_clean$removed_values
+  removed_top <- utils::head(dplyr::arrange(removed, dplyr::desc(n_rows)), 40)
+
+  per_trait <- tibble::tibble(
+    trait = c("LDMC", "LMA", "height", "any of the three"),
+    species = c(sum(!is.na(traits$LDMC)), sum(!is.na(traits$LMA)), sum(!is.na(traits$height)), nrow(traits)))
+  missing <- sort(setdiff(study, traits$species))
+
+  # Trusting TRY's AccSpeciesName against attaching by the record's own name
+  ours <- long |>
+    dplyr::filter(species %in% study) |>
+    dplyr::summarise(n_ours = dplyr::n(), median_ours = stats::median(value), .by = c(species, trait))
+  trust <- long |>
+    dplyr::filter(species_if_trusting_try %in% study) |>
+    dplyr::select(species = species_if_trusting_try, trait, value) |>
+    dplyr::summarise(n_trusting_try = dplyr::n(), median_trusting_try = stats::median(value),
+                     .by = c(species, trait))
+  compare <- dplyr::full_join(ours, trust, by = c("species", "trait")) |>
+    dplyr::mutate(relative_difference = round((median_trusting_try - median_ours) / median_ours, 3))
+  differ <- compare |>
+    dplyr::filter(dplyr::coalesce(n_ours, 0L) != dplyr::coalesce(n_trusting_try, 0L) |
+                    dplyr::coalesce(abs(relative_difference) > 0.05, TRUE)) |>
+    dplyr::arrange(dplyr::desc(abs(dplyr::coalesce(relative_difference, Inf))))
+  focus <- dplyr::filter(compare, species %in% c("Festuca ovina", "Lolium pratense"))
+  festuca_pratensis_in_ovina <- sum(long$species %in% "Festuca ovina" & long$SpeciesName %in% "Festuca pratensis")
+
+  # Against the frozen legacy traits (step 00)
+  frozen <- readRDS(frozen_traits_file) |>
+    dplyr::select(species, LDMC_00 = LDMC, LMA_00 = LMA, height_00 = height)
+  vs00 <- dplyr::full_join(dplyr::select(traits, species, LDMC, LMA, height), frozen, by = "species")
+  gained <- sum(!traits$species %in% frozen$species)
+  lost <- sum(!frozen$species %in% traits$species)
+  changed <- dplyr::bind_rows(lapply(c("LDMC", "LMA", "height"), function(t) {
+    tibble::tibble(species = vs00$species, trait = t, new = vs00[[t]], legacy = vs00[[paste0(t, "_00")]])
+  })) |>
+    dplyr::filter(!is.na(new), !is.na(legacy)) |>
+    dplyr::mutate(relative_difference = round((new - legacy) / legacy, 3)) |>
+    dplyr::filter(abs(relative_difference) > 0.05) |>
+    dplyr::arrange(dplyr::desc(abs(relative_difference)))
+
+  flagged <- dplyr::filter(try_name_map, study, needs_review) |>
+    dplyr::count(used, reason = sub(":.*$", "", gsub(" \\(score [0-9.]+\\)", "", review_reason)), name = "names")
+
+  report <- c(
+    "# P2: TRY traits", "",
+    paste0("TRY records were read by TRY species ID (", length(try_ids), " IDs whose contributor or TRY name resolves to a ",
+           "study species in P1) and each record was attached to a species through its own resolved name (the contributor's ",
+           "`SpeciesName` first, TRY's `AccSpeciesName` only as fallback). Observations under experimental or ambiguous ",
+           "treatment values were removed, then duplicates, ErrorRisk >= 4, observations without coordinates and those in ",
+           "arid and tropical climate zones, as in the legacy pipeline. ", nrow(traits), " of ", length(study),
+           " study species have at least one trait. LDMC in g/g, LMA in mg mm-2 (1 / SLA per observation), height in m."),
+    "", "## Counts", "", md_table(counts),
+    "", "## Treatment values", "",
+    paste0("Counted as natural (`prep/config/try_natural_values.csv`, compared after lower-casing and dropping trailing punctuation): ",
+           paste(sprintf("\"%s\"", natural_values$value), collapse = ", "), "."), "",
+    sprintf("Every other value marks the observation as experimental: %d distinct values on %d rows. The 40 most frequent:",
+            nrow(removed), sum(removed$n_rows)), "",
+    md_table(removed_top),
+    "", "## Values not used", "",
+    sprintf("Non-positive values dropped before the medians (decided 26 Oct): %d observations.",
+            sum(trait_summary$non_positive$observations)), "",
+    if (nrow(trait_summary$non_positive)) md_table(trait_summary$non_positive) else "None.", "",
+    {
+      rep <- attr(try_attached, "repaired_utf8")
+      if (length(rep)) paste0("Text fields repaired from windows-1252 to UTF-8 after reading: ",
+                              paste(sprintf("%s (%d values)", names(rep), rep), collapse = ", "), ".")
+      else "No text field needed UTF-8 repair."
+    },
+    "", "## Species with traits", "", md_table(per_trait), "",
+    sprintf("Study species without any of the three traits (%d): %s.", length(missing), paste(missing, collapse = ", ")),
+    "", "## Trusting TRY's accepted name against attaching by the record's own name", "",
+    sprintf(paste("Records of species x trait whose count or median differs between the two (median differing by more than 5%%):",
+                  "%d of %d species x trait combinations. Festuca ovina now holds %d records submitted as Festuca pratensis."),
+            nrow(differ), nrow(compare), festuca_pratensis_in_ovina), "",
+    md_table(focus), "", "The 30 largest differences:", "", md_table(utils::head(differ, 30)),
+    "", "## Against the frozen legacy traits (step 00)", "",
+    sprintf("Species with traits now: %d; in step 00: %d; species gained: %d; lost: %d (names that changed count as both); species x trait medians changed by more than 5%%: %d. The 30 largest:",
+            nrow(traits), nrow(frozen), gained, lost, nrow(changed)), "",
+    md_table(utils::head(changed, 30)),
+    "", "## Flagged TRY names of study species", "",
+    "A flagged TRY name is used when its accepted species is a study species and the matched name has the submitted genus and epithet (decided 26 Oct).", "",
+    md_table(flagged),
+    "", "## Warnings captured", "",
+    if (length(try_clean$warnings)) paste("-", gsub("\n", " ", unique(try_clean$warnings))) else "None.",
+    "", "## Deviations from the plan", "",
+    paste("(1) Community name decisions (e.g. Thlaspi montanum -> Noccaea fendleri for US_Montana) are not carried over to TRY names,",
+          "because they concern the study records; TRY names are resolved by the rule alone, with the accepted-name renames of P1",
+          "(Taraxacum officinale) applied. (2) ErrorRisk < 3 instead of the legacy < 4 (decided 26 Oct): with experiments removed per",
+          "observation, datasets that legacy dropped wholesale now contribute, and some of their records 3 to 4 SD from TRY's species",
+          "mean gave implausible medians (Viola canina height 1.16 m, Euphrasia officinalis LMA 0.43 mg mm-2). (3) Non-positive values",
+          "dropped (decided 26 Oct). (4) TRY text fields repaired to UTF-8 after reading (legacy repaired names only).")
+  )
+  writeLines(report, path)
+  path
+}

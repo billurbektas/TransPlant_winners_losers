@@ -1,0 +1,12 @@
+analysis_trait,try_trait_name
+LDMC,"Leaf dry mass per leaf fresh mass (leaf dry matter content, LDMC)"
+LDMC,"Leaf dry mass per leaf fresh mass (LDMC)"
+SLA,"Leaf area per leaf dry mass (specific leaf area, SLA or 1/LMA): undefined if petiole is in- or excluded"
+SLA,"Leaf area per leaf dry mass (SLA or 1/LMA): petiole excluded"
+SLA,"Leaf area per leaf dry mass (SLA or 1/LMA): petiole included"
+SLA,"Leaf area per leaf dry mass (SLA)"
+SLA,"Leaf area per leaf dry mass (specific leaf area, SLA or 1/LMA): petiole excluded"
+SLA,"Leaf area per leaf dry mass (specific leaf area, SLA or 1/LMA): petiole included"
+SLA,"Leaf area per leaf dry mass (specific leaf area, SLA or 1/LMA) petiole, rhachis and midrib excluded"
+vegetative_height,"Plant height vegetative"
+vegetative_height,"Plant vegetative height"
