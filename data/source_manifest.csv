@@ -4,3 +4,4 @@ data/try_47163.txt,current TRY export,local immutable large input,4871db4c7c5937
 tidyTRY::extdata/koppen_geiger_0p1.tif,TRY coordinate classification raster bundled with tidyTRY revision 3352199fc99f72170a8983c522d63aa9029d0e9f,installed package input,59b749fe6711e72c720ff903044eb0efb4373524ee434740ed7384a0284c155b,FALSE
 data/cache/chelsa_monthly/,resumable CHELSA monthly cache,local external cache,,FALSE
 config/external_sources.csv,Git source provenance,tracked configuration,d80ff87b05a48c0dba79b47c505bcf2a5df5f29ca07f5ba753ebbb518f4a649e,TRUE
+data/transplant_network_clean.sqlite,raw network community source (TransPlantNetwork/transplant_network_data_cleaning; taxonomy columns not used),local immutable input,546d359d1923649bdd2ea5c01a93d17cccbfe83087b56257dffa3de0df9c5bcc,FALSE
