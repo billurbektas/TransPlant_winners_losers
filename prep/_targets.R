@@ -20,11 +20,13 @@ list(
   tar_target(mapping_decisions_file, "prep/config/species_mapping_decisions.csv", format = "file"),
   tar_target(unidentified_file, "prep/config/unidentified_taxa.csv", format = "file"),
   tar_target(taxonomy_decisions_file, "prep/config/taxonomy_decisions.csv", format = "file"),
+  tar_target(accepted_renames_file, "prep/config/accepted_renames.csv", format = "file"),
   tar_target(site_edits, read_ledger(site_edits_file)),
   tar_target(community_edits, read_ledger(community_edits_file)),
   tar_target(mapping_decisions, read_ledger(mapping_decisions_file)),
   tar_target(unidentified, read_ledger(unidentified_file)),
   tar_target(taxonomy_decisions, read_ledger(taxonomy_decisions_file)),
+  tar_target(accepted_renames, read_ledger(accepted_renames_file)),
 
   # P1: community and taxonomy
   tar_target(community_raw, read_community(sqlite_file)),
@@ -38,8 +40,12 @@ list(
   tar_target(try_candidate_names, names_try(try_names, name_resolution_study)),
   tar_target(name_resolution_try, resolve_names(try_candidate_names)),
   tar_target(names_all, dplyr::bind_rows(study_names, try_candidate_names)),
-  tar_target(name_resolution, dplyr::bind_rows(name_resolution_study, name_resolution_try)),
-  tar_target(taxonomy, build_taxonomy(community_named, name_resolution_study, taxonomy_decisions, unidentified)),
+  # every later join uses these resolutions, with the accepted-name renames applied
+  tar_target(name_resolution,
+             apply_accepted_renames(dplyr::bind_rows(name_resolution_study, name_resolution_try), accepted_renames)),
+  tar_target(taxonomy,
+             build_taxonomy(community_named, apply_accepted_renames(name_resolution_study, accepted_renames),
+                            taxonomy_decisions, unidentified)),
   tar_target(community_dated, date_community(community_named, sites, community_edits)),
   tar_target(community, finish_community(community_dated, taxonomy, community_edits)),
   tar_target(experiments, build_experiments(community, sites)),
@@ -50,7 +56,7 @@ list(
   tar_target(p1_report,
              write_p1_report(community_raw, community_named, community_dated, community, sites,
                              experiments, taxonomy, name_resolution_study, name_resolution_try, names_all,
-                             name_resolution, try_candidate_names, species_merges,
-                             community_edits, rdata_file, frozen_taxonomy_file),
+                             name_resolution, try_candidate_names, try_names, species_merges,
+                             community_edits, accepted_renames, rdata_file, frozen_taxonomy_file),
              format = "file")
 )

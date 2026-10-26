@@ -40,7 +40,23 @@ Rows per region: SQLite 64876, RData `dat` 61430. Region-years where the two dif
 | FR_AlpeHuez | 2023 | 549 | 0 | 549 |
 | FR_AlpeHuez |  | 0 | 1202 | -1202 |
 
+## How names were decided
+
+Every community name gets one of three origins (`decided_by`) and one identification level.
+
+- **rule**: chosen automatically by `tidyTRY::resolve_species()` (v 0.2.1 ) from all TNRS candidates: only legitimate names (taxonomic status Accepted or Synonym, never Illegitimate, Invalid or No opinion); the highest match score; WCVP before WFO; Accepted before Synonym. A match into another genus is never chosen, and a name is flagged for review (not chosen automatically) when it comes only from WFO, matches with a score below 0.9, ties between different accepted names, or has no legitimate candidate.
+- **decision**: set by Bills in `prep/config/taxonomy_decisions.csv`, for every community name the rule flagged and for names the rule resolved to a plant from the wrong region (with the reason in the ledger).
+- **unidentified**: an unidentified field morphotaxon (`prep/config/unidentified_taxa.csv`, from the legacy overrides); its records stay as vegetation but never enter the analysis.
+
+Identification level (legacy rule, `legacy/R/data/community.R:252-285`): **species_or_lower** when the recorded and the accepted name both have at least two words; **genus_only** when either has one word or the recorded name ends in sp./spp./spec./indet.; **family_only** when the name ends in -aceae and has one word. Only species_or_lower names enter the analysis; the others keep their records with a `drop_reason`.
+
+After the rule and the decisions, these accepted names are replaced in every table (`prep/config/accepted_renames.csv`): Taraxacum sect. Taraxacum -> Taraxacum officinale.
+
+**needs_review** in the table below counts the names the rule could not settle on its own (the reasons above). For community names every one of them is decided in the ledger before the pipeline continues; for TRY and Lynn names they are counted here and handled where those names are used (P2, P4).
+
 ## Name resolution
+
+TRY names are resolved here, in the same run as the community names, because traits (P2) are attached to a study species through the TRY record's own name, not through TRY's `AccSpeciesName`, which merges species (TRY files Festuca pratensis records under Festuca ovina). One run, one rule and one TNRS date serve every join.
 
 TRY names: 149997 distinct names in the export; 33914 in a genus of a study name or of its accepted name were resolved (the rest cannot attach to a study species unless filed under a third genus).
 
@@ -61,11 +77,24 @@ Community names by identification level and how they were decided:
 | species_or_lower | rule | 949 |
 | unidentified | unidentified | 35 |
 
-### Accepted species that differ from the frozen legacy taxonomy (45 names)
+TRY names flagged for review: 4094. Those whose accepted name, or one of the tied names, is a study species could carry trait records for the analysis (`could_be_study`); their handling is decided in P2.
+
+| reason | could_be_study | names | try_rows |
+| --- | --- | --- | --- |
+| fallback source wfo | TRUE | 163 | 8583 |
+| fallback source wfo; fuzzy match | TRUE | 30 | 484 |
+| fuzzy match | TRUE | 378 | 7270 |
+| tie | TRUE | 13 | 1097 |
+| fallback source wfo | FALSE | 1074 | 54283 |
+| fallback source wfo; fuzzy match | FALSE | 212 | 1471 |
+| fuzzy match | FALSE | 1931 | 54178 |
+| no legitimate candidate | FALSE | 256 | 31525 |
+| tie | FALSE | 37 | 2243 |
+
+### Accepted species that differ from the frozen legacy taxonomy (44 names)
 
 | name_original | legacy_accepted | accepted_species | decided_by | n_records | regions |
 | --- | --- | --- | --- | --- | --- |
-| Taraxacum officinale | Taraxacum officinale | Taraxacum sect. Taraxacum | rule | 660 | CH_Calanda; CH_Calanda2; CH_Lavey; DE_Grainau; DE_Susalps; DE_TransAlps; IN_Kashmir; IT_MatschMazia1; IT_MatschMazia2; US_Colorado; US_Montana |
 | Festuca pratensis | Festuca ovina | Lolium pratense | rule | 365 | CH_Lavey; DE_Grainau; DE_Susalps; DE_TransAlps; IT_MatschMazia1; IT_MatschMazia2 |
 | Potentilla leuconota | Potentilla leuconota | Argentina leuconota | rule | 199 | CN_Gongga |
 | Agrostis alpina | Agrostis rupestris subsp. rupestris | Alpagrostis alpina | rule | 194 | CH_Calanda; CH_Lavey |

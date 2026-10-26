@@ -24,8 +24,8 @@ md_table <- function(d) {
 
 write_p1_report <- function(community_raw, community_named, community_dated, community, sites,
                             experiments, taxonomy, name_resolution_study, name_resolution_try, names_all,
-                            name_resolution, try_candidate_names, species_merges,
-                            community_edits, rdata_file, frozen_taxonomy_file,
+                            name_resolution, try_candidate_names, try_names, species_merges,
+                            community_edits, accepted_renames, rdata_file, frozen_taxonomy_file,
                             path = "reports/P1_community_taxonomy.md") {
   run <- attr(name_resolution_study, "resolved")
 
@@ -90,6 +90,25 @@ write_p1_report <- function(community_raw, community_named, community_dated, com
     dplyr::count(region, destination_site, local_species_code, name = "rows")
 
   merge_types <- dplyr::count(species_merges, merge_type, name = "names")
+
+  # TRY names flagged for review: which could belong to a study species?
+  study <- unique(stats::na.omit(taxonomy$accepted_species[taxonomy$identification_level %in% "species_or_lower"]))
+  try_rows <- dplyr::bind_rows(
+    dplyr::transmute(try_names, name = SpeciesName, n = n_rows),
+    dplyr::transmute(try_names, name = AccSpeciesName, n = n_rows)) |>
+    dplyr::summarise(n = sum(n), .by = name)
+  try_review <- name_resolution_try |>
+    dplyr::filter(needs_review) |>
+    dplyr::mutate(
+      reason = sub(":.*$", "", gsub(" \\(score [0-9.]+\\)", "", review_reason)),
+      acc_sp = dplyr::coalesce(accepted_species, stringr::word(accepted_name, 1, 2)),
+      tied = ifelse(grepl("^tie: ", review_reason), sub("^tie: ", "", review_reason), ""),
+      could_be_study = acc_sp %in% study |
+        vapply(strsplit(tied, " | ", fixed = TRUE), function(x) any(stringr::word(x, 1, 2) %in% study), logical(1))) |>
+    dplyr::left_join(try_rows, by = c(submitted_name = "name"))
+  try_review_tab <- try_review |>
+    dplyr::summarise(names = dplyr::n(), try_rows = sum(n, na.rm = TRUE), .by = c(reason, could_be_study)) |>
+    dplyr::arrange(dplyr::desc(could_be_study), reason)
   exp_tab <- dplyr::select(experiments, experiment_id, first_year, last_year, year_range, included, exclusion_reason)
 
   report <- c(
@@ -106,11 +125,34 @@ write_p1_report <- function(community_raw, community_named, community_dated, com
     paste0("Rows per region: SQLite ", nrow(community_raw), ", RData `dat` ", nrow(env$dat),
            ". Region-years where the two differ:"), "",
     if (nrow(recon_diff)) md_table(recon_diff) else "None.",
+    "", "## How names were decided", "",
+    "Every community name gets one of three origins (`decided_by`) and one identification level.", "",
+    paste("- **rule**: chosen automatically by `tidyTRY::resolve_species()` (v", run$tidyTRY, ") from all TNRS",
+          "candidates: only legitimate names (taxonomic status Accepted or Synonym, never Illegitimate, Invalid or",
+          "No opinion); the highest match score; WCVP before WFO; Accepted before Synonym. A match into another genus",
+          "is never chosen, and a name is flagged for review (not chosen automatically) when it comes only from WFO,",
+          "matches with a score below 0.9, ties between different accepted names, or has no legitimate candidate."),
+    "- **decision**: set by Bills in `prep/config/taxonomy_decisions.csv`, for every community name the rule flagged and for names the rule resolved to a plant from the wrong region (with the reason in the ledger).",
+    "- **unidentified**: an unidentified field morphotaxon (`prep/config/unidentified_taxa.csv`, from the legacy overrides); its records stay as vegetation but never enter the analysis.",
+    "",
+    "Identification level (legacy rule, `legacy/R/data/community.R:252-285`): **species_or_lower** when the recorded and the accepted name both have at least two words; **genus_only** when either has one word or the recorded name ends in sp./spp./spec./indet.; **family_only** when the name ends in -aceae and has one word. Only species_or_lower names enter the analysis; the others keep their records with a `drop_reason`.",
+    "",
+    paste0("After the rule and the decisions, these accepted names are replaced in every table (`prep/config/accepted_renames.csv`): ",
+           paste(sprintf("%s -> %s", accepted_renames$from_accepted_species, accepted_renames$to_accepted_species), collapse = "; "), "."),
+    "",
+    "**needs_review** in the table below counts the names the rule could not settle on its own (the reasons above). For community names every one of them is decided in the ledger before the pipeline continues; for TRY and Lynn names they are counted here and handled where those names are used (P2, P4).",
     "", "## Name resolution", "",
+    paste("TRY names are resolved here, in the same run as the community names, because traits (P2) are attached to a",
+          "study species through the TRY record's own name, not through TRY's `AccSpeciesName`, which merges species",
+          "(TRY files Festuca pratensis records under Festuca ovina). One run, one rule and one TNRS date serve every join."),
+    "",
     paste0("TRY names: ", n_try_all, " distinct names in the export; ", nrow(try_candidate_names),
            " in a genus of a study name or of its accepted name were resolved (the rest cannot attach to a study species ",
            "unless filed under a third genus)."), "", md_table(res_summary), "",
     "Community names by identification level and how they were decided:", "", md_table(levels_tab),
+    "", sprintf(paste("TRY names flagged for review: %d. Those whose accepted name, or one of the tied names, is a study",
+                      "species could carry trait records for the analysis (`could_be_study`); their handling is decided in P2."),
+                nrow(try_review)), "", md_table(try_review_tab),
     "", sprintf("### Accepted species that differ from the frozen legacy taxonomy (%d names)", nrow(changes)), "",
     if (nrow(changes)) md_table(changes) else "None.",
     "", sprintf("### Names merged into one species (%d names in %d species; full table in `data/derived/prep/species_merges.csv`)",

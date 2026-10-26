@@ -132,6 +132,19 @@ build_taxonomy <- function(community_named, name_resolution, decisions, unidenti
                 n_records, regions)
 }
 
+# Accepted names replaced in every resolution (community, TRY, Lynn), so that
+# all tables keep joining on the same name (prep/config/accepted_renames.csv)
+apply_accepted_renames <- function(resolution, renames) {
+  hit <- match(resolution$accepted_species, renames$from_accepted_species)
+  if (!all(renames$from_accepted_species %in% resolution$accepted_species)) {
+    stop("accepted_renames.csv names not found: ",
+         paste(setdiff(renames$from_accepted_species, resolution$accepted_species), collapse = ", "))
+  }
+  resolution$accepted_species[!is.na(hit)] <- renames$to_accepted_species[hit[!is.na(hit)]]
+  resolution$accepted_name[!is.na(hit)] <- renames$to_accepted_species[hit[!is.na(hit)]]
+  resolution
+}
+
 # Submitted names that end up as one species, and why
 species_merge_table <- function(taxonomy) {
   taxonomy |>
