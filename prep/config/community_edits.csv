@@ -1,0 +1,7 @@
+edit_id,region,origin_site,home_site_only,field,value,legacy_source,reason
+C1,CN_Damxung,*,FALSE,name_original,Stipa capillacea,legacy/R/data/community.R:210-223,Legacy collapsed Stipa capillacea and S. capillata to the genus and dropped them; kept as documented hard code (decided 26 Oct)
+C2,CN_Damxung,*,FALSE,name_original,Stipa capillata,legacy/R/data/community.R:210-223,Legacy collapsed Stipa capillacea and S. capillata to the genus and dropped them; kept as documented hard code (decided 26 Oct)
+C3,CN_Damxung,*,FALSE,local_species_code,Polygonaceae,legacy/R/data/community.R:210-223,Legacy set family-level Polygonaceae records to zero; kept as documented hard code (decided 26 Oct)
+C4,DE_Susalps,FE;BT,TRUE,name_original,Festuca pratensis,legacy/R/data/community.R:210-223,Legacy set Festuca pratensis to zero in home-site plots at FE and BT; kept as documented hard code (decided 26 Oct)
+C5,DE_Susalps,GW,TRUE,name_original,Elymus repens,legacy/R/data/community.R:210-223,Legacy set Elymus repens to zero in home-site plots at GW; kept as documented hard code (decided 26 Oct)
+C6,CH_Calanda2,*,FALSE,year,2020,legacy/R/data/community.R:224-227,Legacy dropped the CH_Calanda2 2020 survey without a recorded reason; kept as documented hard code (decided 26 Oct)

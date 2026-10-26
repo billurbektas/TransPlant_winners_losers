@@ -1,0 +1,3 @@
+edit_id,region,site_id,field,from,to,legacy_source,reason
+S1,FR_Lautaret,*,year_established,2017,2016,legacy/R/data/community.R:77,Legacy value: warming established 2016 although site metadata reads 2017; kept as documented hard code (decided 26 Oct)
+S2,CH_Calanda,Pea,elevation,2800,2600,legacy/R/data/community.R:78,Legacy correction of the Pea site elevation; kept as documented hard code (decided 26 Oct)
