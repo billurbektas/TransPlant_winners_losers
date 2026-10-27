@@ -91,54 +91,7 @@ TRY names flagged for review: 4094. Those whose accepted name, or one of the tie
 | no legitimate candidate | FALSE | 256 | 31525 |
 | tie | FALSE | 37 | 2243 |
 
-### Accepted species that differ from the frozen legacy taxonomy (44 names)
-
-| name_original | legacy_accepted | accepted_species | decided_by | n_records | regions |
-| --- | --- | --- | --- | --- | --- |
-| Festuca pratensis | Festuca ovina | Lolium pratense | rule | 365 | CH_Lavey; DE_Grainau; DE_Susalps; DE_TransAlps; IT_MatschMazia1; IT_MatschMazia2 |
-| Potentilla leuconota | Potentilla leuconota | Argentina leuconota | rule | 199 | CN_Gongga |
-| Agrostis alpina | Agrostis rupestris subsp. rupestris | Alpagrostis alpina | rule | 194 | CH_Calanda; CH_Lavey |
-| Helictotrichon pubescens | Helictotrichon pubescens | Avenula pubescens | rule | 173 | CH_Calanda; DE_Grainau; DE_Susalps; DE_TransAlps |
-| Gentiana campestris | Gentianella germanica | Gentianella campestris | rule | 154 | CH_Calanda; CH_Calanda2; CH_Lavey |
-| Polygonum macrophyllum | Polygonum macrophyllum | Bistorta macrophylla | rule | 154 | CN_Damxung; CN_Gongga; CN_Heibei |
-| Minuartia verna | Minuartia verna | Sabulina verna | rule | 118 | CH_Calanda |
-| Potentilla anserina | Potentilla anserina | Argentina anserina | rule | 111 | CN_Heibei |
-| Helictotrichon versicolor | Helictotrichon versicolor | Helictochloa versicolor | rule | 108 | CH_Lavey; DE_TransAlps |
-| Minuartia sedoides | Minuartia sedoides | Cherleria sedoides | rule | 98 | CH_Calanda |
-| Persicaria vivipara | Persicaria vivipara | Bistorta vivipara | rule | 95 | CN_Gongga; IT_MatschMazia2 |
-| Potentilla stenophylla | Potentilla stenophylla | Argentina stenophylla | rule | 88 | CN_Gongga |
-| Alopecurus gerardii | Alopecurus gerardii | Alopecurus gerardi | decision | 65 | FR_Lautaret |
-| Polygonum runcinatum | Polygonum runcinatum | Persicaria runcinata | rule | 51 | CN_Gongga |
-| Artemisia flaccida | Artemisia flaccida | Artemisia fulgens | rule | 48 | CN_Gongga |
-| Polygonum sibiricum | Polygonum sibiricum | Knorringia sibirica | rule | 37 | CN_Heibei |
-| Festuca arundinacea | Scolochloa festucacea | Lolium arundinaceum | rule | 37 | CH_Calanda |
-| Sedum integrifolium | Sedum integrifolium | Rhodiola integrifolia | rule | 35 | US_Colorado |
-| Aquilegia caerulea | Aquilegia caerulea | Aquilegia coerulea | decision | 31 | US_Colorado |
-| Cerastium cerastoides | Cerastium cerastoides | Dichodon cerastoides | rule | 28 | NO_Gudmedalen; NO_Lavisdalen; NO_Skjellingahaugen; NO_Ulvhaugen |
-| Anemone nemorosa | Anemonoides altaica | Anemonoides nemorosa | rule | 26 | NO_Gudmedalen; NO_Skjellingahaugen |
-| Salix serpyllifolia | Salix serpyllifolia | Salix serpillifolia | decision | 25 | CH_Calanda |
-| Sibbaldia pentaphylla | Sibbaldia pentaphylla | Potentilla clandestina | rule | 24 | CN_Gongga |
-| Oxytropis glacialis | Oxytropis cinerascens | Oxytropis humifusa | rule | 24 | CN_Damxung |
-| Polygonum cyanandrum | Polygonum cyanandrum | Koenigia cyanandra | rule | 21 | CN_Gongga |
-| Perideridia montana | Perideridia montana | Perideridia gairdneri | rule | 19 | US_Montana |
-| Rumex alpestris | Rumex alpestris | Rumex scutatus | rule | 17 | CH_Calanda; CH_Lavey; DE_TransAlps |
-| Koeleria cristata | Rostraria cristata | Koeleria macrantha | decision | 17 | CN_Heibei |
-| Anemone obtusiloba | Anemonastrum polyanthes | Anemonastrum obtusilobum | rule | 14 | CN_Damxung |
-| Vaccinium globulare | Vaccinium globulare | Vaccinium membranaceum | rule | 13 | US_Montana |
-| Acinos alpinus | Acinos alpinus | Clinopodium alpinum | rule | 10 | CH_Calanda; CH_Calanda2 |
-| Arenaria kansuensis | Arenaria kansuensis | Eremogone kansuensis | rule | 10 | CN_Damxung |
-| Astragalus membranaceus | Astragalus trimestris | Astragalus mongholicus | rule | 8 | CN_Damxung; CN_Heibei |
-| Minuartia biflora | Minuartia biflora | Cherleria biflora | rule | 7 | NO_Gudmedalen; NO_Lavisdalen; NO_Ulvhaugen |
-| Arctostaphylos alpinus | Arctostaphylos uva-ursi | Arctous alpina | rule | 5 | CH_Lavey |
-| Hieracium hoppeanum | Hieracium hoppeanum | Pilosella hoppeana | rule | 5 | CH_Calanda2 |
-| Hieracium gracile | Hieracium nigrescens subsp. graciliusculum | Hieracium triste | rule | 4 | US_Montana |
-| Arenaria roborowskii | Arenaria roborowskii | Eremogone roborowskii | rule | 4 | CN_Damxung |
-| Vicia angustifolia | Vicia setifolia var. setifolia | Vicia sativa | rule | 4 | DE_Susalps |
-| Anemone narcissiflora | Anemone narcissiflora | Anemonastrum narcissiflorum | rule | 3 | CH_Lavey |
-| Osmorhiza chilensis | Osmorhiza chilensis | Osmorhiza berteroi | rule | 3 | US_Montana |
-| Primula serratifolia | Primula serratifolia | Primula auricula | rule | 2 | CN_Gongga |
-| Thlaspi montanum | Lepidium campestre | Noccaea fendleri | decision | 2 | US_Montana |
-| Gnaphalium supinum | Gnaphalium supinum | Omalotheca supina | rule | 2 | DE_TransAlps |
+The comparison with the frozen legacy taxonomy of step 00 is in `reports/P5_compare_to_frozen.md`.
 
 ### Names merged into one species (104 names in 49 species; full table in `data/derived/prep/species_merges.csv`)
 

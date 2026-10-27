@@ -23,11 +23,7 @@ Partial coverage (5 experiments; CHELSA has no 2022 to 2023), averaged over the 
 | US_Colorado::mo::um | 4 | 6 | 2022;2023 |
 | US_Colorado::pf::um | 4 | 6 | 2022;2023 |
 
-Against step 00: 41 experiments with the same years agree exactly (largest difference 0). Experiments whose years changed: 1. New experiments: FR_AlpeHuez::HIGH::LOW.
-
-| experiment_id | n_years_00 | n_years | T_00 | T | W_00 | W | P_annual_00 | P_annual |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CH_Calanda2::Cal::Nes | 3 | 4 | 14.02 | 13.699 | 3.234 | 3.234 | 7.248 | 7.194 |
+The comparison with the frozen legacy climate and niche of step 00 is in `reports/P5_compare_to_frozen.md`.
 
 ### Summer temperature: CHELSA 1981-2010 climatology against the experiment JJA T
 
@@ -35,7 +31,7 @@ Lynn's site summer temperature (`sum_temp_site`, the bio10 analogue behind T_opt
 
 ## Niche
 
-Study species with a niche: 767 of 904; with n_obs_sub >= 30: 745. Lynn names: 785, of which 778 used (11 species from more than one Lynn name). Step 00 had 785 Lynn names, keyed by Lynn's own names.
+Study species with a niche: 767 of 904; with n_obs_sub >= 30: 745. Lynn names: 785, of which 778 used (11 species from more than one Lynn name).
 
 Lynn names not used:
 

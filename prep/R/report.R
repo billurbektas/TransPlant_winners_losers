@@ -25,7 +25,7 @@ md_table <- function(d) {
 write_p1_report <- function(community_raw, community_named, community_dated, community, sites,
                             experiments, taxonomy, name_resolution_study, name_resolution_try, names_all,
                             name_resolution, try_candidate_names, try_names, species_merges,
-                            community_edits, accepted_renames, rdata_file, frozen_taxonomy_file,
+                            community_edits, accepted_renames, rdata_file,
                             path = "reports/P1_community_taxonomy.md") {
   run <- attr(name_resolution_study, "resolved")
 
@@ -66,16 +66,6 @@ write_p1_report <- function(community_raw, community_named, community_dated, com
                      sum(res$in_lynn & res$needs_review)))
   levels_tab <- dplyr::count(taxonomy, identification_level = dplyr::coalesce(identification_level, "unidentified"),
                              decided_by, name = "names")
-
-  # Changes against the frozen legacy taxonomy (step 00)
-  frozen <- readRDS(frozen_taxonomy_file) |>
-    dplyr::select(name_original = submitted_name, legacy_accepted = accepted_name_reviewed)
-  changes <- taxonomy |>
-    dplyr::filter(identification_level == "species_or_lower") |>
-    dplyr::inner_join(frozen, by = "name_original") |>
-    dplyr::filter(accepted_species != stringr::word(legacy_accepted, 1, 2)) |>
-    dplyr::select(name_original, legacy_accepted, accepted_species, decided_by, n_records, regions) |>
-    dplyr::arrange(dplyr::desc(n_records))
 
   # Community edits
   edits <- community_edits |>
@@ -153,8 +143,7 @@ write_p1_report <- function(community_raw, community_named, community_dated, com
     "", sprintf(paste("TRY names flagged for review: %d. Those whose accepted name, or one of the tied names, is a study",
                       "species could carry trait records for the analysis (`could_be_study`); their handling is decided in P2."),
                 nrow(try_review)), "", md_table(try_review_tab),
-    "", sprintf("### Accepted species that differ from the frozen legacy taxonomy (%d names)", nrow(changes)), "",
-    if (nrow(changes)) md_table(changes) else "None.",
+    "", "The comparison with the frozen legacy taxonomy of step 00 is in `reports/P5_compare_to_frozen.md`.",
     "", sprintf("### Names merged into one species (%d names in %d species; full table in `data/derived/prep/species_merges.csv`)",
                 nrow(species_merges), dplyr::n_distinct(species_merges$accepted_species)), "",
     md_table(merge_types), "", md_table(species_merges),
@@ -193,7 +182,7 @@ write_trait_outputs <- function(trait_summary, dir = "data/derived/prep") {
 }
 
 write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait_summary, try_name_map,
-                            taxonomy, natural_values, frozen_traits_file, path = "reports/P2_traits.md") {
+                            taxonomy, natural_values, path = "reports/P2_traits.md") {
   traits <- trait_summary$traits
   long <- trait_summary$long
   study <- unique(stats::na.omit(taxonomy$accepted_species[taxonomy$identification_level %in% "species_or_lower"]))
@@ -228,20 +217,6 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
     dplyr::arrange(dplyr::desc(abs(dplyr::coalesce(relative_difference, Inf))))
   focus <- dplyr::filter(compare, species %in% c("Festuca ovina", "Lolium pratense"))
   festuca_pratensis_in_ovina <- sum(long$species %in% "Festuca ovina" & long$SpeciesName %in% "Festuca pratensis")
-
-  # Against the frozen legacy traits (step 00)
-  frozen <- readRDS(frozen_traits_file) |>
-    dplyr::select(species, LDMC_00 = LDMC, LMA_00 = LMA, height_00 = height)
-  vs00 <- dplyr::full_join(dplyr::select(traits, species, LDMC, LMA, height), frozen, by = "species")
-  gained <- sum(!traits$species %in% frozen$species)
-  lost <- sum(!frozen$species %in% traits$species)
-  changed <- dplyr::bind_rows(lapply(c("LDMC", "LMA", "height"), function(t) {
-    tibble::tibble(species = vs00$species, trait = t, new = vs00[[t]], legacy = vs00[[paste0(t, "_00")]])
-  })) |>
-    dplyr::filter(!is.na(new), !is.na(legacy)) |>
-    dplyr::mutate(relative_difference = round((new - legacy) / legacy, 3)) |>
-    dplyr::filter(abs(relative_difference) > 0.05) |>
-    dplyr::arrange(dplyr::desc(abs(relative_difference)))
 
   flagged <- dplyr::filter(try_name_map, study, needs_review) |>
     dplyr::count(used, reason = sub(":.*$", "", gsub(" \\(score [0-9.]+\\)", "", review_reason)), name = "names")
@@ -278,10 +253,7 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
                   "%d of %d species x trait combinations. Festuca ovina now holds %d records submitted as Festuca pratensis."),
             nrow(differ), nrow(compare), festuca_pratensis_in_ovina), "",
     md_table(focus), "", "The 30 largest differences:", "", md_table(utils::head(differ, 30)),
-    "", "## Against the frozen legacy traits (step 00)", "",
-    sprintf("Species with traits now: %d; in step 00: %d; species gained: %d; lost: %d (names that changed count as both); species x trait medians changed by more than 5%%: %d. The 30 largest:",
-            nrow(traits), nrow(frozen), gained, lost, nrow(changed)), "",
-    md_table(utils::head(changed, 30)),
+    "", "The comparison with the frozen legacy traits of step 00 is in `reports/P5_compare_to_frozen.md`.",
     "", "## Flagged TRY names of study species", "",
     "A flagged TRY name is used when its accepted species is a study species and the matched name has the submitted genus and epithet (decided 26 Oct).", "",
     md_table(flagged),
@@ -311,7 +283,7 @@ write_p3_outputs <- function(functional_groups, phylogeny, phylogeny_axes, place
 }
 
 write_p3_report <- function(study_species, functional_groups, placements, placement_draft_tbl, phylogeny,
-                            phylogeny_axes, frozen_groups_file, frozen_axes_file,
+                            phylogeny_axes,
                             path = "reports/P3_groups_phylogeny.md") {
   fg <- functional_groups
   eig <- phylogeny_axes$eigenvalues
@@ -324,18 +296,6 @@ write_p3_report <- function(study_species, functional_groups, placements, placem
                               by = "species") |>
     dplyr::filter(!mapply(identical, ledger, draft) | ledger_placement != draft_placement)
 
-  # against step 00
-  frozen_fg <- readRDS(frozen_groups_file)
-  fg_change <- dplyr::inner_join(dplyr::select(fg, species, graminoid, woody),
-                                 dplyr::select(frozen_fg, species, graminoid_00 = graminoid, woody_00 = woody), by = "species") |>
-    dplyr::filter(graminoid != graminoid_00 | woody != woody_00)
-  frozen_ax <- readRDS(frozen_axes_file)$scores
-  common <- intersect(phylogeny_axes$scores$species, frozen_ax$species)
-  cors <- vapply(paste0("PEV", 1:3), function(ax) {
-    stats::cor(phylogeny_axes$scores[[ax]][match(common, phylogeny_axes$scores$species)],
-               frozen_ax[[ax]][match(common, frozen_ax$species)])
-  }, numeric(1))
-
   report <- c(
     "# P3: Functional groups and phylogeny", "",
     paste0("Graminoid and woody status and a phylogeny with its PCoA axes for all ", nrow(study_species),
@@ -347,8 +307,6 @@ write_p3_report <- function(study_species, functional_groups, placements, placem
     sprintf("Graminoid (Poaceae, Cyperaceae, Juncaceae): %d species. Woody (`prep/config/woodiness.csv`): %d species. Family taken from the backbone genus (no family in P1): %s.",
             sum(fg$graminoid), sum(fg$woody), paste(study_species$species[study_species$family_source == "backbone genus"], collapse = ", ")),
     "", md_table(woody_tab),
-    "", sprintf("Species whose graminoid or woody status differs from step 00 (%d):", nrow(fg_change)), "",
-    if (nrow(fg_change)) md_table(fg_change) else "None.",
     "", "## Placements", "", md_table(ptab), "",
     sprintf("Grafted at family level, their genus being absent from the mega-tree (%d): %s.", length(family_grafts), paste(family_grafts, collapse = ", ")),
     "", sprintf("Ledger rows edited by hand relative to the rule-based draft: %d.", nrow(edited)),
@@ -358,8 +316,7 @@ write_p3_report <- function(study_species, functional_groups, placements, placem
             length(phylogeny$tree$tip.label), nrow(eig), if (phylogeny_axes$corrected) "Lingoes correction" else "no correction needed",
             phylogeny_axes$negative_ratio, n_bs, eig$cumulative_percent[3]),
     "", md_table(dplyr::mutate(utils::head(eig, 6), dplyr::across(dplyr::where(is.numeric), ~ round(.x, 2)))),
-    "", sprintf("Against step 00 (%d resident species in both): correlation of scores PEV1 %.3f, PEV2 %.3f, PEV3 %.3f.",
-                length(common), cors[1], cors[2], cors[3]),
+    "", "The comparison with the frozen legacy groups and axes of step 00 is in `reports/P5_compare_to_frozen.md`.",
     "", "## Warnings captured", "",
     if (length(phylogeny$warnings)) paste("-", unique(phylogeny$warnings)) else "None.",
     "", "## Deviations from the plan", "",
@@ -381,7 +338,7 @@ write_p4_outputs <- function(experiment_climate, niche_optima, site_bio10, dir =
 }
 
 write_p4_report <- function(experiment_climate, experiments, site_bio10, niche_optima, lynn, lynn_disagree,
-                            study_species, frozen_climate_file, frozen_niche_file,
+                            study_species,
                             path = "reports/P4_climate_niche.md") {
   ec <- experiment_climate
   r_P <- stats::cor(ec$P_annual, ec$P_summer)
@@ -393,17 +350,6 @@ write_p4_report <- function(experiment_climate, experiments, site_bio10, niche_o
     dplyr::mutate(dplyr::across(c(min, median, max), ~ round(.x, 3)))
   partial <- dplyr::filter(ec, !climate_complete) |>
     dplyr::select(experiment_id, destination_years_available, destination_years_expected, missing_years = destination_missing_years)
-
-  frozen <- readRDS(frozen_climate_file)
-  cmp <- dplyr::inner_join(dplyr::select(ec, experiment_id, T, W, P_summer, P_annual, n_years = destination_years_expected),
-                           dplyr::select(frozen, experiment_id, T_00 = T, W_00 = W, P_summer_00 = P_summer, P_annual_00 = P_annual,
-                                         n_years_00 = destination_years_expected), by = "experiment_id") |>
-    dplyr::mutate(max_abs_difference = pmax(abs(T - T_00), abs(W - W_00), abs(P_summer - P_summer_00), abs(P_annual - P_annual_00)))
-  unchanged <- dplyr::filter(cmp, n_years == n_years_00)
-  changed <- dplyr::filter(cmp, n_years != n_years_00) |>
-    dplyr::mutate(dplyr::across(c(T, W, P_summer, P_annual, T_00, W_00, P_summer_00, P_annual_00), ~ round(.x, 3)))
-  new_exp <- setdiff(ec$experiment_id, frozen$experiment_id)
-  if (any(unchanged$max_abs_difference > 1e-9)) stop("Climate of an unchanged experiment differs from step 00")
 
   r_bio10 <- stats::cor(site_bio10$T, site_bio10$bio10_site, use = "complete.obs")
 
@@ -419,7 +365,6 @@ write_p4_report <- function(experiment_climate, experiments, site_bio10, niche_o
                                             is.na(accepted_species) ~ "name not resolved in P1",
                                             TRUE ~ "accepted species is not a study species")) |>
     dplyr::count(reason, name = "lynn_names")
-  frozen_niche <- readRDS(frozen_niche_file)
 
   report <- c(
     "# P4: Climate and niche", "",
@@ -433,11 +378,7 @@ write_p4_report <- function(experiment_climate, experiments, site_bio10, niche_o
             nrow(ec), r_P),
     "", sprintf("Partial coverage (%d experiments; CHELSA has no 2022 to 2023), averaged over the years available:", nrow(partial)), "",
     md_table(partial),
-    "", sprintf(paste("Against step 00: %d experiments with the same years agree exactly (largest difference %.2g).",
-                      "Experiments whose years changed: %d. New experiments: %s."),
-                nrow(unchanged), max(unchanged$max_abs_difference), nrow(changed),
-                if (length(new_exp)) paste(new_exp, collapse = ", ") else "none"), "",
-    if (nrow(changed)) md_table(dplyr::select(changed, experiment_id, n_years_00, n_years, T_00, T, W_00, W, P_annual_00, P_annual)) else character(),
+    "", "The comparison with the frozen legacy climate and niche of step 00 is in `reports/P5_compare_to_frozen.md`.",
     "", "### Summer temperature: CHELSA 1981-2010 climatology against the experiment JJA T", "",
     sprintf(paste("Lynn's site summer temperature (`sum_temp_site`, the bio10 analogue behind T_opt) against our destination JJA T",
                   "averaged over the experiment years: r = %.3f; mean difference (ours minus climatology) %.2f degC, range %.2f to %.2f.",
@@ -446,9 +387,9 @@ write_p4_report <- function(experiment_climate, experiments, site_bio10, niche_o
             max(site_bio10$difference, na.rm = TRUE)),
     "", "## Niche", "",
     sprintf(paste("Study species with a niche: %d of %d; with n_obs_sub >= 30: %d. Lynn names: %d, of which %d used",
-                  "(%d species from more than one Lynn name). Step 00 had %d Lynn names, keyed by Lynn's own names."),
+                  "(%d species from more than one Lynn name)."),
             nrow(niche_optima), nrow(study_species), sum(niche_optima$n_obs_sub >= 30), nrow(lynn),
-            nrow(lynn) - sum(unused_lynn$lynn_names), sum(niche_optima$n_lynn_names > 1), nrow(frozen_niche)), "",
+            nrow(lynn) - sum(unused_lynn$lynn_names), sum(niche_optima$n_lynn_names > 1)), "",
     "Lynn names not used:", "", md_table(unused_lynn),
     "", sprintf("### Species with more than one Lynn name (%d): the name with most occurrences is used (decided 26 Oct)",
                 sum(niche_optima$n_lynn_names > 1)), "",

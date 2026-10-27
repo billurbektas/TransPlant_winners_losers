@@ -137,42 +137,7 @@ The 30 largest differences:
 | Poa alberti | LDMC | 10 | 0.4825 |  |  |  |
 | Trichophorum distigmaticum | LDMC | 12 | 0.419797096 |  |  |  |
 
-## Against the frozen legacy traits (step 00)
-
-Species with traits now: 674; in step 00: 558; species gained: 152; lost: 36 (names that changed count as both); species x trait medians changed by more than 5%: 572. The 30 largest:
-
-| species | trait | new | legacy | relative_difference |
-| --- | --- | --- | --- | --- |
-| Euphrasia officinalis | height | 0.2325 | 0.0395 | 4.886 |
-| Phleum alpinum | height | 0.2925 | 0.0694 | 3.215 |
-| Cerastium fontanum | height | 0.25 | 0.068305 | 2.66 |
-| Galium anisophyllon | height | 0.23208 | 0.06416 | 2.617 |
-| Trifolium hybridum | height | 0.494 | 0.152 | 2.25 |
-| Geranium sylvaticum | height | 0.37 | 0.115 | 2.217 |
-| Pyrola minor | height | 0.0995 | 0.0316 | 2.149 |
-| Trollius europaeus | height | 0.5275 | 0.198 | 1.664 |
-| Euphrasia officinalis | LMA | 0.1730821395 | 0.0650364203954214 | 1.661 |
-| Trifolium dubium | height | 0.225350459362423 | 0.09 | 1.504 |
-| Poa annua | height | 0.278 | 0.1165 | 1.386 |
-| Agrostis mertensii | height | 0.14 | 0.06 | 1.333 |
-| Hieracium alpinum | height | 0.138 | 0.06 | 1.3 |
-| Lactuca serriola | height | 0.8 | 0.36 | 1.222 |
-| Ranunculus repens | height | 0.265909090909091 | 0.12 | 1.216 |
-| Luzula spicata | height | 0.1218 | 0.0554 | 1.199 |
-| Astragalus danicus | height | 0.10975 | 0.05 | 1.195 |
-| Gentianella campestris | height | 0.109 | 0.05 | 1.18 |
-| Euphrasia salisburgensis | LMA | 0.114625942468789 | 0.055005500550055 | 1.084 |
-| Carex pallescens | height | 0.6535 | 0.315 | 1.075 |
-| Salix herbacea | height | 0.049 | 0.0237 | 1.068 |
-| Betula pubescens | height | 0.27 | 5.27 | -0.949 |
-| Hedysarum hedysaroides | height | 0.38 | 0.2 | 0.9 |
-| Echium vulgare | height | 0.0454 | 0.4227 | -0.893 |
-| Stellaria graminea | height | 0.5 | 0.269 | 0.859 |
-| Dactylorhiza viridis | LMA | 0.0461039768439346 | 0.0249149221203853 | 0.85 |
-| Androsace septentrionalis | height | 0.02 | 0.011 | 0.818 |
-| Noccaea montana | height | 0.0335 | 0.0185 | 0.811 |
-| Festuca vivipara | height | 0.11 | 0.061 | 0.803 |
-| Festuca ovina | height | 0.07 | 0.3504 | -0.8 |
+The comparison with the frozen legacy traits of step 00 is in `reports/P5_compare_to_frozen.md`.
 
 ## Flagged TRY names of study species
 

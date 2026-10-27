@@ -13,7 +13,7 @@ backbone_genus_family <- function() {
 # Draft of the placement ledger: legacy reviewed rows where the legacy
 # species is the same species, then rules for the rest. Written for review;
 # the pipeline itself reads only the reviewed ledger.
-placement_draft <- function(study_species, legacy, genus_map, taxonomy, frozen_taxonomy,
+placement_draft <- function(study_species, legacy, genus_map, taxonomy, legacy_taxonomy,
                             path = "prep/phylogeny_placements_draft.csv") {
   tips <- backbone_tips()
   gf <- backbone_genus_family()
@@ -24,13 +24,14 @@ placement_draft <- function(study_species, legacy, genus_map, taxonomy, frozen_t
   # name equals ours): rows that stood for a homonym-corrected species, such
   # as legacy "Gentianella germanica" for Gentiana campestris, do not match
   # A renamed legacy species (Minuartia verna, now Sabulina verna) keeps its
-  # reviewed label: legacy name -> submitted names (step 00 taxonomy) -> our
+  # reviewed label: legacy name -> submitted names (legacy taxonomy, copied
+  # from step 00 to prep/config/legacy_taxonomy.csv by P5) -> our
   # accepted species, accepted only when the epithet stays the same (first
   # five letters, so gender endings match). Homonym errors change the epithet
   # (legacy Gentianella germanica stood for Gentiana campestris) and are not
   # linked.
   epithet5 <- function(x) substr(tolower(stringr::word(x, 2)), 1, 5)
-  chain <- frozen_taxonomy |>
+  chain <- legacy_taxonomy |>
     dplyr::select(submitted_name, legacy_accepted = accepted_name_reviewed) |>
     dplyr::inner_join(dplyr::select(taxonomy, submitted_name = name_original, accepted_species),
                       by = "submitted_name") |>

@@ -14,7 +14,6 @@ list(
   tar_target(rdata_file, "data/TransPlantNetwork_060824.RData", format = "file"),
   tar_target(try_file, "data/try_47163.txt", format = "file"),
   tar_target(niche_file, "data/MacroContextTransplantDat_2.csv", format = "file"),
-  tar_target(frozen_taxonomy_file, "data/derived/00_inputs/species_taxonomy.rds", format = "file"),
   tar_target(site_edits_file, "prep/config/site_edits.csv", format = "file"),
   tar_target(community_edits_file, "prep/config/community_edits.csv", format = "file"),
   tar_target(mapping_decisions_file, "prep/config/species_mapping_decisions.csv", format = "file"),
@@ -23,16 +22,12 @@ list(
   tar_target(accepted_renames_file, "prep/config/accepted_renames.csv", format = "file"),
   tar_target(try_dictionary_file, "prep/config/try_trait_map.csv", format = "file"),
   tar_target(natural_values_file, "prep/config/try_natural_values.csv", format = "file"),
-  tar_target(frozen_traits_file, "data/derived/00_inputs/traits.rds", format = "file"),
-  tar_target(frozen_groups_file, "data/derived/00_inputs/functional_groups.rds", format = "file"),
-  tar_target(frozen_axes_file, "data/derived/00_inputs/phylogeny_axes.rds", format = "file"),
   tar_target(woodiness_file, "prep/config/woodiness.csv", format = "file"),
   tar_target(genus_map_file, "prep/config/phylogeny_genus_map.csv", format = "file"),
   tar_target(legacy_placements_file, "prep/config/phylogeny_placements_legacy.csv", format = "file"),
+  tar_target(legacy_taxonomy_file, "prep/config/legacy_taxonomy.csv", format = "file"),
   tar_target(placements_file, "prep/config/phylogeny_placements.csv", format = "file"),
   tar_target(chelsa_files, chelsa_cache_files(), format = "file"),
-  tar_target(frozen_climate_file, "data/derived/00_inputs/experiment_climate.rds", format = "file"),
-  tar_target(frozen_niche_file, "data/derived/00_inputs/niche_optima.rds", format = "file"),
   tar_target(site_edits, read_ledger(site_edits_file)),
   tar_target(community_edits, read_ledger(community_edits_file)),
   tar_target(mapping_decisions, read_ledger(mapping_decisions_file)),
@@ -71,7 +66,7 @@ list(
              write_p1_report(community_raw, community_named, community_dated, community, sites,
                              experiments, taxonomy, name_resolution_study, name_resolution_try, names_all,
                              name_resolution, try_candidate_names, try_names, species_merges,
-                             community_edits, accepted_renames, rdata_file, frozen_taxonomy_file),
+                             community_edits, accepted_renames, rdata_file),
              format = "file"),
 
   # P2: TRY traits
@@ -87,7 +82,7 @@ list(
   tar_target(trait_outputs, write_trait_outputs(trait_summary), format = "file"),
   tar_target(p2_report,
              write_p2_report(try_ids, try_attached, try_clean, try_climate, trait_summary, try_name_map,
-                             taxonomy, natural_values, frozen_traits_file),
+                             taxonomy, natural_values),
              format = "file"),
 
   # P3: functional groups and phylogeny
@@ -97,14 +92,14 @@ list(
   # tree is built from the reviewed ledger only
   tar_target(placement_draft_tbl,
              placement_draft(study_species, read_ledger(legacy_placements_file), read_ledger(genus_map_file),
-                             taxonomy, readRDS(frozen_taxonomy_file))),
+                             taxonomy, read_ledger(legacy_taxonomy_file))),
   tar_target(placements, read_placements(placements_file, study_species)),
   tar_target(phylogeny, build_phylogeny(placements)),
   tar_target(phylogeny_axes, phylogeny_pcoa(phylogeny)),
   tar_target(p3_outputs, write_p3_outputs(functional_groups, phylogeny, phylogeny_axes, placements), format = "file"),
   tar_target(p3_report,
              write_p3_report(study_species, functional_groups, placements, placement_draft_tbl, phylogeny,
-                             phylogeny_axes, frozen_groups_file, frozen_axes_file),
+                             phylogeny_axes),
              format = "file"),
 
   # P4: climate and niche
@@ -118,6 +113,6 @@ list(
   tar_target(p4_outputs, write_p4_outputs(experiment_climate, niche_optima, site_bio10), format = "file"),
   tar_target(p4_report,
              write_p4_report(experiment_climate, experiments, site_bio10, niche_optima, lynn, lynn_disagree,
-                             study_species, frozen_climate_file, frozen_niche_file),
+                             study_species),
              format = "file")
 )

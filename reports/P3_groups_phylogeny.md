@@ -55,18 +55,6 @@ Graminoid (Poaceae, Cyperaceae, Juncaceae): 160 species. Woody (`prep/config/woo
 | Vaccinium uliginosum | Ericaceae | genus row: dwarf shrub (legacy list) |
 | Vaccinium vitis-idaea | Ericaceae | genus row: dwarf shrub (legacy list) |
 
-Species whose graminoid or woody status differs from step 00 (7):
-
-| species | graminoid | woody | graminoid_00 | woody_00 |
-| --- | --- | --- | --- | --- |
-| Acer pseudoplatanus | FALSE | TRUE | FALSE | FALSE |
-| Artemisia tridentata | FALSE | TRUE | FALSE | FALSE |
-| Fargesia spathacea | TRUE | TRUE | TRUE | FALSE |
-| Genista sagittalis | FALSE | TRUE | FALSE | FALSE |
-| Larix decidua | FALSE | TRUE | FALSE | FALSE |
-| Polygaloides chamaebuxus | FALSE | TRUE | FALSE | FALSE |
-| Rubus idaeus | FALSE | TRUE | FALSE | FALSE |
-
 ## Placements
 
 | placement | species |
@@ -95,7 +83,7 @@ Tips: 904, rooted and ultrametric. PCoA on cophenetic distances: 903 positive ax
 | PEV5 | 5 | 1562096.07 | 4.82 | 49.47 | 0.59 | TRUE | none |
 | PEV6 | 6 | 1219541.32 | 3.76 | 53.24 | 0.56 | TRUE | none |
 
-Against step 00 (476 resident species in both): correlation of scores PEV1 0.998, PEV2 0.794, PEV3 0.028.
+The comparison with the frozen legacy groups and axes of step 00 is in `reports/P5_compare_to_frozen.md`.
 
 ## Warnings captured
 
