@@ -5,8 +5,6 @@ format: html
 
 Step reports are included below in order. Each is written by its script.
 
-{{< include 00_freeze_inputs.md >}}
-
 {{< include P1_community_taxonomy.md >}}
 
 {{< include P2_traits.md >}}
@@ -14,3 +12,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include P3_groups_phylogeny.md >}}
 
 {{< include P4_climate_niche.md >}}
+
+{{< include P5_compare_to_frozen.md >}}
