@@ -1,0 +1,7 @@
+"file","key","difference","cause","kind"
+"sites","FR_AlpeHuez::HIGH","survey_year_min: NA -> 2015","FR_AlpeHuez: survey years in the SQLite only (the RData had no year)","new data"
+"sites","FR_AlpeHuez::LOW","survey_year_min: NA -> 2015","FR_AlpeHuez: survey years in the SQLite only (the RData had no year)","new data"
+"sites","FR_AlpeHuez::HIGH","survey_year_max: NA -> 2023","FR_AlpeHuez: survey years in the SQLite only (the RData had no year)","new data"
+"sites","FR_AlpeHuez::LOW","survey_year_max: NA -> 2023","FR_AlpeHuez: survey years in the SQLite only (the RData had no year)","new data"
+"sites","FR_AlpeHuez::HIGH","supplied_year_range: NA -> 9","FR_AlpeHuez: survey years in the SQLite only (the RData had no year)","new data"
+"sites","FR_AlpeHuez::LOW","supplied_year_range: NA -> 9","FR_AlpeHuez: survey years in the SQLite only (the RData had no year)","new data"
