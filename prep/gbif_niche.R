@@ -245,7 +245,11 @@ if (!file.exists(key_file)) {
   stopifnot(all(nzchar(Sys.getenv(c("GBIF_USER", "GBIF_PWD", "GBIF_EMAIL"))))) # from ~/.Renviron
   # Lynn's download predicates (download 0068537-240626123714530): coordinates,
   # no geospatial issue, 1950 onwards; simple CSV. One download, one DOI.
-  dl <- rgbif::occ_download(rgbif::pred_in("taxonKey", as.numeric(key_set)), rgbif::pred("hasCoordinate", TRUE),
+  # the taxon filter carries its own taxonomy; without it rgbif 3.9 tags the
+  # keys as Catalogue of Life XR and GBIF matches none of our Backbone keys
+  # (first request 0011566-261023074918325, 28 Oct: 0 records, not used)
+  dl <- rgbif::occ_download(rgbif::pred_in("taxonKey", as.numeric(key_set), checklistKey = backbone),
+                            rgbif::pred("hasCoordinate", TRUE),
                             rgbif::pred("hasGeospatialIssue", FALSE), rgbif::pred_gte("year", 1950),
                             format = "SIMPLE_CSV", checklistKey = backbone)
   writeLines(as.character(dl), key_file) # saved at once: a rerun never requests twice
@@ -284,6 +288,15 @@ stopifnot(length(land_file) == 1)
 if (meta$status != "SUCCEEDED") meta <- rgbif::occ_download_wait(download_key, status_ping = 120, quiet = FALSE)
 meta <- gbif_retry(function() rgbif::occ_download_meta(download_key))
 stopifnot(meta$status == "SUCCEEDED")
+# the download must hold what stage 1 counted for the same keys: at least the
+# whole-species keys (disjoint), at most all keys (name keys can lie inside
+# a whole species, as R. tuberosus in R. polyanthemos); 2% for records added
+# or reinterpreted between the count and the download
+counted <- distinct(select(keys_used, gbif_key, mode, records)) |> filter(!is.na(records))
+low <- sum(counted$records[counted$mode == "species"])
+high <- sum(counted$records)
+if (meta$totalRecords < 0.98 * low || meta$totalRecords > 1.02 * high)
+  stop("Download ", download_key, " holds ", meta$totalRecords, " records; stage 1 counted ", low, " to ", high)
 zip <- file.path(cache, paste0(download_key, ".zip"))
 if (!file.exists(zip) || file.size(zip) != meta$size) rgbif::occ_download_get(download_key, path = cache, overwrite = TRUE)
 stopifnot(file.size(zip) == meta$size)
