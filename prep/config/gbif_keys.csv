@@ -34,9 +34,7 @@ Helianthemum oelandicum,Helianthemum alpestre,,,,include,WCVP includes H. alpest
 Omalotheca sylvatica,Gnaphalium sylvaticum,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
 Viola biflora,Viola biflora var. rockiana,,,,include,"recorded at CN_Gongga; WCVP places var. rockiana in V. biflora, GBIF treats it as Viola rockiana"
 Persicaria runcinata,Polygonum runcinatum,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
-Primula auricula,Primula serratifolia,,,,exclude,PROVISIONAL: the CN_Gongga plant is Primula serratifolia Franch.; P1 resolved the name to P. auricula (the Gand. homonym); Bills decides the P1 fix
 Pilosella hoppeana,Hieracium hoppeanum,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
-Noticastrum adscendens,Aster adscendens,,,,exclude,PROVISIONAL: the US_Montana plant is Symphyotrichum ascendens (Aster adscendens Lindl.); P1 resolved it to the South American Noticastrum adscendens; Bills decides the P1 fix
 Noccaea fendleri,Thlaspi montanum,,,,exclude,GBIF's usage is Thlaspi montanum Bory & Chaub. (Greece); the US_Montana record is N. fendleri by P1 decision
 Omalotheca norvegica,Gnaphalium norvegicum,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
 Oxytropis humifusa,Oxytropis glacialis,,,,include,"WCVP (P1) places O. glacialis in O. humifusa, GBIF keeps O. glacialis Benth. apart; recorded under this name at CN_Damxung"
@@ -61,3 +59,6 @@ Sisymbrium loeselii,Sisymbrium loeselii,,,,geography_ok,widespread species; Indi
 Viola odorata,Viola odorata,,,,geography_ok,widespread species; India has very few GBIF records (IN_Kashmir)
 Carex curvula,Carex curvula,,,,geography_ok,"alpine species; DE_TransAlps sites lie in the Alps, outside Germany's few records"
 Phyteuma scheuchzeri,Phyteuma scheuchzeri,,,,geography_ok,southern Alpine species with few French records; FR_AlpeHuez lies at its range edge
+Tofieldia calyculata,Tofieldia calyculata,,,,geography_ok,"community record (code Tof.cal, NO_Gudmedalen and NO_Lavisdalen, 2015) kept as recorded; GBIF has 5 Norwegian records (decided 28 Oct: community records are not changed)"
+Helianthus petiolaris,Helianthus petiolaris,,,,geography_ok,"community record: the network dictionary maps code 'Helianthus anus' (IN_Kashmir) to Helianthus canus, which TNRS resolves correctly; kept as recorded (decided 28 Oct)"
+Symphyotrichum ascendens,Aster adscendens,,,,include,"Aster adscendens Lindl. is Symphyotrichum ascendens (P1 decision 28 Oct); GBIF keeps the name as a separate species with US records"

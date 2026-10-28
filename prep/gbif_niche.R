@@ -26,7 +26,7 @@
 # Checks: 904 study species; every non-automatic match decided in the ledger; every
 #         key claimed by one species; every species keyed or excluded; GBIF records
 #         in a study country or confirmed; rows read = GBIF's total; every record
-#         assigned to a species; bio10 within -30 to 40 degC; 904 species out
+#         assigned to a species; bio10 within -30 to 40 degC; 903 species out
 
 suppressPackageStartupMessages(library(dplyr))
 source("prep/R/report.R") # md_table()
@@ -45,7 +45,7 @@ store <- function(x) targets::tar_read_raw(x, store = "prep/_targets")
 study <- store("study_species")
 taxonomy <- store("taxonomy")
 res <- store("name_resolution")
-stopifnot(nrow(study) == 904) # P3: residents and destination pool
+stopifnot(nrow(study) == 903) # P3: residents and destination pool (904 before the 28 Oct homonym fixes)
 
 ledger_file <- "prep/config/gbif_keys.csv"
 ledger <- if (file.exists(ledger_file)) utils::read.csv(ledger_file, colClasses = "character", encoding = "UTF-8") else
@@ -320,7 +320,7 @@ niche <- cells |>
             n_obs_sub = n(), n_records = sum(n_records), .by = species)
 niche <- left_join(select(study, species), niche, by = "species") |>
   mutate(n_obs_sub = coalesce(n_obs_sub, 0L), n_records = coalesce(n_records, 0L))
-stopifnot(nrow(niche) == 904, !anyDuplicated(niche$species))
+stopifnot(nrow(niche) == nrow(study), !anyDuplicated(niche$species))
 saveRDS(niche, "data/derived/prep/gbif_niche.rds")
 utils::write.csv(niche, "data/derived/prep/gbif_niche.csv", row.names = FALSE)
 
