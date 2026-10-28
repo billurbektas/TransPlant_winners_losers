@@ -28,7 +28,7 @@
 #         in a study country or confirmed; rows read = GBIF's total; every record
 #         assigned to a species; bio10 within -30 to 40 degC; 903 species out
 
-suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages({library(dplyr); library(data.table)})
 source("prep/R/report.R") # md_table()
 
 keys_only <- identical(commandArgs(trailingOnly = TRUE), "keys")
@@ -237,41 +237,28 @@ message("Stage 1: ", n_distinct(keys$species), " species keyed with ", length(ke
         length(excluded), " excluded")
 if (keys_only) quit(save = "no")
 
-# ---- Stage 2: the GBIF download -----------------------------------------------
+# ---- Stage 2: request the GBIF download (GBIF prepares it on its servers) ----
 key_file <- file.path(cache, "download_key.txt")
 record_file <- "data/derived/prep/gbif_download.csv"
 request_file <- "reports/P6_gbif_download_request.json"
 if (!file.exists(key_file)) {
   stopifnot(all(nzchar(Sys.getenv(c("GBIF_USER", "GBIF_PWD", "GBIF_EMAIL"))))) # from ~/.Renviron
   # Lynn's download predicates (download 0068537-240626123714530): coordinates,
-  # no geospatial issue, 1950 onwards; simple CSV
+  # no geospatial issue, 1950 onwards; simple CSV. One download, one DOI.
   dl <- rgbif::occ_download(rgbif::pred_in("taxonKey", as.numeric(key_set)), rgbif::pred("hasCoordinate", TRUE),
                             rgbif::pred("hasGeospatialIssue", FALSE), rgbif::pred_gte("year", 1950),
                             format = "SIMPLE_CSV", checklistKey = backbone)
-  writeLines(as.character(dl), key_file) # saved before waiting: a rerun never requests twice
+  writeLines(as.character(dl), key_file) # saved at once: a rerun never requests twice
 }
 download_key <- readLines(key_file)
-meta <- rgbif::occ_download_meta(download_key)
+meta <- gbif_retry(function() rgbif::occ_download_meta(download_key))
 jsonlite::write_json(meta$request, request_file, auto_unbox = TRUE, pretty = TRUE)
 requested <- sort(as.character(unlist(Filter(function(p) identical(p$key, "TAXON_KEY"), meta$request$predicate$predicates)[[1]]$values)))
 if (!identical(requested, key_set)) stop("The keys now chosen differ from the download ", download_key,
                                          "; remove ", key_file, " only if a new download is intended")
-if (meta$status != "SUCCEEDED") meta <- rgbif::occ_download_wait(download_key, status_ping = 60, quiet = FALSE)
-meta <- rgbif::occ_download_meta(download_key)
-zip <- file.path(cache, paste0(download_key, ".zip"))
-if (!file.exists(zip)) rgbif::occ_download_get(download_key, path = cache)
-sha <- digest::digest(file = zip, algo = "sha256")
-if (file.exists(record_file) && utils::read.csv(record_file)$sha256 != sha) stop(zip, " differs from the recorded download")
-record <- tibble::tibble(
-  download_key, doi = meta$doi, url = paste0("https://doi.org/", meta$doi),
-  citation = sprintf("GBIF.org (%s) GBIF Occurrence Download https://doi.org/%s",
-                     format(as.Date(substr(meta$created, 1, 10)), "%d %B %Y"), meta$doi),
-  created = meta$created, status = meta$status, total_records = meta$totalRecords, size_bytes = file.size(zip),
-  sha256 = sha, erase_after = meta$eraseAfter, checklist = paste("GBIF Backbone", backbone),
-  rgbif = as.character(utils::packageVersion("rgbif")), n_keys = length(key_set))
-utils::write.csv(record, record_file, row.names = FALSE)
+message("GBIF download ", download_key, ": ", meta$status)
 
-# ---- Stage 3: CHELSA climatologies and the land polygons ----------------------
+# ---- Stage 3: CHELSA climatologies and the land polygons (while GBIF works) --
 clim_dir <- "data/cache/chelsa_bioclim"
 dir.create(clim_dir, recursive = TRUE, showWarnings = FALSE)
 options(timeout = 7200)
@@ -290,68 +277,124 @@ ne_dir <- "data/cache/naturalearth"
 dir.create(ne_dir, showWarnings = FALSE)
 if (!length(list.files(ne_dir, pattern = "land[.]shp$")))
   rnaturalearth::ne_download(scale = 50, type = "land", category = "physical", destdir = ne_dir, load = FALSE)
-land <- terra::vect(rnaturalearth::ne_load(scale = 50, type = "land", category = "physical", destdir = ne_dir,
-                                           returnclass = "sf"))
+land_file <- list.files(ne_dir, pattern = "land[.]shp$", full.names = TRUE)
+stopifnot(length(land_file) == 1)
 
-# ---- Stage 4: stream the archive, clean, thin --------------------------------
-cells_file <- file.path(cache, paste0("species_cells_", download_key, ".rds"))
-if (!file.exists(cells_file)) {
+# ---- Stage 4: wait for GBIF, fetch the archive, record it ---------------------
+if (meta$status != "SUCCEEDED") meta <- rgbif::occ_download_wait(download_key, status_ping = 120, quiet = FALSE)
+meta <- gbif_retry(function() rgbif::occ_download_meta(download_key))
+stopifnot(meta$status == "SUCCEEDED")
+zip <- file.path(cache, paste0(download_key, ".zip"))
+if (!file.exists(zip) || file.size(zip) != meta$size) rgbif::occ_download_get(download_key, path = cache, overwrite = TRUE)
+stopifnot(file.size(zip) == meta$size)
+sha <- digest::digest(file = zip, algo = "sha256")
+if (file.exists(record_file) && utils::read.csv(record_file)$sha256 != sha) stop(zip, " differs from the recorded download")
+record <- tibble::tibble(
+  download_key, doi = meta$doi, url = paste0("https://doi.org/", meta$doi),
+  citation = sprintf("GBIF.org (%s) GBIF Occurrence Download https://doi.org/%s",
+                     format(as.Date(substr(meta$created, 1, 10)), "%d %B %Y"), meta$doi),
+  created = meta$created, status = meta$status, total_records = meta$totalRecords, size_bytes = file.size(zip),
+  sha256 = sha, erase_after = meta$eraseAfter, checklist = paste("GBIF Backbone", backbone),
+  rgbif = as.character(utils::packageVersion("rgbif")), n_keys = length(key_set))
+utils::write.csv(record, record_file, row.names = FALSE)
+
+# ---- Stage 5: pass 1, stream the archive through the record filters -------
+# The archive is read once, never unpacked (about 55 GB unpacked). Lynn's
+# record filters (lines 29-37, plus living specimens) are per record; what
+# survives is kept as unique species x coordinate with its record count,
+# because the coordinate tests of pass 2 depend on the coordinate only.
+steps <- c("read", "unassigned", "fossil or living specimen", "absent", "uncertainty > 10 km",
+           "individual count 0", "equal coordinates", "zero coordinates", "sea", "kept")
+coords_file <- file.path(cache, paste0("species_coords_", download_key, ".rds"))
+if (!file.exists(coords_file)) {
   csv <- utils::unzip(zip, list = TRUE)$Name[1]
   header <- strsplit(readLines(pipe(sprintf("unzip -p %s %s | head -1", shQuote(zip), shQuote(csv)))), "\t")[[1]]
   cols <- c("taxonKey", "speciesKey", "decimalLatitude", "decimalLongitude", "coordinateUncertaintyInMeters",
             "basisOfRecord", "occurrenceStatus", "individualCount")
   idx <- sort(match(cols, header))
   stopifnot(!anyNA(idx))
-  # read from the zip without unpacking it (about 55 GB unpacked)
   con <- pipe(sprintf("unzip -p %s %s | cut -f %s", shQuote(zip), shQuote(csv), paste(idx, collapse = ",")), "r")
   invisible(readLines(con, n = 1))
+  # species as an index into study$species; name-only keys first, then GBIF species
   name_keys <- filter(keys, mode == "name")
   species_keys <- filter(keys, mode == "species")
-  steps <- c("read", "unassigned", "fossil or living specimen", "absent", "uncertainty > 10 km",
-             "individual count 0", "equal coordinates", "zero coordinates", "sea", "kept")
+  name_sp <- match(name_keys$species, study$species)
+  species_sp <- match(species_keys$species, study$species)
   flow <- setNames(numeric(length(steps)), steps)
   parts <- list()
   repeat {
     lines <- readLines(con, n = 5e6)
     if (!length(lines)) break
-    d <- data.table::fread(text = lines, sep = "\t", header = FALSE, quote = "", col.names = header[idx],
-                           colClasses = list(character = c("taxonKey", "speciesKey", "basisOfRecord", "occurrenceStatus")),
-                           na.strings = "")
+    d <- data.table::fread(text = lines, sep = "\t", header = FALSE, quote = "", col.names = header[idx], na.strings = "",
+                           colClasses = list(character = c("taxonKey", "speciesKey", "basisOfRecord", "occurrenceStatus")))
+    rm(lines)
     flow["read"] <- flow["read"] + nrow(d)
-    # records under a name-only key go to that species, all others by GBIF species
-    d$species <- coalesce(name_keys$species[match(d$taxonKey, name_keys$gbif_key)],
-                          species_keys$species[match(d$speciesKey, species_keys$gbif_key)])
-    flow["unassigned"] <- flow["unassigned"] + sum(is.na(d$species))
-    # Lynn's filters (lines 29-37), plus living specimens (decided 28 Oct)
-    keep <- function(d, ok, step) { flow[step] <<- flow[step] + sum(!ok); d[ok, ] }
-    d <- d[!is.na(d$species) & !is.na(d$decimalLatitude) & !is.na(d$decimalLongitude), ]
-    d <- keep(d, !d$basisOfRecord %in% c("FOSSIL_SPECIMEN", "LIVING_SPECIMEN"), "fossil or living specimen")
-    d <- keep(d, d$occurrenceStatus == "PRESENT", "absent")
-    d <- keep(d, is.na(d$coordinateUncertaintyInMeters) | d$coordinateUncertaintyInMeters / 1000 <= 10, "uncertainty > 10 km")
-    d <- keep(d, is.na(d$individualCount) | d$individualCount > 0, "individual count 0")
-    d <- as.data.frame(d)
-    d <- keep(d, CoordinateCleaner::cc_equ(d, lon = "decimalLongitude", lat = "decimalLatitude", test = "absolute",
-                                           value = "flagged", verbose = FALSE), "equal coordinates")
-    d <- keep(d, CoordinateCleaner::cc_zero(d, lon = "decimalLongitude", lat = "decimalLatitude", buffer = 0.5,
-                                            value = "flagged", verbose = FALSE), "zero coordinates")
-    d <- keep(d, capture(CoordinateCleaner::cc_sea(d, lon = "decimalLongitude", lat = "decimalLatitude", ref = land,
-                                                   value = "flagged", verbose = FALSE)), "sea")
-    flow["kept"] <- flow["kept"] + nrow(d)
-    # one value per species x CHELSA cell: Lynn's thinning (lines 91-109) on the climate grid itself
-    d$cell <- terra::cellFromXY(clim, cbind(d$decimalLongitude, d$decimalLatitude))
-    parts[[length(parts) + 1]] <- count(d, species, cell, name = "n_records")
+    sp <- coalesce(name_sp[match(d$taxonKey, name_keys$gbif_key)], species_sp[match(d$speciesKey, species_keys$gbif_key)])
+    flow["unassigned"] <- flow["unassigned"] + sum(is.na(sp))
+    drop <- function(bad, step) { flow[step] <<- flow[step] + sum(bad & keep); keep & !bad }
+    keep <- !is.na(sp) & !is.na(d$decimalLatitude) & !is.na(d$decimalLongitude)
+    keep <- drop(d$basisOfRecord %in% c("FOSSIL_SPECIMEN", "LIVING_SPECIMEN"), "fossil or living specimen")
+    keep <- drop(d$occurrenceStatus != "PRESENT", "absent")
+    keep <- drop(!is.na(d$coordinateUncertaintyInMeters) & d$coordinateUncertaintyInMeters / 1000 > 10, "uncertainty > 10 km")
+    keep <- drop(!is.na(d$individualCount) & d$individualCount <= 0, "individual count 0")
+    parts[[length(parts) + 1]] <- data.table::data.table(sp = sp[keep], lon = d$decimalLongitude[keep],
+                                                         lat = d$decimalLatitude[keep])[, .(n = .N), by = .(sp, lon, lat)]
+    rm(d)
+    if (length(parts) >= 10) parts <- list(data.table::rbindlist(parts)[, .(n = sum(n)), by = .(sp, lon, lat)])
     message("read ", format(flow[["read"]], big.mark = ","))
   }
   close(con)
-  cells <- bind_rows(parts) |> summarise(n_records = sum(n_records), .by = c(species, cell))
-  saveRDS(list(cells = cells, flow = flow), cells_file)
+  species_coords <- data.table::rbindlist(parts)[, .(n = sum(n)), by = .(sp, lon, lat)]
+  saveRDS(list(species_coords = species_coords, flow = flow), coords_file)
 }
-thinned <- readRDS(cells_file)
-flow <- thinned$flow
+pass1 <- readRDS(coords_file)
+flow <- pass1$flow
+species_coords <- pass1$species_coords
+rm(pass1)
 stopifnot(flow[["read"]] == record$total_records) # every row of the archive read
 stopifnot(flow[["unassigned"]] == 0)               # every record came in under one of our keys
 
-# ---- Stage 5: climate per cell, niche per species ---------------------------
+# ---- Stage 6: pass 2, coordinate tests once per coordinate, in parallel ------
+# CoordinateCleaner's equal, zero and sea tests (Lynn, lines 40-46) run once
+# per unique coordinate across all species, split over all cores but two; a
+# record's result is its coordinate's result, as in Lynn's record-by-record run
+tests_file <- file.path(cache, paste0("coordinate_tests_", download_key, ".rds"))
+if (!file.exists(tests_file)) {
+  coords <- unique(species_coords[, .(lon, lat)])
+  n_cores <- max(1L, parallel::detectCores() - 2L)
+  chunks <- split(seq_len(nrow(coords)), ceiling(seq_len(nrow(coords)) / 1e6))
+  res <- parallel::mclapply(chunks, function(i) {
+    data.table::setDTthreads(1)
+    w <- character()
+    x <- as.data.frame(coords[i])
+    land <- terra::vect(land_file)
+    flags <- withCallingHandlers(data.frame(
+      equal = CoordinateCleaner::cc_equ(x, lon = "lon", lat = "lat", test = "absolute", value = "flagged", verbose = FALSE),
+      zero = CoordinateCleaner::cc_zero(x, lon = "lon", lat = "lat", buffer = 0.5, value = "flagged", verbose = FALSE),
+      sea = CoordinateCleaner::cc_sea(x, lon = "lon", lat = "lat", ref = land, value = "flagged", verbose = FALSE)),
+      warning = function(cond) { w <<- c(w, conditionMessage(cond)); invokeRestart("muffleWarning") })
+    list(flags = cbind(x, flags), warnings = w)
+  }, mc.cores = n_cores, mc.preschedule = FALSE)
+  if (any(vapply(res, inherits, logical(1), "try-error"))) stop("A coordinate-test worker failed: ", res[vapply(res, inherits, logical(1), "try-error")][[1]])
+  tests <- data.table::rbindlist(lapply(res, `[[`, "flags"))
+  saveRDS(list(tests = tests, warnings = unique(unlist(lapply(res, `[[`, "warnings"))), n_cores = n_cores), tests_file)
+}
+pass2 <- readRDS(tests_file)
+warns <- c(warns, pass2$warnings)
+stopifnot(!anyNA(pass2$tests$sea))                 # the sea test ran on every coordinate
+species_coords <- merge(species_coords, pass2$tests, by = c("lon", "lat"))
+flow["equal coordinates"] <- species_coords[!(equal), sum(n)]
+flow["zero coordinates"] <- species_coords[(equal) & !(zero), sum(n)]
+flow["sea"] <- species_coords[(equal) & (zero) & !(sea), sum(n)]
+species_coords <- species_coords[(equal) & (zero) & (sea)]
+flow["kept"] <- species_coords[, sum(n)]
+# one value per species x CHELSA cell: Lynn's thinning (lines 91-109) on the climate grid itself
+species_coords[, cell := terra::cellFromXY(clim, cbind(lon, lat))]
+thinned <- list(cells = as_tibble(species_coords[, .(n_records = sum(n)), by = .(species = study$species[sp], cell)]),
+                flow = flow)
+rm(species_coords)
+
+# ---- Stage 7: climate per cell, niche per species ---------------------------
 cell_ids <- unique(stats::na.omit(thinned$cells$cell)) # NA: outside the CHELSA extent
 vals <- cbind(cell = cell_ids, terra::extract(clim, cell_ids))
 cells <- left_join(thinned$cells, vals, by = "cell")
