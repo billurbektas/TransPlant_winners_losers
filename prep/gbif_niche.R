@@ -305,15 +305,29 @@ stopifnot(length(land_file) == 1)
 if (meta$status != "SUCCEEDED") meta <- rgbif::occ_download_wait(download_key, status_ping = 120, quiet = FALSE)
 meta <- gbif_retry(function() rgbif::occ_download_meta(download_key))
 stopifnot(meta$status == "SUCCEEDED")
-# the download must hold what stage 1 counted for the same keys: at least the
-# whole-species keys (disjoint), at most all keys (name keys can lie inside
-# a whole species, as R. tuberosus in R. polyanthemos); 2% for records added
-# or reinterpreted between the count and the download
-counted <- distinct(select(keys_used, gbif_key, mode, records)) |> filter(!is.na(records))
-low <- sum(counted$records[counted$mode == "species"])
-high <- sum(counted$records)
-if (meta$totalRecords < 0.98 * low || meta$totalRecords > 1.02 * high)
-  stop("Download ", download_key, " holds ", meta$totalRecords, " records; stage 1 counted ", low, " to ", high)
+# The download must hold what GBIF counts for the very request it was built
+# from (occurrence search with the same predicate and taxonomy; all
+# occurrence statuses, as in the download, whereas occ_count() counts only
+# PRESENT records). 1% for records GBIF changed between building and counting.
+gbif_predicate_count <- function(request) {
+  h <- curl::new_handle()
+  curl::handle_setheaders(h, "Content-Type" = "application/json")
+  curl::handle_setopt(h, postfields = jsonlite::toJSON(list(predicate = request$predicate, checklistKey = request$checklistKey,
+                                                            limit = 0), auto_unbox = TRUE))
+  res <- curl::curl_fetch_memory("https://api.gbif.org/v1/occurrence/search/predicate", handle = h)
+  if (!res$status_code %in% c(200, 201)) stop("GBIF predicate count failed with HTTP ", res$status_code)
+  jsonlite::fromJSON(rawToChar(res$content))$count
+}
+expected <- gbif_retry(function() gbif_predicate_count(meta$request))
+if (abs(meta$totalRecords - expected) > 0.01 * expected)
+  stop("Download ", download_key, " holds ", meta$totalRecords, " records; GBIF counts ", expected, " for its request")
+# and the request must reach our keys: at least the PRESENT records stage 1
+# counted for the whole-species keys, which are disjoint (an empty or
+# mis-keyed request agrees with its own empty download)
+counted <- distinct(select(keys_used, gbif_key, mode, records)) |> filter(!is.na(records), mode == "species")
+if (expected < 0.98 * sum(counted$records))
+  stop("GBIF counts ", expected, " records for the request of ", download_key, "; stage 1 counted ",
+       sum(counted$records), " present records for the same species keys")
 zip <- file.path(cache, paste0(download_key, ".zip"))
 if (!file.exists(zip) || file.size(zip) != meta$size) rgbif::occ_download_get(download_key, path = cache, overwrite = TRUE)
 stopifnot(file.size(zip) == meta$size)
