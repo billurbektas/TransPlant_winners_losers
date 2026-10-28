@@ -73,34 +73,34 @@ Community names by identification level and how they were decided:
 | excluded by decision | decision | 1 |
 | family_only | rule | 9 |
 | genus_only | rule | 122 |
-| species_or_lower | decision | 10 |
-| species_or_lower | rule | 949 |
+| species_or_lower | decision | 13 |
+| species_or_lower | rule | 946 |
 | unidentified | unidentified | 35 |
 
 TRY names flagged for review: 4094. Those whose accepted name, or one of the tied names, is a study species could carry trait records for the analysis (`could_be_study`); their handling is decided in P2.
 
 | reason | could_be_study | names | try_rows |
 | --- | --- | --- | --- |
-| fallback source wfo | TRUE | 163 | 8583 |
+| fallback source wfo | TRUE | 164 | 8588 |
 | fallback source wfo; fuzzy match | TRUE | 30 | 484 |
-| fuzzy match | TRUE | 378 | 7270 |
+| fuzzy match | TRUE | 377 | 7268 |
 | tie | TRUE | 13 | 1097 |
-| fallback source wfo | FALSE | 1074 | 54283 |
+| fallback source wfo | FALSE | 1073 | 54278 |
 | fallback source wfo; fuzzy match | FALSE | 212 | 1471 |
-| fuzzy match | FALSE | 1931 | 54178 |
+| fuzzy match | FALSE | 1932 | 54180 |
 | no legitimate candidate | FALSE | 256 | 31525 |
 | tie | FALSE | 37 | 2243 |
 
 The comparison with the frozen legacy taxonomy of step 00 is in `reports/P5_compare_to_frozen.md`.
 
-### Names merged into one species (104 names in 49 species; full table in `data/derived/prep/species_merges.csv`)
+### Names merged into one species (106 names in 50 species; full table in `data/derived/prep/species_merges.csv`)
 
 | merge_type | names |
 | --- | --- |
-| accepted name | 43 |
+| accepted name | 44 |
 | infraspecific to species | 20 |
 | spelling | 3 |
-| synonym | 38 |
+| synonym | 39 |
 
 | accepted_species | name_original | accepted_name | merge_type | regions | n_records |
 | --- | --- | --- | --- | --- | --- |
@@ -204,6 +204,8 @@ The comparison with the frozen legacy taxonomy of step 00 is in `reports/P5_comp
 | Silene flos-cuculi | Silene flos-cuculi | Silene flos-cuculi | accepted name | DE_Susalps | 1 |
 | Solidago virgaurea | Solidago virgaurea | Solidago virgaurea | accepted name | CH_Lavey; NO_Gudmedalen; NO_Lavisdalen; NO_Skjellingahaugen; SE_Abisko | 72 |
 | Solidago virgaurea | Solidago virgaurea subsp. minuta | Solidago virgaurea subsp. minuta | infraspecific to species | CH_Lavey | 19 |
+| Symphyotrichum ascendens | Aster adscendens | Symphyotrichum ascendens | synonym | US_Montana | 1 |
+| Symphyotrichum ascendens | Symphyotrichum ascendens | Symphyotrichum ascendens | accepted name | US_Colorado; US_Montana | 11 |
 | Vaccinium membranaceum | Vaccinium globulare | Vaccinium membranaceum | synonym | US_Montana | 13 |
 | Vaccinium membranaceum | Vaccinium membranaceum | Vaccinium membranaceum | accepted name | US_Montana | 3 |
 | Viola biflora | Viola biflora | Viola biflora | accepted name | CN_Heibei; DE_TransAlps; NO_Gudmedalen; NO_Lavisdalen; NO_Skjellingahaugen; NO_Ulvhaugen; SE_Abisko | 318 |

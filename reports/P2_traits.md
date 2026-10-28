@@ -1,19 +1,19 @@
 # P2: TRY traits
 
-TRY records were read by TRY species ID (1340 IDs whose contributor or TRY name resolves to a study species in P1) and each record was attached to a species through its own resolved name (the contributor's `SpeciesName` first, TRY's `AccSpeciesName` only as fallback). Observations under experimental or ambiguous treatment values were removed, then duplicates, ErrorRisk >= 4, observations without coordinates and those in arid and tropical climate zones, as in the legacy pipeline. 674 of 904 study species have at least one trait. LDMC in g/g, LMA in mg mm-2 (1 / SLA per observation), height in m.
+TRY records were read by TRY species ID (1339 IDs whose contributor or TRY name resolves to a study species in P1) and each record was attached to a species through its own resolved name (the contributor's `SpeciesName` first, TRY's `AccSpeciesName` only as fallback). Observations under experimental or ambiguous treatment values were removed, then duplicates, ErrorRisk >= 4, observations without coordinates and those in arid and tropical climate zones, as in the legacy pipeline. 673 of 903 study species have at least one trait. LDMC in g/g, LMA in mg mm-2 (1 / SLA per observation), height in m.
 
 ## Counts
 
 | stage | rows | observations |
 | --- | --- | --- |
-| read by TRY species ID (1340 IDs) | 2877931 | 179998 |
-| rows of study species (by our name or TRY's) | 2832174 | 177075 |
-| experimental observations removed | 2516912 | 156231 |
-| TRY duplicates removed | 2457036 | 154333 |
-| quantitative, ErrorRisk < 3 | 145916 | 96782 |
-| LDMC, SLA and vegetative height | 89236 | 61254 |
-| with coordinates and a climate zone | 77869 | 50106 |
-| outside the excluded zones Af, Am, Aw, BWh, BWk, BSh, BSk | 77385 | 49694 |
+| read by TRY species ID (1339 IDs) | 2877332 | 179926 |
+| rows of study species (by our name or TRY's) | 2831575 | 177003 |
+| experimental observations removed | 2516313 | 156159 |
+| TRY duplicates removed | 2456448 | 154263 |
+| quantitative, ErrorRisk < 3 | 145847 | 96733 |
+| LDMC, SLA and vegetative height | 89204 | 61230 |
+| with coordinates and a climate zone | 77846 | 50091 |
+| outside the excluded zones Af, Am, Aw, BWh, BWk, BSh, BSk | 77362 | 49679 |
 
 ## Treatment values
 
@@ -76,22 +76,22 @@ Non-positive values dropped before the medians (decided 26 Oct): 17 observations
 | vegetative_height | 247 | Traits of Halohytic Species in North-West-Germany | 6 |
 | vegetative_height | 468 | Tundra Trait Team | 2 |
 
-Text fields repaired from windows-1252 to UTF-8 after reading: LastName (50133 values), FirstName (116262 values), Dataset (22224 values), SpeciesName (2381 values), DataName (370 values), OriglName (8131 values), OrigValueStr (37743 values), OrigUnitStr (13190 values), Reference (432047 values), Comment (7855 values), StdValueStr (70 values).
+Text fields repaired from windows-1252 to UTF-8 after reading: LastName (50126 values), FirstName (116245 values), Dataset (22097 values), SpeciesName (2376 values), DataName (370 values), OriglName (8131 values), OrigValueStr (37703 values), OrigUnitStr (13190 values), Reference (431767 values), Comment (7852 values), StdValueStr (70 values).
 
 ## Species with traits
 
 | trait | species |
 | --- | --- |
-| LDMC | 567 |
-| LMA | 629 |
-| height | 568 |
-| any of the three | 674 |
+| LDMC | 566 |
+| LMA | 628 |
+| height | 567 |
+| any of the three | 673 |
 
-Study species without any of the three traits (230): Agastache urticifolia, Agrostis nervosa, Ajania przewalskii, Alchemilla alpigena, Alchemilla conjuncta, Alchemilla flabellata, Aletris pauciflora, Allium beesianum, Allium brevistylum, Allium prattii, Alopecurus aequalis, Anaphalis aureopunctata, Anaphalis flavescens, Anaphalis xylorhiza, Androsace graminifolia, Androsace mariae, Androsace minor, Androsace occidentalis, Androsace tapete, Anemonastrum demissum, Antennaria microphylla, Antennaria racemosa, Arenaria hispanica, Argentina leuconota, Argentina stenophylla, Arisaema parvum, Artemisia fulgens, Artemisia hedinii, Aster asteroides, Aster diplostephioides, Aster tataricus, Astragalus australis, Astragalus mongholicus, Athyrium spinulosum, Atriplex argentea, Berberis jamesiana, Boechera stricta, Bromus porteri, Calamagrostis rubescens, Calamagrostis tripilifera, Cardamine tangutorum, Carex cercostachys, Carex flava, Carex foetida, Carex kansuensis, Carex lehmannii, Carex nubigena, Carex phaeocephala, Carex sargentiana, Carex scabrirostris, Carex thibetica, Carpesium humile, Cerastium szechuense, Chamaesium viridiflorum, Chamorchis alpina, Chenopodium atrovirens, Chenopodium leptophyllum, Chrysosplenium pilosum, Claytonia lanceolata, Clinopodium polycephalum, Codonopsis foetens, Collomia linearis, Coluria longifolia, Comastoma pulmonarium, Comastoma tenellum, Corydalis pallida, Crepis pontana, Cryptogramma crispa, Cyananthus hookeri, Cyananthus incanus, Delphinium occidentale, Delphinium trichophorum, Draba spectabilis, Drymocallis glandulosa, Elsholtzia ciliata, Elsholtzia densa, Elymus bakeri, Epilobium fangii, Eremogone roborowskii, Erigeron coulteri, Erigeron elatior, Erigeron neglectus, Eritrichium hemisphaericum, Euphorbia pekinensis, Euphorbia prolifera, Euphorbia serrula, Euphorbia stracheyi, Euphrasia pectinata, Euphrasia regelii, Eurybia conspicua, Eurybia integrifolia, Fargesia spathacea, Fragaria nubicola, Galearis spathulata, Galium bifolium, Gentiana aristata, Gentiana crassuloides, Gentiana grumii, Gentiana parryi, Gentiana prostrata, Gentiana scabra, Gentiana squarrosa, Gentiana trichotoma, Gentianella azurea, Geranium pylzowianum, Goodyera oblongifolia, Hackelia micrantha, Halenia corniculata, Halerpestes tricuspis, Hansenia forbesii, Hansenia weberbaueriana, Hedysarum algidum, Helianthella uniflora, Helianthus petiolaris, Helictotrichon parlatorei, Helictotrichon tibeticum, Hemiphragma heterophyllum, Heterotheca pumila, Hypericum wightianum, Iliamna rivularis, Iris potaninii, Juncus allioides, Juncus himalensis, Juncus leucanthus, Juncus prismatocarpus, Juncus setchuensis, Koenigia cyanandra, Lappula occidentalis, Leontodon hyoseroides, Leontopodium japonicum, Ligularia pleurocaulis, Ligularia sagitta, Ligusticopsis scapiformis, Lithophragma glabrum, Lithophragma parviflorum, Lomatogonium macranthum, Lomatogonium rotatum, Luzula alpina, Lycoris radiata, Maianthemum henryi, Maianthemum japonicum, Malaxis monophyllos, Meconopsis horridula, Melica spectabilis, Micranthes atrata, Micranthes occidentalis, Microsteris gracilis, Microula sikkimensis, Morina chinensis, Morina kokonorica, Morina nepalensis, Myosotis decumbens, Myriactis nepalensis, Nemophila breviflora, Notholirion bulbuliferum, Noticastrum adscendens, Orobanche fasciculata, Osmorhiza berteroi, Oxytropis deflexa, Oxytropis densa, Oxytropis humifusa, Oxytropis yunnanensis, Packera cymbalaria, Parasenecio latipes, Pedicularis davidii, Pedicularis mussotii, Pedicularis rhynchodonta, Pedicularis sima, Perideridia gairdneri, Persicaria runcinata, Poa interior, Poa reflexa, Polygonatum cirrhifolium, Polypogon viridis, Pomatosace filicula, Potentilla brauneana, Potentilla clandestina, Potentilla pulcherrima, Primula deflexa, Primula malacoides, Ranunculus acriformis, Ranunculus inamoenus, Ranunculus japonicus, Rheum pumilum, Rhodiola fastigiata, Rhodiola quadrifida, Rhodiola yunnanensis, Rhododendron websterianum, Rudbeckia occidentalis, Rumex nepalensis, Sagina glabra, Sagina japonica, Salix serpillifolia, Saussurea ceterach, Saussurea globosa, Saussurea graminea, Saussurea katochaete, Saussurea pachyneura, Saussurea pulchra, Saussurea stella, Saxifraga cespitosa, Sedum triactina, Sibbaldia cuneata, Solidago multiradiata, Soroseris hookeriana, Sphaeralcea ambigua, Stellaria irrigua, Stellaria longifolia, Stipa capillacea, Swertia macrosperma, Symphyotrichum campestre, Tanacetum tatsienense, Thalictrum javanicum, Thalictrum occidentale, Thermopsis lanceolata, Thesium alpinum, Townsendia smithii, Vaccinium membranaceum, Vaccinium scoparium, Valeriana excelsa, Veronica allionii, Veronica ciliata, Veronica praecox, Veronica szechuanica, Viola nuttallii, Viola orbiculata, Viola philippica, Viola szetschwanensis, Youngia racemifera, Youngia simulatrix.
+Study species without any of the three traits (230): Agastache urticifolia, Agrostis nervosa, Ajania przewalskii, Alchemilla alpigena, Alchemilla conjuncta, Alchemilla flabellata, Aletris pauciflora, Allium beesianum, Allium brevistylum, Allium prattii, Alopecurus aequalis, Anaphalis aureopunctata, Anaphalis flavescens, Anaphalis xylorhiza, Androsace graminifolia, Androsace mariae, Androsace minor, Androsace occidentalis, Androsace tapete, Anemonastrum demissum, Antennaria microphylla, Antennaria racemosa, Argentina leuconota, Argentina stenophylla, Arisaema parvum, Artemisia fulgens, Artemisia hedinii, Aster asteroides, Aster diplostephioides, Aster tataricus, Astragalus australis, Astragalus mongholicus, Athyrium spinulosum, Atriplex argentea, Berberis jamesiana, Boechera stricta, Bromus porteri, Calamagrostis rubescens, Calamagrostis tripilifera, Cardamine tangutorum, Carex cercostachys, Carex flava, Carex foetida, Carex kansuensis, Carex lehmannii, Carex nubigena, Carex phaeocephala, Carex sargentiana, Carex scabrirostris, Carex thibetica, Carpesium humile, Cerastium szechuense, Chamaesium viridiflorum, Chamorchis alpina, Chenopodium atrovirens, Chenopodium leptophyllum, Chrysosplenium pilosum, Claytonia lanceolata, Clinopodium polycephalum, Codonopsis foetens, Collomia linearis, Coluria longifolia, Comastoma pulmonarium, Comastoma tenellum, Corydalis pallida, Crepis pontana, Cryptogramma crispa, Cyananthus hookeri, Cyananthus incanus, Delphinium occidentale, Delphinium trichophorum, Draba spectabilis, Drymocallis glandulosa, Elsholtzia ciliata, Elsholtzia densa, Elymus bakeri, Epilobium fangii, Eremogone roborowskii, Erigeron coulteri, Erigeron elatior, Erigeron neglectus, Eritrichium hemisphaericum, Euphorbia pekinensis, Euphorbia prolifera, Euphorbia serrula, Euphorbia stracheyi, Euphrasia pectinata, Euphrasia regelii, Eurybia conspicua, Eurybia integrifolia, Fargesia spathacea, Fragaria nubicola, Galearis spathulata, Galium bifolium, Gentiana aristata, Gentiana crassuloides, Gentiana grumii, Gentiana parryi, Gentiana prostrata, Gentiana scabra, Gentiana squarrosa, Gentiana trichotoma, Gentianella azurea, Geranium pylzowianum, Goodyera oblongifolia, Hackelia micrantha, Halenia corniculata, Halerpestes tricuspis, Hansenia forbesii, Hansenia weberbaueriana, Hedysarum algidum, Helianthella uniflora, Helianthus petiolaris, Helictotrichon parlatorei, Helictotrichon tibeticum, Hemiphragma heterophyllum, Heterotheca pumila, Hypericum wightianum, Iliamna rivularis, Iris potaninii, Juncus allioides, Juncus himalensis, Juncus leucanthus, Juncus prismatocarpus, Juncus setchuensis, Koenigia cyanandra, Lappula occidentalis, Leontodon hyoseroides, Leontopodium japonicum, Ligularia pleurocaulis, Ligularia sagitta, Ligusticopsis scapiformis, Lithophragma glabrum, Lithophragma parviflorum, Lomatogonium macranthum, Lomatogonium rotatum, Luzula alpina, Lycoris radiata, Maianthemum henryi, Maianthemum japonicum, Malaxis monophyllos, Meconopsis horridula, Melica spectabilis, Micranthes atrata, Micranthes occidentalis, Microsteris gracilis, Microula sikkimensis, Morina chinensis, Morina kokonorica, Morina nepalensis, Myosotis decumbens, Myriactis nepalensis, Nemophila breviflora, Notholirion bulbuliferum, Orobanche fasciculata, Osmorhiza berteroi, Oxytropis deflexa, Oxytropis densa, Oxytropis humifusa, Oxytropis yunnanensis, Packera cymbalaria, Parasenecio latipes, Pedicularis davidii, Pedicularis mussotii, Pedicularis rhynchodonta, Pedicularis sima, Perideridia gairdneri, Persicaria runcinata, Poa interior, Poa reflexa, Polygonatum cirrhifolium, Polypogon viridis, Pomatosace filicula, Potentilla brauneana, Potentilla clandestina, Potentilla pulcherrima, Primula deflexa, Primula malacoides, Primula serratifolia, Ranunculus acriformis, Ranunculus inamoenus, Ranunculus japonicus, Rheum pumilum, Rhodiola fastigiata, Rhodiola quadrifida, Rhodiola yunnanensis, Rhododendron websterianum, Rudbeckia occidentalis, Rumex nepalensis, Sagina glabra, Sagina japonica, Salix serpillifolia, Saussurea ceterach, Saussurea globosa, Saussurea graminea, Saussurea katochaete, Saussurea pachyneura, Saussurea pulchra, Saussurea stella, Saxifraga cespitosa, Sedum triactina, Sibbaldia cuneata, Solidago multiradiata, Soroseris hookeriana, Sphaeralcea ambigua, Stellaria arenarioides, Stellaria irrigua, Stellaria longifolia, Stipa capillacea, Swertia macrosperma, Symphyotrichum campestre, Tanacetum tatsienense, Thalictrum javanicum, Thalictrum occidentale, Thermopsis lanceolata, Thesium alpinum, Townsendia smithii, Vaccinium membranaceum, Vaccinium scoparium, Valeriana excelsa, Veronica allionii, Veronica ciliata, Veronica praecox, Veronica szechuanica, Viola nuttallii, Viola orbiculata, Viola philippica, Viola szetschwanensis, Youngia racemifera, Youngia simulatrix.
 
 ## Trusting TRY's accepted name against attaching by the record's own name
 
-Records of species x trait whose count or median differs between the two (median differing by more than 5%): 151 of 1778 species x trait combinations. Festuca ovina now holds 0 records submitted as Festuca pratensis.
+Records of species x trait whose count or median differs between the two (median differing by more than 5%): 151 of 1775 species x trait combinations. Festuca ovina now holds 0 records submitted as Festuca pratensis.
 
 | species | trait | n_ours | median_ours | n_trusting_try | median_trusting_try | relative_difference |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -147,9 +147,9 @@ A flagged TRY name is used when its accepted species is a study species and the 
 | --- | --- | --- |
 | FALSE | fallback source wfo | 3 |
 | FALSE | fuzzy match | 11 |
-| TRUE | fallback source wfo | 167 |
+| TRUE | fallback source wfo | 168 |
 | TRUE | fallback source wfo; fuzzy match | 30 |
-| TRUE | fuzzy match | 369 |
+| TRUE | fuzzy match | 368 |
 
 ## Warnings captured
 

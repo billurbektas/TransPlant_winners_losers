@@ -31,14 +31,14 @@ Lynn's site summer temperature (`sum_temp_site`, the bio10 analogue behind T_opt
 
 ## Niche
 
-Study species with a niche: 767 of 904; with n_obs_sub >= 30: 745. Lynn names: 785, of which 778 used (11 species from more than one Lynn name).
+Study species with a niche: 768 of 903; with n_obs_sub >= 30: 746. Lynn names: 785, of which 779 used (11 species from more than one Lynn name).
 
 Lynn names not used:
 
 | reason | lynn_names |
 | --- | --- |
 | Lynn's niche values are NA | 2 |
-| accepted species is not a study species | 4 |
+| accepted species is not a study species | 3 |
 | name not resolved in P1 | 1 |
 
 ### Species with more than one Lynn name (11): the name with most occurrences is used (decided 26 Oct)
@@ -70,7 +70,7 @@ The second name is a synonym or an infraspecific name recorded in one region; Ly
 | Viola biflora | Viola biflora | CN_Heibei; NO_Gudmedalen; NO_Lavisdalen; NO_Ulvhaugen; SE_Abisko | 20341 | 11.36 | 1441 | TRUE |
 | Viola biflora | Viola rockiana | CN_Gongga | 83 | 12.48 | 890 | FALSE |
 
-### Rows where Lynn's own code-to-name mapping disagrees with ours (16)
+### Rows where Lynn's own code-to-name mapping disagrees with ours (15)
 
 Lynn's niche for these rows belongs to the name Lynn assigned, not to our species; joining by name keeps it away from our species.
 
@@ -89,7 +89,6 @@ Lynn's niche for these rows belongs to the name Lynn assigned, not to our specie
 | CH_Lavey | Cerastium fontanum subsp. Vulgare | Cerastium fontanum | Cerastium fontanum | Cerastium holosteoides |
 | US_Montana | Hieracium_gracile | Hieracium graciliusculum | Hieracium graciliusculum | Hieracium triste |
 | IN_Kashmir | Helianthus anus | Helianthus annuus | Helianthus annuus | Helianthus petiolaris |
-| CN_Heibei | Stellaria arenaria | Stellaria arenarioides | Stellaria arenarioides | Arenaria hispanica |
 | DE_Susalps | Vicia angustifolia | Vicia lathyroides | Vicia lathyroides | Vicia sativa |
 | CN_Heibei | Koeleria cristata | Koeleria cristata |  | Koeleria macrantha |
 

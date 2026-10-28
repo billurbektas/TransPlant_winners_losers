@@ -1,6 +1,6 @@
 # P3: Functional groups and phylogeny
 
-Graminoid and woody status and a phylogeny with its PCoA axes for all 904 study species (residents and destination pool), on the P1 accepted species. The tree is cut from the V.PhyloMaker2 mega-tree GBOTB.extended.LCVP (scenario S3); each species' place is set by the reviewed ledger `prep/config/phylogeny_placements.csv`, which reuses the legacy hand-checked labels for the same species (and for renamed species whose epithet is unchanged), and places new species by rule.
+Graminoid and woody status and a phylogeny with its PCoA axes for all 903 study species (residents and destination pool), on the P1 accepted species. The tree is cut from the V.PhyloMaker2 mega-tree GBOTB.extended.LCVP (scenario S3); each species' place is set by the reviewed ledger `prep/config/phylogeny_placements.csv`, which reuses the legacy hand-checked labels for the same species (and for renamed species whose epithet is unchanged), and places new species by rule.
 
 ## Functional groups
 
@@ -59,7 +59,7 @@ Graminoid (Poaceae, Cyperaceae, Juncaceae): 160 species. Woody (`prep/config/woo
 
 | placement | species |
 | --- | --- |
-| exact tip | 643 |
+| exact tip | 642 |
 | exact tip under an older genus | 4 |
 | exact tip under an older name (legacy reviewed) | 13 |
 | grafted within family | 12 |
@@ -72,16 +72,16 @@ Ledger rows edited by hand relative to the rule-based draft: 0.
 
 ## Tree and axes
 
-Tips: 904, rooted and ultrametric. PCoA on cophenetic distances: 903 positive axes; no correction needed (negative/positive eigenvalue ratio 0). 36 axes exceed the broken-stick expectation; PEV1 to PEV3 carry 38.2% of the positive variation. Orientation anchors: Poa trivialis +PEV1, Erigeron formosissimus -PEV2, Euphrasia minima +PEV3.
+Tips: 903, rooted and ultrametric. PCoA on cophenetic distances: 902 positive axes; no correction needed (negative/positive eigenvalue ratio 0). 36 axes exceed the broken-stick expectation; PEV1 to PEV3 carry 38.2% of the positive variation. Orientation anchors: Poa trivialis +PEV1, Erigeron formosissimus -PEV2, Euphrasia minima +PEV3.
 
 | PEV | axis_number | eigenvalue | percent_positive_variation | cumulative_percent | broken_stick_expectation_percent | exceeds_broken_stick | correction |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| PEV1 | 1 | 5677393.28 | 17.52 | 17.52 | 0.82 | TRUE | none |
-| PEV2 | 2 | 3705887.18 | 11.44 | 28.96 | 0.71 | TRUE | none |
-| PEV3 | 3 | 2993180.28 | 9.24 | 38.19 | 0.65 | TRUE | none |
-| PEV4 | 4 | 2092437.89 | 6.46 | 44.65 | 0.61 | TRUE | none |
-| PEV5 | 5 | 1562096.07 | 4.82 | 49.47 | 0.59 | TRUE | none |
-| PEV6 | 6 | 1219541.32 | 3.76 | 53.24 | 0.56 | TRUE | none |
+| PEV1 | 1 | 5668277.57 | 17.5 | 17.5 | 0.82 | TRUE | none |
+| PEV2 | 2 | 3705587.91 | 11.44 | 28.95 | 0.71 | TRUE | none |
+| PEV3 | 3 | 2985131.81 | 9.22 | 38.16 | 0.65 | TRUE | none |
+| PEV4 | 4 | 2090661.52 | 6.46 | 44.62 | 0.62 | TRUE | none |
+| PEV5 | 5 | 1562097.9 | 4.82 | 49.44 | 0.59 | TRUE | none |
+| PEV6 | 6 | 1220315.88 | 3.77 | 53.21 | 0.57 | TRUE | none |
 
 The comparison with the frozen legacy groups and axes of step 00 is in `reports/P5_compare_to_frozen.md`.
 
