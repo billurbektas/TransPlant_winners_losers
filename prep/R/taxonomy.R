@@ -1,4 +1,4 @@
-# Taxonomy (P1): one resolution run over the community, TRY and Lynn names,
+# Taxonomy (P1): one resolution run over the community and TRY names,
 # with tidyTRY >= 0.2.0 (legitimate TNRS names only, WCVP before WFO).
 
 # legacy/R/infrastructure/io.R:39-44
@@ -19,14 +19,14 @@ unspecified_species <- function(x) {
 }
 
 # Study names: community names recorded at species level or below (a
-# one-word or "sp." name stays genus-level whatever TNRS returns) and Lynn's
-# niche names
-names_study <- function(community_named, unidentified, lynn_names) {
+# one-word or "sp." name stays genus-level whatever TNRS returns). Lynn's
+# niche names left the run with Lynn's niche file (P6, 28 Oct).
+names_study <- function(community_named, unidentified) {
   comm <- unique(stats::na.omit(community_named$name_original))
   comm <- comm[!comm %in% unidentified$name_original & word_count(comm) >= 2L & !unspecified_species(comm)]
-  all <- unique(stringr::str_squish(c(comm, lynn_names)))
+  all <- unique(stringr::str_squish(comm))
   all <- all[!is.na(all) & nzchar(all)]
-  tibble::tibble(name = all, in_community = all %in% comm, in_lynn = all %in% lynn_names, in_try = FALSE)
+  tibble::tibble(name = all, in_community = TRUE, in_try = FALSE)
 }
 
 # TRY names worth resolving. The export lists every TRY species (about
@@ -41,7 +41,7 @@ names_try <- function(try_names, name_resolution_study) {
   try_all <- try_all[!is.na(try_all) & nzchar(try_all)]
   keep <- tolower(stringr::word(try_all, 1)) %in% tolower(genera)
   cand <- setdiff(try_all[keep], name_resolution_study$submitted_name)
-  out <- tibble::tibble(name = cand, in_community = FALSE, in_lynn = FALSE, in_try = TRUE)
+  out <- tibble::tibble(name = cand, in_community = FALSE, in_try = TRUE)
   attr(out, "n_try_names") <- length(try_all)
   out
 }
@@ -132,7 +132,7 @@ build_taxonomy <- function(community_named, name_resolution, decisions, unidenti
                 n_records, regions)
 }
 
-# Accepted names replaced in every resolution (community, TRY, Lynn), so that
+# Accepted names replaced in every resolution (community and TRY), so that
 # all tables keep joining on the same name (prep/config/accepted_renames.csv)
 apply_accepted_renames <- function(resolution, renames) {
   hit <- match(resolution$accepted_species, renames$from_accepted_species)

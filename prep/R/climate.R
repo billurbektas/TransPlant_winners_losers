@@ -82,16 +82,22 @@ summarise_experiment_climate <- function(experiments, site_years) {
                 destination_missing_years, climate_complete, climate_coverage_note)
 }
 
-# CHELSA 1981-2010 summer temperature at the destination site (Lynn's site
-# column, the bio10 analogue behind T_opt) against the ladder's JJA T
-bio10_check <- function(niche_file, experiment_climate, experiments) {
-  lynn_sites <- utils::read.csv(niche_file) |>
-    dplyr::distinct(region = Region, destination_site = destSiteID, bio10_site = sum_temp_site) |>
-    dplyr::summarise(bio10_site = mean(bio10_site), .by = c(region, destination_site))
-  experiments |>
+# CHELSA 1981-2010 climatology at the destination sites, the scale of the
+# niche optima (bio10, mean temperature of the warmest quarter; bio18,
+# precipitation of the warmest quarter), against the ladder's JJA T and JJA P
+# averaged over the experiment years
+bioclim_check <- function(bioclim_files, sites, experiment_climate, experiments) {
+  clim <- terra::rast(bioclim_files)
+  names(clim) <- c("bio10", "bio18")
+  dest <- experiments |>
     dplyr::filter(included) |>
     dplyr::select(experiment_id, region, destination_site) |>
-    dplyr::left_join(dplyr::select(experiment_climate, experiment_id, T), by = "experiment_id") |>
-    dplyr::left_join(lynn_sites, by = c("region", "destination_site")) |>
-    dplyr::mutate(difference = T - bio10_site)
+    dplyr::left_join(dplyr::select(sites, region, destination_site = site_id, longitude, latitude),
+                     by = c("region", "destination_site"))
+  if (anyNA(dest$longitude)) stop("Destination sites without coordinates")
+  vals <- terra::extract(clim, cbind(dest$longitude, dest$latitude))
+  dest |>
+    dplyr::bind_cols(vals) |>
+    dplyr::left_join(dplyr::select(experiment_climate, experiment_id, T, destination_P_JJA), by = "experiment_id") |>
+    dplyr::mutate(T_minus_bio10 = T - bio10, log_P_JJA_over_bio18 = log(destination_P_JJA / bio18))
 }

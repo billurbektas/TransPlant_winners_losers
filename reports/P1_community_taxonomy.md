@@ -1,6 +1,6 @@
 # P1: Community and taxonomy
 
-The prep pipeline read the network SQLite (64876 records, 22 regions) and the local-code dictionary of the RData, resolved every community, TRY and Lynn name once with tidyTRY 0.2.1 (TNRS 0.3.6, 2026-10-26; legitimate names only, WCVP before WFO), and wrote the community table with one row per plot-year x accepted species for the analysis and every other vegetation record kept with its `drop_reason`. No relative cover is computed here: step 01 computes it over all vegetation records of a plot-year. 44 warmed comparisons, 43 included.
+The prep pipeline read the network SQLite (64876 records, 22 regions) and the local-code dictionary of the RData, resolved every community and TRY name once with tidyTRY 0.2.1 (TNRS 0.3.6, 2026-10-28; legitimate names only, WCVP before WFO), and wrote the community table with one row per plot-year x accepted species for the analysis and every other vegetation record kept with its `drop_reason`. No relative cover is computed here: step 01 computes it over all vegetation records of a plot-year. 44 warmed comparisons, 43 included.
 
 ## Counts
 
@@ -52,19 +52,18 @@ Identification level (legacy rule, `legacy/R/data/community.R:252-285`): **speci
 
 After the rule and the decisions, these accepted names are replaced in every table (`prep/config/accepted_renames.csv`): Taraxacum sect. Taraxacum -> Taraxacum officinale; Alopecurus gerardii -> Alopecurus gerardi.
 
-**needs_review** in the table below counts the names the rule could not settle on its own (the reasons above). For community names every one of them is decided in the ledger before the pipeline continues; for TRY and Lynn names they are counted here and handled where those names are used (P2, P4).
+**needs_review** in the table below counts the names the rule could not settle on its own (the reasons above). For community names every one of them is decided in the ledger before the pipeline continues; for TRY names they are counted here and handled where those names are used (P2).
 
 ## Name resolution
 
 TRY names are resolved here, in the same run as the community names, because traits (P2) are attached to a study species through the TRY record's own name, not through TRY's `AccSpeciesName`, which merges species (TRY files Festuca pratensis records under Festuca ovina). One run, one rule and one TNRS date serve every join.
 
-TRY names: 149997 distinct names in the export; 33914 in a genus of a study name or of its accepted name were resolved (the rest cannot attach to a study species unless filed under a third genus).
+TRY names: 149997 distinct names in the export; 33908 in a genus of a study name or of its accepted name were resolved (the rest cannot attach to a study species unless filed under a third genus).
 
 | names | submitted | resolved | needs_review |
 | --- | --- | --- | --- |
 | community | 960 | 958 | 9 |
-| TRY | 33914 | 33608 | 4094 |
-| Lynn | 785 | 784 | 5 |
+| TRY | 33908 | 33604 | 4082 |
 
 Community names by identification level and how they were decided:
 
@@ -77,7 +76,7 @@ Community names by identification level and how they were decided:
 | species_or_lower | rule | 946 |
 | unidentified | unidentified | 35 |
 
-TRY names flagged for review: 4094. Those whose accepted name, or one of the tied names, is a study species could carry trait records for the analysis (`could_be_study`); their handling is decided in P2.
+TRY names flagged for review: 4082. Those whose accepted name, or one of the tied names, is a study species could carry trait records for the analysis (`could_be_study`); their handling is decided in P2.
 
 | reason | could_be_study | names | try_rows |
 | --- | --- | --- | --- |
@@ -85,11 +84,11 @@ TRY names flagged for review: 4094. Those whose accepted name, or one of the tie
 | fallback source wfo; fuzzy match | TRUE | 30 | 484 |
 | fuzzy match | TRUE | 377 | 7268 |
 | tie | TRUE | 13 | 1097 |
-| fallback source wfo | FALSE | 1073 | 54278 |
+| fallback source wfo | FALSE | 1068 | 54623 |
 | fallback source wfo; fuzzy match | FALSE | 212 | 1471 |
-| fuzzy match | FALSE | 1932 | 54180 |
-| no legitimate candidate | FALSE | 256 | 31525 |
-| tie | FALSE | 37 | 2243 |
+| fuzzy match | FALSE | 1927 | 54751 |
+| no legitimate candidate | FALSE | 255 | 31507 |
+| tie | FALSE | 36 | 2231 |
 
 The comparison with the frozen legacy taxonomy of step 00 is in `reports/P5_compare_to_frozen.md`.
 
@@ -278,8 +277,7 @@ The comparison with the frozen legacy taxonomy of step 00 is in `reports/P5_comp
 
 ## Warnings captured
 
-- study names: TNRS returned 2 candidate rows of an unrelated name (another genus with a perfect name score); dropped. ℹ Affected: "Trollius chinensis".
-- TRY names: TNRS returned 50 candidate rows of an unrelated name (another genus with a perfect name score); dropped. ℹ Affected: "Quercus velutina", "Juncus effusus", "Aristida wildii", "Hypericum   reflexum", "Muhlenbergia asperifolia (Nees & Meyen ex Trin.) Parodi", "Thymus   vulgaris L. Orthodox", "Silene caliacrae Jordanov & Panov Orthodox p",   "Minuartia wiesneri (Stapf) Schischk. Orthodox p", "Ranunculus undosus   Melville", "Papaver apokrinomenon Fedde", "Carex bequaertii De Wild. var.   bequaertii", "Carex aquatilis Wahlenb. var. aquatilis", "Thymus albicans   Hoffmanns. & Link", "Quercus kouangsiensis", "Pulsatilla turczani", "Salix   psilostigma", "Dysphania plantaginella", "Salvia caymanensis", and "Hieracium   amaurostictum".
+- TRY names: TNRS returned 40 candidate rows of an unrelated name (another genus with a perfect name score); dropped. ℹ Affected: "Pimpinella peregrina", "Euphorbia ruficeps", "Myosotis scorpioides   agg.", "Vaccinium vitis-idaea L. Orthodox", "Rosa chinensis Jacq.", "KALMIA   ANGUSTIFOLIA L.", "ROSA MICRANTHA Borrer ex Sm.", "Arabis canadensis L.",   "Senecio piptocoma O.Hoffm.", "Vicia lutea L. subsp. vestita (Boiss.) Rouy",   "Atriplex leucoclada Boiss.", "Symphyotrichum ciliatum", "Trifolium pratense   subsp. nivale", "Senecio latifolius", "Castilleja arctica", "Centaurea   antennata", "Rheum palaestinum", "Urtica bianorii", and "Carex planostachys".
 
 ## Deviations from the plan
 

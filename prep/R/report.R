@@ -58,12 +58,10 @@ write_p1_report <- function(community_raw, community_named, community_dated, com
                           by = "name")
   n_try_all <- attr(try_candidate_names, "n_try_names")
   res_summary <- tibble::tibble(
-    names = c("community", "TRY", "Lynn"),
-    submitted = c(sum(res$in_community), sum(res$in_try), sum(res$in_lynn)),
-    resolved = c(sum(res$in_community & !is.na(res$accepted_name)), sum(res$in_try & !is.na(res$accepted_name)),
-                 sum(res$in_lynn & !is.na(res$accepted_name))),
-    needs_review = c(sum(res$in_community & res$needs_review), sum(res$in_try & res$needs_review),
-                     sum(res$in_lynn & res$needs_review)))
+    names = c("community", "TRY"),
+    submitted = c(sum(res$in_community), sum(res$in_try)),
+    resolved = c(sum(res$in_community & !is.na(res$accepted_name)), sum(res$in_try & !is.na(res$accepted_name))),
+    needs_review = c(sum(res$in_community & res$needs_review), sum(res$in_try & res$needs_review)))
   levels_tab <- dplyr::count(taxonomy, identification_level = dplyr::coalesce(identification_level, "unidentified"),
                              decided_by, name = "names")
 
@@ -105,7 +103,7 @@ write_p1_report <- function(community_raw, community_named, community_dated, com
     "# P1: Community and taxonomy", "",
     paste0("The prep pipeline read the network SQLite (", nrow(community_raw), " records, ",
            dplyr::n_distinct(community_raw$region), " regions) and the local-code dictionary of the RData, ",
-           "resolved every community, TRY and Lynn name once with tidyTRY ", run$tidyTRY, " (TNRS ", run$TNRS,
+           "resolved every community and TRY name once with tidyTRY ", run$tidyTRY, " (TNRS ", run$TNRS,
            ", ", run$date, "; legitimate names only, WCVP before WFO), and wrote the community table with one row ",
            "per plot-year x accepted species for the analysis and every other vegetation record kept with its ",
            "`drop_reason`. No relative cover is computed here: step 01 computes it over all vegetation records of ",
@@ -130,7 +128,7 @@ write_p1_report <- function(community_raw, community_named, community_dated, com
     paste0("After the rule and the decisions, these accepted names are replaced in every table (`prep/config/accepted_renames.csv`): ",
            paste(sprintf("%s -> %s", accepted_renames$from_accepted_species, accepted_renames$to_accepted_species), collapse = "; "), "."),
     "",
-    "**needs_review** in the table below counts the names the rule could not settle on its own (the reasons above). For community names every one of them is decided in the ledger before the pipeline continues; for TRY and Lynn names they are counted here and handled where those names are used (P2, P4).",
+    "**needs_review** in the table below counts the names the rule could not settle on its own (the reasons above). For community names every one of them is decided in the ledger before the pipeline continues; for TRY names they are counted here and handled where those names are used (P2).",
     "", "## Name resolution", "",
     paste("TRY names are resolved here, in the same run as the community names, because traits (P2) are attached to a",
           "study species through the TRY record's own name, not through TRY's `AccSpeciesName`, which merges species",
@@ -328,18 +326,17 @@ write_p3_report <- function(study_species, functional_groups, placements, placem
   path
 }
 
-write_p4_outputs <- function(experiment_climate, niche_optima, site_bio10, dir = "data/derived/prep") {
+write_p4_outputs <- function(experiment_climate, niche_optima, site_bioclim, dir = "data/derived/prep") {
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
-  files <- file.path(dir, c("experiment_climate.rds", "niche_optima.rds", "site_bio10_check.csv"))
+  files <- file.path(dir, c("experiment_climate.rds", "niche_optima.rds", "site_bioclim_check.csv"))
   saveRDS(experiment_climate, files[1])
   saveRDS(niche_optima, files[2])
-  utils::write.csv(site_bio10, files[3], row.names = FALSE)
+  utils::write.csv(site_bioclim, files[3], row.names = FALSE)
   files
 }
 
-write_p4_report <- function(experiment_climate, experiments, site_bio10, niche_optima, lynn, lynn_disagree,
-                            study_species,
-                            path = "reports/P4_climate_niche.md") {
+write_p4_report <- function(experiment_climate, experiments, site_bioclim, niche_optima, study_species,
+                            gbif_download_file, path = "reports/P4_climate_niche.md") {
   ec <- experiment_climate
   r_P <- stats::cor(ec$P_annual, ec$P_summer)
   clim_summary <- tibble::tibble(
@@ -350,59 +347,40 @@ write_p4_report <- function(experiment_climate, experiments, site_bio10, niche_o
     dplyr::mutate(dplyr::across(c(min, median, max), ~ round(.x, 3)))
   partial <- dplyr::filter(ec, !climate_complete) |>
     dplyr::select(experiment_id, destination_years_available, destination_years_expected, missing_years = destination_missing_years)
-
-  r_bio10 <- stats::cor(site_bio10$T, site_bio10$bio10_site, use = "complete.obs")
-
-  merged <- lynn |>
-    dplyr::filter(accepted_species %in% niche_optima$species[niche_optima$n_lynn_names > 1], !is.na(mean_sum_sub)) |>
-    dplyr::left_join(dplyr::select(niche_optima, accepted_species = species, lynn_name_used), by = "accepted_species") |>
-    dplyr::transmute(species = accepted_species, lynn_name, regions, n_obs_sub, T_opt = round(mean_sum_sub, 2),
-                     AP_mm = round(mean_ap_sub), used = lynn_name == lynn_name_used) |>
-    dplyr::arrange(species, dplyr::desc(n_obs_sub))
-  unused_lynn <- lynn |>
-    dplyr::filter(!lynn_name %in% c(niche_optima$lynn_name_used, unlist(strsplit(stats::na.omit(niche_optima$lynn_names_merged), "; ")))) |>
-    dplyr::mutate(reason = dplyr::case_when(is.na(mean_sum_sub) ~ "Lynn's niche values are NA",
-                                            is.na(accepted_species) ~ "name not resolved in P1",
-                                            TRUE ~ "accepted species is not a study species")) |>
-    dplyr::count(reason, name = "lynn_names")
+  sb <- site_bioclim
+  r_T <- stats::cor(sb$T, sb$bio10)
+  r_P_site <- stats::cor(log(sb$destination_P_JJA), log(sb$bio18))
+  dl <- utils::read.csv(gbif_download_file)
 
   report <- c(
     "# P4: Climate and niche", "",
     paste0("Experiment climate for the ", nrow(ec), " included experiments from the cached CHELSA V2.1 monthly files ",
            "(2008 to 2021; read, not downloaded): T = destination June to August mean temperature (day-weighted), ",
            "W = destination minus origin JJA temperature, P_summer and P_annual = log destination JJA and annual precipitation, ",
-           "each averaged over the experiment's years. Lynn's niche optima joined to the P1 accepted species by Lynn's name: ",
-           "T_opt = mean_sum_sub, P_opt = log(mean_ap_sub)."),
+           "each averaged over the experiment's years. Niche optima from P6's GBIF niche (`prep/gbif_niche.R`; ",
+           dl$citation, "): T_opt = mean CHELSA 1981-2010 bio10 and P_opt = log mean bio18 over one value per species ",
+           "x CHELSA cell. Lynn's niche file is no longer read (decided 28 Oct)."),
     "", "## Climate", "", md_table(clim_summary), "",
-    sprintf("Correlation of P_annual and P_summer across the %d included experiments: r = %.3f (PLAN.md: about 0.78 on the earlier 41).",
-            nrow(ec), r_P),
+    sprintf("Correlation of P_annual and P_summer across the %d included experiments: r = %.3f.", nrow(ec), r_P),
     "", sprintf("Partial coverage (%d experiments; CHELSA has no 2022 to 2023), averaged over the years available:", nrow(partial)), "",
     md_table(partial),
     "", "The comparison with the frozen legacy climate and niche of step 00 is in `reports/P5_compare_to_frozen.md`.",
-    "", "### Summer temperature: CHELSA 1981-2010 climatology against the experiment JJA T", "",
-    sprintf(paste("Lynn's site summer temperature (`sum_temp_site`, the bio10 analogue behind T_opt) against our destination JJA T",
-                  "averaged over the experiment years: r = %.3f; mean difference (ours minus climatology) %.2f degC, range %.2f to %.2f.",
-                  "Table: `data/derived/prep/site_bio10_check.csv`."),
-            r_bio10, mean(site_bio10$difference, na.rm = TRUE), min(site_bio10$difference, na.rm = TRUE),
-            max(site_bio10$difference, na.rm = TRUE)),
+    "", "### The niche's climatology at the destination sites", "",
+    sprintf(paste("CHELSA 1981-2010 bio10 (mean temperature of the warmest quarter) and bio18 (precipitation of the warmest",
+                  "quarter) at the %d destination sites, against the ladder's destination JJA T and JJA P averaged over the",
+                  "experiment years: T against bio10 r = %.3f, mean difference (ours minus climatology) %.2f degC, range %.2f",
+                  "to %.2f; log JJA P against log bio18 r = %.3f, median ratio JJA P / bio18 %.2f.",
+                  "Table: `data/derived/prep/site_bioclim_check.csv`."),
+            nrow(sb), r_T, mean(sb$T_minus_bio10), min(sb$T_minus_bio10), max(sb$T_minus_bio10), r_P_site,
+            stats::median(sb$destination_P_JJA / sb$bio18)),
     "", "## Niche", "",
-    sprintf(paste("Study species with a niche: %d of %d; with n_obs_sub >= 30: %d. Lynn names: %d, of which %d used",
-                  "(%d species from more than one Lynn name)."),
-            nrow(niche_optima), nrow(study_species), sum(niche_optima$n_obs_sub >= 30), nrow(lynn),
-            nrow(lynn) - sum(unused_lynn$lynn_names), sum(niche_optima$n_lynn_names > 1)), "",
-    "Lynn names not used:", "", md_table(unused_lynn),
-    "", sprintf("### Species with more than one Lynn name (%d): the name with most occurrences is used (decided 26 Oct)",
-                sum(niche_optima$n_lynn_names > 1)), "",
-    paste("The second name is a synonym or an infraspecific name recorded in one region; Lynn computed a niche per recorded name,",
-          "so the same plant has two samples of its range. The values differ by little except for Solidago virgaurea, whose",
-          "alpine subsp. minuta (recorded in CH_Lavey) has a niche about 5 degC colder than the species, which is used."), "",
-    md_table(merged),
-    "", sprintf("### Rows where Lynn's own code-to-name mapping disagrees with ours (%d)", nrow(lynn_disagree)), "",
-    "Lynn's niche for these rows belongs to the name Lynn assigned, not to our species; joining by name keeps it away from our species.", "",
-    md_table(dplyr::select(lynn_disagree, region, local_species_code, lynn_name, lynn_accepted, our_species)),
+    sprintf(paste("Study species with a niche: %d of %d; with n_obs_sub >= 30: %d. Counts at every cleaning step, the key",
+                  "ledger and the comparison with Lynn's niche are in `reports/P6_gbif_niche.md`."),
+            nrow(niche_optima), nrow(study_species), sum(niche_optima$n_obs_sub >= 30)),
     "", "## Warnings captured", "", "None.",
     "", "## Deviations from the plan", "",
-    "Alopecurus gerardii -> Alopecurus gerardi added to `prep/config/accepted_renames.csv` (decided 26 Oct), so that Lynn's and TRY's records of the species join it."
+    paste("Niche from P6's GBIF download instead of Lynn's file, P_opt from bio18 instead of bio12 (decided 28 Oct);",
+          "Alopecurus gerardii -> Alopecurus gerardi in `prep/config/accepted_renames.csv` (decided 26 Oct).")
   )
   writeLines(report, path)
   path
