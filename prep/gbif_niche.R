@@ -31,11 +31,18 @@
 suppressPackageStartupMessages({library(dplyr); library(data.table)})
 source("prep/R/report.R") # md_table()
 
-keys_only <- identical(commandArgs(trailingOnly = TRUE), "keys")
+args <- commandArgs(trailingOnly = TRUE)
+keys_only <- identical(args, "keys")
+rebuild <- identical(args, "rebuild") # recompute passes 1 and 2 from the archive, overwriting their caches
 backbone <- "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c" # GBIF Backbone, as Lynn's download; rgbif 3.9 defaults to COL XR
 cache <- "data/cache/gbif"
 dir.create(cache, recursive = TRUE, showWarnings = FALSE)
 warns <- character()
+# every warning anywhere in the run goes to the report (CLAUDE.md), not only
+# those of the calls wrapped in capture()
+globalCallingHandlers(warning = function(w) {
+  warns <<- c(warns, conditionMessage(w)); invokeRestart("muffleWarning")
+})
 capture <- function(expr) withCallingHandlers(expr, warning = function(w) {
   warns <<- c(warns, conditionMessage(w)); invokeRestart("muffleWarning")
 })
@@ -182,11 +189,13 @@ sub_names <- bind_rows(lapply(seq_len(nrow(sub)), function(i) {
   names_k <- c(as.character(k), as.character(syn$key))
   stray <- setdiff(by_key$taxonKey, c(higher, names_k))
   if (length(stray)) stop("Records under GBIF key ", k, " carry name keys not listed as its synonyms: ", paste(stray, collapse = ", "))
-  tibble::tibble(species = sub$species[i], name = c(sub$name[i], syn$scientificName), gbif_key = names_k, mode = "name",
+  tibble::tibble(species = sub$species[i], name = c(sub$name[i], syn$scientificName),
+                 gbif_name = c(ledger$gbif_name[match(sub$ledger_key[i], ledger$gbif_key)], syn$scientificName),
+                 gbif_key = names_k, mode = "name",
                  how = c("ledger: gbif_subtaxon", rep("ledger: gbif_subtaxon, name filed under it", nrow(syn))),
                  records = by_key$count[match(names_k, by_key$taxonKey)])
 }))
-keys <- bind_rows(keys, select(sub_names, -records))
+keys <- bind_rows(keys, select(sub_names, -records, -gbif_name))
 stopifnot(!anyNA(keys$gbif_key)) # a match without a GBIF key needs the key in the ledger
 excluded <- filter(decide, decision == "exclude", name == species)$species
 stopifnot(setequal(c(keys$species, excluded), study$species))   # every species keyed or excluded
@@ -350,7 +359,7 @@ utils::write.csv(record, record_file, row.names = FALSE)
 steps <- c("read", "unassigned", "fossil or living specimen", "absent", "uncertainty > 10 km",
            "individual count 0", "equal coordinates", "zero coordinates", "sea", "kept")
 coords_file <- file.path(cache, paste0("species_coords_", download_key, ".rds"))
-if (!file.exists(coords_file)) {
+if (rebuild || !file.exists(coords_file)) {
   csv <- utils::unzip(zip, list = TRUE)$Name[1]
   header <- strsplit(readLines(pipe(sprintf("unzip -p %s %s | head -1", shQuote(zip), shQuote(csv)))), "\t")[[1]]
   cols <- c("taxonKey", "speciesKey", "decimalLatitude", "decimalLongitude", "coordinateUncertaintyInMeters",
@@ -385,7 +394,7 @@ if (!file.exists(coords_file)) {
                                                          lat = d$decimalLatitude[keep])[, .(n = .N), by = .(sp, lon, lat)]
     rm(d)
     if (length(parts) >= 10) parts <- list(data.table::rbindlist(parts)[, .(n = sum(n)), by = .(sp, lon, lat)])
-    message("read ", format(flow[["read"]], big.mark = ","))
+    message("read ", format(flow[["read"]], big.mark = ",", scientific = FALSE))
   }
   close(con)
   species_coords <- data.table::rbindlist(parts)[, .(n = sum(n)), by = .(sp, lon, lat)]
@@ -403,7 +412,7 @@ stopifnot(flow[["unassigned"]] == 0)               # every record came in under 
 # per unique coordinate across all species, split over all cores but two; a
 # record's result is its coordinate's result, as in Lynn's record-by-record run
 tests_file <- file.path(cache, paste0("coordinate_tests_", download_key, ".rds"))
-if (!file.exists(tests_file)) {
+if (rebuild || !file.exists(tests_file)) {
   coords <- unique(species_coords[, .(lon, lat)])
   n_cores <- max(1L, parallel::detectCores() - 2L)
   chunks <- split(seq_len(nrow(coords)), ceiling(seq_len(nrow(coords)) / 1e6))
@@ -507,11 +516,12 @@ report <- c(
         "own name key and so carved out of R. polyanthemos. The script stops if a record under the subspecies carries a",
         "name key not listed here. Records with coordinates, no geospatial issue, 1950 onwards, before cleaning:"),
   "", md_table(filter(sub_names, !is.na(records)) |> arrange(desc(records)) |>
-                 transmute(species, gbif_name = name, gbif_key, how, records = fmt(records))),
+                 transmute(species, gbif_name, gbif_key, how, records = fmt(records))),
   "", sprintf(paste("The first row counts all names together: %s records go to R. tuberosus, of which %s are labelled",
                     "\"Ranunculus tuberosus Lapeyr.\" (the only ones a name-only key would have taken)."),
               fmt(sum(sub_names$records[sub_names$how == "ledger: gbif_subtaxon"], na.rm = TRUE)),
-              fmt(sum(sub_names$records[grepl("^Ranunculus tuberosus", sub_names$name)], na.rm = TRUE))),
+              fmt(sum(sub_names$records[sub_names$how != "ledger: gbif_subtaxon" &
+                                          startsWith(sub_names$gbif_name, sub_names$species)], na.rm = TRUE))),
   "", sprintf("### Species whose names had more than one legitimate author in TNRS (%d)", nrow(multi_author)), "",
   md_table(transmute(multi_author, species, author, records = fmt(records), in_study_countries = fmt(in_study_countries))),
   "", sprintf("Geographic check: %d of %d keyed species have at least 10 GBIF records in their study countries; %d confirmed in the ledger.",
