@@ -275,9 +275,9 @@ names(clim) <- c("bio10", "bio18")
 # Earth 1:50 m land, zeros within 0.5 degree, equal coordinates absolute
 ne_dir <- "data/cache/naturalearth"
 dir.create(ne_dir, showWarnings = FALSE)
-if (!length(list.files(ne_dir, pattern = "land[.]shp$")))
+if (!length(list.files(ne_dir, pattern = "land[.](shp|gpkg)$")))
   rnaturalearth::ne_download(scale = 50, type = "land", category = "physical", destdir = ne_dir, load = FALSE)
-land_file <- list.files(ne_dir, pattern = "land[.]shp$", full.names = TRUE)
+land_file <- list.files(ne_dir, pattern = "land[.](shp|gpkg)$", full.names = TRUE)
 stopifnot(length(land_file) == 1)
 
 # ---- Stage 4: wait for GBIF, fetch the archive, record it ---------------------
