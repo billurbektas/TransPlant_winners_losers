@@ -14,3 +14,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include P4_climate_niche.md >}}
 
 {{< include P5_compare_to_frozen.md >}}
+
+{{< include P6_gbif_niche.md >}}
