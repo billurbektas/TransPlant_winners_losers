@@ -40,6 +40,16 @@ capture <- function(expr) withCallingHandlers(expr, warning = function(w) {
   warns <<- c(warns, conditionMessage(w)); invokeRestart("muffleWarning")
 })
 store <- function(x) targets::tar_read_raw(x, store = "prep/_targets")
+# GBIF's API slows down or times out when busy; retry with growing pauses
+gbif_retry <- function(call) {
+  for (attempt in 1:5) {
+    out <- tryCatch(capture(call()), error = function(e) e)
+    if (!inherits(out, "error")) return(out)
+    message("GBIF call failed (", conditionMessage(out), "); retry ", attempt)
+    Sys.sleep(30 * attempt)
+  }
+  stop("GBIF call failed five times; rerun to resume")
+}
 
 # ---- Stage 1: names -> GBIF keys ---------------------------------------------
 study <- store("study_species")
@@ -51,7 +61,7 @@ ledger_file <- "prep/config/gbif_keys.csv"
 ledger <- if (file.exists(ledger_file)) utils::read.csv(ledger_file, colClasses = "character", encoding = "UTF-8") else
   tibble::tibble(species = character(), name = character(), author = character(), gbif_key = character(),
                  gbif_name = character(), decision = character(), reason = character())
-stopifnot(all(ledger$decision %in% c("accepted", "synonym_only", "include", "exclude", "author", "geography_ok")))
+stopifnot(all(ledger$decision %in% c("accepted", "synonym_only", "gbif_subtaxon", "include", "exclude", "author", "geography_ok")))
 
 # the WCVP author TNRS returned with the accepted name; the most frequent one
 # where TNRS gave several, unless the ledger names it
@@ -146,6 +156,37 @@ keys <- bind_rows(
     transmute(species, name, gbif_key = coalesce(na_if(ledger_key, ""), speciesKey), mode = "species", how = "ledger: include"),
   filter(decide, decision == "synonym_only") |>
     transmute(species, name, gbif_key = coalesce(na_if(ledger_key, ""), usageKey), mode = "name", how = "ledger: synonym_only"))
+
+# gbif_subtaxon (decided 28 Oct for Ranunculus tuberosus). GBIF files our
+# species as a taxon below another study species: R. tuberosus Lapeyr. sits in
+# R. polyanthemos subsp. nemorosus, together with R. nemorosus DC. and the other
+# names GBIF lists as its synonyms, while WCVP gives every one of those names
+# to R. tuberosus. Taking only the records labelled "R. tuberosus" would leave
+# the rest of the plant's records in R. polyanthemos, which takes its whole
+# GBIF species. So the GBIF subtaxon is requested, and every record filed under
+# it, by any of its names, is assigned to our species by the record's own name
+# key; that carves it out of the parent species.
+sub <- filter(decide, decision == "gbif_subtaxon")
+sub_names <- bind_rows(lapply(seq_len(nrow(sub)), function(i) {
+  k <- as.numeric(sub$ledger_key[i])
+  syn <- capture(rgbif::name_usage(key = k, data = "synonyms", limit = 1000))$data
+  kids <- capture(rgbif::name_usage(key = k, data = "children", limit = 1000))$data
+  stopifnot(NROW(kids) == 0) # names ranked below the subtaxon would need their own synonyms
+  # every record filed under the subtaxon must carry one of these name keys
+  usage <- capture(rgbif::name_usage(key = k))$data
+  higher <- as.character(unlist(usage[, intersect(c("kingdomKey", "phylumKey", "classKey", "orderKey", "familyKey",
+                                                    "genusKey", "speciesKey"), names(usage))]))
+  by_key <- gbif_retry(function() rgbif::occ_count(taxonKey = k, hasCoordinate = TRUE, hasGeospatialIssue = FALSE,
+                                                   year = "1950,2026", facet = "taxonKey", facetLimit = 200,
+                                                   curlopts = list(http_version = 2, timeout = 120)))
+  names_k <- c(as.character(k), as.character(syn$key))
+  stray <- setdiff(by_key$taxonKey, c(higher, names_k))
+  if (length(stray)) stop("Records under GBIF key ", k, " carry name keys not listed as its synonyms: ", paste(stray, collapse = ", "))
+  tibble::tibble(species = sub$species[i], name = c(sub$name[i], syn$scientificName), gbif_key = names_k, mode = "name",
+                 how = c("ledger: gbif_subtaxon", rep("ledger: gbif_subtaxon, name filed under it", nrow(syn))),
+                 records = by_key$count[match(names_k, by_key$taxonKey)])
+}))
+keys <- bind_rows(keys, select(sub_names, -records))
 stopifnot(!anyNA(keys$gbif_key)) # a match without a GBIF key needs the key in the ledger
 excluded <- filter(decide, decision == "exclude", name == species)$species
 stopifnot(setequal(c(keys$species, excluded), study$species))   # every species keyed or excluded
@@ -156,18 +197,20 @@ if (any(claimed$n > 1)) stop("GBIF keys claimed by two species: ", paste(claimed
 # countries the species was recorded in, so a wrong homonym cannot pass on a
 # stray record (Primula auricula passed with 1 Chinese record of 26,539)
 count_file <- file.path(cache, "country_counts.rds")
-key_set <- sort(unique(keys$gbif_key))
-if (file.exists(count_file) && identical(readRDS(count_file)$keys, key_set)) {
-  by_country <- readRDS(count_file)$counts
-} else {
-  by_country <- bind_rows(lapply(key_set, function(k) {
-    x <- capture(rgbif::occ_count(taxonKey = as.numeric(k), hasCoordinate = TRUE, hasGeospatialIssue = FALSE,
-                                  year = "1950,2026", facet = "country", facetLimit = 300))
-    if (!nrow(x)) return(tibble::tibble(gbif_key = k, country = NA_character_, count = 0L))
-    tibble::tibble(gbif_key = k, country = x$country, count = as.integer(x$count))
-  }))
-  saveRDS(list(keys = key_set, counts = by_country), count_file)
+key_set <- sort(unique(keys$gbif_key[keys$how != "ledger: gbif_subtaxon, name filed under it"]))
+# cached per key, so an interrupted run (GBIF throttles repeated requests) resumes
+by_country <- if (file.exists(count_file)) readRDS(count_file) else
+  tibble::tibble(gbif_key = character(), country = character(), count = integer())
+if (!is.data.frame(by_country)) by_country <- by_country$counts # cache written before 28 Oct
+for (k in setdiff(key_set, by_country$gbif_key)) {
+  x <- gbif_retry(function() rgbif::occ_count(taxonKey = as.numeric(k), hasCoordinate = TRUE, hasGeospatialIssue = FALSE,
+                                              year = "1950,2026", facet = "country", facetLimit = 300,
+                                              curlopts = list(http_version = 2, timeout = 120)))
+  by_country <- bind_rows(by_country, if (nrow(x)) tibble::tibble(gbif_key = k, country = x$country, count = as.integer(x$count))
+                          else tibble::tibble(gbif_key = k, country = NA_character_, count = 0L))
+  saveRDS(by_country, count_file)
 }
+by_country <- filter(by_country, gbif_key %in% key_set)
 geo <- keys |>
   distinct(species, gbif_key) |>
   left_join(by_country, by = "gbif_key", relationship = "many-to-many") |>
@@ -367,6 +410,21 @@ report <- c(
                     "the two keys; both are requested:"), sum(species_keys$how == "automatic: same-named accepted usage")),
   "", md_table(filter(keys_used, how == "automatic: same-named accepted usage") |> select(species, gbif_key, gbif_name, records)),
   "", sprintf("### Ledger decisions (%d)", nrow(ledger_table)), "", md_table(ledger_table),
+  "", "### Ranunculus tuberosus and Ranunculus polyanthemos (`gbif_subtaxon`, decided 28 Oct)", "",
+  paste("GBIF and WCVP cut these two plants differently. GBIF files R. tuberosus Lapeyr. as a synonym of",
+        "R. polyanthemos subsp. nemorosus, under which it also files R. nemorosus DC. and the other names below;",
+        "WCVP (our P1 taxonomy) gives every one of these names to R. tuberosus and keeps R. polyanthemos for the rest.",
+        "Taking only the records labelled \"R. tuberosus\" would have given R. tuberosus a minority of its own records",
+        "and left the rest in R. polyanthemos, which takes its whole GBIF species. So GBIF's subspecies nemorosus is",
+        "requested, and every record filed under it, by any of its names, is assigned to R. tuberosus by the record's",
+        "own name key and so carved out of R. polyanthemos. The script stops if a record under the subspecies carries a",
+        "name key not listed here. Records with coordinates, no geospatial issue, 1950 onwards, before cleaning:"),
+  "", md_table(filter(sub_names, !is.na(records)) |> arrange(desc(records)) |>
+                 transmute(species, gbif_name = name, gbif_key, how, records = fmt(records))),
+  "", sprintf(paste("The first row counts all names together: %s records go to R. tuberosus, of which %s are labelled",
+                    "\"Ranunculus tuberosus Lapeyr.\" (the only ones a name-only key would have taken)."),
+              fmt(sum(sub_names$records[sub_names$how == "ledger: gbif_subtaxon"], na.rm = TRUE)),
+              fmt(sum(sub_names$records[grepl("^Ranunculus tuberosus", sub_names$name)], na.rm = TRUE))),
   "", sprintf("### Species whose names had more than one legitimate author in TNRS (%d)", nrow(multi_author)), "",
   md_table(transmute(multi_author, species, author, records = fmt(records), in_study_countries = fmt(in_study_countries))),
   "", sprintf("Geographic check: %d of %d keyed species have at least 10 GBIF records in their study countries; %d confirmed in the ledger.",

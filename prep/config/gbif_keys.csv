@@ -21,7 +21,7 @@ Mutellina purpurea,Mutellina purpurea,,,,accepted,"same plant (Ligusticum mutell
 Neogaya simplex,Neogaya simplex,,,,accepted,"same plant (Ligusticum mutellinoides, recorded as such); GBIF name Pachypleurum mutellinoides"
 Orobanche fasciculata,Orobanche fasciculata,,,,accepted,same plant; GBIF name Aphyllon fasciculatum
 Pulsatilla alpina,Pulsatilla alpina,,7278071,Pulsatilla alpina (L.) Delarbre,accepted,no match with the WCVP author (L.) Chaz.; GBIF's accepted usage (L.) Delarbre is the same plant
-Ranunculus tuberosus,Ranunculus tuberosus,,,,synonym_only,"GBIF sinks it into Ranunculus polyanthemos, itself a study species: records under our name only"
+Ranunculus tuberosus,Ranunculus tuberosus,,7510191,Ranunculus polyanthemos subsp. nemorosus (DC.) Schübl. & G.Martens,gbif_subtaxon,"GBIF files R. tuberosus Lapeyr. under R. polyanthemos subsp. nemorosus, with R. nemorosus DC. and its other synonyms; WCVP gives all these names to R. tuberosus, and R. polyanthemos is itself a study species. The whole GBIF subspecies is taken and its records are assigned to R. tuberosus by their own name key, so they are carved out of R. polyanthemos (decided 28 Oct; see the P6 report)"
 Rhinanthus major,Rhinanthus major,,,,synonym_only,GBIF: ambiguous synonym of Rhinanthus serotinus (the name has been applied to more than one plant): records under our name only
 Rubus parviflorus,Rubus parviflorus,,,,accepted,same plant (thimbleberry); GBIF name Rubus nutkanus
 Sanguisorba minor,Sanguisorba minor,,,,accepted,same plant; GBIF name Poterium sanguisorba
@@ -61,4 +61,4 @@ Carex curvula,Carex curvula,,,,geography_ok,"alpine species; DE_TransAlps sites 
 Phyteuma scheuchzeri,Phyteuma scheuchzeri,,,,geography_ok,southern Alpine species with few French records; FR_AlpeHuez lies at its range edge
 Tofieldia calyculata,Tofieldia calyculata,,,,geography_ok,"community record (code Tof.cal, NO_Gudmedalen and NO_Lavisdalen, 2015) kept as recorded; GBIF has 5 Norwegian records (decided 28 Oct: community records are not changed)"
 Helianthus petiolaris,Helianthus petiolaris,,,,geography_ok,"community record: the network dictionary maps code 'Helianthus anus' (IN_Kashmir) to Helianthus canus, which TNRS resolves correctly; kept as recorded (decided 28 Oct)"
-Symphyotrichum ascendens,Aster adscendens,,,,include,"Aster adscendens Lindl. is Symphyotrichum ascendens (P1 decision 28 Oct); GBIF keeps the name as a separate species with US records"
+Symphyotrichum ascendens,Aster adscendens,,,,include,Aster adscendens Lindl. is Symphyotrichum ascendens (P1 decision 28 Oct); GBIF keeps the name as a separate species with US records
