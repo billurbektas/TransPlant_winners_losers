@@ -177,7 +177,7 @@ sub_names <- bind_rows(lapply(seq_len(nrow(sub)), function(i) {
   higher <- as.character(unlist(usage[, intersect(c("kingdomKey", "phylumKey", "classKey", "orderKey", "familyKey",
                                                     "genusKey", "speciesKey"), names(usage))]))
   by_key <- gbif_retry(function() rgbif::occ_count(taxonKey = k, hasCoordinate = TRUE, hasGeospatialIssue = FALSE,
-                                                   year = "1950,2026", facet = "taxonKey", facetLimit = 200,
+                                                   year = "1950,2026", facet = "taxonKey", facetLimit = 200, checklistKey = backbone,
                                                    curlopts = list(http_version = 2, timeout = 120)))
   names_k <- c(as.character(k), as.character(syn$key))
   stray <- setdiff(by_key$taxonKey, c(higher, names_k))
@@ -204,7 +204,7 @@ by_country <- if (file.exists(count_file)) readRDS(count_file) else
 if (!is.data.frame(by_country)) by_country <- by_country$counts # cache written before 28 Oct
 for (k in setdiff(key_set, by_country$gbif_key)) {
   x <- gbif_retry(function() rgbif::occ_count(taxonKey = as.numeric(k), hasCoordinate = TRUE, hasGeospatialIssue = FALSE,
-                                              year = "1950,2026", facet = "country", facetLimit = 300,
+                                              year = "1950,2026", facet = "country", facetLimit = 300, checklistKey = backbone,
                                               curlopts = list(http_version = 2, timeout = 120)))
   by_country <- bind_rows(by_country, if (nrow(x)) tibble::tibble(gbif_key = k, country = x$country, count = as.integer(x$count))
                           else tibble::tibble(gbif_key = k, country = NA_character_, count = 0L))
@@ -241,25 +241,42 @@ if (keys_only) quit(save = "no")
 key_file <- file.path(cache, "download_key.txt")
 record_file <- "data/derived/prep/gbif_download.csv"
 request_file <- "reports/P6_gbif_download_request.json"
+# Lynn's download predicates (download 0068537-240626123714530): coordinates,
+# no geospatial issue, 1950 onwards; simple CSV. One download, one DOI. Every
+# key is a GBIF Backbone key, and in rgbif 3.9 the taxonomy is set twice: on
+# the download and on the taxon filter itself, which otherwise defaults to
+# Catalogue of Life XR (first request 0011566-261023074918325, 28 Oct: the
+# filter was tagged COL XR, matched 0 records, and was not used).
+predicates <- list(rgbif::pred_in("taxonKey", as.numeric(key_set), checklistKey = backbone),
+                   rgbif::pred("hasCoordinate", TRUE), rgbif::pred("hasGeospatialIssue", FALSE),
+                   rgbif::pred_gte("year", 1950))
+# a request, as built here or as GBIF holds it, is used only if it asks for
+# exactly our keys, in the Backbone, with Lynn's filters
+check_request <- function(r) {
+  taxon <- Filter(function(x) identical(x$key, "TAXON_KEY"), r$predicate$predicates)
+  others <- vapply(Filter(function(x) !identical(x$key, "TAXON_KEY"), r$predicate$predicates),
+                   function(x) paste(x$type, x$key, x$value), character(1))
+  problems <- c(
+    if (!identical(r$format, "SIMPLE_CSV")) "format is not SIMPLE_CSV",
+    if (!identical(r$checklistKey, backbone)) "the download is not in the GBIF Backbone",
+    if (length(taxon) != 1) "not exactly one taxon filter",
+    if (length(taxon) == 1 && !identical(taxon[[1]]$checklistKey, backbone)) "the taxon filter is not in the GBIF Backbone",
+    if (length(taxon) == 1 && !identical(sort(as.character(unlist(taxon[[1]]$values))), key_set)) "the taxon keys differ from stage 1",
+    if (!setequal(others, c("equals HAS_COORDINATE true", "equals HAS_GEOSPATIAL_ISSUE false",
+                            "greaterThanOrEquals YEAR 1950"))) "the record filters differ from Lynn's")
+  if (length(problems)) stop("GBIF request not valid: ", paste(problems, collapse = "; "))
+}
 if (!file.exists(key_file)) {
   stopifnot(all(nzchar(Sys.getenv(c("GBIF_USER", "GBIF_PWD", "GBIF_EMAIL"))))) # from ~/.Renviron
-  # Lynn's download predicates (download 0068537-240626123714530): coordinates,
-  # no geospatial issue, 1950 onwards; simple CSV. One download, one DOI.
-  # the taxon filter carries its own taxonomy; without it rgbif 3.9 tags the
-  # keys as Catalogue of Life XR and GBIF matches none of our Backbone keys
-  # (first request 0011566-261023074918325, 28 Oct: 0 records, not used)
-  dl <- rgbif::occ_download(rgbif::pred_in("taxonKey", as.numeric(key_set), checklistKey = backbone),
-                            rgbif::pred("hasCoordinate", TRUE),
-                            rgbif::pred("hasGeospatialIssue", FALSE), rgbif::pred_gte("year", 1950),
-                            format = "SIMPLE_CSV", checklistKey = backbone)
+  built <- do.call(rgbif::occ_download_prep, c(predicates, list(format = "SIMPLE_CSV", checklistKey = backbone)))
+  check_request(jsonlite::fromJSON(built$json_request, simplifyVector = FALSE)) # before anything is sent
+  dl <- do.call(rgbif::occ_download, c(predicates, list(format = "SIMPLE_CSV", checklistKey = backbone)))
   writeLines(as.character(dl), key_file) # saved at once: a rerun never requests twice
 }
 download_key <- readLines(key_file)
 meta <- gbif_retry(function() rgbif::occ_download_meta(download_key))
+check_request(meta$request) # as GBIF holds it
 jsonlite::write_json(meta$request, request_file, auto_unbox = TRUE, pretty = TRUE)
-requested <- sort(as.character(unlist(Filter(function(p) identical(p$key, "TAXON_KEY"), meta$request$predicate$predicates)[[1]]$values)))
-if (!identical(requested, key_set)) stop("The keys now chosen differ from the download ", download_key,
-                                         "; remove ", key_file, " only if a new download is intended")
 message("GBIF download ", download_key, ": ", meta$status)
 
 # ---- Stage 3: CHELSA climatologies and the land polygons (while GBIF works) --
