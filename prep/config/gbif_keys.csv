@@ -1,0 +1,63 @@
+species,name,author,gbif_key,gbif_name,decision,reason
+Alopecurus gerardi,Alopecurus gerardi,,,,accepted,spelling only: GBIF writes gerardii
+Anemonoides nemorosa,Anemonoides nemorosa,,,,accepted,same plant; GBIF keeps it in Anemone
+Arctous alpina,Arctous alpina,,,,accepted,same plant; GBIF keeps it in Arctostaphylos
+Aster asteroides,Aster asteroides,,,,synonym_only,GBIF has the name only as a synonym of the genus Tibetiodes: records under our name only
+Aster bellidiastrum,Aster bellidiastrum,,,,accepted,same plant; GBIF name Bellidiastrum michelii
+Aster diplostephioides,Aster diplostephioides,,,,accepted,same plant; GBIF name Tibetiodes diplostephioides
+Berberis repens,Berberis repens,,,,accepted,same plant; GBIF name Mahonia repens
+Coluria longifolia,Coluria longifolia,,,,accepted,same plant; GBIF name Geum longifolium
+Crepis conyzifolia,Crepis conyzifolia,,,,synonym_only,"GBIF sinks it into Crepis blattarioides, which WCVP keeps apart: records under our name only"
+Draba muralis,Draba muralis,,,,accepted,same plant; GBIF name Drabella muralis
+Epilobium angustifolium,Epilobium angustifolium,,,,accepted,same plant; GBIF name Chamaenerion angustifolium
+Hymenidium hookeri,Hymenidium hookeri,,,,accepted,same plant; GBIF name Pleurospermum hookeri
+Hypochaeris maculata,Hypochaeris maculata,,,,accepted,same plant; GBIF name Trommsdorffia maculata
+Lithophragma glabrum,Lithophragma glabrum,,,,synonym_only,"GBIF: ambiguous synonym of Lithophragma tenella, which WCVP keeps apart: records under our name only"
+Microsteris gracilis,Microsteris gracilis,,,,accepted,same plant; GBIF name Phlox gracilis
+Morina chinensis,Morina chinensis,,,,accepted,same plant; GBIF name Cryptothladia chinensis
+Morina kokonorica,Morina kokonorica,,,,accepted,same plant; GBIF name Cryptothladia kokonorica
+Morina nepalensis,Morina nepalensis,,,,accepted,same plant; GBIF name Acanthocalyx nepalensis
+Mutellina purpurea,Mutellina purpurea,,,,accepted,"same plant (Ligusticum mutellina, recorded as such); GBIF name Mutellina adonidifolia"
+Neogaya simplex,Neogaya simplex,,,,accepted,"same plant (Ligusticum mutellinoides, recorded as such); GBIF name Pachypleurum mutellinoides"
+Orobanche fasciculata,Orobanche fasciculata,,,,accepted,same plant; GBIF name Aphyllon fasciculatum
+Pulsatilla alpina,Pulsatilla alpina,,7278071,Pulsatilla alpina (L.) Delarbre,accepted,no match with the WCVP author (L.) Chaz.; GBIF's accepted usage (L.) Delarbre is the same plant
+Ranunculus tuberosus,Ranunculus tuberosus,,,,synonym_only,"GBIF sinks it into Ranunculus polyanthemos, itself a study species: records under our name only"
+Rhinanthus major,Rhinanthus major,,,,synonym_only,GBIF: ambiguous synonym of Rhinanthus serotinus (the name has been applied to more than one plant): records under our name only
+Rubus parviflorus,Rubus parviflorus,,,,accepted,same plant (thimbleberry); GBIF name Rubus nutkanus
+Sanguisorba minor,Sanguisorba minor,,,,accepted,same plant; GBIF name Poterium sanguisorba
+Valeriana locusta,Valeriana locusta,,,,accepted,same plant; GBIF name Valerianella locusta
+Festuca quadriflora,Festuca quadriflora,Honck.,,,author,the alpine grass of CH_Calanda is Honckeny's; TNRS returned Walter's American homonym
+Pilosella piloselloides,Hieracium piloselloides,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Scorzoneroides autumnalis,Leontodon autumnalis,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Alpagrostis alpina,Agrostis alpina,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Helianthemum oelandicum,Helianthemum alpestre,,,,include,WCVP includes H. alpestre in H. oelandicum; recorded under this name at the sites
+Omalotheca sylvatica,Gnaphalium sylvaticum,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Viola biflora,Viola biflora var. rockiana,,,,include,"recorded at CN_Gongga; WCVP places var. rockiana in V. biflora, GBIF treats it as Viola rockiana"
+Persicaria runcinata,Polygonum runcinatum,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Primula auricula,Primula serratifolia,,,,exclude,PROVISIONAL: the CN_Gongga plant is Primula serratifolia Franch.; P1 resolved the name to P. auricula (the Gand. homonym); Bills decides the P1 fix
+Pilosella hoppeana,Hieracium hoppeanum,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Noticastrum adscendens,Aster adscendens,,,,exclude,PROVISIONAL: the US_Montana plant is Symphyotrichum ascendens (Aster adscendens Lindl.); P1 resolved it to the South American Noticastrum adscendens; Bills decides the P1 fix
+Noccaea fendleri,Thlaspi montanum,,,,exclude,GBIF's usage is Thlaspi montanum Bory & Chaub. (Greece); the US_Montana record is N. fendleri by P1 decision
+Omalotheca norvegica,Gnaphalium norvegicum,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Oxytropis humifusa,Oxytropis glacialis,,,,include,"WCVP (P1) places O. glacialis in O. humifusa, GBIF keeps O. glacialis Benth. apart; recorded under this name at CN_Damxung"
+Koeleria macrantha,Koeleria cristata,,,,exclude,"GBIF's Koeleria cristata Kar. & Kir. collects records of several plants labelled K. cristata (China, Russia, Ukraine, North America, France)"
+Erigeron sumatrensis,Conyza sumatrensis,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Centaurea phrygia,Centaurea pseudophrygia,,,,include,WCVP includes C. pseudophrygia in C. phrygia; recorded under this name at the sites
+Noccaea caerulescens,Noccaea brachypetala,,,,include,WCVP: N. caerulescens subsp. brachypetala; recorded under this name at FR_AlpeHuez
+Hieracium lachenalii,Hieracium vulgatum,,,,include,H. vulgatum Fr. is H. lachenalii (WCVP); GBIF files the name under Sprengel's usage; recorded in the Norwegian regions
+Empetrum nigrum,Empetrum hermaphroditum,,,,include,WCVP includes E. hermaphroditum in E. nigrum; recorded under this name at the sites
+Valeriana excelsa,Valeriana sambucifolia,,,,include,WCVP: V. excelsa subsp. sambucifolia; recorded under this name at NO_Lavisdalen
+Muhlenbergia tricholepis,Blepharoneuron tricholepis,,,,include,"same plant under its older genus, which GBIF keeps as a separate species"
+Dysphania incisa,Dysphania graveolens,,,,include,WCVP places D. graveolens in D. incisa; recorded under this name at the sites
+Arisaema parvum,Arisaema parvum,,,,geography_ok,Chinese species with 2 georeferenced GBIF records in all
+Artemisia fulgens,Artemisia fulgens,,,,geography_ok,Chinese species with 6 georeferenced GBIF records in all (recorded as Artemisia flaccida)
+Cerastium szechuense,Cerastium szechuense,,,,geography_ok,Chinese species with 8 georeferenced GBIF records in all
+Gentiana parvula,Gentiana parvula,,,,geography_ok,Chinese species with 2 georeferenced GBIF records in all
+Pedicularis sima,Pedicularis sima,,,,geography_ok,Chinese species with 8 georeferenced GBIF records in all
+Conium maculatum,Conium maculatum,,,,geography_ok,widespread species; India has very few GBIF records (IN_Kashmir)
+Erigeron canadensis,Erigeron canadensis,,,,geography_ok,widespread species; India has very few GBIF records (IN_Kashmir)
+Ranunculus arvensis,Ranunculus arvensis,,,,geography_ok,widespread species; India has very few GBIF records (IN_Kashmir)
+Sisymbrium loeselii,Sisymbrium loeselii,,,,geography_ok,widespread species; India has very few GBIF records (IN_Kashmir)
+Viola odorata,Viola odorata,,,,geography_ok,widespread species; India has very few GBIF records (IN_Kashmir)
+Carex curvula,Carex curvula,,,,geography_ok,"alpine species; DE_TransAlps sites lie in the Alps, outside Germany's few records"
+Phyteuma scheuchzeri,Phyteuma scheuchzeri,,,,geography_ok,southern Alpine species with few French records; FR_AlpeHuez lies at its range edge
