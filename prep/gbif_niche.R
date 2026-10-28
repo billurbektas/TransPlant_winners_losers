@@ -378,8 +378,14 @@ if (rebuild || !file.exists(coords_file)) {
   repeat {
     lines <- readLines(con, n = 5e6)
     if (!length(lines)) break
+    # colClasses by position: fread matches names before col.names renames the columns
     d <- data.table::fread(text = lines, sep = "\t", header = FALSE, quote = "", col.names = header[idx], na.strings = "",
-                           colClasses = list(character = c("taxonKey", "speciesKey", "basisOfRecord", "occurrenceStatus")))
+                           colClasses = list(character = match(c("taxonKey", "speciesKey", "basisOfRecord",
+                                                                 "occurrenceStatus"), header[idx]),
+                                             numeric = match(c("decimalLatitude", "decimalLongitude",
+                                                               "coordinateUncertaintyInMeters", "individualCount"), header[idx])))
+    stopifnot(is.character(d$taxonKey), is.character(d$speciesKey), is.numeric(d$decimalLatitude),
+              is.numeric(d$individualCount))
     rm(lines)
     flow["read"] <- flow["read"] + nrow(d)
     sp <- coalesce(name_sp[match(d$taxonKey, name_keys$gbif_key)], species_sp[match(d$speciesKey, species_keys$gbif_key)])
