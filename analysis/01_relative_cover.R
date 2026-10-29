@@ -8,13 +8,14 @@
 #         figures/diagnostics/01_pool_sizes.png; reports/01_relative_cover.md
 # Checks: relative cover sums to 1 per plot-year over all vascular records;
 #         the six deep-lineage taxa absent afterwards; 43 included experiments;
-#         no species in both pools; 43 experiments and 21 gradients after the
-#         pool-size rule (k = 5; US_Arizona kept, decided 28 Oct); no duplicate experiment x plot x year x
+#         no species in both pools; 43 experiments and 21 gradients (US_Arizona
+#         kept, decided 28 Oct); no duplicate experiment x plot x year x
 #         species x treatment; every pool species has both A0 values.
 #
 # Decided 28 Oct (Bills): the observation filter (>= 2 plot-year records)
 # decides pool membership only and all observed cover is kept; pools over all
-# survey years; k = 5 resident species; A0 from the first available survey of
+# survey years; no pool-size rule (dropped 29 Oct: every included experiment
+# passed it); A0 from the first available survey of
 # each control group, log of the plot mean in % + 1; gradient_id = region;
 # relative cover over all vascular records, deep-lineage taxa included, and
 # those taxa removed afterwards; destination pool as PLAN.md (present in
@@ -34,7 +35,6 @@ dir.create("figures/diagnostics", recursive = TRUE, showWarnings = FALSE)
 
 deep_lineage <- c("Gymnocarpium dryopteris", "Athyrium spinulosum", "Botrychium lunaria",
                   "Equisetum arvense", "Selaginella selaginoides", "Juniperus communis")
-k <- 5L       # minimum resident pool size (decided 28 Oct)
 min_obs <- 2L # plot-year records for a species to count as present in a group
 
 community <- readRDS("data/derived/prep/community.rds")
@@ -106,24 +106,21 @@ membership <- n_rec |>
 pools <- filter(membership, species_pool %in% c("resident", "destination_pool"))
 stopifnot(!anyDuplicated(pools[c("experiment_id", "species")])) # no species in both pools
 
-# ---- Pool-size rule ------------------------------------------------------
+# ---- Pool sizes (description only) ---------------------------------------
+# No pool-size rule (dropped 29 Oct): every included experiment goes forward,
+# US_Arizona included (8 residents on the SQLite cover; decided 28 Oct)
 pool_sizes <- pools |>
   count(experiment_id, species_pool) |>
   tidyr::pivot_wider(names_from = species_pool, values_from = n, values_fill = 0) |>
   right_join(select(included, experiment_id, region), by = "experiment_id") |>
-  mutate(across(c(resident, destination_pool), ~ coalesce(.x, 0L)), k = k, rule = "resident pool >= k",
-         kept = resident >= k) |>
-  select(experiment_id, region, resident, destination_pool, rule, k, kept) |>
+  mutate(across(c(resident, destination_pool), ~ coalesce(.x, 0L))) |>
+  select(experiment_id, region, resident, destination_pool) |>
   arrange(resident)
-kept <- filter(pool_sizes, kept)
-# US_Arizona has 8 residents on the SQLite cover and stays (decided 28 Oct;
-# PLAN.md expected about 4 from the legacy relative cover, and 42 experiments)
-stopifnot(nrow(kept) == 43)                    # every included experiment passes k = 5
-stopifnot(n_distinct(kept$region) == 21)       # 21 gradients, gradient_id = region
+stopifnot(nrow(pool_sizes) == 43)              # every included experiment
+stopifnot(n_distinct(pool_sizes$region) == 21) # 21 gradients, gradient_id = region
 
 # ---- Zero-filled long table ------------------------------------------------
 pool_plots <- pools |>
-  filter(experiment_id %in% kept$experiment_id) |>
   select(experiment_id, species, species_pool) |>
   inner_join(pool_groups, by = "species_pool", relationship = "many-to-many") |>
   inner_join(plots, by = c("experiment_id", "group"), relationship = "many-to-many") |>
@@ -137,7 +134,7 @@ stopifnot(n_distinct(cover_long$gradient_id) == 21, n_distinct(cover_long$experi
 
 # spot check, counted independently: rows = pool species x surveyed plot-years
 # of the pool's groups in its years; zeros = rows - observed records
-spot <- kept$experiment_id[1]
+spot <- pool_sizes$experiment_id[1]
 spot_expected <- pool_groups |>
   inner_join(filter(plots, experiment_id == spot), by = "group", relationship = "many-to-many") |>
   semi_join(filter(pool_years, experiment_id == spot), by = c("experiment_id", "species_pool", "year")) |>
@@ -151,7 +148,7 @@ stopifnot(spot_check$rows == spot_expected$rows) # zero-filling covers every poo
 
 # ---- A0: first available survey of each control group ----------------------
 first_year <- plots |>
-  filter(group %in% c("origin_control", "destination_control"), experiment_id %in% kept$experiment_id) |>
+  filter(group %in% c("origin_control", "destination_control")) |>
   summarise(first_year = min(year), .by = c(experiment_id, group))
 a0_part <- function(g) {
   base <- plots |>
@@ -159,7 +156,6 @@ a0_part <- function(g) {
     inner_join(filter(first_year, group == g), by = c("experiment_id", "group")) |>
     filter(year == first_year)
   pools |>
-    filter(experiment_id %in% kept$experiment_id) |>
     select(experiment_id, species) |>
     inner_join(base, by = "experiment_id", relationship = "many-to-many") |>
     left_join(select(analysis, plot_year_id, species, rc = relative_cover), by = c("plot_year_id", "species")) |>
@@ -189,11 +185,7 @@ flow_counts <- bind_rows(
   mutate(combos(pools), rule = "observation filter (>= 2 plot-year records in a control group)", branch = "all"),
   mutate(combos(filter(pools, species_pool == "resident")), rule = "pool assignment", branch = "resident"),
   mutate(combos(filter(pools, species_pool == "destination_pool")), rule = "pool assignment", branch = "destination_pool"),
-  mutate(combos(distinct(cover_long, experiment_id, species)), rule = "pool-size rule (resident pool >= 5)", branch = "all"),
-  mutate(combos(distinct(filter(cover_long, species_pool == "resident"), experiment_id, species)),
-         rule = "pool-size rule (resident pool >= 5)", branch = "resident"),
-  mutate(combos(distinct(filter(cover_long, species_pool == "destination_pool"), experiment_id, species)),
-         rule = "pool-size rule (resident pool >= 5)", branch = "destination_pool")) |>
+) |>
   mutate(order = row_number()) |>
   select(order, rule, branch, n_experiments, n_species, n_combinations)
 not_pooled <- count(filter(membership, !species_pool %in% c("resident", "destination_pool")), reason = species_pool,
@@ -202,14 +194,12 @@ not_pooled <- count(filter(membership, !species_pool %in% c("resident", "destina
 # ---- Write -------------------------------------------------------------------
 saveRDS(cover_long, file.path(out_dir, "cover_long.rds"))
 saveRDS(a0, file.path(out_dir, "a0.rds"))
-utils::write.csv(select(filter(included, experiment_id %in% kept$experiment_id), experiment_id, region, origin_site,
-                        destination_site, first_year, last_year), file.path(out_dir, "experiments_kept.csv"), row.names = FALSE)
+utils::write.csv(select(included, experiment_id, region, origin_site, destination_site, first_year, last_year),
+                 file.path(out_dir, "experiments_kept.csv"), row.names = FALSE)
 utils::write.csv(pool_sizes, file.path(out_dir, "pool_sizes.csv"), row.names = FALSE)
 utils::write.csv(flow_counts, file.path(out_dir, "flow_counts.csv"), row.names = FALSE)
 fig <- ggplot(pool_sizes, aes(resident)) +
   geom_histogram(binwidth = 2, boundary = 0, fill = "grey60", colour = "white") +
-  geom_vline(xintercept = k - 0.5, linetype = "dashed") +
-  annotate("text", x = k - 0.5, y = Inf, label = paste0(" k = ", k), hjust = 0, vjust = 1.5) +
   labs(x = "Resident pool size (species)", y = "Experiments") +
   theme_classic()
 ggsave("figures/diagnostics/01_pool_sizes.png", fig, width = 5, height = 3.5, dpi = 150)
@@ -226,7 +216,7 @@ report <- c(
          "turfs, origin controls and destination controls; a species is resident with at least ", min_obs,
          " plot-year records in origin controls, in the destination pool with at least ", min_obs,
          " in destination controls and fewer than ", min_obs, " in origin controls, whether or not it was ever found in ",
-         "warmed turfs. Experiments with fewer than k = ", k, " resident species leave, all observed cover is kept, and ",
+         "warmed turfs. Every included experiment goes forward (no pool-size rule), all observed cover is kept, and ",
          "every pool species gets a row, zero where unrecorded, in every surveyed plot-year of its pool's two groups."),
   "", "## Counts at every rule (`flow_counts.csv`, Fig S1)", "", md_table(select(flow_counts, -order)),
   "", "Species x experiment combinations in neither pool:", "", md_table(not_pooled),
@@ -234,14 +224,13 @@ report <- c(
   sprintf("Sum of relative cover per plot-year: min %.12f, max %.12f. Share of plot-year cover in rows not analysed (dropped or deep-lineage): min %.3f, median %.3f, 90%% %.3f, max %.3f.",
           min(sums$total), max(sums$total), share_q[1], share_q[2], share_q[3], share_q[4]),
   "", "Share of plot-year cover in rows not analysed, by region:", "", md_table(dropped_by_region),
-  "", "## Pool sizes and the rule on k (`pool_sizes.csv`)", "",
-  sprintf("Rule: an experiment enters only if its resident pool has at least k = %d species. %d of %d experiments kept%s. Smallest resident pools: %s.",
-          k, nrow(kept), nrow(pool_sizes),
-          if (any(!pool_sizes$kept)) paste0("; left: ", paste(pool_sizes$experiment_id[!pool_sizes$kept], collapse = ", ")) else "",
-          paste(sprintf("%s %d", head(pool_sizes$experiment_id, 3), head(pool_sizes$resident, 3)), collapse = "; ")),
-  paste("US_Arizona stays: on the SQLite's absolute cover it has", pool_sizes$resident[pool_sizes$region == "US_Arizona"],
-        "resident species, where PLAN.md expected about four from the legacy relative cover (decided 28 Oct: kept)."),
-  sprintf("Gradients (`gradient_id` = region): %d.", n_distinct(kept$region)),
+  "", "## Pool sizes (`pool_sizes.csv`)", "",
+  sprintf(paste("No pool-size rule (dropped 29 Oct): all %d included experiments go forward. Smallest resident pools: %s.",
+                "US_Arizona, which PLAN.md expected to leave with about four residents in the legacy relative cover, has %d",
+                "on the SQLite's absolute cover (kept, decided 28 Oct)."),
+          nrow(pool_sizes), paste(sprintf("%s %d", head(pool_sizes$experiment_id, 3), head(pool_sizes$resident, 3)), collapse = "; "),
+          pool_sizes$resident[pool_sizes$region == "US_Arizona"]),
+  sprintf("Gradients (`gradient_id` = region): %d.", n_distinct(pool_sizes$region)),
   "", "![Resident pool size per experiment](../figures/diagnostics/01_pool_sizes.png)", "",
   md_table(head(pool_sizes, 10)),
   "", sprintf("## Survey years failing the both-groups rule (%d experiment-years)", nrow(year_fails)), "",
@@ -253,8 +242,7 @@ report <- c(
   "", "## Table and spot check", "",
   sprintf("`cover_long`: %s rows, %d experiments, %d gradients, %s species x experiment combinations (%s resident, %s destination pool); %s rows observed, %s zeros.",
           fmt(nrow(cover_long)), n_distinct(cover_long$experiment_id), n_distinct(cover_long$gradient_id),
-          fmt(nrow(a0)), fmt(sum(pools$species_pool == "resident" & pools$experiment_id %in% kept$experiment_id)),
-          fmt(sum(pools$species_pool == "destination_pool" & pools$experiment_id %in% kept$experiment_id)),
+          fmt(nrow(a0)), fmt(sum(pools$species_pool == "resident")), fmt(sum(pools$species_pool == "destination_pool")),
           fmt(sum(cover_long$relative_cover > 0)), fmt(sum(cover_long$relative_cover == 0))),
   sprintf("Spot check, %s: pool species x surveyed plot-years of their groups = %s, rows written = %s (%s zeros + %s observed records).",
           spot, fmt(spot_expected$rows), fmt(spot_check$rows), fmt(spot_check$zero_rows), fmt(spot_check$observed)),
@@ -265,4 +253,4 @@ report <- c(
         "is kept whatever its count (decided 28 Oct; legacy removed it per treatment).")
 )
 writeLines(report, "reports/01_relative_cover.md")
-message("Step 01 written: ", nrow(kept), " experiments, ", fmt(nrow(cover_long)), " rows")
+message("Step 01 written: ", n_distinct(cover_long$experiment_id), " experiments, ", fmt(nrow(cover_long)), " rows")

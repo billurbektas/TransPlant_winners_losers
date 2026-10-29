@@ -5,6 +5,3 @@
 4,"observation filter (>= 2 plot-year records in a control group)","all",43,681,2511
 5,"pool assignment","resident",43,528,1655
 6,"pool assignment","destination_pool",43,414,856
-7,"pool-size rule (resident pool >= 5)","all",43,681,2511
-8,"pool-size rule (resident pool >= 5)","resident",43,528,1655
-9,"pool-size rule (resident pool >= 5)","destination_pool",43,414,856

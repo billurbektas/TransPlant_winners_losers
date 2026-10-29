@@ -1,6 +1,6 @@
 # Step 01: Relative cover table and pools
 
-Relative cover was computed per plot-year over all 58,803 vascular records (identified, genus-level and unidentified, the six deep-lineage taxa included), so it sums to 1 in every one of 3,210 plot-years. The analysis keeps identified species without a `drop_reason` and removes the deep-lineage taxa afterwards. Each of the 43 included experiments gets its warmed turfs, origin controls and destination controls; a species is resident with at least 2 plot-year records in origin controls, in the destination pool with at least 2 in destination controls and fewer than 2 in origin controls, whether or not it was ever found in warmed turfs. Experiments with fewer than k = 5 resident species leave, all observed cover is kept, and every pool species gets a row, zero where unrecorded, in every surveyed plot-year of its pool's two groups.
+Relative cover was computed per plot-year over all 58,803 vascular records (identified, genus-level and unidentified, the six deep-lineage taxa included), so it sums to 1 in every one of 3,210 plot-years. The analysis keeps identified species without a `drop_reason` and removes the deep-lineage taxa afterwards. Each of the 43 included experiments gets its warmed turfs, origin controls and destination controls; a species is resident with at least 2 plot-year records in origin controls, in the destination pool with at least 2 in destination controls and fewer than 2 in origin controls, whether or not it was ever found in warmed turfs. Every included experiment goes forward (no pool-size rule), all observed cover is kept, and every pool species gets a row, zero where unrecorded, in every surveyed plot-year of its pool's two groups.
 
 ## Counts at every rule (`flow_counts.csv`, Fig S1)
 
@@ -12,9 +12,6 @@ Relative cover was computed per plot-year over all 58,803 vascular records (iden
 | observation filter (>= 2 plot-year records in a control group) | all | 43 | 681 | 2511 |
 | pool assignment | resident | 43 | 528 | 1655 |
 | pool assignment | destination_pool | 43 | 414 | 856 |
-| pool-size rule (resident pool >= 5) | all | 43 | 681 | 2511 |
-| pool-size rule (resident pool >= 5) | resident | 43 | 528 | 1655 |
-| pool-size rule (resident pool >= 5) | destination_pool | 43 | 414 | 856 |
 
 Species x experiment combinations in neither pool:
 
@@ -54,26 +51,25 @@ Share of plot-year cover in rows not analysed, by region:
 | US_Colorado | 184 | 0 | 0.336 | 2 |
 | US_Montana | 84 | 0 | 0.217 | 0 |
 
-## Pool sizes and the rule on k (`pool_sizes.csv`)
+## Pool sizes (`pool_sizes.csv`)
 
-Rule: an experiment enters only if its resident pool has at least k = 5 species. 43 of 43 experiments kept. Smallest resident pools: US_Arizona::MC::PP 8; DE_Susalps::FE::BT 12; SE_Abisko::Mid::Low 13.
-US_Arizona stays: on the SQLite's absolute cover it has 8 resident species, where PLAN.md expected about four from the legacy relative cover (decided 28 Oct: kept).
+No pool-size rule (dropped 29 Oct): all 43 included experiments go forward. Smallest resident pools: US_Arizona::MC::PP 8; DE_Susalps::FE::BT 12; SE_Abisko::Mid::Low 13. US_Arizona, which PLAN.md expected to leave with about four residents in the legacy relative cover, has 8 on the SQLite's absolute cover (kept, decided 28 Oct).
 Gradients (`gradient_id` = region): 21.
 
 ![Resident pool size per experiment](../figures/diagnostics/01_pool_sizes.png)
 
-| experiment_id | region | resident | destination_pool | rule | k | kept |
-| --- | --- | --- | --- | --- | --- | --- |
-| US_Arizona::MC::PP | US_Arizona | 8 | 15 | resident pool >= k | 5 | TRUE |
-| DE_Susalps::FE::BT | DE_Susalps | 12 | 18 | resident pool >= k | 5 | TRUE |
-| SE_Abisko::Mid::Low | SE_Abisko | 13 | 10 | resident pool >= k | 5 | TRUE |
-| SE_Abisko::High::Low | SE_Abisko | 16 | 12 | resident pool >= k | 5 | TRUE |
-| SE_Abisko::High::Mid | SE_Abisko | 16 | 8 | resident pool >= k | 5 | TRUE |
-| DE_TransAlps::FP::BT | DE_TransAlps | 21 | 25 | resident pool >= k | 5 | TRUE |
-| IT_MatschMazia2::High::Low | IT_MatschMazia2 | 24 | 24 | resident pool >= k | 5 | TRUE |
-| NO_Lavisdalen::Hogsete::Vikesland | NO_Lavisdalen | 26 | 10 | resident pool >= k | 5 | TRUE |
-| US_Colorado::pf::um | US_Colorado | 26 | 13 | resident pool >= k | 5 | TRUE |
-| US_Colorado::mo::pf | US_Colorado | 27 | 10 | resident pool >= k | 5 | TRUE |
+| experiment_id | region | resident | destination_pool |
+| --- | --- | --- | --- |
+| US_Arizona::MC::PP | US_Arizona | 8 | 15 |
+| DE_Susalps::FE::BT | DE_Susalps | 12 | 18 |
+| SE_Abisko::Mid::Low | SE_Abisko | 13 | 10 |
+| SE_Abisko::High::Low | SE_Abisko | 16 | 12 |
+| SE_Abisko::High::Mid | SE_Abisko | 16 | 8 |
+| DE_TransAlps::FP::BT | DE_TransAlps | 21 | 25 |
+| IT_MatschMazia2::High::Low | IT_MatschMazia2 | 24 | 24 |
+| NO_Lavisdalen::Hogsete::Vikesland | NO_Lavisdalen | 26 | 10 |
+| US_Colorado::pf::um | US_Colorado | 26 | 13 |
+| US_Colorado::mo::pf | US_Colorado | 27 | 10 |
 
 ## Survey years failing the both-groups rule (1 experiment-years)
 
