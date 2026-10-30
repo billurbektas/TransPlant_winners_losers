@@ -121,7 +121,9 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 3.8,
             fontface = "italic") +
   coord_cartesian(xlim = x_lim, ylim = c(0.2, nrow(ranges) + 0.8), expand = FALSE, clip = "off") +
-  scale_fill_manual(values = cols, name = NULL) +
+  # legend labels carry the total count of each class (all eligible species, shown or not)
+  scale_fill_manual(values = cols, name = NULL,
+                    labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Experiments", low = "grey85", high = "black", breaks = c(4, 8, 12, 16, 20)) +
   guides(fill = guide_legend(override.aes = list(size = 4))) +
   labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
