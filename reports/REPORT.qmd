@@ -18,3 +18,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include P7_trait_checks.md >}}
 
 {{< include 01_relative_cover.md >}}
+
+{{< include 02_strength.md >}}
