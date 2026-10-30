@@ -205,6 +205,30 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
   moved <- dplyr::filter(shift, !is.na(median_after), abs(change_pct) > 10) |>
     dplyr::mutate(dplyr::across(c(median_before, median_after), ~ signif(.x, 3))) |>
     dplyr::arrange(dplyr::desc(abs(change_pct)))
+  # every record of each trait in its own units, the removed ones coloured by reason
+  fig_path <- "figures/diagnostics/P2_trait_screening.png"
+  status_levels <- c("kept", "outlier (robust z > 3.5)", "unit signature", "outlier and unit signature",
+                     "tree (trait_trees.csv)", "reviewed value set to NA (trait_review.csv)")
+  screen_plot <- dplyr::bind_rows(
+    dplyr::transmute(trait_summary$long, trait, value, status = "kept"),
+    dplyr::transmute(removed, trait, value, status = reason)) |>
+    dplyr::mutate(status = factor(status, levels = status_levels),
+                  trait = factor(trait, levels = c("LDMC", "LMA", "height"),
+                                 labels = c("LDMC (g g-1)", "LMA (mg mm-2)", "height (m)")))
+  # kept records from zero in grey, the removed ones as their own bars on top,
+  # so the square-root axis does not stretch a stacked base
+  fig <- ggplot2::ggplot(screen_plot, ggplot2::aes(value, fill = status)) +
+    ggplot2::geom_histogram(data = dplyr::filter(screen_plot, status == "kept"), bins = 60) +
+    ggplot2::geom_histogram(data = dplyr::filter(screen_plot, status != "kept"), bins = 60, position = "stack", alpha = 0.9) +
+    ggplot2::scale_x_log10() +
+    ggplot2::scale_y_sqrt() +
+    ggplot2::scale_fill_manual(values = c("grey75", "#E69F00", "#D55E00", "#CC79A7", "#009E73", "#56B4E9"), drop = FALSE) +
+    ggplot2::facet_wrap(~ trait, scales = "free", ncol = 1) +
+    ggplot2::labs(x = "Value (log scale, natural units)", y = "Records (square-root scale)", fill = NULL) +
+    ggplot2::theme_classic() +
+    ggplot2::theme(legend.position = "bottom", legend.direction = "vertical")
+  dir.create(dirname(fig_path), recursive = TRUE, showWarnings = FALSE)
+  ggplot2::ggsave(fig_path, fig, width = 7, height = 8, dpi = 150)
   read <- attr(try_attached, "rows_read")
   counts <- dplyr::bind_rows(
     tibble::tibble(stage = sprintf("read by TRY species ID (%d IDs)", length(try_ids)),
@@ -272,6 +296,10 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
           "(log scale, species x trait with at least 5 records) or at a 10, 100 or 1000x unit slip (at least 3 records) are",
           "dropped. No dataset is removed as a whole. Every removed record is in `data/derived/prep/trait_screen_removed.csv`."), "",
     md_table(screen_counts), "",
+    "![Every TRY record of each trait in its own units, removed records coloured by reason](../figures/diagnostics/P2_trait_screening.png)", "",
+    paste("Kept records in grey, removed records as coloured bars, each counted from zero; log value axis in natural units, square-root",
+          "count axis so the few removed records are visible. Outliers are judged against their own species, so they lie across the",
+          "whole range of a trait, not only in its tails; the trees are the long right tail of height."), "",
     sprintf("Species x trait values lost: %d (%s).", nrow(lost), paste(sprintf("%s %s", lost$species, lost$trait), collapse = "; ")),
     "", sprintf("Species x trait medians moving by more than 10%% (%d):", nrow(moved)), "",
     if (nrow(moved)) md_table(moved) else "None.",
@@ -297,7 +325,7 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
           "dropped (decided 26 Oct). (4) TRY text fields repaired to UTF-8 after reading (legacy repaired names only).")
   )
   writeLines(report, path)
-  path
+  c(path, fig_path)
 }
 
 write_p3_outputs <- function(functional_groups, phylogeny, phylogeny_axes, placements, dir = "data/derived/prep") {

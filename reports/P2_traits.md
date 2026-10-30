@@ -90,6 +90,10 @@ Before the medians: the seven real trees (`prep/config/trait_trees.csv`; seedlin
 | tree (trait_trees.csv) | 2423 | 21 |
 | unit signature | 15 | 8 |
 
+![Every TRY record of each trait in its own units, removed records coloured by reason](../figures/diagnostics/P2_trait_screening.png)
+
+Kept records in grey, removed records as coloured bars, each counted from zero; log value axis in natural units, square-root count axis so the few removed records are visible. Outliers are judged against their own species, so they lie across the whole range of a trait, not only in its tails; the trees are the long right tail of height.
+
 Species x trait values lost: 24 (Acer pseudoplatanus LDMC; Acer pseudoplatanus LMA; Acer pseudoplatanus height; Betula pubescens LDMC; Betula pubescens LMA; Betula pubescens height; Euphrasia officinalis LMA; Euphrasia salisburgensis LMA; Larix decidua LDMC; Larix decidua LMA; Larix decidua height; Picea abies LDMC; Picea abies LMA; Picea abies height; Pilosella piloselloides height; Pinus sylvestris LDMC; Pinus sylvestris LMA; Pinus sylvestris height; Quercus robur LDMC; Quercus robur LMA; Quercus robur height; Sorbus aucuparia LDMC; Sorbus aucuparia LMA; Sorbus aucuparia height).
 
 Species x trait medians moving by more than 10% (5):
