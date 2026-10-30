@@ -21,6 +21,30 @@ Species x experiment combinations in neither pool:
 | in origin controls, below the resident rule | 1028 |
 | warmed only | 256 |
 
+## Cut-offs for pool membership (diagnostic, added 30 Oct)
+
+Plot-year records per species x experiment in each group, from all records before any pool rule, and what a fixed cut-off of at least k plot-year records would keep. Species with a single record are the most common count in every group (Origin controls 368, Warmed plots 475, Destination controls 403); beyond k = 2 the counts decline without a break. The pool rule in use (at least half of a group's plots and at least two years) keeps 995 resident effects.
+
+![Plot-year records and cut-offs](../figures/diagnostics/01_pool_cutoffs.png)
+
+| k | Resident effects (species x experiment) | Species in >= 4 experiments (Step C) |
+| --- | --- | --- |
+| 1 | 2023 | 168 |
+| 2 | 1655 | 137 |
+| 3 | 1460 | 120 |
+| 4 | 1323 | 108 |
+| 5 | 1190 | 97 |
+| 6 | 1085 | 90 |
+| 7 | 993 | 82 |
+| 8 | 925 | 73 |
+| 9 | 862 | 70 |
+| 10 | 816 | 65 |
+| 11 | 765 | 61 |
+| 12 | 721 | 60 |
+| 13 | 669 | 54 |
+| 14 | 632 | 51 |
+| 15 | 604 | 50 |
+
 ## Relative cover
 
 Sum of relative cover per plot-year: min 1.000000000000, max 1.000000000000. Share of plot-year cover in rows not analysed (dropped or deep-lineage): min 0.000, median 0.005, 90% 0.241, max 0.891.
@@ -102,7 +126,7 @@ Spot check, US_Arizona::MC::PP: pool species x surveyed plot-years of their grou
 
 ## Warnings captured
 
-None.
+- Removed 145 rows containing non-finite outside the scale range (`stat_bin()`).
 
 ## Deviations from PLAN.md
 

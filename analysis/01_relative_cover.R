@@ -223,6 +223,47 @@ fig <- ggplot(pool_sizes, aes(resident)) +
   theme_classic()
 ggsave("figures/diagnostics/01_pool_sizes.png", fig, width = 5, height = 3.5, dpi = 150)
 
+# ---- Cut-off diagnostic: plot-year records per species x experiment (added 30 Oct)
+# drawn from all records before any pool rule, to show how many combinations a
+# fixed cut-off of k plot-year records would keep in each group
+group_label <- c(origin_control = "Origin controls", warmed = "Warmed plots", destination_control = "Destination controls")
+n_py <- records |>
+  summarise(plot_years = n_distinct(plot_year_id), .by = c(experiment_id, species, group)) |>
+  mutate(group = factor(group_label[group], levels = group_label))
+ks <- 1:15
+kept_k <- bind_rows(lapply(ks, function(k) count(filter(n_py, plot_years >= k), group, name = "kept") |> mutate(k = k)))
+resident_k <- bind_rows(lapply(ks, function(k) {
+  r <- filter(n_py, group == "Origin controls", plot_years >= k)
+  tibble::tibble(k = k, `Resident effects (species x experiment)` = nrow(r),
+                 `Species in >= 4 experiments (Step C)` = sum(table(r$species) >= 4))
+}))
+group_cols <- c("Origin controls" = "#1B9E77", "Warmed plots" = "#D95F2B", "Destination controls" = "#7570B3")
+big <- theme_classic(base_size = 16) + theme(plot.title = element_text(face = "bold", size = 24),
+                                             strip.text = element_text(face = "bold", size = 15), strip.background = element_blank())
+pa <- ggplot(n_py, aes(plot_years)) +
+  geom_histogram(binwidth = 1, boundary = 0.5, fill = "grey55", colour = "white") +
+  geom_vline(xintercept = 1.5, colour = "#D95F2B", linewidth = 0.8, linetype = "dashed") +
+  facet_wrap(~ group, ncol = 1, scales = "free_y") +
+  scale_x_continuous(limits = c(0.5, 40.5), breaks = c(1, 2, 5, 10, 20, 30, 40)) +
+  labs(title = "a)", x = "Plot-year records per species x experiment (cut at 40)", y = "Species x experiment") + big
+pb <- ggplot(kept_k, aes(k, kept, colour = group)) +
+  geom_vline(xintercept = 2, colour = "grey70", linetype = "dashed") +
+  geom_line(linewidth = 1.1) + geom_point(size = 2.5) +
+  scale_colour_manual(values = group_cols, name = NULL) + scale_x_continuous(breaks = ks) +
+  labs(title = "b)", x = "Cut-off: at least k plot-year records in the group", y = "Species x experiment retained") +
+  big + theme(legend.position = "top", legend.text = element_text(size = 14, face = "bold"))
+pc_long <- tidyr::pivot_longer(resident_k, -k)
+pc <- ggplot(pc_long, aes(k, value)) +
+  geom_vline(xintercept = 2, colour = "grey70", linetype = "dashed") +
+  geom_line(linewidth = 1.1, colour = "#1B9E77") + geom_point(size = 2.5, colour = "#1B9E77") +
+  geom_text(data = filter(pc_long, k %in% c(1:6, 8, 10)), aes(label = value), vjust = -0.9, size = 4.2, fontface = "bold") +
+  facet_wrap(~ name, ncol = 1, scales = "free_y") + scale_x_continuous(breaks = ks) +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.2))) +
+  labs(title = "c)", x = "Resident cut-off: at least k plot-year records in origin controls", y = NULL) + big
+ggsave("figures/diagnostics/01_pool_cutoffs.png",
+       patchwork::wrap_plots(pa, patchwork::wrap_plots(pb, pc, ncol = 1, heights = c(1, 1.3)), widths = c(1, 1.1)),
+       width = 17, height = 12, dpi = 130, bg = "white")
+
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
 share_q <- stats::quantile(dropped_share$share, c(0, 0.5, 0.9, 1))
@@ -239,6 +280,15 @@ report <- c(
          "every pool species gets a row, zero where unrecorded, in every surveyed plot-year of its pool's two groups."),
   "", "## Counts at every rule (`flow_counts.csv`, Fig S1)", "", md_table(select(flow_counts, -order)),
   "", "Species x experiment combinations in neither pool:", "", md_table(not_pooled),
+  "", "## Cut-offs for pool membership (diagnostic, added 30 Oct)", "",
+  paste0("Plot-year records per species x experiment in each group, from all records before any pool rule, and what a ",
+         "fixed cut-off of at least k plot-year records would keep. Species with a single record are the most common ",
+         "count in every group (", paste(sprintf("%s %s", names(table(n_py$group[n_py$plot_years == 1])),
+                                                 fmt(as.integer(table(n_py$group[n_py$plot_years == 1])))), collapse = ", "),
+         "); beyond k = 2 the counts decline without a break. The pool rule in use (at least half of a group's plots and ",
+         "at least two years) keeps ", fmt(sum(pools$species_pool == "resident")), " resident effects."), "",
+  "![Plot-year records and cut-offs](../figures/diagnostics/01_pool_cutoffs.png)", "",
+  md_table(resident_k),
   "", "## Relative cover", "",
   sprintf("Sum of relative cover per plot-year: min %.12f, max %.12f. Share of plot-year cover in rows not analysed (dropped or deep-lineage): min %.3f, median %.3f, 90%% %.3f, max %.3f.",
           min(sums$total), max(sums$total), share_q[1], share_q[2], share_q[3], share_q[4]),
