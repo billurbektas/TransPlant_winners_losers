@@ -23,7 +23,7 @@ Partial coverage (5 experiments; CHELSA has no 2022 to 2023), averaged over the 
 | US_Colorado::mo::um | 4 | 6 | 2022;2023 |
 | US_Colorado::pf::um | 4 | 6 | 2022;2023 |
 
-The comparison with the frozen legacy climate and niche of step 00 is in `reports/P5_compare_to_frozen.md`.
+The comparison with the frozen legacy climate and niche of step 00 (P5, 27 Oct, before the GBIF niche and the trait screening) is kept in the git history: `reports/P5_compare_to_frozen.md` at commit 04e4b70.
 
 ### The niche's climatology at the destination sites
 

@@ -165,7 +165,7 @@ The 30 largest differences:
 | Poa alberti | LDMC | 10 | 0.4825 |  |  |  |
 | Trichophorum distigmaticum | LDMC | 12 | 0.419797096 |  |  |  |
 
-The comparison with the frozen legacy traits of step 00 is in `reports/P5_compare_to_frozen.md`.
+The comparison with the frozen legacy traits of step 00 (P5, 27 Oct, before the GBIF niche and the trait screening) is kept in the git history: `reports/P5_compare_to_frozen.md` at commit 04e4b70.
 
 ## Flagged TRY names of study species
 

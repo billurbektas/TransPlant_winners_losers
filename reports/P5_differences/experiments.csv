@@ -1,8 +1,0 @@
-"file","key","difference","cause","kind"
-"experiments","FR_AlpeHuez::HIGH::LOW","first_year: NA -> 2015","experiment included: FR_AlpeHuez years in the SQLite","new data"
-"experiments","CH_Calanda2::Cal::Nes","last_year: 2019 -> 2020","experiment years changed (CH_Calanda2 2020 kept)","correction"
-"experiments","FR_AlpeHuez::HIGH::LOW","last_year: NA -> 2023","experiment included: FR_AlpeHuez years in the SQLite","new data"
-"experiments","CH_Calanda2::Cal::Nes","year_range: 3 -> 4","experiment years changed (CH_Calanda2 2020 kept)","correction"
-"experiments","FR_AlpeHuez::HIGH::LOW","year_range: NA -> 9","experiment included: FR_AlpeHuez years in the SQLite","new data"
-"experiments","FR_AlpeHuez::HIGH::LOW","exclusion_reason: warmed observations have missing Year -> NA","experiment included: FR_AlpeHuez years in the SQLite","new data"
-"experiments","FR_AlpeHuez::HIGH::LOW","included: FALSE -> TRUE","experiment included: FR_AlpeHuez years in the SQLite","new data"

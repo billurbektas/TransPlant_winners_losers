@@ -90,7 +90,7 @@ TRY names flagged for review: 4082. Those whose accepted name, or one of the tie
 | no legitimate candidate | FALSE | 255 | 31507 |
 | tie | FALSE | 36 | 2231 |
 
-The comparison with the frozen legacy taxonomy of step 00 is in `reports/P5_compare_to_frozen.md`.
+The comparison with the frozen legacy taxonomy of step 00 (P5, 27 Oct, before the GBIF niche and the trait screening) is kept in the git history: `reports/P5_compare_to_frozen.md` at commit 04e4b70.
 
 ### Names merged into one species (106 names in 50 species; full table in `data/derived/prep/species_merges.csv`)
 

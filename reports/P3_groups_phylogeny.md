@@ -83,7 +83,7 @@ Tips: 903, rooted and ultrametric. PCoA on cophenetic distances: 902 positive ax
 | PEV5 | 5 | 1562097.9 | 4.82 | 49.44 | 0.59 | TRUE | none |
 | PEV6 | 6 | 1220315.88 | 3.77 | 53.21 | 0.57 | TRUE | none |
 
-The comparison with the frozen legacy groups and axes of step 00 is in `reports/P5_compare_to_frozen.md`.
+The comparison with the frozen legacy groups and axes of step 00 (P5, 27 Oct, before the GBIF niche and the trait screening) is kept in the git history: `reports/P5_compare_to_frozen.md` at commit 04e4b70.
 
 ## Warnings captured
 
