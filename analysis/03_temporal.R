@@ -134,8 +134,8 @@ switch_labels <- bind_rows(switch_labels) |>
   arrange(x, desc(y)) |>
   mutate(y = Reduce(function(prev, cur) min(cur, prev - 1.3 * gap), y, accumulate = TRUE), .by = x)
 low <- min(strata$bottom)
-boxes <- tibble::tibble(x = head(xpos, -1) + 0.5, y = low - 6 * gap,
-                        label = sprintf("Sign agreement: %.2f\nLin's concordance\ncorrelation coefficient: %.2f",
+boxes <- tibble::tibble(x = head(xpos, -1) + 0.5, y = low - 6.5 * gap,
+                        label = sprintf("Sign agreement: %.2f\nConcordance correlation\ncoefficient: %.2f",
                                         stability$sign_agreement, stability$ccc))
 
 fig <- ggplot() +
@@ -149,9 +149,11 @@ fig <- ggplot() +
   geom_text(data = filter(strata, year == 6L), aes(x + w / 2 + 0.03, (top + bottom) / 2, label = class, colour = class),
             hjust = 0, size = 4.2) +
   annotate("text", x = xpos, y = 3 * gap, label = paste("Year", anchors), size = 6, fontface = "bold", colour = "grey30") +
-  geom_label(data = boxes, aes(x, y, label = label), size = 5, label.size = 0.3, colour = "grey20", lineheight = 1.1) +
+  geom_label(data = boxes, aes(x, y, label = label), size = 5.8, label.size = 0.3, colour = "grey20", lineheight = 1.1) +
+  annotate("text", x = mean(boxes$x), y = low - 1.6 * gap, size = 5, fontface = "bold", colour = "grey30",
+           label = "Agreement of winning-losing strength between adjacent years") +
   scale_fill_manual(values = cols, guide = "none") + scale_colour_manual(values = cols, guide = "none") +
-  coord_cartesian(xlim = c(0.85, length(anchors) + 0.6), ylim = c(low - 9 * gap, 4 * gap), clip = "off") +
+  coord_cartesian(xlim = c(0.85, length(anchors) + 0.6), ylim = c(low - 9.5 * gap, 4 * gap), clip = "off") +
   labs(title = "a Residents: warmed minus origin contrast (draft)") +
   theme_void() + theme(plot.title = element_text(face = "bold", size = 16, colour = "grey30"),
                        plot.margin = margin(10, 10, 10, 10))
