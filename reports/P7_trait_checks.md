@@ -42,8 +42,6 @@ Known case (P2 notes): Euphrasia officinalis LMA from dataset 524 flagged at rec
 | height | 547 | 0.661 | 18 | 19 | 21 | 5 |
 | height | 320 | 0.663 | 42 | 601 | 45 | 16 |
 
-![Dataset offsets](../figures/diagnostics/P7_dataset_offsets.png)
-
 ## Records: the 20 largest departures from their species median
 
 | species | trait | dataset_id | observation_id | SpeciesName | value | species_median | ratio | z | reason |

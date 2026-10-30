@@ -6,8 +6,7 @@
 # Run from the repository root:  Rscript prep/check_traits.R
 # Reads:  data/derived/prep/traits_long.rds, traits.rds, functional_groups.rds
 # Writes: reports/P7_trait_checks.md; reports/P7_trait_checks/flagged_records.csv,
-#         flagged_datasets.csv, flagged_species.csv;
-#         figures/diagnostics/P7_dataset_offsets.png
+#         flagged_datasets.csv, flagged_species.csv
 # Checks, all on the log scale (traits are positive and right-skewed):
 #   1. records: robust z within species x trait (>= 5 records), |z| > 3.5; and
 #      unit signatures, a value 10, 100 or 1000 times (or 1/...) the species
@@ -20,7 +19,7 @@
 #   4. fragile medians: < 3 records or a single dataset
 # Thresholds decided 29 Oct (Bills).
 
-suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
+suppressPackageStartupMessages(library(dplyr))
 source("prep/R/report.R") # md_table()
 source("prep/R/traits.R")  # flag_trait_records(), shared with P2's screening
 
@@ -34,7 +33,6 @@ dataset_min_species <- 3L
 unit_tolerance <- 0.15
 out_dir <- "reports/P7_trait_checks"
 dir.create(out_dir, showWarnings = FALSE)
-dir.create("figures/diagnostics", recursive = TRUE, showWarnings = FALSE)
 
 # the records behind P2's medians, after P2's screening (decided 29-30 Oct)
 records <- readRDS("data/derived/prep/traits_long.rds") |>
@@ -150,14 +148,6 @@ fragile <- records |>
 utils::write.csv(flagged_records, file.path(out_dir, "flagged_records.csv"), row.names = FALSE)
 utils::write.csv(flagged_datasets, file.path(out_dir, "flagged_datasets.csv"), row.names = FALSE)
 utils::write.csv(flagged_species, file.path(out_dir, "flagged_species.csv"), row.names = FALSE)
-fig <- ggplot(dataset_summary, aes(x = log2(offset), y = trait, size = shared_species, colour = flagged)) +
-  geom_vline(xintercept = c(-1, 1) * log2(dataset_factor), linetype = "dashed") +
-  geom_jitter(height = 0.15, width = 0, alpha = 0.6) +
-  scale_colour_manual(values = c(`FALSE` = "grey50", `TRUE` = "firebrick")) +
-  labs(x = "log2(dataset median / other datasets' median), median over shared species", y = NULL,
-       size = "Shared species", colour = "Flagged") +
-  theme_classic()
-ggsave("figures/diagnostics/P7_dataset_offsets.png", fig, width = 7, height = 3.5, dpi = 150)
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
@@ -188,7 +178,6 @@ report <- c(
               any(records$species == "Euphrasia officinalis" & records$trait == "LMA")),
   "", "## Datasets off by 1.5x or more against the other datasets", "",
   md_table(flagged_datasets |> select(trait, dataset_id, offset, shared_species, records, species_fed, species_mostly_this_dataset)),
-  "", "![Dataset offsets](../figures/diagnostics/P7_dataset_offsets.png)",
   "", "## Records: the 20 largest departures from their species median", "",
   md_table(head(flagged_records, 20)),
   "", "## Species medians that move most without their flagged records", "",

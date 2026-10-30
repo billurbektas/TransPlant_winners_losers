@@ -226,11 +226,13 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
   fig <- ggplot2::ggplot(screen_plot, ggplot2::aes(value, fill = status)) +
     ggplot2::geom_histogram(data = dplyr::filter(screen_plot, status == "kept"), bins = 60) +
     ggplot2::geom_histogram(data = dplyr::filter(screen_plot, status != "kept"), bins = 60, position = "stack", alpha = 0.9) +
-    ggplot2::scale_x_log10() +
+    # the top axis repeats the bottom ticks, labelled with ln(value)
+    ggplot2::scale_x_log10(sec.axis = ggplot2::dup_axis(labels = function(b) format(round(log(b), 2), trim = TRUE),
+                                                        name = "ln(value), the scale the screening uses")) +
     ggplot2::scale_y_sqrt() +
     ggplot2::scale_fill_manual(values = c("grey75", "#E69F00", "#D55E00", "#CC79A7", "#009E73", "#56B4E9"), drop = FALSE) +
     ggplot2::facet_wrap(~ trait, scales = "free", ncol = 1) +
-    ggplot2::labs(x = "Value (log scale, natural units)", y = "Records (square-root scale)", fill = NULL) +
+    ggplot2::labs(x = "Value in natural units (log-spaced axis)", y = "Records (square-root scale)", fill = NULL) +
     ggplot2::theme_classic() +
     ggplot2::theme(legend.position = "bottom", legend.direction = "vertical")
   dir.create(dirname(fig_path), recursive = TRUE, showWarnings = FALSE)
