@@ -476,6 +476,36 @@
       "Repository": "CRAN",
       "Type": "source"
     },
+    "RTMB": {
+      "Package": "RTMB",
+      "Version": "2.0",
+      "Source": "Repository",
+      "Imports": [
+        "Rcpp (>= 1.0.9)",
+        "Matrix",
+        "methods",
+        "TMB (>= 1.9.7)",
+        "MASS"
+      ],
+      "LinkingTo": [
+        "Rcpp",
+        "TMB",
+        "RcppEigen"
+      ],
+      "Suggests": [
+        "knitr",
+        "rmarkdown",
+        "igraph",
+        "tinytest",
+        "numDeriv",
+        "tinyplot",
+        "microbenchmark"
+      ],
+      "License": "GPL (>= 2)",
+      "NeedsCompilation": "yes",
+      "Repository": "CRAN",
+      "Type": "source"
+    },
     "Rcpp": {
       "Package": "Rcpp",
       "Version": "1.1.2",
@@ -710,6 +740,33 @@
       "NeedsCompilation": "yes",
       "Author": "Roger Koenker [cre, aut], Pin Tian Ng [ctb] (Contributions to Sparse QR code), Yousef Saad [ctb] (author of sparskit2), Ben Shaby [ctb] (author of chol2csr), Martin Maechler [ctb] (chol() tweaks; S4, <https://orcid.org/0000-0002-8685-9910>)",
       "Repository": "CRAN"
+    },
+    "TMB": {
+      "Package": "TMB",
+      "Version": "1.9.25",
+      "Source": "Repository",
+      "Depends": [
+        "R (>= 3.0.0)"
+      ],
+      "Imports": [
+        "graphics",
+        "methods",
+        "stats",
+        "utils",
+        "Matrix (>= 1.0-12)"
+      ],
+      "LinkingTo": [
+        "Matrix",
+        "RcppEigen"
+      ],
+      "Suggests": [
+        "numDeriv",
+        "parallel"
+      ],
+      "License": "GPL-2",
+      "NeedsCompilation": "yes",
+      "Repository": "CRAN",
+      "Type": "source"
     },
     "TNRS": {
       "Package": "TNRS",
@@ -3377,6 +3434,75 @@
       "Author": "Robert King [aut, cre] (ORCID: <https://orcid.org/0000-0001-7495-6599>), Benjamin Dean [aut], Sigbert Klinke [aut], Paul van Staden [aut] (ORCID: <https://orcid.org/0000-0002-5710-5984>)",
       "Maintainer": "Robert King <Robert.King.Newcastle@gmail.com>",
       "Repository": "CRAN"
+    },
+    "glmmTMB": {
+      "Package": "glmmTMB",
+      "Version": "1.1.15.2",
+      "Source": "Repository",
+      "Depends": [
+        "R (>= 3.6.0)"
+      ],
+      "Imports": [
+        "methods",
+        "RTMB",
+        "TMB (>= 1.9.23)",
+        "lme4 (>= 1.1-18.9000)",
+        "Matrix",
+        "nlme",
+        "numDeriv",
+        "mgcv",
+        "reformulas (>= 0.4.3.1)",
+        "pbkrtest",
+        "sandwich"
+      ],
+      "LinkingTo": [
+        "TMB",
+        "RcppEigen"
+      ],
+      "Suggests": [
+        "knitr",
+        "rmarkdown",
+        "testthat",
+        "withr",
+        "MASS",
+        "ordinal",
+        "lattice",
+        "ggplot2 (>= 2.2.1)",
+        "mlmRev",
+        "bbmle (>= 1.0.19)",
+        "pscl",
+        "coda",
+        "reshape2",
+        "car (>= 3.0.6)",
+        "emmeans (>= 1.4)",
+        "estimability",
+        "DHARMa",
+        "multcomp",
+        "MuMIn",
+        "effects (>= 4.0-1)",
+        "dotwhisker",
+        "broom",
+        "broom.mixed",
+        "plyr",
+        "png",
+        "boot",
+        "texreg",
+        "xtable",
+        "huxtable",
+        "parallel",
+        "blme",
+        "purrr",
+        "dplyr",
+        "ade4",
+        "ape",
+        "gsl",
+        "lmerTest",
+        "metafor"
+      ],
+      "License": "AGPL-3",
+      "NeedsCompilation": "yes",
+      "Repository": "CRAN",
+      "Type": "source"
     },
     "glue": {
       "Package": "glue",
