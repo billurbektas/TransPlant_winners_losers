@@ -147,15 +147,15 @@ fig <- ggplot() +
   geom_label(data = switch_labels, aes(x, y, label = label, colour = class), hjust = 1, size = 3.6,
              fontface = "bold", fill = "white", label.size = 0, label.padding = unit(0.08, "lines")) +
   geom_text(data = filter(strata, year == 6L), aes(x + w / 2 + 0.03, (top + bottom) / 2, label = class, colour = class),
-            hjust = 0, size = 4.2) +
+            hjust = 0, size = 5.8, fontface = "bold") +
   annotate("text", x = xpos, y = 3 * gap, label = paste("Year", anchors), size = 6, fontface = "bold", colour = "grey30") +
   geom_label(data = boxes, aes(x, y, label = label), size = 5.8, label.size = 0.3, colour = "grey20", lineheight = 1.1) +
   annotate("text", x = mean(boxes$x), y = low - 1.6 * gap, size = 5, fontface = "bold", colour = "grey30",
-           label = "Agreement of winning-losing strength between adjacent years") +
+           label = "Agreement of losing-winning strength between adjacent years") +
   scale_fill_manual(values = cols, guide = "none") + scale_colour_manual(values = cols, guide = "none") +
-  coord_cartesian(xlim = c(0.85, length(anchors) + 0.6), ylim = c(low - 9.5 * gap, 4 * gap), clip = "off") +
-  labs(title = "a Residents: warmed minus origin contrast (draft)") +
-  theme_void() + theme(plot.title = element_text(face = "bold", size = 16, colour = "grey30"),
+  coord_cartesian(xlim = c(0.85, length(anchors) + 0.75), ylim = c(low - 9.5 * gap, 4 * gap), clip = "off") +
+  labs(title = "a)") +
+  theme_void() + theme(plot.title = element_text(face = "bold", size = 24, colour = "grey20"),
                        plot.margin = margin(10, 10, 10, 10))
 ggsave("figures/diagnostics/03_fig1_residents_draft.png", fig, width = 14, height = 8.5, dpi = 150, bg = "white")
 
