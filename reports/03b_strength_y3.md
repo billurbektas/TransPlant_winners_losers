@@ -6,14 +6,14 @@ Losing-winning strength was recomputed from the 43 fits of step 02, without refi
 
 | rule | n |
 | --- | --- |
-| effects (species x experiment) | 1,655 |
+| effects (species x experiment) | 995 |
 | experiments | 43 |
 | gradients | 21 |
-| species | 528 |
-| effects resting on a single year >= 3 | 320 |
+| species | 348 |
+| effects resting on a single year >= 3 | 195 |
 | experiments with a single year >= 3 | 9 |
 
-Each matches the expectation checked in the script (1,655 effects, 43 experiments, 21 gradients).
+Each matches the expectation checked in the script (995 effects, 43 experiments, 21 gradients).
 
 ## Years averaged per experiment
 
@@ -67,14 +67,14 @@ Each matches the expectation checked in the script (1,655 effects, 43 experiment
 
 | measure | value |
 | --- | --- |
-| Pearson correlation | 0.889 |
-| Concordance correlation coefficient | 0.862 |
-| Sign agreement | 0.858 |
-| Median SE, years >= 3 / all years | 1.20 |
-| Significant at p < 0.05, all years (step 02) | 420 |
-| Significant at p < 0.05, years 3 and later | 369 |
+| Pearson correlation | 0.884 |
+| Concordance correlation coefficient | 0.856 |
+| Sign agreement | 0.889 |
+| Median SE, years >= 3 / all years | 1.19 |
+| Significant at p < 0.05, all years (step 02) | 310 |
+| Significant at p < 0.05, years 3 and later | 290 |
 
-Quantiles (min / 25% / median / 75% / max). Strength from year 3: -0.3393 / -0.0106 / -0.0015 / 0.0014 / 0.3161; its SE: 0.0001 / 0.0035 / 0.0072 / 0.0145 / 0.1057. Significance uses each experiment's t cut-off (origin-control plots + warmed plots - 2 df), as in step 02.
+Quantiles (min / 25% / median / 75% / max). Strength from year 3: -0.3393 / -0.0195 / -0.0042 / 0.0036 / 0.3161; its SE: 0.0005 / 0.0059 / 0.0091 / 0.0178 / 0.1032. Significance uses each experiment's t cut-off (origin-control plots + warmed plots - 2 df), as in step 02.
 
 ![Strength from year 3](../figures/diagnostics/03b_strength_y3.png)
 
