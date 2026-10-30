@@ -212,7 +212,13 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
   screen_plot <- dplyr::bind_rows(
     dplyr::transmute(trait_summary$long, trait, value, status = "kept"),
     dplyr::transmute(removed, trait, value, status = reason)) |>
-    dplyr::mutate(status = factor(status, levels = status_levels),
+    dplyr::mutate(status = factor(status, levels = status_levels, labels = c(
+                    "kept",
+                    "outlier: more than 3.5 robust SD from its species' median (log scale)",
+                    "unit slip: about 10, 100 or 1000 times (or 1/10...) its species' median",
+                    "outlier and unit slip, both against its species' median",
+                    "tree: all records of the 7 real trees (trait_trees.csv)",
+                    "reviewed: species x trait value set to NA by name (trait_review.csv)")),
                   trait = factor(trait, levels = c("LDMC", "LMA", "height"),
                                  labels = c("LDMC (g g-1)", "LMA (mg mm-2)", "height (m)")))
   # kept records from zero in grey, the removed ones as their own bars on top,
