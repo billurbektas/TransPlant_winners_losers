@@ -117,6 +117,8 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   geom_vline(xintercept = 0, colour = "grey50") +
   geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_experiments), linewidth = 1.3) +
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.8, stroke = 0.4) +
+  # number of experiments, just left of each interval's lower end
+  geom_text(aes(x = lower - 0.004 * diff(x_lim), label = n_experiments), hjust = 1, size = 4.6, colour = "grey20") +
   # species names in their class colour, set directly (one colour scale per plot)
   geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 5.2,
             fontface = "italic") +
