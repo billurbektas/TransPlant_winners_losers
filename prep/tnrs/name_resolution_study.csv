@@ -1,0 +1,961 @@
+submitted_name,accepted_name,matched_name,source,score,taxonomic_status,accepted_author,accepted_species,accepted_family,n_legitimate,tnrs_warning,needs_review,review_reason,resolved_date,tidyTRY,TNRS
+Agrostis agrostiflora,Agrostis schraderiana,Agrostis agrostiflora,wcvp,1,Synonym,Bech.,Agrostis schraderiana,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anthoxanthum odoratum subsp. nipponicum,Anthoxanthum nipponicum,Anthoxanthum odoratum subsp. nipponicum,wcvp,1,Synonym,Honda,Anthoxanthum nipponicum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arnica montana,Arnica montana,Arnica montana,wcvp,1,Accepted,L.,Arnica montana,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Avenella flexuosa,Avenella flexuosa,Avenella flexuosa,wcvp,1,Accepted,(L.) Drejer,Avenella flexuosa,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Campanula scheuchzeri,Campanula scheuchzeri,Campanula scheuchzeri,wcvp,1,Accepted,Vill.,Campanula scheuchzeri,Campanulaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Carex sempervirens,Carex sempervirens,Carex sempervirens,wcvp,1,Accepted,Vill.,Carex sempervirens,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca nigrescens,Festuca nigrescens,Festuca nigrescens,wcvp,1,Accepted,Lam.,Festuca nigrescens,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Geum montanum,Geum montanum,Geum montanum,wcvp,1,Accepted,L.,Geum montanum,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Homogyne alpina,Homogyne alpina,Homogyne alpina,wcvp,1,Accepted,(L.) Cass.,Homogyne alpina,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula sylvatica,Luzula sylvatica,Luzula sylvatica,wcvp,1,Accepted,(Huds.) Gaudin,Luzula sylvatica,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Nardus stricta,Nardus stricta,Nardus stricta,wcvp,1,Accepted,L.,Nardus stricta,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Phleum rhaeticum,Phleum alpinum,Phleum rhaeticum,wcvp,1,Synonym,L.,Phleum alpinum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Plantago atrata,Plantago atrata,Plantago atrata,wcvp,1,Accepted,Hoppe,Plantago atrata,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla aurea,Potentilla aurea,Potentilla aurea,wcvp,1,Accepted,L.,Potentilla aurea,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla erecta,Potentilla erecta,Potentilla erecta,wcvp,1,Accepted,(L.) Raeusch.,Potentilla erecta,Rosaceae,2,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus montanus,Ranunculus montanus,Ranunculus montanus,wcvp,1,Accepted,Willd.,Ranunculus montanus,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Solidago virgaurea subsp. minuta,Solidago virgaurea subsp. minuta,Solidago virgaurea subsp. minuta,wcvp,1,Accepted,(L.) Arcang.,Solidago virgaurea,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium alpinum,Trifolium alpinum,Trifolium alpinum,wcvp,1,Accepted,L.,Trifolium alpinum,Fabaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Vaccinium myrtillus,Vaccinium myrtillus,Vaccinium myrtillus,wcvp,1,Accepted,L.,Vaccinium myrtillus,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Agrostis capillaris,Agrostis capillaris,Agrostis capillaris,wcvp,1,Accepted,L.,Agrostis capillaris,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla xanthochlora,Alchemilla xanthochlora,Alchemilla xanthochlora,wcvp,1,Accepted,Rothm.,Alchemilla xanthochlora,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Antennaria dioica,Antennaria dioica,Antennaria dioica,wcvp,1,Accepted,(L.) Gaertn.,Antennaria dioica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Campanula barbata,Campanula barbata,Campanula barbata,wcvp,1,Accepted,L.,Campanula barbata,Campanulaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Chaerophyllum villarsii,Chaerophyllum villarsii,Chaerophyllum villarsii,wcvp,1,Accepted,W.D.J.Koch,Chaerophyllum villarsii,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium piloselloides,Pilosella piloselloides,Hieracium piloselloides,wcvp,1,Synonym,(Vill.) Soják,Pilosella piloselloides,Asteraceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula multiflora,Luzula multiflora,Luzula multiflora,wcvp,1,Accepted,(Ehrh.) Lej.,Luzula multiflora,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pulsatilla alpina,Pulsatilla alpina,Pulsatilla alpina,wcvp,1,Accepted,(L.) Chaz.,Pulsatilla alpina,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Coeloglossum viride,Dactylorhiza viridis,Coeloglossum viride,wcvp,1,Synonym,"(L.) R.M.Bateman, Pridgeon & M.W.Chase",Dactylorhiza viridis,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana acaulis,Gentiana acaulis,Gentiana acaulis,wcvp,1,Accepted,L.,Gentiana acaulis,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula campestris,Luzula campestris,Luzula campestris,wcvp,1,Accepted,(L.) DC.,Luzula campestris,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bartsia alpina,Bartsia alpina,Bartsia alpina,wcvp,1,Accepted,L.,Bartsia alpina,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ligusticum mutellina,Mutellina purpurea,Ligusticum mutellina,wcvp,1,Synonym,"(Poir.) Reduron, Charpin & Pimenov",Mutellina purpurea,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula alpinopilosa,Luzula alpinopilosa,Luzula alpinopilosa,wcvp,1,Accepted,(Chaix) Breistr.,Luzula alpinopilosa,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Phleum alpinum subsp. rhaeticum,Phleum alpinum,Phleum alpinum subsp. rhaeticum,wcvp,1,Synonym,L.,Phleum alpinum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Solidago virgaurea,Solidago virgaurea,Solidago virgaurea,wcvp,1,Accepted,L.,Solidago virgaurea,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium pratense,Trifolium pratense,Trifolium pratense,wcvp,1,Accepted,L.,Trifolium pratense,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia minima,Euphrasia minima,Euphrasia minima,wcvp,1,Accepted,Jacq. ex DC.,Euphrasia minima,Orobanchaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana clusii,Gentiana clusii,Gentiana clusii,wcvp,1,Accepted,Perr. & Songeon,Gentiana clusii,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Phyteuma betonicifolium,Phyteuma betonicifolium,Phyteuma betonicifolium,wcvp,1,Accepted,Vill.,Phyteuma betonicifolium,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Soldanella alpina,Soldanella alpina,Soldanella alpina,wcvp,1,Accepted,L.,Soldanella alpina,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla conjuncta,Alchemilla conjuncta,Alchemilla conjuncta,wcvp,1,Accepted,Bab.,Alchemilla conjuncta,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana campestris,Gentianella campestris,Gentiana campestris,wcvp,1,Synonym,(L.) Börner,Gentianella campestris,Gentianaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium repens,Trifolium repens,Trifolium repens,wcvp,1,Accepted,L.,Trifolium repens,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium anisophyllon,Galium anisophyllon,Galium anisophyllon,wcvp,1,Accepted,Vill.,Galium anisophyllon,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leontodon helveticus,Scorzoneroides helvetica,Leontodon helveticus,wcvp,1,Synonym,(Mérat) Holub,Scorzoneroides helvetica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vaccinium vitis-idaea,Vaccinium vitis-idaea,Vaccinium vitis-idaea,wcvp,1,Accepted,L.,Vaccinium vitis-idaea,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium murorum,Hieracium murorum,Hieracium murorum,wcvp,1,Accepted,L.,Hieracium murorum,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Polygonum viviparum,Bistorta vivipara,Polygonum viviparum,wcvp,1,Synonym,(L.) Delarbre,Bistorta vivipara,Polygonaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ajuga reptans,Ajuga reptans,Ajuga reptans,wcvp,1,Accepted,L.,Ajuga reptans,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Crepis conyzifolia,Crepis conyzifolia,Crepis conyzifolia,wcvp,1,Accepted,(Gouan) A.Kern.,Crepis conyzifolia,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Cynosurus cristatus,Cynosurus cristatus,Cynosurus cristatus,wcvp,1,Accepted,L.,Cynosurus cristatus,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia rostkoviana,Euphrasia officinalis subsp. pratensis,Euphrasia rostkoviana,wcvp,1,Synonym,Fr.,Euphrasia officinalis,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Genista sagittalis,Genista sagittalis,Genista sagittalis,wcvp,1,Accepted,L.,Genista sagittalis,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium sylvaticum,Geranium sylvaticum,Geranium sylvaticum,wcvp,1,Accepted,L.,Geranium sylvaticum,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium pilosella,Pilosella officinarum,Hieracium pilosella,wcvp,1,Synonym,Vaill.,Pilosella officinarum,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leucanthemum vulgare,Leucanthemum vulgare,Leucanthemum vulgare,wcvp,1,Accepted,Lam.,Leucanthemum vulgare,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula nivea,Luzula nivea,Luzula nivea,wcvp,1,Accepted,(L.) DC.,Luzula nivea,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sorbus aucuparia,Sorbus aucuparia,Sorbus aucuparia,wcvp,1,Accepted,L.,Sorbus aucuparia,Rosaceae,2,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Thymus pulegioides,Thymus pulegioides,Thymus pulegioides,wcvp,1,Accepted,L.,Thymus pulegioides,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Achillea millefolium,Achillea millefolium,Achillea millefolium,wcvp,1,Accepted,L.,Achillea millefolium,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cirsium acaule,Cirsium acaule,Cirsium acaule,wcvp,1,Accepted,(L.) Scop.,Cirsium acaule,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Knautia dipsacifolia,Knautia dipsacifolia,Knautia dipsacifolia,wcvp,1,Accepted,Kreutzer,Knautia dipsacifolia,Caprifoliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lotus corniculatus,Lotus corniculatus,Lotus corniculatus,wcvp,1,Accepted,L.,Lotus corniculatus,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Plantago media,Plantago media,Plantago media,wcvp,1,Accepted,L.,Plantago media,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium campestre,Trifolium campestre,Trifolium campestre,wcvp,1,Accepted,Schreb.,Trifolium campestre,Fabaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica chamaedrys,Veronica chamaedrys,Veronica chamaedrys,wcvp,1,Accepted,L.,Veronica chamaedrys,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Plantago lanceolata,Plantago lanceolata,Plantago lanceolata,wcvp,1,Accepted,L.,Plantago lanceolata,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula lutea,Luzula lutea,Luzula lutea,wcvp,1,Accepted,(All.) DC.,Luzula lutea,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus reptans,Ranunculus reptans,Ranunculus reptans,wcvp,1,Accepted,L.,Ranunculus reptans,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica officinalis,Veronica officinalis,Veronica officinalis,wcvp,1,Accepted,L.,Veronica officinalis,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anthyllis vulneraria,Anthyllis vulneraria,Anthyllis vulneraria,wcvp,1,Accepted,L.,Anthyllis vulneraria,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Prunella vulgaris,Prunella vulgaris,Prunella vulgaris,wcvp,1,Accepted,L.,Prunella vulgaris,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rumex alpestris,Rumex scutatus subsp. scutatus,Rumex alpestris,wcvp,1,Synonym,,Rumex scutatus,Polygonaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Plantago alpina,Plantago alpina,Plantago alpina,wcvp,1,Accepted,L.,Plantago alpina,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chaerophyllum hirsutum,Chaerophyllum hirsutum,Chaerophyllum hirsutum,wcvp,1,Accepted,L.,Chaerophyllum hirsutum,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polygala vulgaris,Polygala vulgaris,Polygala vulgaris,wcvp,1,Accepted,L.,Polygala vulgaris,Polygalaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Centaurea montana,Centaurea montana,Centaurea montana,wcvp,1,Accepted,L.,Centaurea montana,Asteraceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Dactylis glomerata,Dactylis glomerata,Dactylis glomerata,wcvp,1,Accepted,L.,Dactylis glomerata,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Deschampsia cespitosa,Deschampsia cespitosa,Deschampsia cespitosa,wcvp,1,Accepted,(L.) P.Beauv.,Deschampsia cespitosa,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leontodon hispidus,Leontodon hispidus,Leontodon hispidus,wcvp,1,Accepted,L.,Leontodon hispidus,Asteraceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Pimpinella major,Pimpinella major,Pimpinella major,wcvp,1,Accepted,(L.) Huds.,Pimpinella major,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Astrantia major,Astrantia major,Astrantia major,wcvp,1,Accepted,L.,Astrantia major,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Brachypodium pinnatum,Brachypodium pinnatum,Brachypodium pinnatum,wcvp,1,Accepted,(L.) P.Beauv.,Brachypodium pinnatum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Briza media,Briza media,Briza media,wcvp,1,Accepted,L.,Briza media,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bromus erectus,Bromus erectus,Bromus erectus,wcvp,1,Accepted,Huds.,Bromus erectus,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Carex flacca,Carex flacca,Carex flacca,wcvp,1,Accepted,Schreb.,Carex flacca,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carum carvi,Carum carvi,Carum carvi,wcvp,1,Accepted,L.,Carum carvi,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Centaurea scabiosa,Centaurea scabiosa,Centaurea scabiosa,wcvp,1,Accepted,L.,Centaurea scabiosa,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Crepis pyrenaica,Crepis pyrenaica,Crepis pyrenaica,wcvp,1,Accepted,(L.) Greuter,Crepis pyrenaica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca rubra,Festuca rubra,Festuca rubra,wcvp,1,Accepted,L.,Festuca rubra,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helianthemum nummularium,Helianthemum nummularium,Helianthemum nummularium,wcvp,1,Accepted,(L.) Mill.,Helianthemum nummularium,Cistaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lathyrus pratensis,Lathyrus pratensis,Lathyrus pratensis,wcvp,1,Accepted,L.,Lathyrus pratensis,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leontodon autumnalis,Scorzoneroides autumnalis,Leontodon autumnalis,wcvp,1,Synonym,(L.) Moench,Scorzoneroides autumnalis,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Leontodon hyoseroides,Leontodon hyoseroides,Leontodon hyoseroides,wcvp,1,Accepted,Welw. ex Rchb.,Leontodon hyoseroides,Asteraceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Linum catharticum,Linum catharticum,Linum catharticum,wcvp,1,Accepted,L.,Linum catharticum,Linaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lolium perenne,Lolium perenne,Lolium perenne,wcvp,1,Accepted,L.,Lolium perenne,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Phleum pratense,Phleum pratense,Phleum pratense,wcvp,1,Accepted,L.,Phleum pratense,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Poa alpina,Poa alpina,Poa alpina,wcvp,1,Accepted,L.,Poa alpina,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Poa trivialis,Poa trivialis,Poa trivialis,wcvp,1,Accepted,L.,Poa trivialis,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus tuberosus,Ranunculus tuberosus,Ranunculus tuberosus,wcvp,1,Accepted,Lapeyr.,Ranunculus tuberosus,Ranunculaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Sanguisorba minor,Sanguisorba minor,Sanguisorba minor,wcvp,1,Accepted,Scop.,Sanguisorba minor,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Scabiosa lucida,Scabiosa lucida,Scabiosa lucida,wcvp,1,Accepted,Vill.,Scabiosa lucida,Caprifoliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Taraxacum officinale,Taraxacum sect. Taraxacum,Taraxacum officinale,wcvp,1,Synonym,F.H.Wigg.,Taraxacum sect. Taraxacum,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vicia cracca,Vicia cracca,Vicia cracca,wcvp,1,Accepted,L.,Vicia cracca,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arrhenatherum elatius,Arrhenatherum elatius,Arrhenatherum elatius,wcvp,1,Accepted,(L.) P.Beauv. ex J.Presl & C.Presl,Arrhenatherum elatius,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphorbia cyparissias,Euphorbia cyparissias,Euphorbia cyparissias,wcvp,1,Accepted,L.,Euphorbia cyparissias,Euphorbiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca pratensis,Lolium pratense,Festuca pratensis,wcvp,1,Synonym,(Huds.) Darbysh.,Lolium pratense,Poaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Picris hieracioides,Picris hieracioides,Picris hieracioides,wcvp,1,Accepted,L.,Picris hieracioides,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Anthoxanthum odoratum,Anthoxanthum odoratum,Anthoxanthum odoratum,wcvp,1,Accepted,L.,Anthoxanthum odoratum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bellis perennis,Bellis perennis,Bellis perennis,wcvp,1,Accepted,L.,Bellis perennis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana lutea,Gentiana lutea,Gentiana lutea,wcvp,1,Accepted,L.,Gentiana lutea,Gentianaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Leontodon hispidus subsp. hispidus,Leontodon hispidus subsp. hispidus,Leontodon hispidus subsp. hispidus,wcvp,1,Accepted,,Leontodon hispidus,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trisetum flavescens,Trisetum flavescens,Trisetum flavescens,wcvp,1,Accepted,(L.) P.Beauv.,Trisetum flavescens,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arabis ciliata,Arabis ciliata,Arabis ciliata,wcvp,1,Accepted,Clairv.,Arabis ciliata,Brassicaceae,1,[Ambiguous] [Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Gymnadenia conopsea,Gymnadenia conopsea,Gymnadenia conopsea,wcvp,1,Accepted,(L.) R.Br.,Gymnadenia conopsea,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polygala chamaebuxus,Polygaloides chamaebuxus,Polygala chamaebuxus,wcvp,1,Synonym,(L.) O.Schwarz,Polygaloides chamaebuxus,Polygalaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla crantzii,Potentilla crantzii,Potentilla crantzii,wcvp,1,Accepted,(Crantz) Beck ex Fritsch,Potentilla crantzii,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Cerastium arvense,Cerastium arvense,Cerastium arvense,wcvp,1,Accepted,L.,Cerastium arvense,Caryophyllaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Agrostis alpina,Alpagrostis alpina,Agrostis alpina,wcvp,1,Synonym,"(Scop.) P.M.Peterson, Romasch., Soreng & Sylvester",Alpagrostis alpina,Poaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Astragalus frigidus,Astragalus frigidus,Astragalus frigidus,wcvp,1,Accepted,(L.) A.Gray,Astragalus frigidus,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Biscutella laevigata,Biscutella laevigata,Biscutella laevigata,wcvp,1,Accepted,L.,Biscutella laevigata,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Dryas octopetala,Dryas octopetala,Dryas octopetala,wcvp,1,Accepted,L.,Dryas octopetala,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Elyna myosuroides,Carex myosuroides,Elyna myosuroides,wcvp,1,Synonym,Vill.,Carex myosuroides,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca alpina,Festuca alpina,Festuca alpina,wcvp,1,Accepted,Suter,Festuca alpina,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca laevigata,Festuca laevigata,Festuca laevigata,wcvp,1,Accepted,Gaudin,Festuca laevigata,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca violacea,Festuca violacea,Festuca violacea,wcvp,1,Accepted,Ser. ex Gaudin,Festuca violacea,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hedysarum hedysaroides,Hedysarum hedysaroides,Hedysarum hedysaroides,wcvp,1,Accepted,(L.) Schinz & Thell.,Hedysarum hedysaroides,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helictotrichon versicolor,Helictochloa versicolor,Helictotrichon versicolor,wcvp,1,Synonym,(Vill.) Romero Zarco,Helictochloa versicolor,Poaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Juncus trifidus,Oreojuncus trifidus,Juncus trifidus,wcvp,1,Synonym,(L.) Záv.Drábk. & Kirschner,Oreojuncus trifidus,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Loiseleuria procumbens,Kalmia procumbens,Loiseleuria procumbens,wcvp,1,Synonym,"(L.) Gift, Kron & P.F.Stevens ex Galasso, Banfi & F.Conti",Kalmia procumbens,Ericaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis verticillata,Pedicularis verticillata,Pedicularis verticillata,wcvp,1,Accepted,L.,Pedicularis verticillata,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pyrola rotundifolia,Pyrola rotundifolia,Pyrola rotundifolia,wcvp,1,Accepted,L.,Pyrola rotundifolia,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus alpestris,Ranunculus alpestris,Ranunculus alpestris,wcvp,1,Accepted,L.,Ranunculus alpestris,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sesleria caerulea,Sesleria caerulea,Sesleria caerulea,wcvp,1,Accepted,(L.) Ard.,Sesleria caerulea,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vaccinium uliginosum,Vaccinium uliginosum,Vaccinium uliginosum,wcvp,1,Accepted,L.,Vaccinium uliginosum,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Myosotis alpestris,Myosotis alpestris,Myosotis alpestris,wcvp,1,Accepted,F.W.Schmidt,Myosotis alpestris,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Salix retusa,Salix retusa,Salix retusa,wcvp,1,Accepted,L.,Salix retusa,Salicaceae,2,[Ambiguous] [Overall] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace obtusifolia,Androsace obtusifolia,Androsace obtusifolia,wcvp,1,Accepted,All.,Androsace obtusifolia,Primulaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Astrantia minor,Astrantia minor,Astrantia minor,wcvp,1,Accepted,L.,Astrantia minor,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca melanopsis,Festuca violacea subsp. violacea,Festuca melanopsis,wcvp,1,Synonym,,Festuca violacea,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aster bellidiastrum,Aster bellidiastrum,Aster bellidiastrum,wcvp,1,Accepted,(L.) Scop.,Aster bellidiastrum,Asteraceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Astragalus alpinus,Astragalus alpinus,Astragalus alpinus,wcvp,1,Accepted,L.,Astragalus alpinus,Fabaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca halleri,Festuca halleri,Festuca halleri,wcvp,1,Accepted,All.,Festuca halleri,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Ligusticum mutellinoides,Neogaya simplex,Ligusticum mutellinoides,wcvp,1,Synonym,(L.) Meisn.,Neogaya simplex,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Linum alpinum,Linum alpinum,Linum alpinum,wcvp,1,Accepted,Jacq.,Linum alpinum,Linaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Astragalus australis,Astragalus australis,Astragalus australis,wcvp,1,Accepted,(L.) Lam.,Astragalus australis,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Salix reticulata,Salix reticulata,Salix reticulata,wcvp,1,Accepted,L.,Salix reticulata,Salicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arctostaphylos alpinus,Arctous alpina,Arctostaphylos alpina,wcvp,0.92876649034479,Synonym,(L.) Nied.,Arctous alpina,Ericaceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Helianthemum alpestre,Helianthemum oelandicum subsp. alpestre,Helianthemum alpestre,wcvp,1,Synonym,(Jacq.) Ces.,Helianthemum oelandicum,Cistaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Silene acaulis,Silene acaulis,Silene acaulis,wcvp,1,Accepted,(L.) Jacq.,Silene acaulis,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gnaphalium sylvaticum,Omalotheca sylvatica,Gnaphalium sylvaticum,wcvp,1,Synonym,(L.) F.W.Schultz & Sch.Bip.,Omalotheca sylvatica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pulsatilla vernalis,Pulsatilla vernalis,Pulsatilla vernalis,wcvp,1,Accepted,(L.) Mill.,Pulsatilla vernalis,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla vulgaris,Alchemilla vulgaris,Alchemilla vulgaris,wcvp,1,Accepted,L.,Alchemilla vulgaris,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Crepis aurea,Crepis aurea,Crepis aurea,wcvp,1,Accepted,(L.) Cass.,Crepis aurea,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium thalii,Trifolium thalii,Trifolium thalii,wcvp,1,Accepted,Vill.,Trifolium thalii,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Antennaria carpatica,Antennaria carpatica,Antennaria carpatica,wcvp,1,Accepted,(Wahlenb.) Bluff & Fingerh.,Antennaria carpatica,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana purpurea,Gentiana purpurea,Gentiana purpurea,wcvp,1,Accepted,L.,Gentiana purpurea,Gentianaceae,4,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Anemone narcissiflora,Anemonastrum narcissiflorum,Anemone narcissiflora,wcvp,1,Synonym,(L.) Holub,Anemonastrum narcissiflorum,Ranunculaceae,3,,FALSE,,2026-10-28,0.2.1,0.3.6
+Salix herbacea,Salix herbacea,Salix herbacea,wcvp,1,Accepted,L.,Salix herbacea,Salicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lotus alpinus,Lotus alpinus,Lotus alpinus,wcvp,1,Accepted,(Ser.) Schleich. ex Ramond,Lotus alpinus,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium pallescens,Trifolium pallescens,Trifolium pallescens,wcvp,1,Accepted,Schreb.,Trifolium pallescens,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pyrola minor,Pyrola minor,Pyrola minor,wcvp,1,Accepted,L.,Pyrola minor,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Selaginella selaginoides,Selaginella selaginoides,Selaginella selaginoides,wcvp,1,Accepted,(L.) P.Beauv. ex Schrank & Mart.,Selaginella selaginoides,Selaginellaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex rupestris,Carex rupestris,Carex rupestris,wcvp,1,Accepted,All.,Carex rupestris,Cyperaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis campestris,Oxytropis campestris,Oxytropis campestris,wcvp,1,Accepted,(L.) DC.,Oxytropis campestris,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola calcarata,Viola calcarata,Viola calcarata,wcvp,1,Accepted,L.,Viola calcarata,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carlina acaulis,Carlina acaulis,Carlina acaulis,wcvp,1,Accepted,L.,Carlina acaulis,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex montana,Carex montana,Carex montana,wcvp,1,Accepted,L.,Carex montana,Cyperaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium lachenalii,Hieracium lachenalii,Hieracium lachenalii,wcvp,1,Accepted,Suter,Hieracium lachenalii,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Polygala alpestris,Polygala alpestris,Polygala alpestris,wcvp,1,Accepted,Rchb.,Polygala alpestris,Polygalaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thesium alpinum,Thesium alpinum,Thesium alpinum,wcvp,1,Accepted,L.,Thesium alpinum,Santalaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hypericum maculatum,Hypericum maculatum,Hypericum maculatum,wcvp,1,Accepted,Crantz,Hypericum maculatum,Hypericaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Rumex acetosella,Rumex acetosella,Rumex acetosella,wcvp,1,Accepted,L.,Rumex acetosella,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veratrum album,Veratrum album,Veratrum album,wcvp,1,Accepted,L.,Veratrum album,Melanthiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cerastium fontanum subsp. vulgare,Cerastium holosteoides,Cerastium fontanum subsp. vulgare,wcvp,1,Synonym,Fr.,Cerastium holosteoides,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Larix decidua,Larix decidua,Larix decidua,wcvp,1,Accepted,Mill.,Larix decidua,Pinaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium montanum,Trifolium montanum,Trifolium montanum,wcvp,1,Accepted,L.,Trifolium montanum,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex digitata,Carex digitata,Carex digitata,wcvp,1,Accepted,L.,Carex digitata,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola reichenbachiana,Viola reichenbachiana,Viola reichenbachiana,wcvp,1,Accepted,Jord. ex Boreau,Viola reichenbachiana,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana punctata,Gentiana punctata,Gentiana punctata,wcvp,1,Accepted,L.,Gentiana punctata,Gentianaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium lactucella,Pilosella lactucella,Hieracium lactucella,wcvp,1,Synonym,(Wallr.) P.D.Sell & C.West,Pilosella lactucella,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rumex acetosa,Rumex acetosa,Rumex acetosa,wcvp,1,Accepted,L.,Rumex acetosa,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus acris subsp. friesianus,Ranunculus acris subsp. friesianus,Ranunculus acris subsp. friesianus,wcvp,1,Accepted,(Jord.) Syme,Ranunculus acris,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arabis hirsuta,Arabis hirsuta,Arabis hirsuta,wcvp,1,Accepted,(L.) Scop.,Arabis hirsuta,Brassicaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Anthyllis vulneraria var. alpestris,Anthyllis vulneraria subsp. alpestris,Anthyllis vulneraria var. alpestris,wcvp,1,Synonym,(Kit.) Asch. & Graebn.,Anthyllis vulneraria,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica aphylla,Veronica aphylla,Veronica aphylla,wcvp,1,Accepted,L.,Veronica aphylla,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium badium,Trifolium badium,Trifolium badium,wcvp,1,Accepted,Schreb.,Trifolium badium,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Melampyrum pratense,Melampyrum pratense,Melampyrum pratense,wcvp,1,Accepted,L.,Melampyrum pratense,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aster alpinus,Aster alpinus,Aster alpinus,wcvp,1,Accepted,L.,Aster alpinus,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica persica,Veronica persica,Veronica persica,wcvp,1,Accepted,Poir.,Veronica persica,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chamorchis alpina,Chamorchis alpina,Chamorchis alpina,wcvp,1,Accepted,(L.) Rich.,Chamorchis alpina,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Crocus albiflorus,Crocus vernus,Crocus albiflorus,wcvp,1,Synonym,(L.) Hill,Crocus vernus,Iridaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Phyteuma hemisphaericum,Phyteuma hemisphaericum,Phyteuma hemisphaericum,wcvp,1,Accepted,L.,Phyteuma hemisphaericum,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arenaria serpyllifolia,Arenaria serpyllifolia,Arenaria serpyllifolia,wcvp,1,Accepted,L.,Arenaria serpyllifolia,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trollius europaeus,Trollius europaeus,Trollius europaeus,wcvp,1,Accepted,L.,Trollius europaeus,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Agoseris glauca,Agoseris glauca,Agoseris glauca,wcvp,1,Accepted,(Pursh) Raf.,Agoseris glauca,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Aquilegia caerulea,Aquilegia caerulea,Aquilegia caerulea,wfo,1,Accepted,E.James,Aquilegia caerulea,Ranunculaceae,1,,TRUE,fallback source wfo,2026-10-28,0.2.1,0.3.6
+Bromus carinatus,Bromus carinatus,Bromus carinatus,wcvp,1,Accepted,Hook. & Arn.,Bromus carinatus,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Castilleja sulphurea,Castilleja septentrionalis,Castilleja sulphurea,wcvp,1,Synonym,Lindl.,Castilleja septentrionalis,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Elymus bakeri,Elymus bakeri,Elymus bakeri,wcvp,1,Accepted,(E.E.Nelson) Á.Löve,Elymus bakeri,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Frasera speciosa,Frasera speciosa,Frasera speciosa,wcvp,1,Accepted,Douglas ex Griseb.,Frasera speciosa,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helianthella quinquenervis,Helianthella quinquenervis,Helianthella quinquenervis,wcvp,1,Accepted,(Hook.) A.Gray,Helianthella quinquenervis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hymenoxys hoopesii,Hymenoxys hoopesii,Hymenoxys hoopesii,wcvp,1,Accepted,(A.Gray) Bierner,Hymenoxys hoopesii,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ligusticum porteri,Ligusticum porteri,Ligusticum porteri,wcvp,1,Accepted,J.M.Coult. & Rose,Ligusticum porteri,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Poa reflexa,Poa reflexa,Poa reflexa,wcvp,1,Accepted,Vasey & Scribn.,Poa reflexa,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla pulcherrima,Potentilla pulcherrima,Potentilla pulcherrima,wcvp,1,Accepted,Lehm.,Potentilla pulcherrima,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Senecio crassulus,Senecio crassulus,Senecio crassulus,wcvp,1,Accepted,A.Gray,Senecio crassulus,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Fragaria virginiana,Fragaria virginiana,Fragaria virginiana,wcvp,1,Accepted,Mill.,Fragaria virginiana,Rosaceae,1,[Overall] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Heterotheca pumila,Heterotheca pumila,Heterotheca pumila,wcvp,1,Accepted,(Greene) Semple,Heterotheca pumila,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus inamoenus,Ranunculus inamoenus,Ranunculus inamoenus,wcvp,1,Accepted,Greene,Ranunculus inamoenus,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace septentrionalis,Androsace septentrionalis,Androsace septentrionalis,wcvp,1,Accepted,L.,Androsace septentrionalis,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Noccaea fendleri,Noccaea fendleri,Noccaea fendleri,wcvp,1,Accepted,(A.Gray) Holub,Noccaea fendleri,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Erigeron coulteri,Erigeron coulteri,Erigeron coulteri,wcvp,1,Accepted,Porter & J.M.Coult.,Erigeron coulteri,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium richardsonii,Geranium richardsonii,Geranium richardsonii,wcvp,1,Accepted,Fisch. & Trautv.,Geranium richardsonii,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola nuttallii,Viola nuttallii,Viola nuttallii,wcvp,1,Accepted,Pursh,Viola nuttallii,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Mertensia fusiformis,Mertensia brevistyla,Mertensia fusiformis,wcvp,1,Synonym,S.Watson,Mertensia brevistyla,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sedum integrifolium,Rhodiola integrifolia,Sedum integrifolium,wcvp,1,Synonym,Raf.,Rhodiola integrifolia,Crassulaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana parryi,Gentiana parryi,Gentiana parryi,wcvp,1,Accepted,Engelm.,Gentiana parryi,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Elymus repens,Elymus repens,Elymus repens,wcvp,1,Accepted,(L.) Gould,Elymus repens,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thalictrum fendleri,Thalictrum fendleri,Thalictrum fendleri,wcvp,1,Accepted,Engelm. ex A.Gray,Thalictrum fendleri,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Erigeron speciosus,Erigeron speciosus,Erigeron speciosus,wcvp,1,Accepted,(Lindl.) DC.,Erigeron speciosus,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Erythronium grandiflorum,Erythronium grandiflorum,Erythronium grandiflorum,wcvp,1,Accepted,Pursh,Erythronium grandiflorum,Liliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Heliomeris multiflora,Heliomeris multiflora,Heliomeris multiflora,wcvp,1,Accepted,Nutt.,Heliomeris multiflora,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Valeriana edulis,Valeriana edulis,Valeriana edulis,wcvp,1,Accepted,Nutt.,Valeriana edulis,Caprifoliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Atriplex argentea,Atriplex argentea,Atriplex argentea,wcvp,1,Accepted,Nutt.,Atriplex argentea,Amaranthaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Lathyrus lanszwertii,Lathyrus lanszwertii,Lathyrus lanszwertii,wcvp,1,Accepted,Kellogg,Lathyrus lanszwertii,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Poa pratensis,Poa pratensis,Poa pratensis,wcvp,1,Accepted,L.,Poa pratensis,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vicia americana,Vicia americana,Vicia americana,wcvp,1,Accepted,Muhl. ex Willd.,Vicia americana,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Agoseris aurantiaca,Agoseris aurantiaca,Agoseris aurantiaca,wcvp,1,Accepted,(Hook.) Greene,Agoseris aurantiaca,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Symphyotrichum ascendens,Symphyotrichum ascendens,Symphyotrichum ascendens,wcvp,1,Accepted,(Lindl.) G.L.Nesom,Symphyotrichum ascendens,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Melica spectabilis,Melica spectabilis,Melica spectabilis,wcvp,1,Accepted,Scribn.,Melica spectabilis,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Linum lewisii,Linum lewisii,Linum lewisii,wcvp,1,Accepted,Pursh,Linum lewisii,Linaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Erigeron elatior,Erigeron elatior,Erigeron elatior,wcvp,1,Accepted,Greene,Erigeron elatior,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Campanula rotundifolia,Campanula rotundifolia,Campanula rotundifolia,wcvp,1,Accepted,L.,Campanula rotundifolia,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stipa nelsonii,Eriocoma nelsonii,Stipa nelsonii,wcvp,1,Synonym,(Scribn.) Romasch.,Eriocoma nelsonii,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Tragopogon dubius,Tragopogon dubius,Tragopogon dubius,wcvp,1,Accepted,Scop.,Tragopogon dubius,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca thurberi,Festuca thurberi,Festuca thurberi,wcvp,1,Accepted,Vasey,Festuca thurberi,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Draba spectabilis,Draba spectabilis,Draba spectabilis,wcvp,1,Accepted,Greene,Draba spectabilis,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Artemisia tridentata,Artemisia tridentata,Artemisia tridentata,wcvp,1,Accepted,Nutt.,Artemisia tridentata,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hydrophyllum capitatum,Hydrophyllum capitatum,Hydrophyllum capitatum,wcvp,1,Accepted,Douglas ex Benth.,Hydrophyllum capitatum,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polygonum douglasii,Polygonum douglasii,Polygonum douglasii,wcvp,1,Accepted,Greene,Polygonum douglasii,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Boechera stricta,Boechera stricta,Boechera stricta,wfo,1,Accepted,(Graham) Al-Shehbaz,Boechera stricta,Brassicaceae,1,,TRUE,fallback source wfo,2026-10-28,0.2.1,0.3.6
+Collomia linearis,Collomia linearis,Collomia linearis,wcvp,1,Accepted,Nutt.,Collomia linearis,Polemoniaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Delphinium nuttallianum,Delphinium nuttallianum,Delphinium nuttallianum,wcvp,1,Accepted,Pritz. ex Walp.,Delphinium nuttallianum,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium coloradoense,Galium coloradoense,Galium coloradoense,wcvp,1,Accepted,W.Wight,Galium coloradoense,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium bifolium,Galium bifolium,Galium bifolium,wcvp,1,Accepted,S.Watson,Galium bifolium,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Claytonia lanceolata,Claytonia lanceolata,Claytonia lanceolata,wcvp,1,Accepted,Pursh,Claytonia lanceolata,Montiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Senecio integerrimus,Senecio integerrimus,Senecio integerrimus,wcvp,1,Accepted,Nutt.,Senecio integerrimus,Asteraceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Veratrum californicum,Veratrum californicum,Veratrum californicum,wcvp,1,Accepted,Durand,Veratrum californicum,Melanthiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lithophragma glabrum,Lithophragma glabrum,Lithophragma glabrum,wcvp,1,Accepted,Nutt.,Lithophragma glabrum,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aphyllon fasciculatum,Orobanche fasciculata,Aphyllon fasciculatum,wcvp,1,Synonym,Nutt.,Orobanche fasciculata,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Allium prattii,Allium prattii,Allium prattii,wcvp,1,Accepted,C.H.Wright,Allium prattii,Amaryllidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Clinopodium polycephalum,Clinopodium polycephalum,Clinopodium polycephalum,wcvp,1,Accepted,(Vaniot) C.Y.Wu & S.J.Hsuan,Clinopodium polycephalum,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Epilobium fangii,Epilobium fangii,Epilobium fangii,wcvp,1,Accepted,"C.J.Chen, Hoch & P.H.Raven",Epilobium fangii,Onagraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Fragaria orientalis,Fragaria orientalis,Fragaria orientalis,wcvp,1,Accepted,Losinsk.,Fragaria orientalis,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium pylzowianum,Geranium pylzowianum,Geranium pylzowianum,wcvp,1,Accepted,Maxim.,Geranium pylzowianum,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hedysarum algidum,Hedysarum algidum,Hedysarum algidum,wcvp,1,Accepted,L.Z.Shue ex P.C.Li,Hedysarum algidum,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hemiphragma heterophyllum,Hemiphragma heterophyllum,Hemiphragma heterophyllum,wcvp,1,Accepted,Wall.,Hemiphragma heterophyllum,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Juncus leucanthus,Juncus leucanthus,Juncus leucanthus,wcvp,1,Accepted,Royle ex D.Don,Juncus leucanthus,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Kobresia pygmaea,Carex parvula,Kobresia pygmaea,wcvp,1,Synonym,O.Yano,Carex parvula,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ligusticum scapiforme,Ligusticopsis scapiformis,Ligusticum scapiforme,wcvp,1,Synonym,(H.Wolff) Leute,Ligusticopsis scapiformis,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Maianthemum japonicum,Maianthemum japonicum,Maianthemum japonicum,wcvp,1,Accepted,(A.Gray) LaFrankie,Maianthemum japonicum,Asparagaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis sima,Pedicularis sima,Pedicularis sima,wcvp,1,Accepted,Maxim.,Pedicularis sima,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Persicaria vivipara,Bistorta vivipara,Persicaria vivipara,wcvp,1,Synonym,(L.) Delarbre,Bistorta vivipara,Polygonaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla leuconota,Argentina leuconota,Potentilla leuconota,wcvp,1,Synonym,(D.Don) Soják,Argentina leuconota,Rosaceae,2,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea globosa,Saussurea globosa,Saussurea globosa,wcvp,1,Accepted,F.H.Chen,Saussurea globosa,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica szechuanica,Veronica szechuanica,Veronica szechuanica,wcvp,1,Accepted,Batalin,Veronica szechuanica,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola biflora var. rockiana,Viola biflora var. rockiana,Viola biflora var. rockiana,wcvp,1,Accepted,(W.Becker) Y.S.Chen,Viola biflora,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polygonum cyanandrum,Koenigia cyanandra,Polygonum cyanandrum,wcvp,1,Synonym,(Diels) Měsíček & Soják,Koenigia cyanandra,Polygonaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polygonum macrophyllum,Bistorta macrophylla,Polygonum macrophyllum,wcvp,1,Synonym,(D.Don) Soják,Bistorta macrophylla,Polygonaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus brotherusii var. tanguticus,Ranunculus brotherusii var. tanguticus,Ranunculus brotherusii var. tanguticus,wcvp,1,Accepted,(Maxim.) Tamura,Ranunculus brotherusii,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Agrostis nervosa,Agrostis nervosa,Agrostis nervosa,wcvp,1,Accepted,Nees ex Trin.,Agrostis nervosa,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galearis spathulata,Galearis spathulata,Galearis spathulata,wcvp,1,Accepted,(Lindl.) P.F.Hunt,Galearis spathulata,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Soroseris hookeriana,Soroseris hookeriana,Soroseris hookeriana,wcvp,1,Accepted,Stebbins,Soroseris hookeriana,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Swertia macrosperma,Swertia macrosperma,Swertia macrosperma,wcvp,1,Accepted,(C.B.Clarke) C.B.Clarke,Swertia macrosperma,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola szetschwanensis,Viola szetschwanensis,Viola szetschwanensis,wcvp,1,Accepted,W.Becker & H.Boissieu,Viola szetschwanensis,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla stenophylla,Argentina stenophylla,Potentilla stenophylla,wcvp,1,Synonym,(Franch.) Soják,Argentina stenophylla,Rosaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cerastium szechuense,Cerastium szechuense,Cerastium szechuense,wcvp,1,Accepted,F.N.Williams,Cerastium szechuense,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana crassuloides,Gentiana crassuloides,Gentiana crassuloides,wcvp,1,Accepted,Bureau & Franch.,Gentiana crassuloides,Gentianaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Ligularia pleurocaulis,Ligularia pleurocaulis,Ligularia pleurocaulis,wcvp,1,Accepted,Hand.-Mazz.,Ligularia pleurocaulis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis mussotii var. lophocentra,Pedicularis mussotii var. lophocentra,Pedicularis mussotii var. lophocentra,wcvp,1,Accepted,(Hand.-Mazz.) H.L.Li,Pedicularis mussotii,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rhodiola yunnanensis,Rhodiola yunnanensis,Rhodiola yunnanensis,wcvp,1,Accepted,(Franch.) S.H.Fu,Rhodiola yunnanensis,Crassulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace minor,Androsace minor,Androsace minor,wcvp,1,Accepted,(Hand.-Mazz.) C.M.Hu & Y.C.Yang,Androsace minor,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Berberis jamesiana,Berberis jamesiana,Berberis jamesiana,wcvp,1,Accepted,Forrest & W.W.Sm.,Berberis jamesiana,Berberidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Caltha palustris,Caltha palustris,Caltha palustris,wcvp,1,Accepted,L.,Caltha palustris,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis yunnanensis,Oxytropis yunnanensis,Oxytropis yunnanensis,wcvp,1,Accepted,Franch.,Oxytropis yunnanensis,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Fargesia spathacea,Fargesia spathacea,Fargesia spathacea,wcvp,1,Accepted,Franch.,Fargesia spathacea,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aletris pauciflora,Aletris pauciflora,Aletris pauciflora,wcvp,1,Accepted,(Klotzsch) Hand.-Mazz.,Aletris pauciflora,Nartheciaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cyananthus incanus,Cyananthus incanus,Cyananthus incanus,wcvp,1,Accepted,Hook.f. & Thomson,Cyananthus incanus,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Kobresia cercostachys,Carex cercostachys,Kobresia cercostachys,wcvp,1,Synonym,Franch.,Carex cercostachys,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pyrethrum tatsienense,Tanacetum tatsienense,Pyrethrum tatsienense,wcvp,1,Synonym,(Bureau & Franch.) K.Bremer & Humphries,Tanacetum tatsienense,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea ceterach,Saussurea ceterach,Saussurea ceterach,wcvp,1,Accepted,Hand.-Mazz.,Saussurea ceterach,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea graminea,Saussurea graminea,Saussurea graminea,wcvp,1,Accepted,Dunn,Saussurea graminea,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anemone demissa,Anemonastrum demissum,Anemone demissa,wcvp,1,Synonym,(Hook.f. & Thomson) Holub,Anemonastrum demissum,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sibbaldia pentaphylla,Potentilla clandestina,Sibbaldia pentaphylla,wcvp,1,Synonym,Soják,Potentilla clandestina,Rosaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aster asteroides,Aster asteroides,Aster asteroides,wcvp,1,Accepted,(DC.) Kuntze,Aster asteroides,Asteraceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Rheum pumilum,Rheum pumilum,Rheum pumilum,wcvp,1,Accepted,Maxim.,Rheum pumilum,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Salix brachista,Salix lindleyana,Salix brachista,wcvp,1,Synonym,Wall. ex Andersson,Salix lindleyana,Salicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Plantago asiatica,Plantago asiatica,Plantago asiatica,wcvp,1,Accepted,L.,Plantago asiatica,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis rhynchodonta,Pedicularis rhynchodonta,Pedicularis rhynchodonta,wcvp,1,Accepted,Bureau & Franch.,Pedicularis rhynchodonta,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rhododendron websterianum,Rhododendron websterianum,Rhododendron websterianum,wcvp,1,Accepted,Rehder & E.H.Wilson,Rhododendron websterianum,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anaphalis flavescens,Anaphalis flavescens,Anaphalis flavescens,wcvp,1,Accepted,Hand.-Mazz.,Anaphalis flavescens,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chamaesium viridiflorum,Chamaesium viridiflorum,Chamaesium viridiflorum,wcvp,1,Accepted,(Franch.) H.Wolff ex R.H.Shan,Chamaesium viridiflorum,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Codonopsis foetens,Codonopsis foetens,Codonopsis foetens,wcvp,1,Accepted,Hook.f. & Thomson,Codonopsis foetens,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea pachyneura,Saussurea pachyneura,Saussurea pachyneura,wcvp,1,Accepted,Franch.,Saussurea pachyneura,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Juncus prismatocarpus,Juncus prismatocarpus,Juncus prismatocarpus,wcvp,1,Accepted,R.Br.,Juncus prismatocarpus,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sagina japonica,Sagina japonica,Sagina japonica,wcvp,1,Accepted,(Sw.) Ohwi,Sagina japonica,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geum aleppicum,Geum aleppicum,Geum aleppicum,wcvp,1,Accepted,Jacq.,Geum aleppicum,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium nepalense,Geranium nepalense,Geranium nepalense,wcvp,1,Accepted,Sweet,Geranium nepalense,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rumex nepalensis,Rumex nepalensis,Rumex nepalensis,wcvp,1,Accepted,Spreng.,Rumex nepalensis,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hypericum wightianum,Hypericum wightianum,Hypericum wightianum,wcvp,1,Accepted,Wall. ex Wight & Arn.,Hypericum wightianum,Hypericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Juncus allioides,Juncus allioides,Juncus allioides,wcvp,1,Accepted,Franch.,Juncus allioides,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carpesium humile,Carpesium humile,Carpesium humile,wcvp,1,Accepted,C.Winkl.,Carpesium humile,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Juncus himalensis,Juncus himalensis,Juncus himalensis,wcvp,1,Accepted,Klotzsch,Juncus himalensis,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis davidii,Pedicularis davidii,Pedicularis davidii,wcvp,1,Accepted,Franch.,Pedicularis davidii,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polygonum runcinatum,Persicaria runcinata,Polygonum runcinatum,wcvp,1,Synonym,(Buch.-Ham. ex D.Don) H.Gross,Persicaria runcinata,Polygonaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Artemisia flaccida,Artemisia fulgens var. fulgens,Artemisia flaccida,wcvp,1,Synonym,,Artemisia fulgens,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Halenia corniculata,Halenia corniculata,Halenia corniculata,wcvp,1,Accepted,(L.) Cornaz,Halenia corniculata,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anaphalis aureopunctata,Anaphalis aureopunctata,Anaphalis aureopunctata,wcvp,1,Accepted,Lingelsh. & Borza,Anaphalis aureopunctata,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arisaema parvum,Arisaema parvum,Arisaema parvum,wcvp,1,Accepted,N.E.Br. ex Hemsl.,Arisaema parvum,Araceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Malaxis monophyllos,Malaxis monophyllos,Malaxis monophyllos,wcvp,1,Accepted,(L.) Sw.,Malaxis monophyllos,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stellaria uliginosa,Stellaria alsine subsp. alsine,Stellaria uliginosa,wcvp,1,Synonym,,Stellaria alsine,Caryophyllaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Youngia racemifera,Youngia racemifera,Youngia racemifera,wcvp,1,Accepted,(Hook.f.) Babc. & Stebbins,Youngia racemifera,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Microula sikkimensis,Microula sikkimensis,Microula sikkimensis,wcvp,1,Accepted,(C.B.Clarke) Hemsl.,Microula sikkimensis,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Notholirion bulbuliferum,Notholirion bulbuliferum,Notholirion bulbuliferum,wcvp,1,Accepted,(Lingelsh.) Stearn,Notholirion bulbuliferum,Liliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Parasenecio latipes,Parasenecio latipes,Parasenecio latipes,wcvp,1,Accepted,(Franch.) Y.L.Chen,Parasenecio latipes,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polygonatum cirrhifolium,Polygonatum cirrhifolium,Polygonatum cirrhifolium,wcvp,1,Accepted,(Wall.) Royle,Polygonatum cirrhifolium,Asparagaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Juncus setchuensis,Juncus setchuensis,Juncus setchuensis,wcvp,1,Accepted,Buchenau,Juncus setchuensis,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Prunella hispida,Prunella vulgaris subsp. hispida,Prunella hispida,wcvp,1,Synonym,(Benth.) Hultén,Prunella vulgaris,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rhodiola fastigiata,Rhodiola fastigiata,Rhodiola fastigiata,wcvp,1,Accepted,(Hook.f. & Thomson) S.H.Fu,Rhodiola fastigiata,Crassulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla fruticosa,Dasiphora fruticosa,Potentilla fruticosa,wcvp,1,Synonym,(L.) Rydb.,Dasiphora fruticosa,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Primula serratifolia,Primula auricula,Primula serratifolia,wcvp,1,Synonym,L.,Primula auricula,Primulaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Athyrium subtriangulare,Athyrium spinulosum,Athyrium subtriangulare,wcvp,1,Synonym,(Maxim.) Milde,Athyrium spinulosum,Aspleniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sedum triactina,Sedum triactina,Sedum triactina,wcvp,1,Accepted,A.Berger,Sedum triactina,Crassulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Morina nepalensis,Morina nepalensis,Morina nepalensis,wcvp,1,Accepted,D.Don,Morina nepalensis,Caprifoliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Allium sikkimense,Allium sikkimense,Allium sikkimense,wcvp,1,Accepted,Baker,Allium sikkimense,Amaryllidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea stella,Saussurea stella,Saussurea stella,wcvp,1,Accepted,Maxim.,Saussurea stella,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Primula deflexa,Primula deflexa,Primula deflexa,wcvp,1,Accepted,Duthie,Primula deflexa,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lomatogonium macranthum,Lomatogonium macranthum,Lomatogonium macranthum,wcvp,1,Accepted,(Diels & Gilg) Fernald,Lomatogonium macranthum,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana trichotoma,Gentiana trichotoma,Gentiana trichotoma,wcvp,1,Accepted,Kusn.,Gentiana trichotoma,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Myriactis nepalensis,Myriactis nepalensis,Myriactis nepalensis,wcvp,1,Accepted,Less.,Myriactis nepalensis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thalictrum javanicum,Thalictrum javanicum,Thalictrum javanicum,wcvp,1,Accepted,Blume,Thalictrum javanicum,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anemone rivularis,Eriocapitella rivularis,Anemone rivularis,wcvp,1,Synonym,(Buch.-Ham. ex DC.) Christenh. & Byng,Eriocapitella rivularis,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex nubigena,Carex nubigena,Carex nubigena,wcvp,1,Accepted,D.Don,Carex nubigena,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Maianthemum henryi,Maianthemum henryi,Maianthemum henryi,wcvp,1,Accepted,(Baker) LaFrankie,Maianthemum henryi,Asparagaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace chamaejasme,Androsace chamaejasme,Androsace chamaejasme,wcvp,1,Accepted,Wulfen,Androsace chamaejasme,Primulaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia salisburgensis,Euphrasia salisburgensis,Euphrasia salisburgensis,wcvp,1,Accepted,Funck ex Hoppe,Euphrasia salisburgensis,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Phyteuma orbiculare,Phyteuma orbiculare,Phyteuma orbiculare,wcvp,1,Accepted,L.,Phyteuma orbiculare,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Primula farinosa,Primula farinosa,Primula farinosa,wcvp,1,Accepted,L.,Primula farinosa,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia hirtella,Euphrasia hirtella,Euphrasia hirtella,wcvp,1,Accepted,Jord. ex Reut.,Euphrasia hirtella,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus acris,Ranunculus acris,Ranunculus acris,wcvp,1,Accepted,L.,Ranunculus acris,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leucanthemum adustum,Leucanthemum adustum,Leucanthemum adustum,wcvp,1,Accepted,(W.D.J.Koch) Gremli,Leucanthemum adustum,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Primula integrifolia,Primula integrifolia,Primula integrifolia,wcvp,1,Accepted,L.,Primula integrifolia,Primulaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Cerastium fontanum,Cerastium fontanum,Cerastium fontanum,wcvp,1,Accepted,Baumg.,Cerastium fontanum,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium hoppeanum,Pilosella hoppeana,Hieracium hoppeanum,wcvp,1,Synonym,(Schult.) F.W.Schultz & Sch.Bip.,Pilosella hoppeana,Asteraceae,3,,FALSE,,2026-10-28,0.2.1,0.3.6
+Botrychium lunaria,Botrychium lunaria,Botrychium lunaria,wcvp,1,Accepted,(L.) Sw.,Botrychium lunaria,Ophioglossaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Allium carinatum,Allium carinatum,Allium carinatum,wcvp,1,Accepted,L.,Allium carinatum,Amaryllidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Colchicum autumnale,Colchicum autumnale,Colchicum autumnale,wcvp,1,Accepted,L.,Colchicum autumnale,Colchicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia rostkoviana subsp. montana,Euphrasia officinalis subsp. monticola,Euphrasia rostkoviana subsp. montana,wcvp,1,Synonym,Silverside,Euphrasia officinalis,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Primula veris,Primula veris,Primula veris,wcvp,1,Accepted,L.,Primula veris,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Salvia pratensis,Salvia pratensis,Salvia pratensis,wcvp,1,Accepted,L.,Salvia pratensis,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Silene vulgaris,Silene vulgaris,Silene vulgaris,wcvp,1,Accepted,(Moench) Garcke,Silene vulgaris,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica teucrium,Veronica teucrium,Veronica teucrium,wcvp,1,Accepted,L.,Veronica teucrium,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola collina,Viola collina,Viola collina,wcvp,1,Accepted,Besser,Viola collina,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola hirta,Viola hirta,Viola hirta,wcvp,1,Accepted,L.,Viola hirta,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Medicago lupulina,Medicago lupulina,Medicago lupulina,wcvp,1,Accepted,L.,Medicago lupulina,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica collina,Veronica triphyllos,Veronica collina,wcvp,1,Synonym,L.,Veronica triphyllos,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Centaurea jacea,Centaurea jacea,Centaurea jacea,wcvp,1,Accepted,L.,Centaurea jacea,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Echium vulgare,Echium vulgare,Echium vulgare,wcvp,1,Accepted,L.,Echium vulgare,Boraginaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Tragopogon pratensis,Tragopogon pratensis,Tragopogon pratensis,wcvp,1,Accepted,L.,Tragopogon pratensis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus bulbosus,Ranunculus bulbosus,Ranunculus bulbosus,wcvp,1,Accepted,L.,Ranunculus bulbosus,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Picea abies,Picea abies,Picea abies,wcvp,1,Accepted,(L.) H.Karst.,Picea abies,Pinaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Medicago falcata,Medicago falcata,Medicago falcata,wcvp,1,Accepted,L.,Medicago falcata,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carduus defloratus,Carduus defloratus,Carduus defloratus,wcvp,1,Accepted,L.,Carduus defloratus,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Campanula rapunculoides,Campanula rapunculoides,Campanula rapunculoides,wcvp,1,Accepted,L.,Campanula rapunculoides,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hypericum perforatum,Hypericum perforatum,Hypericum perforatum,wcvp,1,Accepted,L.,Hypericum perforatum,Hypericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Acinos alpinus,Clinopodium alpinum,Acinos alpinus,wcvp,1,Synonym,(L.) Kuntze,Clinopodium alpinum,Lamiaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Calamagrostis rubescens,Calamagrostis rubescens,Calamagrostis rubescens,wcvp,1,Accepted,Buckley,Calamagrostis rubescens,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Elymus glaucus,Elymus glaucus,Elymus glaucus,wcvp,1,Accepted,Buckley,Elymus glaucus,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Eurybia conspicua,Eurybia conspicua,Eurybia conspicua,wcvp,1,Accepted,(Lindl.) G.L.Nesom,Eurybia conspicua,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Symphoricarpos albus,Symphoricarpos albus,Symphoricarpos albus,wcvp,1,Accepted,(L.) S.F.Blake,Symphoricarpos albus,Caprifoliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Goodyera oblongifolia,Goodyera oblongifolia,Goodyera oblongifolia,wcvp,1,Accepted,Raf.,Goodyera oblongifolia,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Mahonia repens,Berberis repens,Mahonia repens,wcvp,1,Synonym,Lindl.,Berberis repens,Berberidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium boreale,Galium boreale,Galium boreale,wcvp,1,Accepted,L.,Galium boreale,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vaccinium membranaceum,Vaccinium membranaceum,Vaccinium membranaceum,wcvp,1,Accepted,Douglas ex Torr.,Vaccinium membranaceum,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cirsium arvense,Cirsium arvense,Cirsium arvense,wcvp,1,Accepted,(L.) Scop.,Cirsium arvense,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium hybridum,Trifolium hybridum,Trifolium hybridum,wcvp,1,Accepted,L.,Trifolium hybridum,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Antennaria microphylla,Antennaria microphylla,Antennaria microphylla,wcvp,1,Accepted,Rydb.,Antennaria microphylla,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bromus inermis,Bromus inermis,Bromus inermis,wcvp,1,Accepted,Leyss.,Bromus inermis,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Cynoglossum officinale,Cynoglossum officinale,Cynoglossum officinale,wcvp,1,Accepted,L.,Cynoglossum officinale,Boraginaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla glandulosa,Drymocallis glandulosa,Potentilla glandulosa,wcvp,1,Synonym,(Lindl.) Rydb.,Drymocallis glandulosa,Rosaceae,2,[Overall] [Ambiguous] [HigherTaxa] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Rosa woodsii,Rosa woodsii,Rosa woodsii,wcvp,1,Accepted,Lindl.,Rosa woodsii,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium viscosissimum,Geranium viscosissimum,Geranium viscosissimum,wcvp,1,Accepted,Fisch. & C.A.Mey.,Geranium viscosissimum,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex geyeri,Carex geyeri,Carex geyeri,wcvp,1,Accepted,Boott,Carex geyeri,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Elymus trachycaulus,Elymus violaceus,Elymus trachycaulus,wcvp,1,Synonym,(Hornem.) J.Feilberg,Elymus violaceus,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Osmorhiza berteroi,Osmorhiza berteroi,Osmorhiza berteroi,wcvp,1,Accepted,DC.,Osmorhiza berteroi,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vaccinium globulare,Vaccinium membranaceum,Vaccinium globulare,wcvp,1,Synonym,Douglas ex Torr.,Vaccinium membranaceum,Ericaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arnica angustifolia,Arnica angustifolia,Arnica angustifolia,wcvp,1,Accepted,Vahl,Arnica angustifolia,Asteraceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Solidago multiradiata,Solidago multiradiata,Solidago multiradiata,wcvp,1,Accepted,Aiton,Solidago multiradiata,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium triflorum,Galium triflorum,Galium triflorum,wcvp,1,Accepted,Michx.,Galium triflorum,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Epilobium angustifolium,Epilobium angustifolium,Epilobium angustifolium,wcvp,1,Accepted,L.,Epilobium angustifolium,Onagraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium gracile,Hieracium triste,Hieracium gracile,wcvp,1,Synonym,Willd. ex Spreng.,Hieracium triste,Asteraceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Spiraea betulifolia,Spiraea betulifolia,Spiraea betulifolia,wcvp,1,Accepted,Pall.,Spiraea betulifolia,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Trisetum spicatum,Koeleria spicata,Trisetum spicatum,wcvp,1,Synonym,"(L.) Barberá, Quintanar, Soreng & P.M.Peterson",Koeleria spicata,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arnica latifolia,Arnica latifolia,Arnica latifolia,wcvp,1,Accepted,Bong.,Arnica latifolia,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Epilobium ciliatum,Epilobium ciliatum,Epilobium ciliatum,wcvp,1,Accepted,Raf.,Epilobium ciliatum,Onagraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Antennaria racemosa,Antennaria racemosa,Antennaria racemosa,wcvp,1,Accepted,Hook.,Antennaria racemosa,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Senecio cymbalaria,Packera cymbalaria,Senecio cymbalaria,wcvp,1,Synonym,(Pursh) W.A.Weber & Á.Löve,Packera cymbalaria,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Symphyotrichum campestre,Symphyotrichum campestre,Symphyotrichum campestre,wcvp,1,Accepted,(Nutt.) G.L.Nesom,Symphyotrichum campestre,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vaccinium scoparium,Vaccinium scoparium,Vaccinium scoparium,wcvp,1,Accepted,Leiberg ex Coville,Vaccinium scoparium,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Agastache urticifolia,Agastache urticifolia,Agastache urticifolia,wcvp,1,Accepted,(Benth.) Kuntze,Agastache urticifolia,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bromus tectorum,Bromus tectorum,Bromus tectorum,wcvp,1,Accepted,L.,Bromus tectorum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Delphinium occidentale,Delphinium occidentale,Delphinium occidentale,wcvp,1,Accepted,(S.Watson) S.Watson ex Coult.,Delphinium occidentale,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lupinus argenteus,Lupinus argenteus,Lupinus argenteus,wcvp,1,Accepted,Pursh,Lupinus argenteus,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Nemophila breviflora,Nemophila breviflora,Nemophila breviflora,wcvp,1,Accepted,A.Gray,Nemophila breviflora,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla gracilis,Potentilla gracilis,Potentilla gracilis,wcvp,1,Accepted,Douglas ex Hook.,Potentilla gracilis,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Thlaspi arvense,Thlaspi arvense,Thlaspi arvense,wcvp,1,Accepted,L.,Thlaspi arvense,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Iliamna rivularis,Iliamna rivularis,Iliamna rivularis,wcvp,1,Accepted,(Douglas) Greene,Iliamna rivularis,Malvaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex phaeocephala,Carex phaeocephala,Carex phaeocephala,wcvp,1,Accepted,Piper,Carex phaeocephala,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Perideridia montana,Perideridia gairdneri subsp. borealis,Perideridia montana,wcvp,1,Synonym,T.I.Chuang & Constance,Perideridia gairdneri,Apiaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rubus parviflorus,Rubus parviflorus,Rubus parviflorus,wcvp,1,Accepted,Nutt.,Rubus parviflorus,Rosaceae,2,[Overall] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Antennaria rosea,Antennaria rosea,Antennaria rosea,wcvp,1,Accepted,Greene,Antennaria rosea,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Microsteris gracilis,Microsteris gracilis,Microsteris gracilis,wcvp,1,Accepted,(Hook.) Greene,Microsteris gracilis,Polemoniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus acriformis,Ranunculus acriformis,Ranunculus acriformis,wcvp,1,Accepted,A.Gray,Ranunculus acriformis,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola adunca,Viola adunca,Viola adunca,wcvp,1,Accepted,Sm.,Viola adunca,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Draba nemorosa,Draba nemorosa,Draba nemorosa,wcvp,1,Accepted,L.,Draba nemorosa,Brassicaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Hackelia micrantha,Hackelia micrantha,Hackelia micrantha,wcvp,1,Accepted,(Eastw.) J.L.Gentry,Hackelia micrantha,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aster adscendens,Noticastrum adscendens,Aster adscendens,wcvp,1,Synonym,DC.,Noticastrum adscendens,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stellaria umbellata,Stellaria irrigua,Stellaria umbellata,wcvp,1,Synonym,Bunge,Stellaria irrigua,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polygonum aviculare,Polygonum aviculare,Polygonum aviculare,wcvp,1,Accepted,L.,Polygonum aviculare,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Solidago missouriensis,Solidago missouriensis,Solidago missouriensis,wcvp,1,Accepted,Nutt.,Solidago missouriensis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thlaspi montanum,Noccaea montana,Thlaspi montanum,wcvp,1,Synonym,(L.) F.K.Mey.,Noccaea montana,Brassicaceae,1,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Arnica cordifolia,Arnica cordifolia,Arnica cordifolia,wcvp,1,Accepted,Hook.,Arnica cordifolia,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola orbiculata,Viola orbiculata,Viola orbiculata,wcvp,1,Accepted,(A.Gray) Geyer ex B.D.Jacks.,Viola orbiculata,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Allium brevistylum,Allium brevistylum,Allium brevistylum,wcvp,1,Accepted,S.Watson,Allium brevistylum,Amaryllidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helianthella uniflora,Helianthella uniflora,Helianthella uniflora,wcvp,1,Accepted,Torr. & A.Gray,Helianthella uniflora,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geum triflorum,Geum triflorum,Geum triflorum,wcvp,1,Accepted,Pursh,Geum triflorum,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace occidentalis,Androsace occidentalis,Androsace occidentalis,wcvp,1,Accepted,Pursh,Androsace occidentalis,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Osmorhiza chilensis,Osmorhiza berteroi,Osmorhiza chilensis,wcvp,1,Synonym,DC.,Osmorhiza berteroi,Apiaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thalictrum occidentale,Thalictrum occidentale,Thalictrum occidentale,wcvp,1,Accepted,A.Gray,Thalictrum occidentale,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bromus porteri,Bromus porteri,Bromus porteri,wcvp,1,Accepted,(Coult.) Nash,Bromus porteri,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Actaea rubra,Actaea rubra,Actaea rubra,wcvp,1,Accepted,(Aiton) Willd.,Actaea rubra,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Senecio corymbosus,Cissampelopsis corymbosa,Senecio corymbosus,wcvp,1,Synonym,(Wall. ex DC.) C.Jeffrey & Y.L.Chen,Cissampelopsis corymbosa,Asteraceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Eurybia integrifolia,Eurybia integrifolia,Eurybia integrifolia,wcvp,1,Accepted,(Nutt.) G.L.Nesom,Eurybia integrifolia,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ellisia nyctelea,Ellisia nyctelea,Ellisia nyctelea,wcvp,1,Accepted,(L.) L.,Ellisia nyctelea,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lithophragma parviflorum,Lithophragma parviflorum,Lithophragma parviflorum,wcvp,1,Accepted,(Hook.) Nutt.,Lithophragma parviflorum,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Micranthes occidentalis,Micranthes occidentalis,Micranthes occidentalis,wcvp,1,Accepted,(S.Watson) Small,Micranthes occidentalis,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rudbeckia occidentalis,Rudbeckia occidentalis,Rudbeckia occidentalis,wcvp,1,Accepted,Nutt.,Rudbeckia occidentalis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Noccaea montana,Noccaea montana,Noccaea montana,wcvp,1,Accepted,(L.) F.K.Mey.,Noccaea montana,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bistorta vivipara,Bistorta vivipara,Bistorta vivipara,wcvp,1,Accepted,(L.) Delarbre,Bistorta vivipara,Polygonaceae,2,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Carex bigelowii,Carex bigelowii,Carex bigelowii,wcvp,1,Accepted,Torr. ex Schwein.,Carex bigelowii,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula spicata,Luzula spicata,Luzula spicata,wcvp,1,Accepted,(L.) DC.,Luzula spicata,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus nivalis,Ranunculus nivalis,Ranunculus nivalis,wcvp,1,Accepted,L.,Ranunculus nivalis,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Salix polaris,Salix polaris,Salix polaris,wcvp,1,Accepted,Wahlenb.,Salix polaris,Salicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola biflora,Viola biflora,Viola biflora,wcvp,1,Accepted,L.,Viola biflora,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Betula nana,Betula nana,Betula nana,wcvp,1,Accepted,L.,Betula nana,Betulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rhodiola rosea,Rhodiola rosea,Rhodiola rosea,wcvp,1,Accepted,L.,Rhodiola rosea,Crassulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea alpina,Saussurea alpina,Saussurea alpina,wcvp,1,Accepted,(L.) DC.,Saussurea alpina,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Calamagrostis lapponica,Calamagrostis lapponica,Calamagrostis lapponica,wcvp,1,Accepted,(Wahlenb.) Hartm.,Calamagrostis lapponica,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thalictrum alpinum,Thalictrum alpinum,Thalictrum alpinum,wcvp,1,Accepted,L.,Thalictrum alpinum,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Petasites frigidus,Petasites frigidus,Petasites frigidus,wcvp,1,Accepted,(L.) Fr.,Petasites frigidus,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sibbaldia procumbens,Sibbaldia procumbens,Sibbaldia procumbens,wcvp,1,Accepted,L.,Sibbaldia procumbens,Rosaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica alpina,Veronica alpina,Veronica alpina,wcvp,1,Accepted,L.,Veronica alpina,Plantaginaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Oxyria digyna,Oxyria digyna,Oxyria digyna,wcvp,1,Accepted,(L.) Hill,Oxyria digyna,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca vivipara,Festuca vivipara,Festuca vivipara,wcvp,1,Accepted,(L.) Sm.,Festuca vivipara,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Huperzia selago,Huperzia selago,Huperzia selago,wcvp,1,Accepted,(L.) Bernh. ex Schrank & Mart.,Huperzia selago,Lycopodiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gymnocarpium dryopteris,Gymnocarpium dryopteris,Gymnocarpium dryopteris,wcvp,1,Accepted,(L.) Newman,Gymnocarpium dryopteris,Cystopteridaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Milium effusum,Milium effusum,Milium effusum,wcvp,1,Accepted,L.,Milium effusum,Poaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Orthilia secunda,Orthilia secunda,Orthilia secunda,wcvp,1,Accepted,(L.) House,Orthilia secunda,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Deschampsia flexuosa,Avenella flexuosa,Deschampsia flexuosa,wcvp,1,Synonym,(L.) Drejer,Avenella flexuosa,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca ovina,Festuca ovina,Festuca ovina,wcvp,1,Accepted,L.,Festuca ovina,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia frigida,Euphrasia frigida,Euphrasia frigida,wcvp,1,Accepted,Pugsley,Euphrasia frigida,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trientalis europaea,Lysimachia europaea,Trientalis europaea,wcvp,1,Synonym,(L.) U.Manns & Anderb.,Lysimachia europaea,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gnaphalium norvegicum,Omalotheca norvegica,Gnaphalium norvegicum,wcvp,1,Synonym,(Gunnerus) F.W.Schultz & Sch.Bip.,Omalotheca norvegica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica fruticans,Veronica fruticans,Veronica fruticans,wcvp,1,Accepted,Jacq.,Veronica fruticans,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium alpinum,Hieracium alpinum,Hieracium alpinum,wcvp,1,Accepted,L.,Hieracium alpinum,Asteraceae,2,[Overall] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Myosotis decumbens,Myosotis decumbens,Myosotis decumbens,wcvp,1,Accepted,Host,Myosotis decumbens,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Epilobium lactiflorum,Epilobium lactiflorum,Epilobium lactiflorum,wcvp,1,Accepted,Hausskn.,Epilobium lactiflorum,Onagraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rubus chamaemorus,Rubus chamaemorus,Rubus chamaemorus,wcvp,1,Accepted,L.,Rubus chamaemorus,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cystopteris fragilis,Cystopteris fragilis,Cystopteris fragilis,wcvp,1,Accepted,(L.) Bernh.,Cystopteris fragilis,Cystopteridaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stellaria nemorum,Stellaria nemorum,Stellaria nemorum,wcvp,1,Accepted,L.,Stellaria nemorum,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cicerbita alpina,Cicerbita alpina,Cicerbita alpina,wcvp,1,Accepted,(L.) Wallr.,Cicerbita alpina,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rubus saxatilis,Rubus saxatilis,Rubus saxatilis,wcvp,1,Accepted,L.,Rubus saxatilis,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana nivalis,Gentiana nivalis,Gentiana nivalis,wcvp,1,Accepted,L.,Gentiana nivalis,Gentianaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Phleum alpinum,Phleum alpinum,Phleum alpinum,wcvp,1,Accepted,L.,Phleum alpinum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula wahlenbergii,Luzula wahlenbergii,Luzula wahlenbergii,wcvp,1,Accepted,Rupr.,Luzula wahlenbergii,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cryptogramma crispa,Cryptogramma crispa,Cryptogramma crispa,wcvp,1,Accepted,(L.) R.Br.,Cryptogramma crispa,Pteridaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Angelica archangelica,Angelica archangelica,Angelica archangelica,wcvp,1,Accepted,L.,Angelica archangelica,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla crinita,Alchemilla crinita,Alchemilla crinita,wcvp,1,Accepted,Buser,Alchemilla crinita,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex ferruginea,Carex ferruginea,Carex ferruginea,wcvp,1,Accepted,Scop.,Carex ferruginea,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Carex pallescens,Carex pallescens,Carex pallescens,wcvp,1,Accepted,L.,Carex pallescens,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex sylvatica,Carex sylvatica,Carex sylvatica,wcvp,1,Accepted,Huds.,Carex sylvatica,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Cerastium holosteoides,Cerastium holosteoides,Cerastium holosteoides,wcvp,1,Accepted,Fr.,Cerastium holosteoides,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helictotrichon parlatorei,Helictotrichon parlatorei,Helictotrichon parlatorei,wcvp,1,Accepted,(J.Woods) Pilg.,Helictotrichon parlatorei,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Poa supina,Poa supina,Poa supina,wcvp,1,Accepted,Schrad.,Poa supina,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus repens,Ranunculus repens,Ranunculus repens,wcvp,1,Accepted,L.,Ranunculus repens,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rumex arifolius,Rumex arifolius,Rumex arifolius,wcvp,1,Accepted,All.,Rumex arifolius,Polygonaceae,2,[Ambiguous] [Overall] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica serpyllifolia,Veronica serpyllifolia,Veronica serpyllifolia,wcvp,1,Accepted,L.,Veronica serpyllifolia,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cardamine pratensis,Cardamine pratensis,Cardamine pratensis,wcvp,1,Accepted,L.,Cardamine pratensis,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Primula elatior,Primula elatior,Primula elatior,wcvp,1,Accepted,(L.) Hill,Primula elatior,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Senecio alpinus,,Senecio alpinus,,,,,,,3,[Ambiguous],TRUE,tie: Jacobaea alpina | Senecio albopurpureus,2026-10-28,0.2.1,0.3.6
+Plantago major,Plantago major,Plantago major,wcvp,1,Accepted,L.,Plantago major,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus polyanthemos,Ranunculus polyanthemos,Ranunculus polyanthemos,wcvp,1,Accepted,L.,Ranunculus polyanthemos,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geum rivale,Geum rivale,Geum rivale,wcvp,1,Accepted,L.,Geum rivale,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Tragopogon orientalis,Tragopogon orientalis,Tragopogon orientalis,wcvp,1,Accepted,L.,Tragopogon orientalis,Asteraceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Myosotis scorpioides,Myosotis scorpioides,Myosotis scorpioides,wcvp,1,Accepted,L.,Myosotis scorpioides,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia officinalis,Euphrasia officinalis,Euphrasia officinalis,wcvp,1,Accepted,L.,Euphrasia officinalis,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alopecurus pratensis,Alopecurus pratensis,Alopecurus pratensis,wcvp,1,Accepted,L.,Alopecurus pratensis,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Heracleum sphondylium,Heracleum sphondylium,Heracleum sphondylium,wcvp,1,Accepted,L.,Heracleum sphondylium,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leucanthemum ircutianum,Leucanthemum ircutianum,Leucanthemum ircutianum,wcvp,1,Accepted,DC.,Leucanthemum ircutianum,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium mollugo,Galium mollugo,Galium mollugo,wcvp,1,Accepted,L.,Galium mollugo,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Acer pseudoplatanus,Acer pseudoplatanus,Acer pseudoplatanus,wcvp,1,Accepted,L.,Acer pseudoplatanus,Sapindaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helictotrichon pubescens,Avenula pubescens,Helictotrichon pubescens,wcvp,1,Synonym,(Huds.) Dumort.,Avenula pubescens,Poaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sagina saginoides,Sagina saginoides,Sagina saginoides,wcvp,1,Accepted,(L.) H.Karst.,Sagina saginoides,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Holcus lanatus,Holcus lanatus,Holcus lanatus,wcvp,1,Accepted,L.,Holcus lanatus,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Knautia arvensis,Knautia arvensis,Knautia arvensis,wcvp,1,Accepted,(L.) Coult.,Knautia arvensis,Caprifoliaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Crepis biennis,Crepis biennis,Crepis biennis,wcvp,1,Accepted,L.,Crepis biennis,Asteraceae,5,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace tapete,Androsace tapete,Androsace tapete,wcvp,1,Accepted,Maxim.,Androsace tapete,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anemone obtusiloba,Anemonastrum obtusilobum,Anemone obtusiloba,wcvp,1,Synonym,(D.Don) Mosyakin,Anemonastrum obtusilobum,Ranunculaceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana squarrosa,Gentiana squarrosa,Gentiana squarrosa,wcvp,1,Accepted,Ledeb.,Gentiana squarrosa,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Kobresia robusta,Carex sargentiana,Kobresia robusta,wcvp,1,Synonym,(Hemsl.) S.R.Zhang,Carex sargentiana,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis densa,Oxytropis densa,Oxytropis densa,wcvp,1,Accepted,Benth. ex Bunge,Oxytropis densa,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla nivea,Potentilla nivea,Potentilla nivea,wcvp,1,Accepted,L.,Potentilla nivea,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Primula tangutica,Primula tangutica,Primula tangutica,wcvp,1,Accepted,Duthie,Primula tangutica,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea superba,Saussurea superba,Saussurea superba,wcvp,1,Accepted,J.Anthony,Saussurea superba,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stipa aliena,Stipa aliena,Stipa aliena,wcvp,1,Accepted,Keng,Stipa aliena,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Taraxacum mongolicum,Taraxacum mongolicum,Taraxacum mongolicum,wcvp,1,Accepted,Hand.-Mazz.,Taraxacum mongolicum,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arenaria kansuensis,Eremogone kansuensis,Arenaria kansuensis,wcvp,1,Synonym,(Maxim.) Dillenb. & Kadereit,Eremogone kansuensis,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex tristachya,Carex tristachya,Carex tristachya,wcvp,1,Accepted,Thunb.,Carex tristachya,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lancea tibetica,Lancea tibetica,Lancea tibetica,wcvp,1,Accepted,Hook.f. & Thomson,Lancea tibetica,Mazaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis glacialis,Oxytropis humifusa,Oxytropis glacialis,wcvp,1,Synonym,Kar. & Kir.,Oxytropis humifusa,Fabaceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Pleurospermum hookeri,Hymenidium hookeri,Pleurospermum hookeri,wcvp,1,Synonym,(C.B.Clarke) Pimenov & Kljuykov,Hymenidium hookeri,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stipa capillata,Stipa capillata,Stipa capillata,wcvp,1,Accepted,L.,Stipa capillata,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thalictrum aquilegifolium,Thalictrum aquilegiifolium,Thalictrum aquilegifolium,wfo,1,Synonym,L.,Thalictrum aquilegiifolium,Ranunculaceae,1,,TRUE,fallback source wfo,2026-10-28,0.2.1,0.3.6
+Anaphalis xylorhiza,Anaphalis xylorhiza,Anaphalis xylorhiza,wcvp,1,Accepted,Sch.Bip. ex Hook.f.,Anaphalis xylorhiza,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphorbia pekinensis,Euphorbia pekinensis,Euphorbia pekinensis,wcvp,1,Accepted,Rupr.,Euphorbia pekinensis,Euphorbiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Kobresia humilis,Carex alatauensis,Kobresia humilis,wcvp,1,Synonym,S.R.Zhang,Carex alatauensis,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stipa capillacea,Stipa capillacea,Stipa capillacea,wcvp,1,Accepted,Keng,Stipa capillacea,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aster tataricus,Aster tataricus,Aster tataricus,wcvp,1,Accepted,L.f.,Aster tataricus,Asteraceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla bifurca,Sibbaldianthe bifurca,Potentilla bifurca,wcvp,1,Synonym,(L.) Kurtto & T.Erikss.,Sibbaldianthe bifurca,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla multifida,Potentilla multifida,Potentilla multifida,wcvp,1,Accepted,L.,Potentilla multifida,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Stipa purpurea,Stipa purpurea,Stipa purpurea,wcvp,1,Accepted,Griseb.,Stipa purpurea,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trollius chinensis,Trollius chinensis,Trollius chinensis,wcvp,1,Accepted,Bunge,Trollius chinensis,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphorbia stracheyi,Euphorbia stracheyi,Euphorbia stracheyi,wcvp,1,Accepted,Boiss.,Euphorbia stracheyi,Euphorbiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leontopodium japonicum,Leontopodium japonicum,Leontopodium japonicum,wcvp,1,Accepted,Miq.,Leontopodium japonicum,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lycoris radiata,Lycoris radiata,Lycoris radiata,wcvp,1,Accepted,(L'Hér.) Herb.,Lycoris radiata,Amaryllidaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Rhodiola quadrifida,Rhodiola quadrifida,Rhodiola quadrifida,wcvp,1,Accepted,(Pall.) Fisch. & C.A.Mey.,Rhodiola quadrifida,Crassulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace mariae,Androsace mariae,Androsace mariae,wcvp,1,Accepted,Kanitz,Androsace mariae,Primulaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla cuneata,Sibbaldia cuneata,Potentilla cuneata,wcvp,1,Synonym,Edgew.,Sibbaldia cuneata,Rosaceae,1,[Ambiguous] [Overall] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Artemisia hedinii,Artemisia hedinii,Artemisia hedinii,wcvp,1,Accepted,Ostenf.,Artemisia hedinii,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Incarvillea sinensis,Incarvillea sinensis,Incarvillea sinensis,wcvp,1,Accepted,Lam.,Incarvillea sinensis,Bignoniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Astragalus membranaceus,Astragalus mongholicus,Astragalus membranaceus,wcvp,1,Synonym,Bunge,Astragalus mongholicus,Fabaceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace graminifolia,Androsace graminifolia,Androsace graminifolia,wcvp,1,Accepted,C.E.C.Fisch.,Androsace graminifolia,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Eritrichium hemisphaericum,Eritrichium hemisphaericum,Eritrichium hemisphaericum,wcvp,1,Accepted,W.T.Wang,Eritrichium hemisphaericum,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arenaria roborowskii,Eremogone roborowskii,Arenaria roborowskii,wcvp,1,Synonym,(Maxim.) Rabeler & W.L.Wagner,Eremogone roborowskii,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cyananthus hookeri,Cyananthus hookeri,Cyananthus hookeri,wcvp,1,Accepted,C.B.Clarke,Cyananthus hookeri,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana parvula,Gentiana parvula,Gentiana parvula,wcvp,1,Accepted,Harry Sm.,Gentiana parvula,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphorbia prolifera,Euphorbia prolifera,Euphorbia prolifera,wcvp,1,Accepted,Buch.-Ham. ex D.Don,Euphorbia prolifera,Euphorbiaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Primula malacoides,Primula malacoides,Primula malacoides,wcvp,1,Accepted,Franch.,Primula malacoides,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Youngia simulatrix,Youngia simulatrix,Youngia simulatrix,wcvp,1,Accepted,(Babc.) Babc. & Stebbins,Youngia simulatrix,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex scabrirostris,Carex scabrirostris,Carex scabrirostris,wcvp,1,Accepted,Kük.,Carex scabrirostris,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Elymus nutans,Elymus nutans,Elymus nutans,wcvp,1,Accepted,Griseb.,Elymus nutans,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia regelii,Euphrasia regelii,Euphrasia regelii,wcvp,1,Accepted,Wettst.,Euphrasia regelii,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana grumii,Gentiana grumii,Gentiana grumii,wcvp,1,Accepted,Kusn.,Gentiana grumii,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana straminea,Gentiana straminea,Gentiana straminea,wcvp,1,Accepted,Maxim.,Gentiana straminea,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Halerpestes tricuspis,Halerpestes tricuspis,Halerpestes tricuspis,wcvp,1,Accepted,(Maxim.) Hand.-Mazz.,Halerpestes tricuspis,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Medicago ruthenica,Medicago ruthenica,Medicago ruthenica,wcvp,1,Accepted,(L.) Trautv.,Medicago ruthenica,Fabaceae,2,[Ambiguous] [Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis deflexa,Oxytropis deflexa,Oxytropis deflexa,wcvp,1,Accepted,(Pall.) DC.,Oxytropis deflexa,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla anserina,Argentina anserina,Potentilla anserina,wcvp,1,Synonym,(L.) Rydb.,Argentina anserina,Rosaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea pulchra,Saussurea pulchra,Saussurea pulchra,wcvp,1,Accepted,Lipsch.,Saussurea pulchra,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Scirpus distigmaticus,Trichophorum distigmaticum,Scirpus distigmaticus,wcvp,1,Synonym,(Kük.) T.V.Egorova,Trichophorum distigmaticum,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis kansuensis,Pedicularis kansuensis,Pedicularis kansuensis,wcvp,1,Accepted,Maxim.,Pedicularis kansuensis,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Allium beesianum,Allium beesianum,Allium beesianum,wcvp,1,Accepted,W.W.Sm.,Allium beesianum,Amaryllidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anemone cathayensis,Anemone cathayensis,Anemone cathayensis,wcvp,1,Accepted,Kitag. ex Tamura,Anemone cathayensis,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aster diplostephioides,Aster diplostephioides,Aster diplostephioides,wcvp,1,Accepted,(DC.) Benth. ex C.B.Clarke,Aster diplostephioides,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis kansuensis,Oxytropis kansuensis,Oxytropis kansuensis,wcvp,1,Accepted,Bunge,Oxytropis kansuensis,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis ochrocephala,Oxytropis ochrocephala,Oxytropis ochrocephala,wcvp,1,Accepted,Bunge,Oxytropis ochrocephala,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trollius farreri,Trollius farreri,Trollius farreri,wcvp,1,Accepted,Stapf,Trollius farreri,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ligularia virgaurea,Ligularia virgaurea,Ligularia virgaurea,wcvp,1,Accepted,(Maxim.) Mattf. ex Rehder & Kobuski,Ligularia virgaurea,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cardamine tangutorum,Cardamine tangutorum,Cardamine tangutorum,wcvp,1,Accepted,O.E.Schulz,Cardamine tangutorum,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex atrofusca,Carex atrofusca,Carex atrofusca,wcvp,1,Accepted,Schkuhr,Carex atrofusca,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Glaux maritima,Lysimachia maritima,Glaux maritima,wcvp,1,Synonym,"(L.) Galasso, Banfi & Soldano",Lysimachia maritima,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leontopodium nanum,Leontopodium nanum,Leontopodium nanum,wcvp,1,Accepted,(Hook.f. & Thomson ex C.B.Clarke) Hand.-Mazz.,Leontopodium nanum,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saxifraga atrata,Micranthes atrata,Saxifraga atrata,wcvp,1,Synonym,(Engl.) Losinsk.,Micranthes atrata,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gueldenstaedtia diversifolia,Tibetia himalaica,Gueldenstaedtia diversifolia,wcvp,1,Synonym,(Baker) H.P.Tsui,Tibetia himalaica,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Koeleria cristata,,Koeleria cristata,,,,,,,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],TRUE,tie: Cinnagrostis micrathera | Koeleria pyramidata | Rostraria cristata,2026-10-28,0.2.1,0.3.6
+Corydalis pallida,Corydalis pallida,Corydalis pallida,wcvp,1,Accepted,Pers.,Corydalis pallida,Papaveraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Morina chinensis,Morina chinensis,Morina chinensis,wcvp,1,Accepted,Y.Y.Pai,Morina chinensis,Caprifoliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Iris potaninii,Iris potaninii,Iris potaninii,wcvp,1,Accepted,Maxim.,Iris potaninii,Iridaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea nigrescens,Saussurea nigrescens,Saussurea nigrescens,wcvp,1,Accepted,Maxim.,Saussurea nigrescens,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica ciliata,Veronica ciliata,Veronica ciliata,wcvp,1,Accepted,Fisch.,Veronica ciliata,Plantaginaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Polygonum sibiricum,Knorringia sibirica,Polygonum sibiricum,wcvp,1,Synonym,(Laxm.) Tzvelev,Knorringia sibirica,Polygonaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Elsholtzia calycocarpa,Elsholtzia densa,Elsholtzia calycocarpa,wcvp,1,Synonym,Benth.,Elsholtzia densa,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Elsholtzia ciliata,Elsholtzia ciliata,Elsholtzia ciliata,wcvp,1,Accepted,(Thunb.) Hyl.,Elsholtzia ciliata,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Agropyron cristatum,Agropyron cristatum,Agropyron cristatum,wcvp,1,Accepted,(L.) Gaertn.,Agropyron cristatum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus japonicus,Ranunculus japonicus,Ranunculus japonicus,wcvp,1,Accepted,Thunb.,Ranunculus japonicus,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helictotrichon tibeticum,Helictotrichon tibeticum,Helictotrichon tibeticum,wcvp,1,Accepted,(Roshev.) Keng f.,Helictotrichon tibeticum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus brotherusii,Ranunculus brotherusii,Ranunculus brotherusii,wcvp,1,Accepted,Freyn,Ranunculus brotherusii,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thermopsis lanceolata,Thermopsis lanceolata,Thermopsis lanceolata,wcvp,1,Accepted,R.Br.,Thermopsis lanceolata,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Comastoma pulmonarium,Comastoma pulmonarium,Comastoma pulmonarium,wcvp,1,Accepted,(Turcz.) Toyok.,Comastoma pulmonarium,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Kobresia capillifolia,Carex capillifolia,Kobresia capillifolia,wcvp,1,Synonym,(Decne.) S.R.Zhang,Carex capillifolia,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana aristata,Gentiana aristata,Gentiana aristata,wcvp,1,Accepted,Maxim.,Gentiana aristata,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saussurea katochaete,Saussurea katochaete,Saussurea katochaete,wcvp,1,Accepted,Maxim.,Saussurea katochaete,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Poa annua,Poa annua,Poa annua,wcvp,1,Accepted,L.,Poa annua,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana farreri,Gentiana lawrencei,Gentiana farreri,wcvp,1,Synonym,Burkill,Gentiana lawrencei,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lomatogonium rotatum,Lomatogonium rotatum,Lomatogonium rotatum,wcvp,1,Accepted,(L.) Fr.,Lomatogonium rotatum,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chrysosplenium pilosum,Chrysosplenium pilosum,Chrysosplenium pilosum,wcvp,1,Accepted,Maxim.,Chrysosplenium pilosum,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Deschampsia caespitosa,Deschampsia cespitosa subsp. cespitosa,Deschampsia caespitosa,wfo,1,Synonym,,Deschampsia cespitosa,Poaceae,1,,TRUE,fallback source wfo,2026-10-28,0.2.1,0.3.6
+Poa alpigena,Poa alpigena,Poa alpigena,wcvp,1,Accepted,Lindm.,Poa alpigena,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Notopterygium incisum,Hansenia weberbaueriana,Notopterygium incisum,wcvp,1,Synonym,(Fedde ex H.Wolff) Pimenov & Kljuykov,Hansenia weberbaueriana,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Humulus japonicus,Humulus scandens,Humulus japonicus,wcvp,1,Synonym,(Lour.) Merr.,Humulus scandens,Cannabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Poa poophagorum,Poa alberti subsp. poophagorum,Poa poophagorum,wcvp,1,Synonym,(Bor) Olonova & G.H.Zhu,Poa alberti,Poaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Deyeuxia flavens,Calamagrostis tripilifera,Deyeuxia flavens,wcvp,1,Synonym,Hook.f.,Calamagrostis tripilifera,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana crenulatotruncata,Gentiana prostrata var. crenulatotruncata,Gentiana crenulatotruncata,wcvp,1,Synonym,C.Marquand,Gentiana prostrata,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pomatosace filicula,Pomatosace filicula,Pomatosace filicula,wcvp,1,Accepted,Maxim.,Pomatosace filicula,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana scabra,Gentiana scabra,Gentiana scabra,wcvp,1,Accepted,Bunge,Gentiana scabra,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana pudica,Gentiana prostrata var. pudica,Gentiana pudica,wcvp,1,Synonym,(Maxim.) Kusn.,Gentiana prostrata,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Delphinium caeruleum,Delphinium caeruleum,Delphinium caeruleum,wcvp,1,Accepted,Jacquem. ex Cambess.,Delphinium caeruleum,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ajania przewalskii,Ajania przewalskii,Ajania przewalskii,wcvp,1,Accepted,Poljakov,Ajania przewalskii,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hippophae rhamnoides,Hippophae rhamnoides,Hippophae rhamnoides,wcvp,1,Accepted,L.,Hippophae rhamnoides,Elaeagnaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ligularia sagitta,Ligularia sagitta,Ligularia sagitta,wcvp,1,Accepted,(Maxim.) Mattf. ex Rehder & Kobuski,Ligularia sagitta,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anaphalis lactea,Anaphalis lactea,Anaphalis lactea,wcvp,1,Accepted,Maxim.,Anaphalis lactea,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex thibetica,Carex thibetica,Carex thibetica,wcvp,1,Accepted,Franch.,Carex thibetica,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex kansuensis,Carex kansuensis,Carex kansuensis,wcvp,1,Accepted,Nelmes,Carex kansuensis,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis resupinata,Pedicularis resupinata,Pedicularis resupinata,wcvp,1,Accepted,L.,Pedicularis resupinata,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex lehmanii,Carex lehmannii,Carex lehmannii,wcvp,0.98210117101673,Accepted,Drejer,Carex lehmannii,Cyperaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Coluria longifolia,Coluria longifolia,Coluria longifolia,wcvp,1,Accepted,Maxim.,Coluria longifolia,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola philippica,Viola philippica,Viola philippica,wcvp,1,Accepted,Cav.,Viola philippica,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentianella azurea,Gentianella azurea,Gentianella azurea,wcvp,1,Accepted,(Bunge) Holub,Gentianella azurea,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Morina kokonorica,Morina kokonorica,Morina kokonorica,wcvp,1,Accepted,K.S.Hao,Morina kokonorica,Caprifoliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Iris tectorum,Iris tectorum,Iris tectorum,wcvp,1,Accepted,Maxim.,Iris tectorum,Iridaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ptilagrostis dichotoma,Ptilagrostis dichotoma,Ptilagrostis dichotoma,wcvp,1,Accepted,Keng ex Tzvelev,Ptilagrostis dichotoma,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Delphinium trichophorum,Delphinium trichophorum,Delphinium trichophorum,wcvp,1,Accepted,Franch.,Delphinium trichophorum,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia pectinata,Euphrasia pectinata,Euphrasia pectinata,wcvp,1,Accepted,Ten.,Euphrasia pectinata,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Notopterygium forbesii,Hansenia forbesii,Notopterygium forbesii,wcvp,1,Synonym,(H.Boissieu) Pimenov & Kljuykov,Hansenia forbesii,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola verecunda,Viola hamiltoniana,Viola verecunda,wcvp,1,Synonym,D.Don,Viola hamiltoniana,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium wilfordii,Geranium wilfordii,Geranium wilfordii,wcvp,1,Accepted,Maxim.,Geranium wilfordii,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Meconopsis horridula,Meconopsis horridula,Meconopsis horridula,wcvp,1,Accepted,Hook.f. & Thomson,Meconopsis horridula,Papaveraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stellaria arenaria,Arenaria hispanica,Stellaria arenaria,wcvp,1,Synonym,Spreng.,Arenaria hispanica,Caryophyllaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Hypochaeris radicata,Hypochaeris radicata,Hypochaeris radicata,wcvp,1,Accepted,L.,Hypochaeris radicata,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pilosella piloselloides,Pilosella piloselloides,Pilosella piloselloides,wcvp,1,Accepted,(Vill.) Soják,Pilosella piloselloides,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rhinanthus minor,Rhinanthus minor,Rhinanthus minor,wcvp,1,Accepted,L.,Rhinanthus minor,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium dubium,Trifolium dubium,Trifolium dubium,wcvp,1,Accepted,Sibth.,Trifolium dubium,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vicia hirsuta,Vicia hirsuta,Vicia hirsuta,wcvp,1,Accepted,(L.) Gray,Vicia hirsuta,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Agrostis stolonifera,Agrostis stolonifera,Agrostis stolonifera,wcvp,1,Accepted,L.,Agrostis stolonifera,Poaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rhinanthus angustifolius,Rhinanthus major var. major,Rhinanthus angustifolius,wcvp,1,Synonym,,Rhinanthus major,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Filipendula ulmaria,Filipendula ulmaria,Filipendula ulmaria,wcvp,1,Accepted,(L.) Maxim.,Filipendula ulmaria,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla monticola,Alchemilla monticola,Alchemilla monticola,wcvp,1,Accepted,Opiz,Alchemilla monticola,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium rotundifolium,Geranium rotundifolium,Geranium rotundifolium,wcvp,1,Accepted,L.,Geranium rotundifolium,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Scorzoneroides helvetica,Scorzoneroides helvetica,Scorzoneroides helvetica,wcvp,1,Accepted,(Mérat) Holub,Scorzoneroides helvetica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola tricolor,Viola tricolor,Viola tricolor,wcvp,1,Accepted,L.,Viola tricolor,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lolium multiflorum,Lolium multiflorum,Lolium multiflorum,wcvp,1,Accepted,Lam.,Lolium multiflorum,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium medium,Trifolium medium,Trifolium medium,wcvp,1,Accepted,L.,Trifolium medium,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bistorta officinalis,Bistorta officinalis,Bistorta officinalis,wcvp,1,Accepted,Delarbre,Bistorta officinalis,Polygonaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Silene latifolia,Silene latifolia,Silene latifolia,wcvp,1,Accepted,Poir.,Silene latifolia,Caryophyllaceae,2,[Ambiguous] [Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Vicia sepium,Vicia sepium,Vicia sepium,wcvp,1,Accepted,L.,Vicia sepium,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Euphrasia stricta,Euphrasia stricta,Euphrasia stricta,wcvp,1,Accepted,J.P.Wolff ex J.F.Lehm.,Euphrasia stricta,Orobanchaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Pimpinella saxifraga,Pimpinella saxifraga,Pimpinella saxifraga,wcvp,1,Accepted,L.,Pimpinella saxifraga,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Crocus vernus,Crocus vernus,Crocus vernus,wcvp,1,Accepted,(L.) Hill,Crocus vernus,Iridaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lychnis flos-cuculi,Silene flos-cuculi,Lychnis flos-cuculi,wcvp,1,Synonym,(L.) Greuter & Burdet,Silene flos-cuculi,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Barbarea vulgaris,Barbarea vulgaris,Barbarea vulgaris,wcvp,1,Accepted,W.T.Aiton,Barbarea vulgaris,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Persicaria maculosa,Persicaria maculosa,Persicaria maculosa,wcvp,1,Accepted,Gray,Persicaria maculosa,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Convolvulus arvensis,Convolvulus arvensis,Convolvulus arvensis,wcvp,1,Accepted,L.,Convolvulus arvensis,Convolvulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Epilobium obscurum,Epilobium obscurum,Epilobium obscurum,wcvp,1,Accepted,Schreb.,Epilobium obscurum,Onagraceae,4,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Quercus robur,Quercus robur,Quercus robur,wcvp,1,Accepted,L.,Quercus robur,Fagaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica filiformis,Veronica filiformis,Veronica filiformis,wcvp,1,Accepted,Sm.,Veronica filiformis,Plantaginaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Equisetum arvense,Equisetum arvense,Equisetum arvense,wcvp,1,Accepted,L.,Equisetum arvense,Equisetaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stellaria longifolia,Stellaria longifolia,Stellaria longifolia,wcvp,1,Accepted,Muhl. ex Willd.,Stellaria longifolia,Caryophyllaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica arvensis,Veronica arvensis,Veronica arvensis,wcvp,1,Accepted,L.,Veronica arvensis,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Capsella bursa-pastoris,Capsella bursa-pastoris,Capsella bursa-pastoris,wcvp,1,Accepted,(L.) Medik.,Capsella bursa-pastoris,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Elymus caninus,Elymus caninus,Elymus caninus,wcvp,1,Accepted,(L.) L.,Elymus caninus,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Glechoma hederacea,Glechoma hederacea,Glechoma hederacea,wcvp,1,Accepted,L.,Glechoma hederacea,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rumex sanguineus,Rumex sanguineus,Rumex sanguineus,wcvp,1,Accepted,L.,Rumex sanguineus,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Agrostis gigantea,Agrostis gigantea,Agrostis gigantea,wcvp,1,Accepted,Roth,Agrostis gigantea,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Silene dioica,Silene dioica,Silene dioica,wcvp,1,Accepted,(L.) Clairv.,Silene dioica,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium album,Galium album,Galium album,wcvp,1,Accepted,Mill.,Galium album,Rubiaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica hederifolia,Veronica hederifolia,Veronica hederifolia,wcvp,1,Accepted,L.,Veronica hederifolia,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sonchus asper,Sonchus asper,Sonchus asper,wcvp,1,Accepted,(L.) Hill,Sonchus asper,Asteraceae,2,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Senecio vulgaris,Senecio vulgaris,Senecio vulgaris,wcvp,1,Accepted,L.,Senecio vulgaris,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Papaver rhoeas,Papaver rhoeas,Papaver rhoeas,wcvp,1,Accepted,L.,Papaver rhoeas,Papaveraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lactuca serriola,Lactuca serriola,Lactuca serriola,wcvp,1,Accepted,L.,Lactuca serriola,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cardamine hirsuta,Cardamine hirsuta,Cardamine hirsuta,wcvp,1,Accepted,L.,Cardamine hirsuta,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Valerianella locusta,Valeriana locusta,Valerianella locusta,wcvp,1,Synonym,L.,Valeriana locusta,Caprifoliaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Vicia angustifolia,Vicia sativa subsp. nigra,Vicia angustifolia,wcvp,1,Synonym,Ehrh.,Vicia sativa,Fabaceae,4,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Bromus hordeaceus,Bromus hordeaceus,Bromus hordeaceus,wcvp,1,Accepted,L.,Bromus hordeaceus,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Cirsium vulgare,Cirsium vulgare,Cirsium vulgare,wcvp,1,Accepted,(Savi) Ten.,Cirsium vulgare,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Jacobaea vulgaris,Jacobaea vulgaris,Jacobaea vulgaris,wcvp,1,Accepted,Gaertn.,Jacobaea vulgaris,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vicia tetrasperma,Vicia tetrasperma,Vicia tetrasperma,wcvp,1,Accepted,(L.) Schreb.,Vicia tetrasperma,Fabaceae,2,[Ambiguous] [Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Lapsana communis,Lapsana communis,Lapsana communis,wcvp,1,Accepted,L.,Lapsana communis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Collomia grandiflora,Collomia grandiflora,Collomia grandiflora,wcvp,1,Accepted,Douglas ex Lindl.,Collomia grandiflora,Polemoniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Matricaria chamomilla,Matricaria chamomilla,Matricaria chamomilla,wcvp,1,Accepted,L.,Matricaria chamomilla,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Silene flos-cuculi,Silene flos-cuculi,Silene flos-cuculi,wcvp,1,Accepted,(L.) Greuter & Burdet,Silene flos-cuculi,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sonchus arvensis,Sonchus arvensis,Sonchus arvensis,wcvp,1,Accepted,L.,Sonchus arvensis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stellaria media,Stellaria media,Stellaria media,wcvp,1,Accepted,(L.) Vill.,Stellaria media,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex curvula,Carex curvula,Carex curvula,wcvp,1,Accepted,All.,Carex curvula,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Leucanthemopsis alpina,Leucanthemopsis alpina,Leucanthemopsis alpina,wcvp,1,Accepted,(L.) Heywood,Leucanthemopsis alpina,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Mutellina adonidifolia,Mutellina purpurea,Mutellina adonidifolia,wcvp,1,Synonym,"(Poir.) Reduron, Charpin & Pimenov",Mutellina purpurea,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Crepis paludosa,Crepis paludosa,Crepis paludosa,wcvp,1,Accepted,(L.) Moench,Crepis paludosa,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula alpina,Luzula alpina,Luzula alpina,wcvp,1,Accepted,Hoppe,Luzula alpina,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus aconitifolius,Ranunculus aconitifolius,Ranunculus aconitifolius,wcvp,1,Accepted,L.,Ranunculus aconitifolius,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium aurantiacum,Pilosella aurantiaca,Hieracium aurantiacum,wcvp,1,Synonym,(L.) F.W.Schultz & Sch.Bip.,Pilosella aurantiaca,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carduus crispus,Carduus crispus,Carduus crispus,wcvp,1,Accepted,L.,Carduus crispus,Asteraceae,2,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica montana,Veronica montana,Veronica montana,wcvp,1,Accepted,L.,Veronica montana,Plantaginaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Cirsium oleraceum,Cirsium oleraceum,Cirsium oleraceum,wcvp,1,Accepted,(L.) Scop.,Cirsium oleraceum,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium pratense,Geranium pratense,Geranium pratense,wcvp,1,Accepted,L.,Geranium pratense,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lysimachia nemorum,Lysimachia nemorum,Lysimachia nemorum,wcvp,1,Accepted,L.,Lysimachia nemorum,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Centaurea nigra,Centaurea nigra,Centaurea nigra,wcvp,1,Accepted,L.,Centaurea nigra,Asteraceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Chenopodium album,Chenopodium album,Chenopodium album,wcvp,1,Accepted,L.,Chenopodium album,Amaranthaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stellaria graminea,Stellaria graminea,Stellaria graminea,wcvp,1,Accepted,L.,Stellaria graminea,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gnaphalium supinum,Omalotheca supina,Gnaphalium supinum,wcvp,1,Synonym,(L.) DC.,Omalotheca supina,Asteraceae,3,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rhinanthus glacialis,Rhinanthus glacialis,Rhinanthus glacialis,wcvp,1,Accepted,Personnat,Rhinanthus glacialis,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Vicia villosa,Vicia villosa,Vicia villosa,wcvp,1,Accepted,Roth,Vicia villosa,Fabaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Cynodon dactylon,Cynodon dactylon,Cynodon dactylon,wcvp,1,Accepted,(L.) Pers.,Cynodon dactylon,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola odorata,Viola odorata,Viola odorata,wcvp,1,Accepted,L.,Viola odorata,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Medicago sativa,Medicago sativa,Medicago sativa,wcvp,1,Accepted,L.,Medicago sativa,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sisymbrium loeselii,Sisymbrium loeselii,Sisymbrium loeselii,wcvp,1,Accepted,L.,Sisymbrium loeselii,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Urtica dioica,Urtica dioica,Urtica dioica,wcvp,1,Accepted,L.,Urtica dioica,Urticaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Conyza canadensis,Erigeron canadensis,Conyza canadensis,wcvp,1,Synonym,L.,Erigeron canadensis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Oxalis acetocella,Oxalis acetosella,Oxalis acetosella,wcvp,0.98428510306992,Accepted,L.,Oxalis acetosella,Oxalidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium aparine,Galium aparine,Galium aparine,wcvp,1,Accepted,L.,Galium aparine,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Conium maculatum,Conium maculatum,Conium maculatum,wcvp,1,Accepted,L.,Conium maculatum,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Daucus carota,Daucus carota,Daucus carota,wcvp,1,Accepted,L.,Daucus carota,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Fragaria nubicola,Fragaria nubicola,Fragaria nubicola,wcvp,1,Accepted,(Lindl. ex Hook.f.) Lacaita,Fragaria nubicola,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus arvensis,Ranunculus arvensis,Ranunculus arvensis,wcvp,1,Accepted,L.,Ranunculus arvensis,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cichorium intybus,Cichorium intybus,Cichorium intybus,wcvp,1,Accepted,L.,Cichorium intybus,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hemerocallis fulva,Hemerocallis fulva,Hemerocallis fulva,wcvp,1,Accepted,(L.) L.,Hemerocallis fulva,Asphodelaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Conyza sumatrensis,Erigeron sumatrensis,Conyza sumatrensis,wcvp,1,Synonym,Retz.,Erigeron sumatrensis,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Asparagus officinalis,Asparagus officinalis,Asparagus officinalis,wcvp,1,Accepted,L.,Asparagus officinalis,Asparagaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helianthus canus,Helianthus petiolaris var. canescens,Helianthus canus,wcvp,1,Synonym,A.Gray,Helianthus petiolaris,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Oxalis corniculata,Oxalis corniculata,Oxalis corniculata,wcvp,1,Accepted,L.,Oxalis corniculata,Oxalidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rubia cordifolia,Rubia cordifolia,Rubia cordifolia,wcvp,1,Accepted,L.,Rubia cordifolia,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anthriscus sylvestris,Anthriscus sylvestris,Anthriscus sylvestris,wcvp,1,Accepted,(L.) Hoffm.,Anthriscus sylvestris,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Myosotis sylvatica,Myosotis sylvatica,Myosotis sylvatica,wcvp,1,Accepted,Ehrh. ex Hoffm.,Myosotis sylvatica,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aegopodium podagraria,Aegopodium podagraria,Aegopodium podagraria,wcvp,1,Accepted,L.,Aegopodium podagraria,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Homalotrichon pubescens,Avenula pubescens,Homalotrichon pubescens,wcvp,1,Synonym,(Huds.) Dumort.,Avenula pubescens,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geranium pyrenaicum,Geranium pyrenaicum,Geranium pyrenaicum,wcvp,1,Accepted,Burm.f.,Geranium pyrenaicum,Geraniaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Laserpitium halleri,Laserpitium halleri,Laserpitium halleri,wcvp,1,Accepted,Crantz,Laserpitium halleri,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Scorzoneroides autumnalis,Scorzoneroides autumnalis,Scorzoneroides autumnalis,wcvp,1,Accepted,(L.) Moench,Scorzoneroides autumnalis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Centaurea pseudophrygia,Centaurea phrygia subsp. pseudophrygia,Centaurea pseudophrygia,wcvp,1,Synonym,(C.A.Mey.) Gugler,Centaurea phrygia,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex caryophyllea,Carex caryophyllea,Carex caryophyllea,wcvp,1,Accepted,Latourr.,Carex caryophyllea,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex ornithopoda,Carex ornithopoda,Carex ornithopoda,wcvp,1,Accepted,Willd.,Carex ornithopoda,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Erigeron neglectus,Erigeron neglectus,Erigeron neglectus,wcvp,1,Accepted,A.Kern.,Erigeron neglectus,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium pumilum,Galium pumilum,Galium pumilum,wcvp,1,Accepted,Murray,Galium pumilum,Rubiaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana verna,Gentiana verna,Gentiana verna,wcvp,1,Accepted,L.,Gentiana verna,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hippocrepis comosa,Hippocrepis comosa,Hippocrepis comosa,wcvp,1,Accepted,L.,Hippocrepis comosa,Fabaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula sudetica,Luzula sudetica,Luzula sudetica,wcvp,1,Accepted,(Willd.) Schult.,Luzula sudetica,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Thymus praecox polytrichus,Thymus praecox subsp. polytrichus,Thymus praecox subsp. polytrichus,wcvp,0.96021221090168,Accepted,(A.Kern. ex Borbás) Jalas,Thymus praecox,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saxifraga paniculata,Saxifraga paniculata,Saxifraga paniculata,wcvp,1,Accepted,Mill.,Saxifraga paniculata,Saxifragaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca quadriflora,Festuca quadriflora,Festuca quadriflora,wcvp,1,Accepted,Walter,Festuca quadriflora,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Gentiana brachyphylla,Gentiana brachyphylla,Gentiana brachyphylla,wcvp,1,Accepted,Vill.,Gentiana brachyphylla,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Daphne striata,Daphne striata,Daphne striata,wcvp,1,Accepted,Tratt.,Daphne striata,Thymelaeaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arenaria ciliata,Arenaria ciliata,Arenaria ciliata,wcvp,1,Accepted,L.,Arenaria ciliata,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gymnadenia nigra,Gymnadenia nigra,Gymnadenia nigra,wcvp,1,Accepted,(L.) Rchb.f.,Gymnadenia nigra,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Silene nutans,Silene nutans,Silene nutans,wcvp,1,Accepted,L.,Silene nutans,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Stachys alpina,Stachys alpina,Stachys alpina,wcvp,1,Accepted,L.,Stachys alpina,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Festuca arundinacea,Lolium arundinaceum,Festuca arundinacea,wcvp,1,Synonym,(Schreb.) Darbysh.,Lolium arundinaceum,Poaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Clinopodium vulgare,Clinopodium vulgare,Clinopodium vulgare,wcvp,1,Accepted,L.,Clinopodium vulgare,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Fragaria vesca,Fragaria vesca,Fragaria vesca,wcvp,1,Accepted,L.,Fragaria vesca,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Neottia ovata,Neottia ovata,Neottia ovata,wcvp,1,Accepted,(L.) Hartm.,Neottia ovata,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Prunella grandiflora,Prunella grandiflora,Prunella grandiflora,wcvp,1,Accepted,(L.) Turra,Prunella grandiflora,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cerastium alpinum,Cerastium alpinum,Cerastium alpinum,wcvp,1,Accepted,L.,Cerastium alpinum,Caryophyllaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Minuartia sedoides,Cherleria sedoides,Minuartia sedoides,wcvp,1,Synonym,L.,Cherleria sedoides,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Minuartia verna,Sabulina verna,Minuartia verna,wcvp,1,Synonym,(L.) Rchb.,Sabulina verna,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex parviflora,Carex parviflora,Carex parviflora,wcvp,1,Accepted,Host,Carex parviflora,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Draba aizoides,Draba aizoides,Draba aizoides,wcvp,1,Accepted,L.,Draba aizoides,Brassicaceae,4,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Salix serpyllifolia,Salix serpyllifolia,Salix serpyllifolia,wfo,1,Accepted,Scop.,Salix serpyllifolia,Salicaceae,1,,TRUE,fallback source wfo,2026-10-28,0.2.1,0.3.6
+Lloydia serotina,Gagea serotina,Lloydia serotina,wcvp,1,Synonym,(L.) Ker Gawl.,Gagea serotina,Liliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentianella tenella,Comastoma tenellum,Gentianella tenella,wcvp,1,Synonym,(Rottb.) Toyok.,Comastoma tenellum,Gentianaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Arenaria multicaulis,Arenaria ciliata subsp. multicaulis,Arenaria multicaulis,wfo,1,Synonym,(L.) Arcang.,Arenaria ciliata,Caryophyllaceae,1,[Overall] [HigherTaxa] [Ambiguous],TRUE,fallback source wfo,2026-10-28,0.2.1,0.3.6
+Saxifraga bryoides,Saxifraga bryoides,Saxifraga bryoides,wcvp,1,Accepted,L.,Saxifraga bryoides,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saxifraga oppositifolia,Saxifraga oppositifolia,Saxifraga oppositifolia,wcvp,1,Accepted,L.,Saxifraga oppositifolia,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Dianthus superbus,Dianthus superbus,Dianthus superbus,wcvp,1,Accepted,L.,Dianthus superbus,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla brauneana,Potentilla brauneana,Potentilla brauneana,wcvp,1,Accepted,(DC.) Hoppe ex Nestl.,Potentilla brauneana,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anthoxanthum alpinum,Anthoxanthum nipponicum,Anthoxanthum alpinum,wcvp,1,Synonym,Honda,Anthoxanthum nipponicum,Poaceae,2,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Helictotrichon alpinum,Helictochloa pratensis subsp. pratensis,Helictotrichon alpinum,wcvp,1,Synonym,,Helictochloa pratensis,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pilosella lactucella,Pilosella lactucella,Pilosella lactucella,wcvp,1,Accepted,(Wallr.) P.D.Sell & C.West,Pilosella lactucella,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Plantago maritima,Plantago maritima,Plantago maritima,wcvp,1,Accepted,L.,Plantago maritima,Plantaginaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Scorzoneroides pyrenaica,Scorzoneroides pyrenaica,Scorzoneroides pyrenaica,wcvp,1,Accepted,(Gouan) Holub,Scorzoneroides pyrenaica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla grandiflora,Potentilla grandiflora,Potentilla grandiflora,wcvp,1,Accepted,L.,Potentilla grandiflora,Rosaceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica allionii,Veronica allionii,Veronica allionii,wcvp,1,Accepted,Vill.,Veronica allionii,Plantaginaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Poa chaixii,Poa chaixii,Poa chaixii,wcvp,1,Accepted,Vill.,Poa chaixii,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Patzkea paniculata,Patzkea paniculata,Patzkea paniculata,wcvp,1,Accepted,(L.) G.H.Loos,Patzkea paniculata,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula pediformis,Luzula pediformis,Luzula pediformis,wcvp,1,Accepted,(Chaix) DC.,Luzula pediformis,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Geum urbanum,Geum urbanum,Geum urbanum,wcvp,1,Accepted,L.,Geum urbanum,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium verum,Galium verum,Galium verum,wcvp,1,Accepted,L.,Galium verum,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Avenula pratensis,Helictochloa pratensis,Avenula pratensis,wcvp,1,Synonym,(L.) Romero Zarco,Helictochloa pratensis,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galeopsis tetrahit,Galeopsis tetrahit,Galeopsis tetrahit,wcvp,1,Accepted,L.,Galeopsis tetrahit,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Onobrychis montana,Onobrychis montana,Onobrychis montana,wcvp,1,Accepted,DC.,Onobrychis montana,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ziziphora granatensis,Clinopodium alpinum subsp. meridionale,Ziziphora granatensis,wcvp,1,Synonym,(Nyman) Govaerts,Clinopodium alpinum,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Myosotis arvensis,Myosotis arvensis,Myosotis arvensis,wcvp,1,Accepted,(L.) Hill,Myosotis arvensis,Boraginaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Noccaea brachypetala,Noccaea caerulescens subsp. brachypetala,Noccaea brachypetala,wcvp,1,Synonym,(Jord.) Tzvelev,Noccaea caerulescens,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Linaria vulgaris,Linaria vulgaris,Linaria vulgaris,wcvp,1,Accepted,Mill.,Linaria vulgaris,Plantaginaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Erigeron annuus,Erigeron annuus,Erigeron annuus,wcvp,1,Accepted,(L.) Desf,Erigeron annuus,Asteraceae,2,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Helictochloa pratensis,Helictochloa pratensis,Helictochloa pratensis,wcvp,1,Accepted,(L.) Romero Zarco,Helictochloa pratensis,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Campanula rhomboidalis,Campanula rhomboidalis,Campanula rhomboidalis,wcvp,1,Accepted,L.,Campanula rhomboidalis,Campanulaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Phyteuma scheuchzeri,Phyteuma scheuchzeri,Phyteuma scheuchzeri,wcvp,1,Accepted,All.,Phyteuma scheuchzeri,Campanulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Veronica praecox,Veronica praecox,Veronica praecox,wcvp,1,Accepted,All.,Veronica praecox,Plantaginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Centaurea nervosa,Centaurea nervosa,Centaurea nervosa,wcvp,1,Accepted,Willd.,Centaurea nervosa,Asteraceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Ajuga pyramidalis,Ajuga pyramidalis,Ajuga pyramidalis,wcvp,1,Accepted,L.,Ajuga pyramidalis,Lamiaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Myrrhis odorata,Myrrhis odorata,Myrrhis odorata,wcvp,1,Accepted,(L.) Scop.,Myrrhis odorata,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Fallopia convolvulus,Fallopia convolvulus,Fallopia convolvulus,wcvp,1,Accepted,(L.) Á.Löve,Fallopia convolvulus,Polygonaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sonchus oleraceus,Sonchus oleraceus,Sonchus oleraceus,wcvp,1,Accepted,L.,Sonchus oleraceus,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla thuringiaca,Potentilla thuringiaca,Potentilla thuringiaca,wcvp,1,Accepted,Bernh. ex Link,Potentilla thuringiaca,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis tuberosa,Pedicularis tuberosa,Pedicularis tuberosa,wcvp,1,Accepted,L.,Pedicularis tuberosa,Orobanchaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helictochloa versicolor,Helictochloa versicolor,Helictochloa versicolor,wcvp,1,Accepted,(Vill.) Romero Zarco,Helictochloa versicolor,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Draba muralis,Draba muralis,Draba muralis,wcvp,1,Accepted,L.,Draba muralis,Brassicaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Viola arvensis,Viola arvensis,Viola arvensis,wcvp,1,Accepted,Murray,Viola arvensis,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arabidopsis thaliana,Arabidopsis thaliana,Arabidopsis thaliana,wcvp,1,Accepted,(L.) Heynh.,Arabidopsis thaliana,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alopecurus gerardii,Alopecurus gerardii,Alopecurus gerardii,wfo,1,Accepted,(All.) Vill.,Alopecurus gerardii,Poaceae,1,,TRUE,fallback source wfo,2026-10-28,0.2.1,0.3.6
+Androsace vitaliana,Androsace vitaliana,Androsace vitaliana,wcvp,1,Accepted,(L.) Lapeyr.,Androsace vitaliana,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus kuepferi,Ranunculus kuepferi,Ranunculus kuepferi,wcvp,1,Accepted,Greuter & Burdet,Ranunculus kuepferi,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alopecurus aequalis,Alopecurus aequalis,Alopecurus aequalis,wcvp,1,Accepted,Sobol.,Alopecurus aequalis,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bupleurum ranunculoides,Bupleurum ranunculoides,Bupleurum ranunculoides,wcvp,1,Accepted,L.,Bupleurum ranunculoides,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla flabellata,Alchemilla flabellata,Alchemilla flabellata,wcvp,1,Accepted,Buser,Alchemilla flabellata,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Polypogon viridis,Polypogon viridis,Polypogon viridis,wcvp,1,Accepted,(Gouan) Breistr.,Polypogon viridis,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla pentaphyllea,Alchemilla pentaphyllea,Alchemilla pentaphyllea,wcvp,1,Accepted,L.,Alchemilla pentaphyllea,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Helictotrichon sedenense,Helictotrichon sedenense,Helictotrichon sedenense,wcvp,1,Accepted,(Clarion ex DC.) Holub,Helictotrichon sedenense,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sagina glabra,Sagina glabra,Sagina glabra,wcvp,1,Accepted,(Willd.) Fenzl,Sagina glabra,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Androsace adfinis,Androsace adfinis,Androsace adfinis,wcvp,1,Accepted,Biroli,Androsace adfinis,Primulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla fissa,Alchemilla fissa,Alchemilla fissa,wcvp,1,Accepted,Günther & Schummel,Alchemilla fissa,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Agrostis rupestris,Agrostis rupestris,Agrostis rupestris,wcvp,1,Accepted,All.,Agrostis rupestris,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Centaurea uniflora,Centaurea uniflora,Centaurea uniflora,wcvp,1,Accepted,Turra,Centaurea uniflora,Asteraceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Hypochaeris maculata,Hypochaeris maculata,Hypochaeris maculata,wcvp,1,Accepted,L.,Hypochaeris maculata,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Jacobaea incana,Jacobaea incana,Jacobaea incana,wcvp,1,Accepted,(L.) Veldkamp,Jacobaea incana,Asteraceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Meum athamanticum,Meum athamanticum,Meum athamanticum,wcvp,1,Accepted,Jacq.,Meum athamanticum,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Orchis mascula,Orchis mascula,Orchis mascula,wcvp,1,Accepted,(L.) L.,Orchis mascula,Orchidaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Plantago maritima subsp. serpentina,Plantago maritima subsp. maritima,Plantago maritima subsp. serpentina,wcvp,1,Synonym,,Plantago maritima,Plantaginaceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Pulmonaria angustifolia,Pulmonaria angustifolia,Pulmonaria angustifolia,wcvp,1,Accepted,L.,Pulmonaria angustifolia,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Laserpitium latifolium,Laserpitium latifolium,Laserpitium latifolium,wcvp,1,Accepted,L.,Laserpitium latifolium,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lilium martagon,Lilium martagon,Lilium martagon,wcvp,1,Accepted,L.,Lilium martagon,Liliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Senecio doronicum,Senecio doronicum,Senecio doronicum,wcvp,1,Accepted,(L.) L.,Senecio doronicum,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trifolium alpestre,Trifolium alpestre,Trifolium alpestre,wcvp,1,Accepted,L.,Trifolium alpestre,Fabaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Anemone alpina,Pulsatilla alpina,Anemone alpina,wcvp,1,Synonym,(L.) Chaz.,Pulsatilla alpina,Ranunculaceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Bromopsis erecta,Bromus erectus,Bromopsis erecta,wcvp,1,Synonym,Huds.,Bromus erectus,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex spicata,Carex spicata,Carex spicata,wcvp,1,Accepted,Huds.,Carex spicata,Cyperaceae,5,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium piliferum,Hieracium piliferum,Hieracium piliferum,wcvp,1,Accepted,Hoppe,Hieracium piliferum,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Pachypleurum mutellinoides,Neogaya simplex,Pachypleurum mutellinoides,wcvp,1,Synonym,(L.) Meisn.,Neogaya simplex,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla alpigena,Alchemilla alpigena,Alchemilla alpigena,wcvp,1,Accepted,Buser,Alchemilla alpigena,Rosaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hypericum richeri,Hypericum richeri,Hypericum richeri,wcvp,1,Accepted,Vill.,Hypericum richeri,Hypericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Laserpitium siler,Siler montanum,Laserpitium siler,wcvp,1,Synonym,Crantz,Siler montanum,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ornithogalum umbellatum,Ornithogalum umbellatum,Ornithogalum umbellatum,wcvp,1,Accepted,L.,Ornithogalum umbellatum,Asparagaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Paradisea liliastrum,Paradisea liliastrum,Paradisea liliastrum,wcvp,1,Accepted,(L.) Bertol.,Paradisea liliastrum,Asparagaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pedicularis comosa,Pedicularis comosa,Pedicularis comosa,wcvp,1,Accepted,L.,Pedicularis comosa,Orobanchaceae,4,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa] [Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Thymus serpyllum,Thymus serpyllum,Thymus serpyllum,wcvp,1,Accepted,L.,Thymus serpyllum,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Astragalus danicus,Astragalus danicus,Astragalus danicus,wcvp,1,Accepted,Retz.,Astragalus danicus,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Avenula pubescens,Avenula pubescens,Avenula pubescens,wcvp,1,Accepted,(Huds.) Dumort.,Avenula pubescens,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Leontodon pyrenaicus,Scorzoneroides pyrenaica,Leontodon pyrenaicus,wcvp,1,Synonym,(Gouan) Holub,Scorzoneroides pyrenaica,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pilosella glacialis,Pilosella glacialis,Pilosella glacialis,wcvp,1,Accepted,(Reyn. ex Lachen.) F.W.Schultz & Sch.Bip.,Pilosella glacialis,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bupleurum falcatum,Bupleurum falcatum,Bupleurum falcatum,wcvp,1,Accepted,L.,Bupleurum falcatum,Apiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Crepis bocconei,Crepis pontana,Crepis bocconei,wcvp,1,Synonym,(L.) Dalla Torre,Crepis pontana,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex capillaris,Carex capillaris,Carex capillaris,wcvp,1,Accepted,L.,Carex capillaris,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Platanthera bifolia,Platanthera bifolia,Platanthera bifolia,wcvp,1,Accepted,(L.) Rich.,Platanthera bifolia,Orchidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex myosuroides,Carex myosuroides,Carex myosuroides,wcvp,1,Accepted,Vill.,Carex myosuroides,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Carex foetida,Carex foetida,Carex foetida,wcvp,1,Accepted,All.,Carex foetida,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hypericum maculatum maculatum,Hypericum maculatum subsp. maculatum,Hypericum maculatum subsp. maculatum,wcvp,0.96021221090168,Accepted,,Hypericum maculatum,Hypericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hypericum hirsutum,Hypericum hirsutum,Hypericum hirsutum,wcvp,1,Accepted,L.,Hypericum hirsutum,Hypericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentianella campestris,Gentianella campestris,Gentianella campestris,wcvp,1,Accepted,(L.) Börner,Gentianella campestris,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium glanduliferum,Hieracium piliferum subsp. glanduliferum,Hieracium glanduliferum,wcvp,1,Synonym,(Hoppe) Zahn,Hieracium piliferum,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Crepis pontana,Crepis pontana,Crepis pontana,wcvp,1,Accepted,(L.) Dalla Torre,Crepis pontana,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pulmonaria australis,Pulmonaria australis,Pulmonaria australis,wcvp,1,Accepted,(Murr) W.Sauer,Pulmonaria australis,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cuscuta epithymum,Cuscuta epithymum,Cuscuta epithymum,wcvp,1,Accepted,(L.) L.,Cuscuta epithymum,Convolvulaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Viola riviniana,Viola riviniana,Viola riviniana,wcvp,1,Accepted,Rchb.,Viola riviniana,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium vulgatum,Hieracium lachenalii subsp. lachenalii,Hieracium vulgatum,wcvp,1,Synonym,,Hieracium lachenalii,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Alchemilla alpina,Alchemilla alpina,Alchemilla alpina,wcvp,1,Accepted,L.,Alchemilla alpina,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Dianthus deltoides,Dianthus deltoides,Dianthus deltoides,wcvp,1,Accepted,L.,Dianthus deltoides,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Betula pubescens,Betula pubescens,Betula pubescens,wcvp,1,Accepted,Ehrh.,Betula pubescens,Betulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Noccaea caerulescens,Noccaea caerulescens,Noccaea caerulescens,wcvp,1,Accepted,(J.Presl & C.Presl) F.K.Mey.,Noccaea caerulescens,Brassicaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sedum acre,Sedum acre,Sedum acre,wcvp,1,Accepted,L.,Sedum acre,Crassulaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Galium uliginosum,Galium uliginosum,Galium uliginosum,wcvp,1,Accepted,L.,Galium uliginosum,Rubiaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Carex atrata,Carex atrata,Carex atrata,wcvp,1,Accepted,L.,Carex atrata,Cyperaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Carex norvegica,Carex norvegica,Carex norvegica,wcvp,1,Accepted,Retz.,Carex norvegica,Cyperaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Carex vaginata,Carex vaginata,Carex vaginata,wcvp,1,Accepted,Tausch,Carex vaginata,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Omalotheca supina,Omalotheca supina,Omalotheca supina,wcvp,1,Accepted,(L.) DC.,Omalotheca supina,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Omalotheca norvegica,Omalotheca norvegica,Omalotheca norvegica,wcvp,1,Accepted,(Gunnerus) F.W.Schultz & Sch.Bip.,Omalotheca norvegica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Phyllodoce caerulea,Phyllodoce caerulea,Phyllodoce caerulea,wcvp,1,Accepted,(L.) Bab.,Phyllodoce caerulea,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Gentianella amarella,Gentianella amarella,Gentianella amarella,wcvp,1,Accepted,(L.) Börner,Gentianella amarella,Gentianaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Viscaria vulgaris,Viscaria vulgaris,Viscaria vulgaris,wcvp,1,Accepted,Bernh.,Viscaria vulgaris,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cerastium cerastoides,Dichodon cerastoides,Cerastium cerastoides,wcvp,1,Synonym,(L.) Rchb.,Dichodon cerastoides,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Tofieldia pusilla,Tofieldia pusilla,Tofieldia pusilla,wcvp,1,Accepted,(Michx.) Pers.,Tofieldia pusilla,Tofieldiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Minuartia biflora,Cherleria biflora,Minuartia biflora,wcvp,1,Synonym,(L.) A.J.Moore & Dillenb.,Cherleria biflora,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex pilulifera,Carex pilulifera,Carex pilulifera,wcvp,1,Accepted,L.,Carex pilulifera,Cyperaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Comastoma tenellum,Comastoma tenellum,Comastoma tenellum,wcvp,1,Accepted,(Rottb.) Toyok.,Comastoma tenellum,Gentianaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Ranunculus auricomus,Ranunculus auricomus,Ranunculus auricomus,wcvp,1,Accepted,L.,Ranunculus auricomus,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex nigra,Carex nigra,Carex nigra,wcvp,1,Accepted,(L.) Reichard,Carex nigra,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Hieracium umbellatum,Hieracium umbellatum,Hieracium umbellatum,wcvp,1,Accepted,L.,Hieracium umbellatum,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Potentilla argentea,Potentilla argentea,Potentilla argentea,wcvp,1,Accepted,L.,Potentilla argentea,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Erigeron uniflorus,Erigeron uniflorus,Erigeron uniflorus,wcvp,1,Accepted,L.,Erigeron uniflorus,Asteraceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Empetrum hermaphroditum,Empetrum nigrum subsp. nigrum,Empetrum hermaphroditum,wcvp,1,Synonym,,Empetrum nigrum,Ericaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pinus sylvestris,Pinus sylvestris,Pinus sylvestris,wcvp,1,Accepted,L.,Pinus sylvestris,Pinaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Luzula pilosa,Luzula pilosa,Luzula pilosa,wcvp,1,Accepted,(L.) Willd.,Luzula pilosa,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola canina,Viola canina,Viola canina,wcvp,1,Accepted,L.,Viola canina,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Pinguicula vulgaris,Pinguicula vulgaris,Pinguicula vulgaris,wcvp,1,Accepted,L.,Pinguicula vulgaris,Lentibulariaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Melampyrum sylvaticum,Melampyrum sylvaticum,Melampyrum sylvaticum,wcvp,1,Accepted,L.,Melampyrum sylvaticum,Orobanchaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Galium saxatile,Galium saxatile,Galium saxatile,wcvp,1,Accepted,L.,Galium saxatile,Rubiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Viola palustris,Viola palustris,Viola palustris,wcvp,1,Accepted,L.,Viola palustris,Violaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex leporina,Carex leporina,Carex leporina,wcvp,1,Accepted,L.,Carex leporina,Cyperaceae,4,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Agrostis mertensii,Agrostis mertensii,Agrostis mertensii,wcvp,1,Accepted,Trin.,Agrostis mertensii,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saxifraga aizoides,Saxifraga aizoides,Saxifraga aizoides,wcvp,1,Accepted,L.,Saxifraga aizoides,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Arctous alpinus,Arctous alpina,Arctous alpina,wcvp,0.92876649034479,Accepted,(L.) Nied.,Arctous alpina,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Rubus idaeus,Rubus idaeus,Rubus idaeus,wcvp,1,Accepted,L.,Rubus idaeus,Rosaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Calluna vulgaris,Calluna vulgaris,Calluna vulgaris,wcvp,1,Accepted,(L.) Hull,Calluna vulgaris,Ericaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Deschampsia alpina,Deschampsia cespitosa subsp. cespitosa,Deschampsia alpina,wcvp,1,Synonym,,Deschampsia cespitosa,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Parnassia palustris,Parnassia palustris,Parnassia palustris,wcvp,1,Accepted,L.,Parnassia palustris,Celastraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex panicea,Carex panicea,Carex panicea,wcvp,1,Accepted,L.,Carex panicea,Cyperaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Tofieldia calyculata,Tofieldia calyculata,Tofieldia calyculata,wcvp,1,Accepted,(L.) Wahlenb.,Tofieldia calyculata,Tofieldiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Valeriana sambucifolia,Valeriana excelsa subsp. sambucifolia,Valeriana sambucifolia,wcvp,1,Synonym,(J.C.Mikan ex Pohl) Holub,Valeriana excelsa,Caprifoliaceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Oxalis acetosella,Oxalis acetosella,Oxalis acetosella,wcvp,1,Accepted,L.,Oxalis acetosella,Oxalidaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Kobresia simpliciuscula,Carex simpliciuscula,Kobresia simpliciuscula,wcvp,1,Synonym,Wahlenb.,Carex simpliciuscula,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aconitum septentrionale,Aconitum septentrionale,Aconitum septentrionale,wcvp,1,Accepted,Koelle,Aconitum septentrionale,Ranunculaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex pulicaris,Carex pulicaris,Carex pulicaris,wcvp,1,Accepted,L.,Carex pulicaris,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Trichophorum cespitosum,Trichophorum cespitosum,Trichophorum cespitosum,wcvp,1,Accepted,(L.) Hartm.,Trichophorum cespitosum,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Cirsium palustre,Cirsium palustre,Cirsium palustre,wcvp,1,Accepted,(L.) Scop.,Cirsium palustre,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex flava,Carex flava,Carex flava,wcvp,1,Accepted,L.,Carex flava,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anemone nemorosa,Anemonoides nemorosa,Anemone nemorosa,wcvp,1,Synonym,(L.) Holub,Anemonoides nemorosa,Ranunculaceae,2,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Viscaria alpina,Viscaria alpina,Viscaria alpina,wcvp,1,Accepted,(L.) G.Don,Viscaria alpina,Caryophyllaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex saxatilis,Carex saxatilis,Carex saxatilis,wcvp,1,Accepted,L.,Carex saxatilis,Cyperaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis lapponica,Oxytropis lapponica,Oxytropis lapponica,wcvp,1,Accepted,(Wahlenb.) J.Gay,Oxytropis lapponica,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Juniperus communis,Juniperus communis,Juniperus communis,wcvp,1,Accepted,L.,Juniperus communis,Cupressaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Succisa pratensis,Succisa pratensis,Succisa pratensis,wcvp,1,Accepted,Moench,Succisa pratensis,Caprifoliaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Omalotheca sylvatica,Omalotheca sylvatica,Omalotheca sylvatica,wcvp,1,Accepted,(L.) F.W.Schultz & Sch.Bip.,Omalotheca sylvatica,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex echinata,Carex echinata,Carex echinata,wcvp,1,Accepted,Murray,Carex echinata,Cyperaceae,3,[Ambiguous] [Overall] [Ambiguous] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Danthonia decumbens,Danthonia decumbens,Danthonia decumbens,wcvp,1,Accepted,(L.) DC.,Danthonia decumbens,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Juncus alpinoarticulatus,Juncus alpinoarticulatus,Juncus alpinoarticulatus,wcvp,1,Accepted,Chaix,Juncus alpinoarticulatus,Juncaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Saxifraga cespitosa,Saxifraga cespitosa,Saxifraga cespitosa,wcvp,1,Accepted,L.,Saxifraga cespitosa,Saxifragaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Carex dioica,Carex dioica,Carex dioica,wcvp,1,Accepted,L.,Carex dioica,Cyperaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Epilobium anagallidifolium,Epilobium anagallidifolium,Epilobium anagallidifolium,wcvp,1,Accepted,Lam.,Epilobium anagallidifolium,Onagraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Aristida purpurea,Aristida purpurea,Aristida purpurea,wcvp,1,Accepted,Nutt.,Aristida purpurea,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Blepharoneuron tricholepis,Muhlenbergia tricholepis,Blepharoneuron tricholepis,wcvp,1,Synonym,(Torr.) P.M.Peterson,Muhlenbergia tricholepis,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Bouteloua gracilis,Bouteloua gracilis,Bouteloua gracilis,wcvp,1,Accepted,(Kunth) Lag. ex Griffiths,Bouteloua gracilis,Poaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Elymus elymoides,Elymus elymoides,Elymus elymoides,wcvp,1,Accepted,(Raf.) Swezey,Elymus elymoides,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Muhlenbergia minutissima,Muhlenbergia minutissima,Muhlenbergia minutissima,wcvp,1,Accepted,(Steud.) Swallen,Muhlenbergia minutissima,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Muhlenbergia montana,Muhlenbergia montana,Muhlenbergia montana,wcvp,1,Accepted,(Nutt.) Hitchc.,Muhlenbergia montana,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Poa compressa,Poa compressa,Poa compressa,wcvp,1,Accepted,L.,Poa compressa,Poaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Poa nemoralis var. interior,Poa interior,Poa nemoralis var. interior,wcvp,1,Synonym,Rydb.,Poa interior,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Schizachyrium scoparium,Schizachyrium scoparium,Schizachyrium scoparium,wcvp,1,Accepted,(Michx.) Nash,Schizachyrium scoparium,Poaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Amaranthus powellii,Amaranthus powellii,Amaranthus powellii,wcvp,1,Accepted,S.Watson,Amaranthus powellii,Amaranthaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Anaphalis margaritacea,Anaphalis margaritacea,Anaphalis margaritacea,wcvp,1,Accepted,(L.) Benth. & Hook.f.,Anaphalis margaritacea,Asteraceae,1,[Ambiguous],FALSE,,2026-10-28,0.2.1,0.3.6
+Bahia dissecta,Hymenothrix dissecta,Bahia dissecta,wcvp,1,Synonym,(A.Gray) B.G.Baldwin,Hymenothrix dissecta,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chenopodium atrovirens,Chenopodium atrovirens,Chenopodium atrovirens,wcvp,1,Accepted,Rydb.,Chenopodium atrovirens,Amaranthaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chenopodium fremontii,Chenopodium fremontii,Chenopodium fremontii,wcvp,1,Accepted,S.Watson,Chenopodium fremontii,Amaranthaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chenopodium leptophyllum,Chenopodium leptophyllum,Chenopodium leptophyllum,wcvp,1,Accepted,(Moq.) Nutt. ex S.Watson,Chenopodium leptophyllum,Amaranthaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chamaesyce maculata,Euphorbia maculata,Chamaesyce maculata,wcvp,1,Synonym,L.,Euphorbia maculata,Euphorbiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chamaesyce serpyllifolia,Euphorbia serpillifolia,Chamaesyce serpillifolia,wcvp,0.98850510141534,Synonym,Pers.,Euphorbia serpillifolia,Euphorbiaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Chamaesyce serrula,Euphorbia serrula,Chamaesyce serrula,wcvp,1,Synonym,Engelm.,Euphorbia serrula,Euphorbiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Drymaria molluginea,Drymaria molluginea,Drymaria molluginea,wcvp,1,Accepted,(Hornem.) Didr.,Drymaria molluginea,Caryophyllaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Dysphania graveolens,Dysphania incisa,Dysphania graveolens,wcvp,1,Synonym,(Poir.) ined.,Dysphania incisa,Amaranthaceae,2,,FALSE,,2026-10-28,0.2.1,0.3.6
+Erigeron formosissimus,Erigeron formosissimus,Erigeron formosissimus,wcvp,1,Accepted,Greene,Erigeron formosissimus,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Erigeron divergens,Erigeron divergens,Erigeron divergens,wcvp,1,Accepted,Torr. & A.Gray,Erigeron divergens,Asteraceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Lappula occidentalis,Lappula occidentalis,Lappula occidentalis,wcvp,1,Accepted,(S.Watson) Greene,Lappula occidentalis,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Lappula squarrosa,Lappula squarrosa,Lappula squarrosa,wcvp,1,Accepted,(Retz.) Dumort.,Lappula squarrosa,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Nama dichotomum,Nama dichotoma,Nama dichotomum,wcvp,1,Synonym,(Ruiz & Pav.) Choisy,Nama dichotoma,Boraginaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Oxytropis lambertii,Oxytropis lambertii,Oxytropis lambertii,wcvp,1,Accepted,Pursh,Oxytropis lambertii,Fabaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Salsola collina,Salsola collina,Salsola collina,wcvp,1,Accepted,Pall.,Salsola collina,Amaranthaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Sphaeralcea ambigua,Sphaeralcea ambigua,Sphaeralcea ambigua,wcvp,1,Accepted,A.Gray,Sphaeralcea ambigua,Malvaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Plantago patagonica,Plantago patagonica,Plantago patagonica,wcvp,1,Accepted,Jacq.,Plantago patagonica,Plantaginaceae,2,[Overall] [HigherTaxa],FALSE,,2026-10-28,0.2.1,0.3.6
+Stachys byzantina,Stachys byzantina,Stachys byzantina,wcvp,1,Accepted,K.Koch,Stachys byzantina,Lamiaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Townsendia smithii,Townsendia smithii,Townsendia smithii,wcvp,1,Accepted,L.M.Shultz & A.H.Holmgren,Townsendia smithii,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Verbena macdougalii,Verbena macdougalii,Verbena macdougalii,wcvp,1,Accepted,A.Heller,Verbena macdougalii,Verbenaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Verbascum thapsus,Verbascum thapsus,Verbascum thapsus,wcvp,1,Accepted,L.,Verbascum thapsus,Scrophulariaceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6
+Xanthisma gracile,Xanthisma gracile,Xanthisma gracile,wcvp,1,Accepted,(Nutt.) D.R.Morgan & R.L.Hartm.,Xanthisma gracile,Asteraceae,1,,FALSE,,2026-10-28,0.2.1,0.3.6

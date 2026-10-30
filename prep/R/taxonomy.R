@@ -46,26 +46,47 @@ names_try <- function(try_names, name_resolution_study) {
   out
 }
 
-# The TNRS calls of the pipeline (study names, then TRY names); each reruns
-# only when its list of names changes. The date and package versions travel
-# with the result.
+# The TNRS call, made only by prep/update_tnrs_cache.R: TNRS answers can
+# change between runs, so the pipeline reads the saved answers instead.
 # All candidates for 5,000 names in one request fails on the TNRS server
 # (HTTP 500), hence smaller batches.
-resolve_names <- function(names_all, batch_size = 1000L) {
+tnrs_resolve <- function(names, batch_size = 1000L) {
   # warnings (e.g. TNRS rows of unrelated names dropped) go to the report
   warns <- character()
   res <- withCallingHandlers(
-    tidyTRY::resolve_species(names_all$name, method = "tnrs", sources = c("wcvp", "wfo"),
-                             batch_size = batch_size),
+    tidyTRY::resolve_species(names, method = "tnrs", sources = c("wcvp", "wfo"), batch_size = batch_size),
     warning = function(w) {
       warns <<- c(warns, conditionMessage(w))
       invokeRestart("muffleWarning")
     })
   attr(res, "warnings") <- warns
-  attr(res, "resolved") <- list(date = as.character(Sys.Date()),
-                                tidyTRY = as.character(utils::packageVersion("tidyTRY")),
-                                TNRS = as.character(utils::packageVersion("TNRS")))
   res
+}
+
+read_tnrs_cache <- function(cache_file) {
+  readr::read_csv(cache_file, na = "", progress = FALSE,
+                  col_types = readr::cols(score = "d", n_legitimate = "i", needs_review = "l", .default = "c")) |>
+    as.data.frame() |>
+    tibble::as_tibble()
+}
+
+# The pipeline's name resolution: the TNRS answers saved in prep/tnrs/ (one
+# row per name, with the date and package versions of its call). A name
+# missing from the cache stops the pipeline; prep/update_tnrs_cache.R adds it.
+resolve_names <- function(names_all, cache_file, warnings_file) {
+  cache <- read_tnrs_cache(cache_file)
+  missing <- setdiff(names_all$name, cache$submitted_name)
+  if (length(missing))
+    stop(length(missing), " names are not in ", cache_file, " (e.g. ", paste(utils::head(missing, 5), collapse = "; "),
+         "). Run `Rscript prep/update_tnrs_cache.R` to resolve them with TNRS.", call. = FALSE)
+  res <- cache[cache$submitted_name %in% names_all$name, ]
+  stopifnot(setequal(res$submitted_name, names_all$name), !anyDuplicated(res$submitted_name))
+  warns <- readr::read_csv(warnings_file, col_types = readr::cols(.default = "c"), progress = FALSE)
+  attr(res, "warnings") <- warns$message[warns$cache_file == basename(cache_file)]
+  attr(res, "resolved") <- list(date = paste(unique(res$resolved_date), collapse = ", "),
+                                tidyTRY = paste(unique(res$tidyTRY), collapse = ", "),
+                                TNRS = paste(unique(res$TNRS), collapse = ", "))
+  dplyr::select(res, -resolved_date, -tidyTRY, -TNRS)
 }
 
 # One row per community name: accepted name and species, family, status and

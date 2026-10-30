@@ -28,6 +28,10 @@ list(
   tar_target(legacy_placements_file, "prep/config/phylogeny_placements_legacy.csv", format = "file"),
   tar_target(legacy_taxonomy_file, "prep/config/legacy_taxonomy.csv", format = "file"),
   tar_target(placements_file, "prep/config/phylogeny_placements.csv", format = "file"),
+  # TNRS answers saved by prep/update_tnrs_cache.R; the pipeline never calls TNRS
+  tar_target(tnrs_study_file, "prep/tnrs/name_resolution_study.csv", format = "file"),
+  tar_target(tnrs_try_file, "prep/tnrs/name_resolution_try.csv.gz", format = "file"),
+  tar_target(tnrs_warnings_file, "prep/tnrs/warnings.csv", format = "file"),
   tar_target(chelsa_files, chelsa_cache_files(), format = "file"),
   # written by prep/gbif_niche.R (P6), outside the pipeline: the GBIF download
   # is a frozen input with a DOI, and the script stops if its species differ
@@ -51,9 +55,9 @@ list(
   tar_target(community_named, name_community(community_raw, dictionary)),
   tar_target(try_names, tidyTRY::try_species_names(try_file, progress = FALSE)),
   tar_target(study_names, names_study(community_named, unidentified)),
-  tar_target(name_resolution_study, resolve_names(study_names)),
+  tar_target(name_resolution_study, resolve_names(study_names, tnrs_study_file, tnrs_warnings_file)),
   tar_target(try_candidate_names, names_try(try_names, name_resolution_study)),
-  tar_target(name_resolution_try, resolve_names(try_candidate_names)),
+  tar_target(name_resolution_try, resolve_names(try_candidate_names, tnrs_try_file, tnrs_warnings_file)),
   tar_target(names_all, dplyr::bind_rows(study_names, try_candidate_names)),
   # every later join uses these resolutions, with the accepted-name renames applied
   tar_target(name_resolution,

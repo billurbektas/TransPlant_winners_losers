@@ -1,0 +1,10 @@
+cache_file,resolved_date,message
+name_resolution_try.csv.gz,2026-10-28,"TNRS returned 40 candidate rows of an unrelated name (another genus with a
+perfect name score); dropped.
+ℹ Affected: ""Pimpinella peregrina"", ""Euphorbia ruficeps"", ""Myosotis scorpioides
+  agg."", ""Vaccinium vitis-idaea L. Orthodox"", ""Rosa chinensis Jacq."", ""KALMIA
+  ANGUSTIFOLIA L."", ""ROSA MICRANTHA Borrer ex Sm."", ""Arabis canadensis L."",
+  ""Senecio piptocoma O.Hoffm."", ""Vicia lutea L. subsp. vestita (Boiss.) Rouy"",
+  ""Atriplex leucoclada Boiss."", ""Symphyotrichum ciliatum"", ""Trifolium pratense
+  subsp. nivale"", ""Senecio latifolius"", ""Castilleja arctica"", ""Centaurea
+  antennata"", ""Rheum palaestinum"", ""Urtica bianorii"", and ""Carex planostachys""."
