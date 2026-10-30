@@ -24,3 +24,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include 03_temporal.md >}}
 
 {{< include 03b_strength_y3.md >}}
+
+{{< include 04_classification.md >}}
