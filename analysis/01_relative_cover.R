@@ -12,8 +12,12 @@
 #         kept, decided 28 Oct); no duplicate experiment x plot x year x
 #         species x treatment; every pool species has both A0 values.
 #
-# Decided 28 Oct (Bills): the observation filter (>= 2 plot-year records)
-# decides pool membership only and all observed cover is kept; pools over all
+# Decided 30 Oct (Bills): a resident is recorded in at least half of the
+# origin-control plots and in at least two years of origin controls; a
+# destination-pool species in at least half of the destination-control plots
+# and in at least two years of destination controls, with no record in the
+# origin controls (replaces the 28 Oct rule of >= 2 plot-year records). The
+# rule decides pool membership only and all observed cover is kept; pools over all
 # survey years; no pool-size rule (dropped 29 Oct: every included experiment
 # passed it); A0 from the first available survey of
 # each control group, log of the plot mean in % + 1; gradient_id = region;
@@ -35,7 +39,8 @@ dir.create("figures/diagnostics", recursive = TRUE, showWarnings = FALSE)
 
 deep_lineage <- c("Gymnocarpium dryopteris", "Athyrium spinulosum", "Botrychium lunaria",
                   "Equisetum arvense", "Selaginella selaginoides", "Juniperus communis")
-min_obs <- 2L # plot-year records for a species to count as present in a group
+min_plot_share <- 0.5 # share of a control group's plots with a record
+min_years <- 2L       # survey years with a record in that control group
 
 community <- readRDS("data/derived/prep/community.rds")
 experiments <- readRDS("data/derived/prep/experiments.rds")
@@ -93,18 +98,32 @@ year_fails <- filter(pool_years, n_groups < 2) |> arrange(experiment_id, species
 pool_years <- filter(pool_years, n_groups == 2) |> select(experiment_id, species_pool, year)
 
 # ---- Pools, from plot-year records over all survey years --------------------
-n_rec <- records |>
-  summarise(n = n_distinct(plot_year_id), .by = c(experiment_id, species, group)) |>
-  tidyr::pivot_wider(names_from = group, values_from = n, values_fill = 0)
-for (g in c("origin_control", "destination_control", "warmed")) if (!g %in% names(n_rec)) n_rec[[g]] <- 0L
-membership <- n_rec |>
+# plots and years with a record, per control group, over all survey years
+group_plots <- summarise(plots, n_plots = n_distinct(plot_id), .by = c(experiment_id, group))
+occupancy <- records |>
+  summarise(plots_with = n_distinct(plot_id), years_with = n_distinct(year), .by = c(experiment_id, species, group)) |>
+  left_join(group_plots, by = c("experiment_id", "group")) |>
+  mutate(meets_rule = plots_with >= min_plot_share * n_plots & years_with >= min_years)
+membership <- occupancy |>
+  select(experiment_id, species, group, plots_with, meets_rule) |>
+  tidyr::pivot_wider(names_from = group, values_from = c(plots_with, meets_rule),
+                     values_fill = list(plots_with = 0L, meets_rule = FALSE))
+for (g in c("origin_control", "destination_control", "warmed")) {
+  if (!paste0("plots_with_", g) %in% names(membership)) membership[[paste0("plots_with_", g)]] <- 0L
+  if (!paste0("meets_rule_", g) %in% names(membership)) membership[[paste0("meets_rule_", g)]] <- FALSE
+}
+membership <- membership |>
   mutate(species_pool = case_when(
-    origin_control >= min_obs ~ "resident",
-    destination_control >= min_obs ~ "destination_pool",
-    origin_control == 0 & destination_control == 0 ~ "warmed only",
-    TRUE ~ "below the filter in both control groups"))
+    meets_rule_origin_control ~ "resident",
+    meets_rule_destination_control & plots_with_origin_control == 0 ~ "destination_pool",
+    plots_with_origin_control == 0 & plots_with_destination_control == 0 ~ "warmed only",
+    plots_with_origin_control > 0 ~ "in origin controls, below the resident rule",
+    TRUE ~ "in destination controls only, below the destination-pool rule"))
 pools <- filter(membership, species_pool %in% c("resident", "destination_pool"))
 stopifnot(!anyDuplicated(pools[c("experiment_id", "species")])) # no species in both pools
+stopifnot(sum(pools$species_pool == "resident") == 995,         # pool rule (decided 30 Oct)
+          sum(pools$species_pool == "destination_pool") == 410,
+          n_distinct(pools$species[pools$species_pool == "resident"]) == 348)
 
 # ---- Pool sizes (description only) ---------------------------------------
 # No pool-size rule (dropped 29 Oct): every included experiment goes forward,
@@ -182,7 +201,7 @@ flow_counts <- bind_rows(
   mutate(combos(input_records), rule = "input (P1 community, identified species)", branch = "all"),
   mutate(combos(filter(input_records, experiment_id %in% included$experiment_id)), rule = "experiment exclusions (P1)", branch = "all"),
   mutate(combos(records), rule = "deep-lineage taxa removed", branch = "all"),
-  mutate(combos(pools), rule = "observation filter (>= 2 plot-year records in a control group)", branch = "all"),
+  mutate(combos(pools), rule = "pool rule (>= half of a control group's plots and >= 2 years; destination pool: no origin-control record)", branch = "all"),
   mutate(combos(filter(pools, species_pool == "resident")), rule = "pool assignment", branch = "resident"),
   mutate(combos(filter(pools, species_pool == "destination_pool")), rule = "pool assignment", branch = "destination_pool"),
 ) |>
@@ -213,9 +232,9 @@ report <- c(
          "genus-level and unidentified, the six deep-lineage taxa included), so it sums to 1 in every one of ",
          fmt(nrow(sums)), " plot-years. The analysis keeps identified species without a `drop_reason` and removes ",
          "the deep-lineage taxa afterwards. Each of the ", nrow(included), " included experiments gets its warmed ",
-         "turfs, origin controls and destination controls; a species is resident with at least ", min_obs,
-         " plot-year records in origin controls, in the destination pool with at least ", min_obs,
-         " in destination controls and fewer than ", min_obs, " in origin controls, whether or not it was ever found in ",
+         "turfs, origin controls and destination controls; a species is resident if recorded in at least half of the ",
+         "origin-control plots and in at least ", min_years, " years of origin controls, and in the destination pool if ",
+         "recorded likewise in the destination controls and never in the origin controls, whether or not it was ever found in ",
          "warmed turfs. Every included experiment goes forward (no pool-size rule), all observed cover is kept, and ",
          "every pool species gets a row, zero where unrecorded, in every surveyed plot-year of its pool's two groups."),
   "", "## Counts at every rule (`flow_counts.csv`, Fig S1)", "", md_table(select(flow_counts, -order)),
@@ -249,7 +268,7 @@ report <- c(
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   paste("Relative cover includes the six deep-lineage taxa in its denominator and removes them afterwards (decided 28 Oct;",
-        "PLAN.md Data rules updated). The observation filter decides pool membership only; observed cover of pool species",
+        "PLAN.md Data rules updated). The pool rule decides pool membership only; observed cover of pool species",
         "is kept whatever its count (decided 28 Oct; legacy removed it per treatment).")
 )
 writeLines(report, "reports/01_relative_cover.md")
