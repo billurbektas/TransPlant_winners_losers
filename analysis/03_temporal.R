@@ -125,23 +125,25 @@ for (k in seq_len(nrow(stability))) {
 }
 ribbons <- bind_rows(ribbons); labels <- bind_rows(labels)
 low <- min(strata$bottom)
-boxes <- tibble::tibble(x = c(1.5, 2.5), y = low - 4 * gap,
-                        label = sprintf("sign agreement %.2f\nCCC %.2f", stability$sign_agreement, stability$ccc))
+boxes <- tibble::tibble(x = c(1.5, 2.5), y = low - 6 * gap,
+                        label = sprintf("Sign agreement: %.2f\nLin's concordance\ncorrelation coefficient: %.2f",
+                                        stability$sign_agreement, stability$ccc))
 fig <- ggplot() +
   geom_polygon(data = ribbons, aes(x, y, group = id, fill = class), alpha = 0.35) +
   geom_rect(data = strata, aes(xmin = x - w / 2, xmax = x + w / 2, ymin = bottom, ymax = top, fill = class)) +
-  geom_text(data = filter(strata, n >= 40), aes(x, (top + bottom) / 2, label = n), colour = "white", size = 3) +
-  geom_text(data = labels, aes(x, y, label = label), size = 2.8, colour = "grey25") +
+  geom_text(data = filter(strata, n >= 40), aes(x, (top + bottom) / 2, label = n), colour = "white", size = 3.8,
+            fontface = "bold") +
+  geom_text(data = labels, aes(x, y, label = label), size = 3.5, colour = "grey25") +
   geom_text(data = filter(strata, year == 6L), aes(x + w / 2 + 0.03, (top + bottom) / 2, label = class, colour = class),
-            hjust = 0, size = 3.2) +
-  annotate("text", x = xpos, y = 2.5 * gap, label = paste("Year", anchors), size = 3.6, colour = "grey30") +
-  geom_label(data = boxes, aes(x, y, label = label), size = 3, label.size = 0.3, colour = "grey30") +
+            hjust = 0, size = 4.2) +
+  annotate("text", x = xpos, y = 3 * gap, label = paste("Year", anchors), size = 6, fontface = "bold", colour = "grey30") +
+  geom_label(data = boxes, aes(x, y, label = label), size = 5, label.size = 0.3, colour = "grey20", lineheight = 1.1) +
   scale_fill_manual(values = cols, guide = "none") + scale_colour_manual(values = cols, guide = "none") +
-  coord_cartesian(xlim = c(0.85, 3.55), clip = "off") +
+  coord_cartesian(xlim = c(0.85, 3.6), clip = "off") +
   labs(title = "a Residents: warmed minus origin contrast (draft)") +
-  theme_void() + theme(plot.title = element_text(face = "bold", size = 12, colour = "grey30"),
+  theme_void() + theme(plot.title = element_text(face = "bold", size = 16, colour = "grey30"),
                        plot.margin = margin(10, 10, 10, 10))
-ggsave("figures/diagnostics/03_fig1_residents_draft.png", fig, width = 9, height = 5.5, dpi = 150)
+ggsave("figures/diagnostics/03_fig1_residents_draft.png", fig, width = 11, height = 7.5, dpi = 150)
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
