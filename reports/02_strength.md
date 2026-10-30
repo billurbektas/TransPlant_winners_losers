@@ -18,7 +18,7 @@ strength <- contrast(emmeans(m, ~ treatment | species, df = df_plots), method = 
 
 - Fixed part: one mean per treatment x year x species cell. Residual variance: one per species (`dispformula = ~ species`, decided 30 Oct). REML; Gaussian on relative cover (bounded, zero-heavy: accepted approximation, PLAN.md Known weaknesses).
 - Degrees of freedom: origin-control plots + warmed plots - 2 of the experiment (decided 30 Oct), because treatment is applied to whole plots and the yearly surveys of a plot are repeated measures; 4 to 18 (median 12), so the two-sided 5% cut-off is t = 2.10 to 2.78 instead of z = 1.96. They change p-values only, not `strength` or `strength_se`.
-- Random part, a known limitation kept by decision (30 Oct): `(1 | plot_id:species)` has one plot x species variance shared by all species of an experiment, while the residual variance is per species. This shared term is more than half of the SE variance in 635 of 1655 effects (median share 0.21), and a species' own plot-to-plot spread grows with its residual SD (Spearman 0.94): the shared term overstates the SE of rare species and understates that of dominant ones. The species-specific alternative is `diag(0 + species | plot_id)` in place of `(1 | plot_id:species)`.
+- Random part, a known limitation kept by decision (30 Oct): `(1 | plot_id:species)` has one plot x species variance shared by all species of an experiment, while the residual variance is per species. This shared term is more than half of the SE variance in 635 of 1655 effects (median share 0.21), and a species' own plot-to-plot spread grows with its residual SD (Spearman 0.94): the shared term overstates the SE of rare species and understates that of dominant ones.
 
 ## Counts
 
