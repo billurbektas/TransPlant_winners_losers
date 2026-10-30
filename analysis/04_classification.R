@@ -115,25 +115,25 @@ x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(r
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
   geom_vline(xintercept = 0, colour = "grey50") +
-  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_experiments), linewidth = 1) +
-  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.3, stroke = 0.4) +
+  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_experiments), linewidth = 1.3) +
+  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.8, stroke = 0.4) +
   # species names in their class colour, set directly (one colour scale per plot)
-  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 3.8,
+  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 5.2,
             fontface = "italic") +
   coord_cartesian(xlim = x_lim, ylim = c(0.2, nrow(ranges) + 0.8), expand = FALSE, clip = "off") +
   # legend labels carry the total count of each class (all eligible species, shown or not)
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Experiments", low = "grey85", high = "black", breaks = c(4, 8, 12, 16, 20)) +
-  guides(fill = guide_legend(override.aes = list(size = 4))) +
+  guides(fill = guide_legend(override.aes = list(size = 5))) +
   labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
-  theme_classic(base_size = 15) +
-  theme(plot.title = element_text(face = "bold", size = 24), legend.position = "top", legend.box = "vertical",
-        legend.text = element_text(size = 14, face = "bold"), legend.title = element_text(size = 14, face = "bold"),
-        legend.key.width = unit(1.6, "cm"), axis.title.x = element_text(face = "bold", size = 16),
+  theme_classic(base_size = 20) +
+  theme(plot.title = element_text(face = "bold", size = 32), legend.position = "top", legend.box = "vertical",
+        legend.text = element_text(size = 19, face = "bold"), legend.title = element_text(size = 19, face = "bold"),
+        legend.key.width = unit(2, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 21), axis.text.x = element_text(size = 18),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
-        plot.margin = margin(10, 10, 10, 150))
-ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 12, height = 14, dpi = 150, bg = "white")
+        plot.margin = margin(10, 15, 10, 210))
+ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 16, height = 18, dpi = 150, bg = "white")
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
