@@ -115,19 +115,20 @@ x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(r
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
   geom_vline(xintercept = 0, colour = "grey50") +
-  geom_segment(aes(x = lower, xend = upper, yend = species, colour = class), linewidth = 0.9) +
-  geom_point(aes(x = mu, fill = n_experiments, colour = class), shape = 21, size = 2.3, stroke = 0.9) +
-  # species names coloured by class, so classes stay visible where the line is shorter than the point
-  geom_text(aes(x = x_lab, label = species, colour = class), hjust = 1, size = 3.8, fontface = "italic",
-            show.legend = FALSE) +
+  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_experiments), linewidth = 1) +
+  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.3, stroke = 0.4) +
+  # species names in their class colour, set directly (one colour scale per plot)
+  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 3.8,
+            fontface = "italic") +
   coord_cartesian(xlim = x_lim, ylim = c(0.2, nrow(ranges) + 0.8), expand = FALSE, clip = "off") +
-  scale_colour_manual(values = cols, name = NULL) +
-  scale_fill_gradient(name = "Experiments", low = "white", high = "black", breaks = c(4, 8, 12, 16, 20)) +
+  scale_fill_manual(values = cols, name = NULL) +
+  scale_colour_gradient(name = "Experiments", low = "grey85", high = "black", breaks = c(4, 8, 12, 16, 20)) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) +
   labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
   theme_classic(base_size = 15) +
   theme(plot.title = element_text(face = "bold", size = 24), legend.position = "top", legend.box = "vertical",
         legend.text = element_text(size = 14, face = "bold"), legend.title = element_text(size = 14, face = "bold"),
-        legend.key.width = unit(1.6, "cm"), plot.subtitle = element_text(size = 13, colour = "grey25"), axis.title.x = element_text(face = "bold", size = 16),
+        legend.key.width = unit(1.6, "cm"), axis.title.x = element_text(face = "bold", size = 16),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
         plot.margin = margin(10, 10, 10, 150))
 ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 12, height = 14, dpi = 150, bg = "white")
@@ -168,8 +169,8 @@ report <- c(
   "![Fig 2 draft](../figures/diagnostics/04_fig2_draft.png)", "",
   "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
   "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)", "",
-  paste0("Fig S6: point = pooled strength; line = 95% interval including the variation among experiments (a line that ",
-         "does not cross zero marks a consistent loser or winner); points filled by the number of experiments. ",
+  paste0("Fig S6: point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
+         "(a line that does not cross zero marks a consistent loser or winner), shaded by the number of experiments. ",
          n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +", min_shown,
          " are not shown."),
   "", "## Warnings captured", "",
