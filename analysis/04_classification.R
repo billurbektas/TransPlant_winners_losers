@@ -104,28 +104,38 @@ ggsave("figures/diagnostics/04_fig2_draft.png", fig2, width = 10, height = 9, dp
 # ---- Fig S6 draft: species overview -------------------------------------
 # one row per species: pooled mean (point) and the model's prediction interval
 # for a new experiment (line), the interval that sets the class (Bills, 30 Oct)
-ranges <- species_summary |> arrange(mu) |> mutate(species = factor(species, levels = species))
+# readable version (Bills, 30 Oct): species with a pooled strength of at least
+# half a percentage point of relative cover, plus every consistent species
+min_shown <- 0.005
+ranges <- species_summary |>
+  filter(abs(mu) >= min_shown | class != "Context-dependent") |>
+  arrange(mu) |> mutate(species = factor(species, levels = species))
+n_hidden <- nrow(species_summary) - nrow(ranges)
 x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(ranges$lower, ranges$upper)))
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
   geom_vline(xintercept = 0, colour = "grey50") +
   geom_segment(aes(x = lower, xend = upper, yend = species, colour = class), linewidth = 0.9) +
-  geom_point(aes(x = mu, fill = n_experiments), shape = 21, colour = "grey20", size = 2.8, stroke = 0.3) +
+  geom_point(aes(x = mu, fill = n_experiments), shape = 21, colour = "black", size = 3.4, stroke = 0.5) +
   # species names coloured by class, so classes stay visible where the line is shorter than the point
-  geom_text(aes(x = x_lab, label = species, colour = class), hjust = 1, size = 2.9, fontface = "italic",
+  geom_text(aes(x = x_lab, label = species, colour = class), hjust = 1, size = 3.8, fontface = "italic",
             show.legend = FALSE) +
-  coord_cartesian(xlim = x_lim, expand = FALSE, clip = "off") +
+  coord_cartesian(xlim = x_lim, ylim = c(0.2, nrow(ranges) + 0.8), expand = FALSE, clip = "off") +
   scale_colour_manual(values = cols, name = NULL) +
-  scale_fill_viridis_c(name = "Experiments", option = "plasma", direction = -1, breaks = c(4, 8, 12, 16, 20)) +
-  labs(title = "a)", x = expression(bold("Losing-winning strength: pooled mean ")*mu[s]*bold(" (point), ")*
-                                      mu[s] %+-% 1.96*sqrt(tau[s]^2 + SE(mu[s])^2)*bold(" (line)")),
-       y = NULL) +
+  scale_fill_gradient(name = "Experiments", low = "white", high = "black", breaks = c(4, 8, 12, 16, 20)) +
+  labs(title = "a)",
+       subtitle = paste0("Point: pooled strength across experiments.\nLine: 95% interval including the variation among ",
+                         "experiments;\na line that does not cross zero marks a consistent loser or winner.\n",
+                         n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +",
+                         min_shown, " are not shown."),
+       x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
   theme_classic(base_size = 15) +
   theme(plot.title = element_text(face = "bold", size = 24), legend.position = "top", legend.box = "vertical",
         legend.text = element_text(size = 14, face = "bold"), legend.title = element_text(size = 14, face = "bold"),
-        legend.key.width = unit(1.6, "cm"), axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
+        legend.key.width = unit(1.6, "cm"), plot.subtitle = element_text(size = 13, colour = "grey25"), axis.title.x = element_text(face = "bold", size = 16),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
         plot.margin = margin(10, 10, 10, 150))
-ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 11, height = 20, dpi = 150, bg = "white")
+ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 12, height = 14, dpi = 150, bg = "white")
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
