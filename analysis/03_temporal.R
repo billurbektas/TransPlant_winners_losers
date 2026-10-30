@@ -101,7 +101,7 @@ strata <- count(classes, year, class) |>
   arrange(year, class) |>
   mutate(top = -(cumsum(n) - n + (as.integer(class) - 1) * gap), bottom = top - n, x = xpos[as.character(year)], .by = year)
 side <- function(cl) ifelse(cl %in% c("Loser", "Loser (ns)"), "loser side", "winner side")
-ribbons <- list(); labels <- list(); switch_labels <- list()
+ribbons <- list(); switch_labels <- list()
 for (k in seq_len(nrow(stability))) {
   y1 <- anchors[k]; y2 <- anchors[k + 1]; fl <- as.data.frame(stability$flows[[k]], stringsAsFactors = FALSE)
   names(fl) <- c("from", "to", "n")
@@ -119,21 +119,20 @@ for (k in seq_len(nrow(stability))) {
                                                       (fl$from[i] %in% c("Loser", "Winner") | fl$to[i] %in% c("Loser", "Winner")),
                                                     x = c(x, rev(x)), y = c(upper, rev(upper - fl$n[i])))
   }
-  # ribbons that cross zero, summed by direction, with the share of their starting side
-  cross <- fl |> filter(side(from) != side(to)) |> mutate(dir = side(from)) |>
-    summarise(y = mean(s0 + (t0 - s0) / 2 - n / 2), n = sum(n), .by = dir)
-  start_n <- src |> mutate(dir = side(class)) |> summarise(n = sum(n), .by = dir)
-  labels[[k]] <- mutate(cross, x = mean(xpos[c(as.character(y1), as.character(y2))]),
-                        label = sprintf("%d (%.0f%%)", n, 100 * n / start_n$n[match(dir, start_n$dir)]))
-  # ribbons that cross zero with a significant class at either end, labelled on the ribbon
+  # every ribbon that crosses zero is labelled where it enters the next anchor:
+  # its count and its share of the class it started from, in that class's colour
   switch_labels[[k]] <- fl |>
-    filter(side(from) != side(to), from %in% c("Loser", "Winner") | to %in% c("Loser", "Winner")) |>
-    transmute(x = mean(xpos[c(as.character(y1), as.character(y2))]), y = s0 + (t0 - s0) / 2 - n / 2,
-              label = paste0(from, " \u2192 ", to, ": ", n))
+    filter(side(from) != side(to)) |>
+    mutate(share = 100 * n / src$n[match(from, src$class)]) |>
+    transmute(x = xpos[as.character(y2)] - w / 2 - 0.01, y = t0 - n / 2, class = from,
+              label = sprintf("%d (%s%%)", n, ifelse(share < 1, sprintf("%.1f", share), sprintf("%.0f", share))))
 }
 switches <- sapply(stability$flows, function(f) c(lw = f["Loser", "Winner"], wl = f["Winner", "Loser"]))
-ribbons <- bind_rows(ribbons); labels <- bind_rows(labels)
-switch_labels <- bind_rows(switch_labels, tibble::tibble(x = numeric(), y = numeric(), label = character()))
+ribbons <- bind_rows(ribbons)
+# labels entering the same column are pushed apart from the top down, so none overlap
+switch_labels <- bind_rows(switch_labels) |>
+  arrange(x, desc(y)) |>
+  mutate(y = Reduce(function(prev, cur) min(cur, prev - 1.3 * gap), y, accumulate = TRUE), .by = x)
 low <- min(strata$bottom)
 boxes <- tibble::tibble(x = head(xpos, -1) + 0.5, y = low - 6 * gap,
                         label = sprintf("Sign agreement: %.2f\nLin's concordance\ncorrelation coefficient: %.2f",
@@ -145,9 +144,8 @@ fig <- ggplot() +
   geom_rect(data = strata, aes(xmin = x - w / 2, xmax = x + w / 2, ymin = bottom, ymax = top, fill = class)) +
   geom_text(data = filter(strata, n >= 40), aes(x, (top + bottom) / 2, label = n), colour = "white", size = 3.8,
             fontface = "bold") +
-  geom_text(data = labels, aes(x, y, label = label), size = 3.5, colour = "grey25") +
-  geom_label(data = switch_labels, aes(x, y, label = label), size = 3.4, fontface = "bold", colour = "grey10",
-             fill = "white", label.size = 0.2, label.padding = unit(0.12, "lines")) +
+  geom_label(data = switch_labels, aes(x, y, label = label, colour = class), hjust = 1, size = 3.6,
+             fontface = "bold", fill = "white", label.size = 0, label.padding = unit(0.08, "lines")) +
   geom_text(data = filter(strata, year == 6L), aes(x + w / 2 + 0.03, (top + bottom) / 2, label = class, colour = class),
             hjust = 0, size = 4.2) +
   annotate("text", x = xpos, y = 3 * gap, label = paste("Year", anchors), size = 6, fontface = "bold", colour = "grey30") +
@@ -186,14 +184,13 @@ report <- c(
   "## Fig 1 panel a (draft)", "",
   "![Fig 1a draft](../figures/diagnostics/03_fig1_residents_draft.png)", "",
   paste0("Strata are drawn to one absolute scale, so columns shrink as experiments end and as species are absent from ",
-         "both groups. Ribbon labels give the combinations that crossed from the loser side (Loser, Loser (ns)) to the ",
-         "winner side or back, with their share of the starting side. The final figure, with panel b (colonizers, ",
+         "both groups. The final figure, with panel b (colonizers, ",
          "step 07), is drawn in step 10. Columns are evenly spaced: the gap from year 4 to year 6 spans two years, ",
          "the others one."),
   "",
   paste0("Switches between a significant winner and a significant loser, in either direction: ",
          paste(sprintf("%s: %d", stability$pair, switches["lw", ] + switches["wl", ]), collapse = "; "),
-         ". Ribbons that cross zero with a significant class at either end are drawn darker and labelled with their count."),
+         ". Ribbons that cross zero with a significant class at either end are drawn darker; every ribbon that crosses zero is labelled where it enters the next anchor with its count and its share of the class it started from."),
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   paste("Combinations absent from both groups in an anchor year (", sum(absent_counts$absent), " of ", fmt(nrow(at_anchor)),

@@ -52,9 +52,9 @@ Each resident species x experiment was classified at years 2, 3, 4 and 6 after t
 
 ![Fig 1a draft](../figures/diagnostics/03_fig1_residents_draft.png)
 
-Strata are drawn to one absolute scale, so columns shrink as experiments end and as species are absent from both groups. Ribbon labels give the combinations that crossed from the loser side (Loser, Loser (ns)) to the winner side or back, with their share of the starting side. The final figure, with panel b (colonizers, step 07), is drawn in step 10. Columns are evenly spaced: the gap from year 4 to year 6 spans two years, the others one.
+Strata are drawn to one absolute scale, so columns shrink as experiments end and as species are absent from both groups. The final figure, with panel b (colonizers, step 07), is drawn in step 10. Columns are evenly spaced: the gap from year 4 to year 6 spans two years, the others one.
 
-Switches between a significant winner and a significant loser, in either direction: 2 to 3: 0; 3 to 4: 0; 4 to 6: 0. Ribbons that cross zero with a significant class at either end are drawn darker and labelled with their count.
+Switches between a significant winner and a significant loser, in either direction: 2 to 3: 0; 3 to 4: 0; 4 to 6: 0. Ribbons that cross zero with a significant class at either end are drawn darker; every ribbon that crosses zero is labelled where it enters the next anchor with its count and its share of the class it started from.
 
 ## Warnings captured
 
