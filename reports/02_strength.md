@@ -40,8 +40,6 @@ Quantiles (min / 25% / median / 75% / max). strength: -0.2965 / -0.0091 / -0.001
 
 With one residual variance per species, the SE follows each species' own scatter: within an experiment the largest SE is a median of 8 times the smallest (range 1 to 389), and the Spearman correlation of SE with the species' mean relative cover in the experiment is 0.79. Rare species therefore get the smallest SEs on the absolute cover scale, and the largest weights in the later `rma.mv` calls.
 
-Against the lmer fit with one residual variance per experiment (step 02 before 30 Oct, commit 912bc69): strength moved by more than 1e-6 in 385 of 1655 effects (largest change 0.0114, in experiments with unequal plot numbers across years); effects significant at p < 0.05 went from 232 (lmer, z) to 491 (per-species variance, z) and 420 (per-species variance, plot df, as used now). Step 03 classifies the yearly contrasts by p < 0.05.
-
 ## Fits per experiment
 
 | experiment_id | rows | species | years | df | convergence | pdHess | sd_plot_species | se_min | se_median | se_max | warnings |
@@ -167,4 +165,4 @@ Raw values before standardisation:
 
 ## Deviations from PLAN.md
 
-The residual variance is one per species (`glmmTMB`, `dispformula = ~ species`) instead of PLAN.md's `lmer` with one per experiment (decided 30 Oct, Bills; PLAN.md Step A updated): with one variance per experiment every species of an experiment got the same SE. Decisions taken where PLAN.md is silent (30 Oct, Bills): degrees of freedom = origin-control plots + warmed plots - 2 per experiment; the plot x species variance kept shared (see Model as fitted); PEV1 to PEV3 carried; properties standardised across the residents that have them, traits logged first; graminoid and woody as 0/1. MILESTONES' expected count (about 1,596 effects in 41 experiments) is 1,655 in 43, after FR_AlpeHuez (26 Oct) and US_Arizona (28 Oct) were included.
+None in the model: PLAN.md Step A was revised on 30 Oct (Bills) to one residual variance per species (`glmmTMB`, `dispformula = ~ species`). Decisions taken where PLAN.md is silent (30 Oct, Bills): degrees of freedom = origin-control plots + warmed plots - 2 per experiment; the plot x species variance kept shared (see Model as fitted); PEV1 to PEV3 carried; properties standardised across the residents that have them, traits logged first; graminoid and woody as 0/1. MILESTONES' expected count (about 1,596 effects in 41 experiments) is 1,655 in 43, after FR_AlpeHuez (26 Oct) and US_Arizona (28 Oct) were included.

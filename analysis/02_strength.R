@@ -155,19 +155,6 @@ fit_table <- tibble::tibble(
 mean_cover <- summarise(resident, mean_cover = mean(relative_cover), .by = c(experiment_id, species)) |>
   mutate(species = as.character(species))
 se_cover <- inner_join(strength, mean_cover, by = c("experiment_id", "species"))
-# the lmer fit with one residual variance per experiment, committed before the
-# 30 Oct change (step 02 at 912bc69), for the comparison in the report
-lmer_run <- utils::read.csv(pipe("git show 912bc69:data/derived/02_strength/strength_df.csv")) |>
-  select(effect_id, strength_lmer = strength, se_lmer = strength_se) |>
-  inner_join(select(strength_df, effect_id, strength, strength_se), by = "effect_id")
-stopifnot(nrow(lmer_run) == 1655) # same effects as the lmer run
-moved <- abs(lmer_run$strength - lmer_run$strength_lmer) > 1e-6
-# the plot-based df (30 Oct) changes p-values only: strength and its SE as in
-# the glmmTMB run with df = Inf (beff962)
-tmb_inf <- utils::read.csv(pipe("git show beff962:data/derived/02_strength/strength_df.csv")) |>
-  inner_join(select(strength_df, effect_id, s_new = strength, se_new = strength_se), by = "effect_id")
-stopifnot(nrow(tmb_inf) == 1655, max(abs(tmb_inf$strength - tmb_inf$s_new)) < 1e-12,
-          max(abs(tmb_inf$strength_se - tmb_inf$se_new)) < 1e-12)
 
 # significance at each experiment's own t cut-off (df = control + warmed plots - 2)
 df_exp <- sapply(fits, `[[`, "df_plots")
@@ -261,14 +248,6 @@ report <- c(
          "), and the Spearman correlation of SE with the species' mean relative cover in the experiment is ",
          sprintf("%.2f", cor(se_cover$strength_se, se_cover$mean_cover, method = "spearman")), ". Rare species therefore ",
          "get the smallest SEs on the absolute cover scale, and the largest weights in the later `rma.mv` calls."),
-  "",
-  paste0("Against the lmer fit with one residual variance per experiment (step 02 before 30 Oct, commit 912bc69): ",
-         "strength moved by more than 1e-6 in ", sum(moved), " of ", nrow(lmer_run), " effects (largest change ",
-         sprintf("%.4f", max(abs(lmer_run$strength - lmer_run$strength_lmer))), ", in experiments with unequal plot numbers ",
-         "across years); effects significant at p < 0.05 went from ",
-         sum(abs(lmer_run$strength_lmer) > 1.96 * lmer_run$se_lmer), " (lmer, z) to ",
-         sum(abs(lmer_run$strength) > 1.96 * lmer_run$strength_se), " (per-species variance, z) and ", n_sig,
-         " (per-species variance, plot df, as used now). Step 03 classifies the yearly contrasts by p < 0.05."),
   "", "## Fits per experiment", "", md_table(fit_table),
   "", "## Property coverage on the residents (added 26 Oct)", "",
   "Species and effects with each property, after steps 01 and 02:", "", md_table(coverage),
@@ -281,9 +260,8 @@ report <- c(
   "", "## Warnings captured", "",
   if (length(fit_warnings) + length(warns)) paste("-", c(fit_warnings, unique(warns))) else "None.",
   "", "## Deviations from PLAN.md", "",
-  paste("The residual variance is one per species (`glmmTMB`, `dispformula = ~ species`) instead of PLAN.md's `lmer`",
-        "with one per experiment (decided 30 Oct, Bills; PLAN.md Step A updated): with one variance per experiment",
-        "every species of an experiment got the same SE. Decisions taken where PLAN.md is silent (30 Oct, Bills): degrees",
+  paste("None in the model: PLAN.md Step A was revised on 30 Oct (Bills) to one residual variance per species",
+        "(`glmmTMB`, `dispformula = ~ species`). Decisions taken where PLAN.md is silent (30 Oct, Bills): degrees",
         "of freedom = origin-control plots + warmed plots - 2 per experiment; the plot x species variance kept shared",
         "(see Model as fitted); PEV1 to PEV3 carried; properties standardised across the residents that have them, traits",
         "logged first; graminoid and woody as 0/1. MILESTONES' expected count (about 1,596 effects in 41 experiments)",
