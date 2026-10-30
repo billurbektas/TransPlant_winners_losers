@@ -1,45 +1,46 @@
 # P7: Trait checks
 
-Checks of the 76,954 TRY records behind P2's medians (673 species; LDMC, LMA, height), within TRY only and on the log scale. Nothing is changed: the rules Bills accepts become P2 cleaning targets (decided 29 Oct). Thresholds: robust z 3.5; datasets off by 1.5x on at least 3 shared species; unit signatures at 10, 100 and 1000x within 15%. Full lists in `reports/P7_trait_checks/`.
+Checks of the 73,809 TRY records behind P2's medians after P2's screening (666 species; LDMC, LMA, height), within TRY only and on the log scale. Nothing is changed here. The rules Bills accepted on 29-30 Oct (trees, two reviewed values, record outliers and unit slips) are P2 cleaning targets, so this report shows what remains after them; new record flags can appear because the species medians moved. Thresholds: robust z 3.5; datasets off by 1.5x on at least 3 shared species; unit signatures at 10, 100 and 1000x within 15%. Full lists in `reports/P7_trait_checks/`.
 
 ## Counts
 
 | check | n |
 | --- | --- |
-| records: outlier (|z| > 3.5) | 743 |
-| records: unit signature | 32 |
-| species x trait medians moving > 10% without flagged records | 5 |
-| datasets off by >= 1.5x | 18 |
-| species flagged against relatives or plausibility | 45 |
-| fragile medians (< 3 records or one dataset) | 511 |
+| records: outlier (|z| > 3.5) | 175 |
+| records: unit signature | 1 |
+| species x trait medians moving > 10% without flagged records | 0 |
+| datasets off by >= 1.5x | 19 |
+| species flagged against relatives or plausibility | 46 |
+| fragile medians (< 3 records or one dataset) | 532 |
 
-Species x trait groups with at least 5 records and zero spread (z undefined): 6.
-Species check: spread = the larger of the relatives' own spread and the typical within-genus spread (log scale; LMA 0.18, LDMC 0.13, height 0.40).
+Species x trait groups with at least 5 records and zero spread (z undefined): 10.
+Species check: spread = the larger of the relatives' own spread and the typical within-genus spread (log scale; LMA 0.18, LDMC 0.13, height 0.38).
 
-Known case (P2 notes): Euphrasia officinalis LMA from dataset 524 flagged at record level: FALSE; dataset level: TRUE; species level: TRUE.
+Known case (P2 notes): Euphrasia officinalis LMA from dataset 524 flagged at record level: FALSE; dataset level: TRUE; species level: FALSE; still in P2's records: FALSE (set to NA by the review ledger, 30 Oct).
 
 ## Datasets off by 1.5x or more against the other datasets
 
 | trait | dataset_id | offset | shared_species | records | species_fed | species_mostly_this_dataset |
 | --- | --- | --- | --- | --- | --- | --- |
-| height | 158 | 4.33 | 8 | 21 | 8 | 0 |
-| LMA | 524 | 3.16 | 34 | 109 | 34 | 1 |
-| height | 474 | 0.33 | 11 | 11 | 11 | 1 |
-| height | 115 | 2.94 | 42 | 42 | 43 | 6 |
-| height | 428 | 0.341 | 20 | 2413 | 20 | 16 |
+| height | 158 | 4.12 | 7 | 18 | 7 | 0 |
+| height | 474 | 0.334 | 8 | 8 | 8 | 1 |
+| height | 428 | 0.346 | 20 | 2394 | 20 | 16 |
+| LMA | 524 | 2.58 | 18 | 73 | 18 | 0 |
+| height | 115 | 2.5 | 37 | 37 | 38 | 5 |
 | height | 272 | 0.411 | 5 | 5 | 5 | 1 |
-| height | 65 | 2.42 | 15 | 28 | 15 | 1 |
-| height | 192 | 2.11 | 20 | 20 | 21 | 2 |
-| height | 90 | 2.05 | 12 | 29 | 12 | 2 |
-| height | 273 | 1.97 | 7 | 7 | 7 | 0 |
-| height | 76 | 1.76 | 99 | 170 | 105 | 21 |
-| height | 50 | 1.76 | 44 | 264 | 45 | 7 |
-| height | 544 | 0.59 | 12 | 12 | 12 | 3 |
+| height | 65 | 2.39 | 14 | 27 | 14 | 1 |
+| height | 192 | 2.08 | 18 | 18 | 19 | 2 |
+| height | 273 | 1.94 | 7 | 7 | 7 | 0 |
+| height | 90 | 1.92 | 9 | 21 | 9 | 2 |
+| height | 76 | 1.71 | 98 | 169 | 104 | 21 |
 | height | 247 | 1.67 | 3 | 38 | 3 | 2 |
-| height | 25 | 0.614 | 55 | 184 | 58 | 11 |
-| height | 86 | 1.61 | 96 | 110 | 101 | 13 |
-| height | 547 | 0.643 | 19 | 20 | 22 | 5 |
-| height | 320 | 0.645 | 43 | 615 | 46 | 17 |
+| height | 50 | 1.65 | 42 | 241 | 45 | 8 |
+| height | 1 | 0.647 | 6 | 6 | 6 | 0 |
+| height | 617 | 1.54 | 10 | 20 | 11 | 2 |
+| height | 86 | 1.54 | 92 | 106 | 96 | 13 |
+| height | 193 | 0.656 | 22 | 304 | 43 | 32 |
+| height | 547 | 0.661 | 18 | 19 | 21 | 5 |
+| height | 320 | 0.663 | 42 | 601 | 45 | 16 |
 
 ![Dataset offsets](../figures/diagnostics/P7_dataset_offsets.png)
 
@@ -47,97 +48,97 @@ Known case (P2 notes): Euphrasia officinalis LMA from dataset 524 flagged at rec
 
 | species | trait | dataset_id | observation_id | SpeciesName | value | species_median | ratio | z | reason |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Quercus robur | height | 90 | 957991 | Quercus robur L. | 40.5 | 0.99 | 40.9 | 6.12 | outlier |
-| Quercus robur | height | 90 | 957935 | Quercus robur L. | 37.26 | 0.99 | 37.6 | 5.99 | outlier |
-| Hypericum perforatum | height | 320 | 2474939 | Hypericum perforatum | 0.015 | 0.481 | 0.0312 | -10.42 | outlier |
-| Hypericum perforatum | height | 320 | 2475028 | Hypericum perforatum | 0.015 | 0.481 | 0.0312 | -10.42 | outlier |
-| Quercus robur | height | 90 | 957929 | Quercus robur L. | 30.7 | 0.99 | 31 | 5.67 | outlier |
-| Quercus robur | height | 90 | 957965 | Quercus robur L. | 27.92 | 0.99 | 28.2 | 5.51 | outlier |
-| Silene nutans | height | 320 | 2474880 | Silene nutans | 0.015 | 0.4 | 0.0375 | -9.92 | outlier |
-| Quercus robur | height | 88 | 943617 | Quercus robur | 25.6 | 0.99 | 25.9 | 5.37 | outlier |
-| Quercus robur | height | 158 | 1322258 | Quercus robur | 25 | 0.99 | 25.3 | 5.33 | outlier |
-| Betula pubescens | height | 88 | 943718 | Betula pubescens | 5.27 | 0.27 | 19.5 | 6.68 | outlier |
-| Quercus robur | height | 90 | 957995 | Quercus robur L. | 19 | 0.99 | 19.2 | 4.87 | outlier |
-| Quercus robur | height | 88 | 943641 | Quercus robur | 18.8 | 0.99 | 19 | 4.86 | outlier |
-| Quercus robur | height | 200 | 1434376 | Quercus robur | 17 | 0.99 | 17.2 | 4.69 | outlier |
-| Quercus robur | height | 88 | 943725 | Quercus robur | 16.4 | 0.99 | 16.6 | 4.63 | outlier |
-| Quercus robur | height | 88 | 943713 | Quercus robur | 15.6 | 0.99 | 15.8 | 4.55 | outlier |
-| Rumex acetosa | height | 158 | 1322289 | Rumex acetosa acetosa | 1.1 | 0.07 | 15.7 | 4.69 | outlier |
-| Rumex acetosa | height | 88 | 943677 | Rumex acetosa | 1.09 | 0.07 | 15.6 | 4.68 | outlier |
-| Quercus robur | height | 200 | 1434378 | Quercus robur | 15 | 0.99 | 15.2 | 4.48 | outlier |
-| Quercus robur | height | 88 | 943702 | Quercus robur | 14.7 | 0.99 | 14.8 | 4.45 | outlier |
-| Plantago lanceolata | height | 320 | 2475008 | Plantago lanceolata | 0.01 | 0.14 | 0.0714 | -4.31 | outlier |
+| Lotus corniculatus | height | 320 | 2474870 | Lotus corniculatus | 0.03 | 0.27 | 0.111 | -2.67 | unit signature |
+| Rumex acetosa | height | 76 | 940965 | Rumex acetosa | 0.546 | 0.07 | 7.8 | 3.68 | outlier |
+| Rumex acetosa | height | 192 | 1396716 | RUMEX ACETOSA L. | 0.51 | 0.07 | 7.29 | 3.56 | outlier |
+| Geranium sylvaticum | height | 25 | 175293 | Geranium sylvaticum | 0.06 | 0.378 | 0.159 | -3.89 | outlier |
+| Cerastium fontanum | height | 519 | 5995524 | Cerastium fontanum | 0.043 | 0.265 | 0.162 | -4.65 | outlier |
+| Cerastium fontanum | height | 519 | 5995533 | Cerastium fontanum | 0.044 | 0.265 | 0.166 | -4.59 | outlier |
+| Cerastium fontanum | height | 519 | 5995528 | Cerastium fontanum | 0.045 | 0.265 | 0.17 | -4.53 | outlier |
+| Geranium sylvaticum | height | 25 | 1117784 | Geranium sylvaticum | 0.07 | 0.378 | 0.185 | -3.57 | outlier |
+| Poa pratensis | height | 428 | 2951250 | Poa pratensis L. | 0.054 | 0.29 | 0.186 | -3.53 | outlier |
+| Carum carvi | height | 519 | 5995511 | Carum carvi | 0.056 | 0.2759 | 0.203 | -3.79 | outlier |
+| Carum carvi | height | 519 | 5995507 | Carum carvi | 0.057 | 0.2759 | 0.207 | -3.75 | outlier |
+| Poa alpina | height | 468 | 5815804 | Poa alpina | 0.057 | 0.2716 | 0.21 | -4.02 | outlier |
+| Poa alpina | height | 168 | 1339254 | Poa alpina | 0.06 | 0.2716 | 0.221 | -3.89 | outlier |
+| Poa alpina | height | 168 | 1339279 | Poa alpina | 0.06 | 0.2716 | 0.221 | -3.89 | outlier |
+| Poa alpina | height | 468 | 5815803 | Poa alpina | 0.061 | 0.2716 | 0.225 | -3.85 | outlier |
+| Cerastium fontanum | height | 519 | 5995529 | Cerastium fontanum | 0.06 | 0.265 | 0.226 | -3.8 | outlier |
+| Poa alpina | height | 468 | 5815819 | Poa alpina | 0.064 | 0.2716 | 0.236 | -3.73 | outlier |
+| Luzula spicata | height | 468 | 5814041 | Luzula spicata | 0.032 | 0.127 | 0.252 | -4.14 | outlier |
+| Poa alpina | height | 468 | 5815817 | Poa alpina | 0.069 | 0.2716 | 0.254 | -3.53 | outlier |
+| Silene vulgaris | height | 519 | 5996683 | Silene vulgaris | 0.099 | 0.3853 | 0.257 | -5.76 | outlier |
 
 ## Species medians that move most without their flagged records
 
 | species | trait | median_all | median_without | n_flagged | shift_pct |
 | --- | --- | --- | --- | --- | --- |
-| Sonchus oleraceus | height | 0.8 | 1.15 | 1 | 43.7 |
-| Trollius europaeus | height | 0.528 | 0.597 | 4 | 13.3 |
-| Prunella vulgaris | height | 0.115 | 0.13 | 1 | 13 |
-| Silene nutans | height | 0.4 | 0.45 | 2 | 12.5 |
-| Plantago alpina | height | 0.0995 | 0.11 | 2 | 10.1 |
-| Pulsatilla vernalis | height | 0.05 | 0.045 | 1 | -10 |
-| Rhinanthus major | height | 0.375 | 0.41 | 3 | 9.3 |
-| Potentilla argentea | height | 0.22 | 0.24 | 1 | 9.1 |
-| Pulsatilla alpina | LMA | 0.0618 | 0.0563 | 2 | -8.9 |
-| Carex norvegica | LMA | 0.0673 | 0.0728 | 1 | 8.3 |
-| Botrychium lunaria | height | 0.03 | 0.0275 | 1 | -8.3 |
-| Lupinus argenteus | height | 0.37 | 0.4 | 5 | 8.1 |
-| Lotus corniculatus | height | 0.25 | 0.27 | 4 | 8 |
-| Tofieldia pusilla | height | 0.0465 | 0.05 | 1 | 7.5 |
-| Cerastium fontanum | height | 0.25 | 0.265 | 2 | 6 |
-| Quercus robur | height | 0.99 | 0.931 | 17 | -5.9 |
-| Silene vulgaris | height | 0.365 | 0.386 | 4 | 5.6 |
-| Lolium arundinaceum | height | 0.524 | 0.553 | 1 | 5.6 |
-| Sonchus arvensis | LMA | 0.0237 | 0.0224 | 2 | -5.5 |
-| Frasera speciosa | height | 0.134 | 0.127 | 2 | -5.4 |
+| Cerastium fontanum | height | 0.265 | 0.284 | 4 | 7 |
+| Geranium sylvaticum | height | 0.378 | 0.4 | 2 | 5.8 |
+| Carum carvi | height | 0.276 | 0.29 | 2 | 5.1 |
+| Myosotis sylvatica | LMA | 0.019 | 0.0181 | 1 | -4.3 |
+| Galium album | LMA | 0.0456 | 0.0441 | 1 | -3.5 |
+| Silene vulgaris | height | 0.386 | 0.397 | 1 | 3 |
+| Lappula squarrosa | LDMC | 0.232 | 0.226 | 2 | -2.5 |
+| Trifolium hybridum | height | 0.504 | 0.514 | 1 | 2 |
+| Polygala vulgaris | height | 0.25 | 0.255 | 1 | 2 |
+| Lotus corniculatus | height | 0.27 | 0.275 | 1 | 1.9 |
+| Galium pumilum | LMA | 0.0438 | 0.0446 | 1 | 1.9 |
+| Hippophae rhamnoides | LMA | 0.0784 | 0.077 | 1 | -1.8 |
+| Trollius europaeus | height | 0.597 | 0.607 | 1 | 1.6 |
+| Carex curvula | LDMC | 0.335 | 0.329 | 5 | -1.6 |
+| Hippocrepis comosa | height | 0.031 | 0.0305 | 1 | -1.6 |
+| Erigeron canadensis | height | 0.72 | 0.73 | 1 | 1.4 |
+| Alchemilla pentaphyllea | LMA | 0.0494 | 0.0487 | 1 | -1.3 |
+| Erigeron uniflorus | LMA | 0.0445 | 0.0439 | 1 | -1.3 |
+| Lilium martagon | LDMC | 0.109 | 0.108 | 1 | -1.3 |
+| Luzula spicata | height | 0.127 | 0.128 | 1 | 1.2 |
 
 ## Species flagged against their relatives or by plausibility rules
 
 | species | trait | median | reason |
 | --- | --- | --- | --- |
-| Bromus inermis | height | 0.72 | far from its genus (robust z 3.6, 3 relatives) |
+| Arnica angustifolia | height | 0.05 | far from its genus (robust z -3.6, 3 relatives) |
+| Bromus inermis | height | 0.72 | far from its genus (robust z 3.8, 3 relatives) |
 | Campanula rapunculoides | LDMC | 0.142 | far from its genus (robust z -4.3, 3 relatives) |
-| Campanula rapunculoides | LMA | 0.0223 | far from its genus (robust z -4.6, 4 relatives) |
-| Cirsium acaule | height | 0.085 | far from its genus (robust z -5.8, 4 relatives) |
-| Cirsium oleraceum | LMA | 0.0303 | far from its genus (robust z -3.6, 4 relatives) |
-| Crepis aurea | height | 0.08 | far from its genus (robust z -4.9, 4 relatives) |
+| Campanula rapunculoides | LMA | 0.0223 | far from its genus (robust z -4.8, 4 relatives) |
+| Cirsium acaule | height | 0.085 | far from its genus (robust z -6.1, 4 relatives) |
+| Cirsium oleraceum | LMA | 0.0303 | far from its genus (robust z -3.7, 4 relatives) |
+| Crepis aurea | height | 0.08 | far from its genus (robust z -5.1, 4 relatives) |
 | Draba aizoides | LDMC | 0.28 | far from its family (robust z 4.8, 8 relatives) |
-| Drymaria molluginea | LDMC | 0.135 | LMA and LDMC at opposite extremes |
+| Drymaria molluginea | LDMC | 0.138 | LMA and LDMC at opposite extremes |
 | Drymaria molluginea | LMA | 0.121 | LMA and LDMC at opposite extremes |
-| Epilobium anagallidifolium | height | 0.05 | far from its genus (robust z -7, 3 relatives) |
-| Epilobium angustifolium | height | 0.855 | far from its genus (robust z 7.2, 3 relatives) |
-| Epilobium lactiflorum | height | 0.05 | far from its genus (robust z -7, 3 relatives) |
-| Epilobium obscurum | height | 0.8 | far from its genus (robust z 7, 3 relatives) |
-| Erigeron uniflorus | height | 0.0325 | far from its genus (robust z -4.2, 6 relatives) |
-| Euphrasia officinalis | LMA | 0.173 | far from its genus (robust z 5.4, 4 relatives) |
-| Festuca thurberi | height | 0.56 | far from its genus (robust z 3.9, 6 relatives) |
-| Galium aparine | LMA | 0.0204 | far from its genus (robust z -3.9, 9 relatives) |
+| Epilobium anagallidifolium | height | 0.05 | far from its genus (robust z -7.3, 3 relatives) |
+| Epilobium angustifolium | height | 0.87 | far from its genus (robust z 7.6, 3 relatives) |
+| Epilobium lactiflorum | height | 0.05 | far from its genus (robust z -7.3, 3 relatives) |
+| Epilobium obscurum | height | 0.8 | far from its genus (robust z 7.3, 3 relatives) |
+| Erigeron uniflorus | height | 0.0325 | far from its genus (robust z -3.9, 6 relatives) |
+| Festuca thurberi | height | 0.572 | far from its genus (robust z 4, 6 relatives) |
+| Galium aparine | LMA | 0.0204 | far from its genus (robust z -4, 9 relatives) |
 | Gentiana nivalis | LDMC | 0.146 | far from its genus (robust z -3.7, 9 relatives) |
-| Geum aleppicum | LDMC | 0.165 | far from its genus (robust z -4, 4 relatives) |
-| Geum montanum | height | 0.049 | far from its genus (robust z -4.9, 4 relatives) |
-| Hieracium umbellatum | height | 1.03 | far from its genus (robust z 4.5, 4 relatives) |
+| Geum aleppicum | LDMC | 0.165 | far from its genus (robust z -3.9, 4 relatives) |
+| Geum montanum | height | 0.049 | far from its genus (robust z -5.1, 4 relatives) |
+| Hieracium umbellatum | height | 1.03 | far from its genus (robust z 4.7, 4 relatives) |
 | Holcus lanatus | LDMC | 0.21 | graminoid LDMC below the herb median |
-| Juncus alpinoarticulatus | LMA | 0.111 | far from its family (robust z 4.9, 12 relatives) |
+| Juncus alpinoarticulatus | LMA | 0.113 | far from its family (robust z 5, 12 relatives) |
 | Kalmia procumbens | height | 0.0135 | far from its family (robust z -3.9, 9 relatives) |
 | Kalmia procumbens | height | 0.0135 | woody, shorter than 95% of herbs |
-| Lolium multiflorum | LDMC | 0.188 | graminoid LDMC below the herb median |
+| Lolium multiflorum | LDMC | 0.186 | graminoid LDMC below the herb median |
 | Luzula pilosa | LDMC | 0.196 | graminoid LDMC below the herb median |
 | Luzula sudetica | LDMC | 0.195 | graminoid LDMC below the herb median |
-| Mutellina purpurea | height | 0.044 | far from its family (robust z -3.7, 23 relatives) |
-| Myosotis alpestris | LMA | 0.046 | far from its genus (robust z 4.4, 3 relatives) |
+| Mutellina purpurea | height | 0.0435 | far from its family (robust z -3.7, 23 relatives) |
+| Myosotis alpestris | LMA | 0.0462 | far from its genus (robust z 4.7, 3 relatives) |
 | Neogaya simplex | height | 0.035 | far from its family (robust z -4.1, 23 relatives) |
+| Neottia ovata | LMA | 0.0259 | far from its family (robust z -3.5, 5 relatives) |
 | Noccaea montana | height | 0.0335 | far from its family (robust z -4.3, 15 relatives) |
-| Pedicularis resupinata | height | 0.4 | far from its genus (robust z 3.9, 3 relatives) |
-| Phyteuma hemisphaericum | LMA | 0.0781 | far from its genus (robust z 3.7, 3 relatives) |
-| Phyteuma orbiculare | height | 0.283 | far from its genus (robust z 4.4, 3 relatives) |
-| Pilosella piloselloides | height | 0.5 | far from its genus (robust z 6.5, 4 relatives) |
+| Pedicularis resupinata | height | 0.4 | far from its genus (robust z 4.1, 3 relatives) |
+| Phyteuma hemisphaericum | LMA | 0.0781 | far from its genus (robust z 3.9, 3 relatives) |
+| Phyteuma orbiculare | height | 0.283 | far from its genus (robust z 4.6, 3 relatives) |
 | Poa alberti | LDMC | 0.482 | far from its genus (robust z 4, 7 relatives) |
-| Poa annua | LDMC | 0.189 | far from its genus (robust z -3.7, 7 relatives) |
-| Poa annua | LDMC | 0.189 | graminoid LDMC below the herb median |
+| Poa annua | LDMC | 0.187 | far from its genus (robust z -3.8, 7 relatives) |
+| Poa annua | LDMC | 0.187 | graminoid LDMC below the herb median |
 | Poa supina | LDMC | 0.187 | far from its genus (robust z -3.8, 7 relatives) |
-... 8 more in `flagged_species.csv`.
+... 9 more in `flagged_species.csv`.
 
 ## What to decide
 

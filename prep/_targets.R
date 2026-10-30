@@ -21,6 +21,8 @@ list(
   tar_target(accepted_renames_file, "prep/config/accepted_renames.csv", format = "file"),
   tar_target(try_dictionary_file, "prep/config/try_trait_map.csv", format = "file"),
   tar_target(natural_values_file, "prep/config/try_natural_values.csv", format = "file"),
+  tar_target(trait_trees_file, "prep/config/trait_trees.csv", format = "file"),
+  tar_target(trait_review_file, "prep/config/trait_review.csv", format = "file"),
   tar_target(woodiness_file, "prep/config/woodiness.csv", format = "file"),
   tar_target(genus_map_file, "prep/config/phylogeny_genus_map.csv", format = "file"),
   tar_target(legacy_placements_file, "prep/config/phylogeny_placements_legacy.csv", format = "file"),
@@ -82,7 +84,9 @@ list(
   # from TRY's species mean gave implausible medians (Viola canina 1.2 m tall)
   tar_target(try_clean, clean_try(try_attached, try_dictionary, natural_values, max_error_risk = 3)),
   tar_target(try_climate, filter_try_climate(try_clean)),
-  tar_target(trait_summary, summarise_traits(try_climate, taxonomy)),
+  # screening decided 29-30 Oct after the P7 checks: trees, reviewed values, record outliers
+  tar_target(trait_summary, summarise_traits(try_climate, taxonomy, read_ledger(trait_trees_file),
+                                             read_ledger(trait_review_file))),
   tar_target(trait_outputs, write_trait_outputs(trait_summary), format = "file"),
   tar_target(p2_report,
              write_p2_report(try_ids, try_attached, try_clean, try_climate, trait_summary, try_name_map,

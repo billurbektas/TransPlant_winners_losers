@@ -22,6 +22,7 @@
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("prep/R/report.R") # md_table()
+source("prep/R/traits.R")  # flag_trait_records(), shared with P2's screening
 
 warns <- character()
 globalCallingHandlers(warning = function(w) {
@@ -35,6 +36,7 @@ out_dir <- "reports/P7_trait_checks"
 dir.create(out_dir, showWarnings = FALSE)
 dir.create("figures/diagnostics", recursive = TRUE, showWarnings = FALSE)
 
+# the records behind P2's medians, after P2's screening (decided 29-30 Oct)
 records <- readRDS("data/derived/prep/traits_long.rds") |>
   mutate(log_value = log(value))
 medians <- readRDS("data/derived/prep/traits.rds")
@@ -43,16 +45,7 @@ stopifnot(all(records$value > 0)) # P2 drops non-positive values
 robust_z <- function(x, centre, spread) ifelse(spread > 0, (x - centre) / spread, NA_real_)
 
 # ---- 1. Records within species x trait --------------------------------------
-records <- records |>
-  mutate(n_records = n(), species_median = median(log_value), mad = stats::mad(log_value),
-         .by = c(species, trait)) |>
-  mutate(z = if_else(n_records >= 5, robust_z(log_value, species_median, mad), NA_real_),
-         ratio = exp(log_value - species_median),
-         unit_signature = n_records >= 3 &
-           Reduce(`|`, lapply(c(10, 100, 1000, 0.1, 0.01, 0.001),
-                              function(f) abs(ratio / f - 1) <= unit_tolerance)),
-         outlier = !is.na(z) & abs(z) > z_cut,
-         flagged = outlier | unit_signature)
+records <- flag_trait_records(records, z_cut = z_cut, unit_tolerance = unit_tolerance)
 flagged_records <- records |>
   filter(flagged) |>
   transmute(species, trait, dataset_id, observation_id, SpeciesName, value = signif(value, 4),
@@ -179,17 +172,20 @@ counts <- tibble::tibble(
         nrow(flagged_datasets), n_distinct(paste(flagged_species$species, flagged_species$trait)), nrow(fragile)))
 report <- c(
   "# P7: Trait checks", "",
-  paste0("Checks of the ", fmt(nrow(records)), " TRY records behind P2's medians (", n_distinct(records$species),
-         " species; LDMC, LMA, height), within TRY only and on the log scale. Nothing is changed: the rules Bills accepts become ",
-         "P2 cleaning targets (decided 29 Oct). Thresholds: robust z ", z_cut, "; datasets off by ", dataset_factor,
+  paste0("Checks of the ", fmt(nrow(records)), " TRY records behind P2's medians after P2's screening (", n_distinct(records$species),
+         " species; LDMC, LMA, height), within TRY only and on the log scale. Nothing is changed here. The rules Bills accepted on 29-30 Oct ",
+         "(trees, two reviewed values, record outliers and unit slips) are P2 cleaning targets, so this report shows what remains after them; ",
+         "new record flags can appear because the species medians moved. Thresholds: robust z ", z_cut, "; datasets off by ", dataset_factor,
          "x on at least ", dataset_min_species, " shared species; unit signatures at 10, 100 and 1000x within ",
          100 * unit_tolerance, "%. Full lists in `reports/P7_trait_checks/`."),
   "", "## Counts", "", md_table(counts),
   "", sprintf("Species x trait groups with at least 5 records and zero spread (z undefined): %d.", mad_zero),
   sprintf("Species check: spread = the larger of the relatives' own spread and the typical within-genus spread (log scale; %s).",
           paste(sprintf("%s %.2f", typical_spread$trait, typical_spread$typical_spread), collapse = ", ")),
-  "", sprintf("Known case (P2 notes): Euphrasia officinalis LMA from dataset 524 flagged at record level: %s; dataset level: %s; species level: %s.",
-              euphrasia$record, euphrasia$dataset, euphrasia$species),
+  "", sprintf(paste("Known case (P2 notes): Euphrasia officinalis LMA from dataset 524 flagged at record level: %s; dataset level: %s;",
+                    "species level: %s; still in P2's records: %s (set to NA by the review ledger, 30 Oct)."),
+              euphrasia$record, euphrasia$dataset, euphrasia$species,
+              any(records$species == "Euphrasia officinalis" & records$trait == "LMA")),
   "", "## Datasets off by 1.5x or more against the other datasets", "",
   md_table(flagged_datasets |> select(trait, dataset_id, offset, shared_species, records, species_fed, species_mostly_this_dataset)),
   "", "![Dataset offsets](../figures/diagnostics/P7_dataset_offsets.png)",

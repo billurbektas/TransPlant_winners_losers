@@ -131,7 +131,7 @@ filter_try_climate <- function(try_clean,
 
 # Units, ranges, LMA = 1 / SLA per observation, then medians per species
 # (legacy/R/data/traits.R:213-290)
-summarise_traits <- function(try_climate, taxonomy) {
+summarise_traits <- function(try_climate, taxonomy, trees, review) {
   obs <- try_climate$observations
   # a recorded 0 (or less) is not a measurement, and SLA = 0 has no LMA
   # (decided 26 Oct: drop non-positive values of all three traits)
@@ -159,12 +159,56 @@ summarise_traits <- function(try_climate, taxonomy) {
       SpeciesName, AccSpeciesName, name_source, species_if_trusting_try)
   study <- unique(stats::na.omit(taxonomy$accepted_species[taxonomy$identification_level %in% "species_or_lower"]))
   ours <- dplyr::filter(long, species %in% study)
-  traits <- ours |>
+  screened <- screen_trait_records(ours, trees, review)
+  traits <- screened$kept |>
     dplyr::summarise(median = stats::median(value), n_obs = dplyr::n(), n_datasets = dplyr::n_distinct(dataset_id),
                      .by = c(species, trait)) |>
     tidyr::pivot_wider(names_from = trait, values_from = c(median, n_obs, n_datasets), names_glue = "{.value}_{trait}") |>
     dplyr::rename(dplyr::any_of(c(LDMC = "median_LDMC", LMA = "median_LMA", height = "median_height"))) |>
     dplyr::arrange(species)
   if (anyDuplicated(traits$species)) stop("Duplicate species in the trait table")
-  list(traits = traits, long = long, non_positive = non_positive)
+  # long_all: every attached record before screening, for the report's comparisons
+  list(traits = traits, long = screened$kept, long_all = long, removed = screened$removed, non_positive = non_positive)
+}
+
+# Records far from their species (robust z on the log scale within species x
+# trait, >= 5 records) and unit slips (10, 100 or 1000 times the species
+# median, or the inverse, within 15%; >= 3 records). Used by P2's screening and
+# by the P7 checker (prep/check_traits.R); thresholds decided 29 Oct.
+flag_trait_records <- function(records, z_cut = 3.5, unit_tolerance = 0.15) {
+  records |>
+    dplyr::mutate(log_value = log(value), n_records = dplyr::n(), species_median = stats::median(log_value),
+                  mad = stats::mad(log_value), .by = c(species, trait)) |>
+    dplyr::mutate(
+      z = dplyr::if_else(n_records >= 5 & mad > 0, (log_value - species_median) / mad, NA_real_),
+      ratio = exp(log_value - species_median),
+      unit_signature = n_records >= 3 &
+        Reduce(`|`, lapply(c(10, 100, 1000, 0.1, 0.01, 0.001), function(f) abs(ratio / f - 1) <= unit_tolerance)),
+      outlier = !is.na(z) & abs(z) > z_cut,
+      flagged = outlier | unit_signature)
+}
+
+# P2 screening (decided 29-30 Oct after P7): real trees carry no traits (they
+# are seedlings in the turfs and TRY measures adults), reviewed species x trait
+# values set to NA, then records flagged by flag_trait_records() dropped. No
+# dataset is removed as a whole.
+screen_trait_records <- function(records, trees, review) {
+  if (!all(review$decision %in% c("keep", "exclude"))) stop("trait_review.csv decisions must be keep or exclude")
+  if (!all(trees$species %in% records$species)) stop("trait_trees.csv species without TRY records: ",
+                                                    paste(setdiff(trees$species, records$species), collapse = ", "))
+  excluded <- dplyr::filter(review, decision == "exclude") |> dplyr::distinct(species, trait)
+  if (nrow(dplyr::anti_join(excluded, records, by = c("species", "trait")))) stop("trait_review.csv rows without records")
+  is_tree <- records$species %in% trees$species
+  is_excluded <- paste(records$species, records$trait) %in% paste(excluded$species, excluded$trait)
+  rest <- flag_trait_records(records[!is_tree & !is_excluded, ])
+  removed <- dplyr::bind_rows(
+    dplyr::mutate(records[is_tree, ], reason = "tree (trait_trees.csv)"),
+    dplyr::mutate(records[!is_tree & is_excluded, ], reason = "reviewed value set to NA (trait_review.csv)"),
+    rest |> dplyr::filter(flagged) |>
+      dplyr::mutate(reason = dplyr::case_when(outlier & unit_signature ~ "outlier and unit signature",
+                                              outlier ~ "outlier (robust z > 3.5)", TRUE ~ "unit signature")) |>
+      dplyr::select(dplyr::all_of(c(names(records), "z", "ratio", "reason"))))
+  kept <- dplyr::filter(rest, !flagged) |> dplyr::select(dplyr::all_of(names(records)))
+  if (nrow(kept) + nrow(removed) != nrow(records)) stop("Trait screening lost records")
+  list(kept = kept, removed = removed)
 }

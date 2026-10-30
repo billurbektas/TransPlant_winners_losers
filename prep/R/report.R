@@ -176,14 +176,35 @@ write_trait_outputs <- function(trait_summary, dir = "data/derived/prep") {
   files <- file.path(dir, c("traits.rds", "traits_long.rds"))
   saveRDS(trait_summary$traits, files[1])
   saveRDS(dplyr::filter(trait_summary$long, species %in% trait_summary$traits$species), files[2])
+  files <- c(files, file.path(dir, "trait_screen_removed.csv"))
+  utils::write.csv(dplyr::select(trait_summary$removed, species, trait, value, dataset_id, observation_id, SpeciesName,
+                                 dplyr::any_of(c("z", "ratio")), reason),
+                   files[3], row.names = FALSE)
   files
 }
 
 write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait_summary, try_name_map,
                             taxonomy, natural_values, path = "reports/P2_traits.md") {
   traits <- trait_summary$traits
-  long <- trait_summary$long
+  long <- trait_summary$long_all # before screening, for the name comparison below
+
   study <- unique(stats::na.omit(taxonomy$accepted_species[taxonomy$identification_level %in% "species_or_lower"]))
+  # Screening (decided 29-30 Oct after the P7 checks)
+  removed <- trait_summary$removed
+  screen_counts <- dplyr::count(removed, reason, name = "records") |>
+    dplyr::left_join(dplyr::summarise(removed, species_x_trait = dplyr::n_distinct(paste(species, trait)), .by = reason),
+                     by = "reason")
+  before <- long |>
+    dplyr::filter(species %in% study) |>
+    dplyr::summarise(median_before = stats::median(value), .by = c(species, trait))
+  after <- trait_summary$long |>
+    dplyr::summarise(median_after = stats::median(value), .by = c(species, trait))
+  shift <- dplyr::left_join(before, after, by = c("species", "trait")) |>
+    dplyr::mutate(change_pct = round(100 * (median_after / median_before - 1), 1))
+  lost <- dplyr::filter(shift, is.na(median_after)) |> dplyr::arrange(species, trait)
+  moved <- dplyr::filter(shift, !is.na(median_after), abs(change_pct) > 10) |>
+    dplyr::mutate(dplyr::across(c(median_before, median_after), ~ signif(.x, 3))) |>
+    dplyr::arrange(dplyr::desc(abs(change_pct)))
   read <- attr(try_attached, "rows_read")
   counts <- dplyr::bind_rows(
     tibble::tibble(stage = sprintf("read by TRY species ID (%d IDs)", length(try_ids)),
@@ -244,6 +265,16 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
                               paste(sprintf("%s (%d values)", names(rep), rep), collapse = ", "), ".")
       else "No text field needed UTF-8 repair."
     },
+    "", "## Screening (decided 29-30 Oct after the P7 checks)", "",
+    paste("Before the medians: the seven real trees (`prep/config/trait_trees.csv`; seedlings in the turfs, while TRY",
+          "measures adult trees) carry no traits; species x trait values reviewed by name and set to NA",
+          "(`prep/config/trait_review.csv`) are dropped; then records more than 3.5 robust SD from their species median",
+          "(log scale, species x trait with at least 5 records) or at a 10, 100 or 1000x unit slip (at least 3 records) are",
+          "dropped. No dataset is removed as a whole. Every removed record is in `data/derived/prep/trait_screen_removed.csv`."), "",
+    md_table(screen_counts), "",
+    sprintf("Species x trait values lost: %d (%s).", nrow(lost), paste(sprintf("%s %s", lost$species, lost$trait), collapse = "; ")),
+    "", sprintf("Species x trait medians moving by more than 10%% (%d):", nrow(moved)), "",
+    if (nrow(moved)) md_table(moved) else "None.",
     "", "## Species with traits", "", md_table(per_trait), "",
     sprintf("Study species without any of the three traits (%d): %s.", length(missing), paste(missing, collapse = ", ")),
     "", "## Trusting TRY's accepted name against attaching by the record's own name", "",
