@@ -20,3 +20,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include 01_relative_cover.md >}}
 
 {{< include 02_strength.md >}}
+
+{{< include 03_temporal.md >}}
