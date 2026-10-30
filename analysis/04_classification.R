@@ -102,20 +102,20 @@ fig2 <- ggplot(species_summary, aes(lower, upper)) +
 ggsave("figures/diagnostics/04_fig2_draft.png", fig2, width = 10, height = 9, dpi = 150, bg = "white")
 
 # ---- Fig S6 draft: species overview -------------------------------------
-ranges <- d_c |> mutate(species = as.character(species)) |>
-  summarise(min_s = min(strength), max_s = max(strength), .by = species) |>
-  inner_join(species_summary, by = "species") |>
-  arrange(mu) |> mutate(species = factor(species, levels = species))
+# one row per species: pooled mean (point) and the model's prediction interval
+# for a new experiment (line), the interval that sets the class (Bills, 30 Oct)
+ranges <- species_summary |> arrange(mu) |> mutate(species = factor(species, levels = species))
 figS6 <- ggplot(ranges, aes(y = species)) +
-  geom_vline(xintercept = 0, colour = "grey60") +
-  geom_segment(aes(x = min_s, xend = max_s, yend = species, colour = class), linewidth = 0.9) +
-  geom_point(aes(x = mu, colour = class), size = 2.6) +
+  geom_vline(xintercept = 0, colour = "grey50") +
+  geom_segment(aes(x = lower, xend = upper, yend = species, colour = class), linewidth = 0.9) +
+  geom_point(aes(x = mu, colour = class), size = 2.4) +
   scale_colour_manual(values = cols, name = NULL) +
-  labs(title = "a)", x = "Losing-winning strength across experiments (line) and pooled mean (point)", y = NULL) +
+  labs(title = "a)", x = "Losing-winning strength: pooled mean (point) and prediction interval for a new experiment (line)",
+       y = NULL) +
   theme_classic(base_size = 15) +
   theme(plot.title = element_text(face = "bold", size = 24), legend.position = "top",
-        legend.text = element_text(size = 14, face = "bold"), axis.text.y = element_text(face = "italic", size = 10))
-ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 10, height = 14, dpi = 150, bg = "white")
+        legend.text = element_text(size = 14, face = "bold"), axis.text.y = element_text(face = "italic", size = 8))
+ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 11, height = 20, dpi = 150, bg = "white")
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
