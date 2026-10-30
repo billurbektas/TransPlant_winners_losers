@@ -1,14 +1,12 @@
 # Step 04: consistency across experiments (Step C, residents).
 #
 # PLAN.md: Step C (model as revised 30 Oct); Fig 2 caption; Appendix Fig S6.
-# Reads:  data/derived/03b_strength_y3/strength_df.rds (main, years >= 3);
-#         data/derived/02_strength/strength_df.rds (all-years sensitivity)
+# Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3)
 # Writes: data/derived/04_classification/m_C.rds, species_summary.csv;
 #         figures/diagnostics/04_fig2_draft.png, 04_figS6_draft.png;
 #         reports/04_classification.md
-# Checks: 995 effects; 77 species with at least 4 experiments (552 effects);
-#         length(m_C$tau2) equals the eligible count and its species order
-#         matches m_C$g.levels.f[[1]] and the mods columns; the prediction
+# Checks: 1,655 effects; 137 species with at least 4 experiments (998 effects);
+#         one tau2_s per eligible species, in species order; the prediction
 #         interval equals mu +/- 1.96 sqrt(tau2 + se(mu)^2); class counts sum to
 #         the eligible count; no interval or whisker on tau anywhere.
 #
@@ -17,9 +15,9 @@
 # comes from the prediction interval of predict(), which carries tau2_s and the
 # uncertainty of mu_s (the species random intercept of the first version had
 # its variance estimated at about zero, pulling every mean onto the grand
-# mean). Approved with the plan: se_mu in species_summary; the all-years
-# strength of step 02 as a sensitivity run; draft figures in
-# figures/diagnostics/; Fig 2 corner panels once four species are named.
+# mean). Approved with the plan: se_mu in species_summary; draft figures in
+# figures/diagnostics/; Fig 2 corner panels once four species are named. The
+# all-years sensitivity run was dropped on 30 Oct (Bills: not needed for now).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/md_table.R")
@@ -34,7 +32,7 @@ class_levels <- c("Consistent loser", "Context-dependent", "Consistent winner")
 cols <- c("Consistent loser" = "#D95F2B", "Context-dependent" = "#3A86D6", "Consistent winner" = "#1B9E77")
 
 strength_df <- readRDS("data/derived/03b_strength_y3/strength_df.rds")
-stopifnot(nrow(strength_df) == 995) # step 03b
+stopifnot(nrow(strength_df) == 1655) # step 03b
 
 # ---- Eligible species (PLAN.md Step C) ------------------------------------
 eligible <- strength_df |>
@@ -42,36 +40,41 @@ eligible <- strength_df |>
   dplyr::filter(n >= 4) |>
   dplyr::pull(species)
 d_c <- dplyr::filter(strength_df, species %in% eligible) |> mutate(species = factor(species))
-stopifnot(length(eligible) == 77, nrow(d_c) == 552) # at least 4 experiments
+stopifnot(length(eligible) == 137, nrow(d_c) == 998) # at least 4 experiments
 
 # ---- Model and prediction interval per species ------------------------------
-fit_c <- function(d) {
-  rma.mv(yi = strength, V = strength_se^2,
-         mods   = ~ 0 + species,          # one mu_s per species, fixed
-         random = ~ species | effect_id,  # one tau2_s per species
-         struct = "DIAG", data = d, method = "REML", sparse = TRUE)
+# The model (mods = ~ 0 + species, random = ~ species | effect_id, DIAG) shares
+# no parameter between species: its REML likelihood is the sum of one REML
+# likelihood per species. It is therefore fitted as one rma.mv per species
+# (intercept = mu_s, random ~ 1 | effect_id = tau2_s), with the same optimizer;
+# checked 30 Oct against the joint fit (see MILESTONES notes), seconds instead
+# of minutes.
+# nlminb can fail to declare convergence when tau2_s sits at its boundary of 0;
+# those species are refitted with bobyqa and listed in the report
+fallback <- character()
+fit_species <- function(d) {
+  m <- try(rma.mv(yi = strength, V = strength_se^2, random = ~ 1 | effect_id, data = d, method = "REML"), silent = TRUE)
+  if (inherits(m, "try-error")) {
+    fallback <<- c(fallback, as.character(d$species[1]))
+    m <- rma.mv(yi = strength, V = strength_se^2, random = ~ 1 | effect_id, data = d, method = "REML",
+                control = list(optimizer = "bobyqa"))
+  }
+  m
 }
-summarise_c <- function(m, d) {
-  sp <- levels(d$species)
-  stopifnot(length(m$tau2) == length(sp), identical(m$g.levels.f[[1]], sp),
-            identical(sub("^species", "", rownames(m$beta)), sp)) # tau2 and mu in the same species order
-  p <- predict(m, newmods = diag(length(sp)), tau2.levels = sp)
-  out <- tibble::tibble(species = sp, n_experiments = as.integer(table(d$species)[sp]),
-                        mu = p$pred, se_mu = p$se, tau = sqrt(m$tau2), lower = p$pi.lb, upper = p$pi.ub)
-  stopifnot(max(abs(out$upper - (out$mu + qnorm(0.975) * sqrt(out$tau^2 + out$se_mu^2)))) < 1e-10,
-            max(abs(out$lower - (out$mu - qnorm(0.975) * sqrt(out$tau^2 + out$se_mu^2)))) < 1e-10)
-  mutate(out, class = factor(case_when(lower > 0 ~ "Consistent winner", upper < 0 ~ "Consistent loser",
-                                       TRUE ~ "Context-dependent"), levels = class_levels))
-}
-m_C <- fit_c(d_c)
-species_summary <- summarise_c(m_C, d_c)
-stopifnot(sum(table(species_summary$class)) == 77) # classes sum to the eligible count
+m_C <- lapply(split(d_c, d_c$species, drop = TRUE), fit_species)
+sp <- levels(d_c$species)
+tau2 <- sapply(m_C, function(m) m$sigma2)
+stopifnot(length(tau2) == length(eligible), identical(names(m_C), sp)) # one tau2_s per eligible species, in order
+pred <- lapply(m_C, predict)
+species_summary <- tibble::tibble(species = sp, n_experiments = as.integer(table(d_c$species)[sp]),
+                                  mu = sapply(pred, `[[`, "pred"), se_mu = sapply(pred, `[[`, "se"), tau = sqrt(tau2),
+                                  lower = sapply(pred, `[[`, "pi.lb"), upper = sapply(pred, `[[`, "pi.ub"))
+stopifnot(max(abs(species_summary$upper - (species_summary$mu + qnorm(0.975) * sqrt(species_summary$tau^2 + species_summary$se_mu^2)))) < 1e-10,
+          max(abs(species_summary$lower - (species_summary$mu - qnorm(0.975) * sqrt(species_summary$tau^2 + species_summary$se_mu^2)))) < 1e-10)
+species_summary <- mutate(species_summary, class = factor(case_when(lower > 0 ~ "Consistent winner", upper < 0 ~ "Consistent loser",
+                                                                    TRUE ~ "Context-dependent"), levels = class_levels))
+stopifnot(sum(table(species_summary$class)) == 137) # classes sum to the eligible count
 
-# sensitivity: the same model on step 02's all-years strength, same species
-d_all <- readRDS("data/derived/02_strength/strength_df.rds") |>
-  filter(species %in% eligible) |> mutate(species = factor(species))
-stopifnot(nrow(d_all) == 552)
-summary_all <- summarise_c(fit_c(d_all), d_all)
 
 # ---- Write -------------------------------------------------------------------
 saveRDS(m_C, file.path(out_dir, "m_C.rds"))
@@ -117,9 +120,6 @@ ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 10, height = 14,
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
 f4 <- function(x) sprintf("%.4f", x)
-cross <- table(`years >= 3 (main)` = species_summary$class,
-               `all years (step 02)` = summary_all$class[match(species_summary$species, summary_all$species)])
-cross_md <- as.data.frame.matrix(cross); cross_md <- cbind(`years >= 3 (main)` = rownames(cross_md), cross_md)
 consistent <- named |> arrange(class, mu) |>
   transmute(species, class = as.character(class), n_experiments, mu = f4(mu), se_mu = f4(se_mu), tau = f4(tau),
             lower = f4(lower), upper = f4(upper))
@@ -131,12 +131,13 @@ report <- c(
          "strength per species and a species-specific among-experiment variance, on the strength from year 3 (step 03b). ",
          "Each species' prediction interval for a new experiment, which carries both its among-experiment variance and the ",
          "uncertainty of its pooled strength, places it as a consistent winner (interval above zero), a consistent loser ",
-         "(below zero) or context-dependent (spanning zero). The same model on step 02's all-years strength is the ",
-         "sensitivity run."),
+         "(below zero) or context-dependent (spanning zero)."),
   "", "## Model as fitted (for reviewers)", "", "```r",
-  paste0("m_C <- ", paste(trimws(deparse(m_C$call, width.cutoff = 500)), collapse = " ")),
-  "# d: eligible species (>= 4 experiments); mods = ~ 0 + species, random = ~ species | effect_id, struct = \"DIAG\"",
-  "p <- predict(m_C, newmods = diag(n_species), tau2.levels = species)",
+  "# the model: one fixed mean and one among-experiment variance per species",
+  "# rma.mv(strength, strength_se^2, mods = ~ 0 + species, random = ~ species | effect_id, struct = \"DIAG\")",
+  "# fitted as one rma.mv per species, which maximises the same REML likelihood (no shared parameter):",
+  paste0("m_s <- ", paste(trimws(deparse(m_C[[1]]$call, width.cutoff = 500)), collapse = " "), "   # d = one species' effects"),
+  "p <- predict(m_s)",
   "# lower, upper = p$pi.lb, p$pi.ub = mu_s -/+ 1.96 * sqrt(tau2_s + se(mu_s)^2)",
   "```", "",
   "## Counts", "",
@@ -148,17 +149,18 @@ report <- c(
   "", "Consistent winners and losers:", "", md_table(consistent),
   "", paste0("Species with tau2_s at about zero (their interval is the uncertainty of the mean alone): ",
              paste(tau0$species, collapse = ", "), "."),
-  "", "## Sensitivity: all-years strength (step 02)", "",
-  "Rows: class on the strength from year 3 (main); columns: class on the all-years strength.", "", md_table(cross_md),
   "", "## Figures (drafts)", "",
   "![Fig 2 draft](../figures/diagnostics/04_fig2_draft.png)", "",
   "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
   "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)",
-  "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
+  "", "## Warnings captured", "",
+  if (length(fallback)) paste0("- Refitted with the bobyqa optimizer after nlminb did not declare convergence (tau2_s at 0): ",
+                               paste(fallback, collapse = ", "), ".") else character(),
+  if (length(warns)) paste("-", unique(warns)) else if (!length(fallback)) "None." else character(),
   "", "## Deviations from PLAN.md", "",
   paste("None: PLAN.md Step C was revised on 30 Oct (Bills) to fixed species means with predict() intervals. Decisions",
-        "approved with the plan: se_mu added to species_summary; the all-years sensitivity run here; draft figures in",
-        "figures/diagnostics/ rather than data/derived/04_classification/.")
+        "approved with the plan: se_mu added to species_summary; draft figures in figures/diagnostics/ rather than",
+        "data/derived/04_classification/.")
 )
 writeLines(report, "reports/04_classification.md")
 message("Step 04 written: ", paste(sprintf("%s %d", names(table(species_summary$class)), table(species_summary$class)),
