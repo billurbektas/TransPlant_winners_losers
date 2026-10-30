@@ -7,9 +7,9 @@
 # Writes: data/derived/03_temporal/classes_by_anchor.rds, stability.csv,
 #         flows.rds; figures/diagnostics/03_fig1_residents_draft.png;
 #         reports/03_temporal.md
-# Checks: 7,571 yearly contrasts; 5,024 at the anchors (1,655, 1,453, 1,150,
-#         766), of which 663 absent from both groups (232, 174, 125, 132),
-#         leaving 1,423, 1,279, 1,025 and 634 classified; year 1 absent from every output; class
+# Checks: 4,610 yearly contrasts; 3,041 at the anchors (995, 887, 687, 472),
+#         of which 147 absent from both groups (48, 38, 25, 36), leaving 947,
+#         849, 662 and 436 classified (pools of 30 Oct); year 1 absent from every output; class
 #         counts per anchor sum to the combinations at that anchor; n per pair
 #         equals the combinations present at both anchors, counted separately.
 #
@@ -33,7 +33,7 @@ anchors <- c(2L, 3L, 4L, 6L)
 class_levels <- c("Loser", "Loser (ns)", "Winner (ns)", "Winner")
 
 by_year <- as.data.frame(readRDS("data/derived/02_strength/by_year.rds"))
-stopifnot(nrow(by_year) == 7571) # step 02
+stopifnot(nrow(by_year) == 4610) # step 02
 
 # ---- Absence from both groups in a year, from the raw cover ---------------
 present <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
@@ -45,10 +45,10 @@ at_anchor <- by_year |>
   mutate(year = as.integer(as.character(year))) |>   # emmeans returns year as a factor
   filter(year %in% anchors) |>
   left_join(present, by = c("experiment_id", "species", "year"))
-stopifnot(nrow(at_anchor) == 5024, !anyNA(at_anchor$present))
-stopifnot(identical(as.integer(table(at_anchor$year)), c(1655L, 1453L, 1150L, 766L))) # combinations per anchor
+stopifnot(nrow(at_anchor) == 3041, !anyNA(at_anchor$present))
+stopifnot(identical(as.integer(table(at_anchor$year)), c(995L, 887L, 687L, 472L))) # combinations per anchor
 absent_counts <- count(filter(at_anchor, !present), year, name = "absent")
-stopifnot(identical(absent_counts$absent, c(232L, 174L, 125L, 132L))) # absent from both groups (decided 30 Oct)
+stopifnot(identical(absent_counts$absent, c(48L, 38L, 25L, 36L))) # absent from both groups (decided 30 Oct)
 
 # ---- Classes (PLAN.md Step B) ----------------------------------------------
 classes <- at_anchor |>
@@ -59,10 +59,10 @@ classes <- at_anchor |>
     estimate > 0 ~ "Winner (ns)",
     TRUE ~ "Loser (ns)"),
     class = factor(class, levels = class_levels))
-stopifnot(identical(as.integer(table(classes$year)), c(1423L, 1279L, 1025L, 634L))) # classified per anchor
+stopifnot(identical(as.integer(table(classes$year)), c(947L, 849L, 662L, 436L))) # classified per anchor
 stopifnot(!any(classes$year == 1L))
 class_counts <- count(classes, year, class) |> tidyr::pivot_wider(names_from = class, values_from = n, values_fill = 0)
-stopifnot(all(rowSums(class_counts[class_levels]) == c(1423, 1279, 1025, 634))) # classes sum to the anchor's combinations
+stopifnot(all(rowSums(class_counts[class_levels]) == c(947, 849, 662, 436))) # classes sum to the anchor's combinations
 
 # ---- Sign agreement, CCC and flows between adjacent anchors -----------------
 pair <- function(y1, y2) {
