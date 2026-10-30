@@ -116,7 +116,7 @@ ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
   geom_vline(xintercept = 0, colour = "grey50") +
   geom_segment(aes(x = lower, xend = upper, yend = species, colour = class), linewidth = 0.9) +
-  geom_point(aes(x = mu, fill = n_experiments), shape = 21, colour = "black", size = 3.4, stroke = 0.5) +
+  geom_point(aes(x = mu, fill = n_experiments, colour = class), shape = 21, size = 2.3, stroke = 0.9) +
   # species names coloured by class, so classes stay visible where the line is shorter than the point
   geom_text(aes(x = x_lab, label = species, colour = class), hjust = 1, size = 3.8, fontface = "italic",
             show.legend = FALSE) +
