@@ -61,6 +61,8 @@ Fig 2 corner panels follow once four species are named (MILESTONES).
 
 ![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)
 
+Fig S6: point = pooled strength; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner); points filled by the number of experiments. 63 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
+
 ## Warnings captured
 
 - Refitted with the bobyqa optimizer after nlminb did not declare convergence (tau2_s at 0): Bartsia alpina.

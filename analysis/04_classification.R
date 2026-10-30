@@ -123,12 +123,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   coord_cartesian(xlim = x_lim, ylim = c(0.2, nrow(ranges) + 0.8), expand = FALSE, clip = "off") +
   scale_colour_manual(values = cols, name = NULL) +
   scale_fill_gradient(name = "Experiments", low = "white", high = "black", breaks = c(4, 8, 12, 16, 20)) +
-  labs(title = "a)",
-       subtitle = paste0("Point: pooled strength across experiments.\nLine: 95% interval including the variation among ",
-                         "experiments;\na line that does not cross zero marks a consistent loser or winner.\n",
-                         n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +",
-                         min_shown, " are not shown."),
-       x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
+  labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
   theme_classic(base_size = 15) +
   theme(plot.title = element_text(face = "bold", size = 24), legend.position = "top", legend.box = "vertical",
         legend.text = element_text(size = 14, face = "bold"), legend.title = element_text(size = 14, face = "bold"),
@@ -172,7 +167,11 @@ report <- c(
   "", "## Figures (drafts)", "",
   "![Fig 2 draft](../figures/diagnostics/04_fig2_draft.png)", "",
   "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
-  "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)",
+  "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)", "",
+  paste0("Fig S6: point = pooled strength; line = 95% interval including the variation among experiments (a line that ",
+         "does not cross zero marks a consistent loser or winner); points filled by the number of experiments. ",
+         n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +", min_shown,
+         " are not shown."),
   "", "## Warnings captured", "",
   if (length(fallback)) paste0("- Refitted with the bobyqa optimizer after nlminb did not declare convergence (tau2_s at 0): ",
                                paste(fallback, collapse = ", "), ".") else character(),
