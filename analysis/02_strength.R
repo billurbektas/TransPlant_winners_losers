@@ -16,7 +16,9 @@
 #         T, P standardised across the 43 experiments, A0 across the 1,655
 #         effects; every join keeps the 1,655 rows.
 #
-# Decided 30 Oct (Bills): asymptotic df in every experiment (R/fit_experiment.R);
+# Decided 30 Oct (Bills): one residual variance per species (glmmTMB,
+# dispformula = ~ species, in R/fit_experiment.R), so each species gets its own
+# strength_se; asymptotic df in every experiment;
 # PEV1 to PEV3 only; species properties standardised across the 528 residents
 # that have each one (as legacy/R/models/predictors.R:170-184), traits logged
 # first (same lines); graminoid and woody as 0/1, not standardised.
@@ -141,9 +143,23 @@ fit_table <- tibble::tibble(
   rows = as.integer(table(resident$experiment_id)[experiment_ids]),
   species = sapply(experiment_ids, function(e) nlevels(droplevels(filter(resident, experiment_id == e)$species))),
   years = sapply(experiment_ids, function(e) n_distinct(filter(resident, experiment_id == e)$year)),
-  singular = sapply(fits, `[[`, "singular"),
-  distinct_se = sapply(experiment_ids, function(e) n_distinct(signif(strength$strength_se[strength$experiment_id == e], 6))),
+  convergence = sapply(fits, `[[`, "convergence"),
+  pdHess = sapply(fits, `[[`, "pdHess"),
+  sd_plot_species = signif(sapply(fits, `[[`, "sd_plot_species"), 3),
+  se_min = signif(sapply(experiment_ids, function(e) min(strength$strength_se[strength$experiment_id == e])), 3),
+  se_median = signif(sapply(experiment_ids, function(e) stats::median(strength$strength_se[strength$experiment_id == e])), 3),
+  se_max = signif(sapply(experiment_ids, function(e) max(strength$strength_se[strength$experiment_id == e])), 3),
   warnings = sapply(fits, function(x) length(x$warnings)))
+mean_cover <- summarise(resident, mean_cover = mean(relative_cover), .by = c(experiment_id, species)) |>
+  mutate(species = as.character(species))
+se_cover <- inner_join(strength, mean_cover, by = c("experiment_id", "species"))
+# the lmer fit with one residual variance per experiment, committed before the
+# 30 Oct change (step 02 at 912bc69), for the comparison in the report
+lmer_run <- utils::read.csv(pipe("git show 912bc69:data/derived/02_strength/strength_df.csv")) |>
+  select(effect_id, strength_lmer = strength, se_lmer = strength_se) |>
+  inner_join(select(strength_df, effect_id, strength, strength_se), by = "effect_id")
+stopifnot(nrow(lmer_run) == 1655) # same effects as the lmer run
+moved <- abs(lmer_run$strength - lmer_run$strength_lmer) > 1e-6
 fit_warnings <- unlist(lapply(experiment_ids, function(e) if (length(fits[[e]]$warnings)) paste0(e, ": ", fits[[e]]$warnings)))
 q <- function(x) paste(sprintf("%.4f", stats::quantile(x, c(0, 0.25, 0.5, 0.75, 1))), collapse = " / ")
 has <- function(d, col) d$species[!is.na(d[[col]])]
@@ -167,7 +183,8 @@ counts <- tibble::tibble(
 
 report <- c(
   "# Step 02: Strength (Step A, residents)", "",
-  paste0("One `lmer(relative_cover ~ treatment * year * species + (1 | plot_id:species))` was fitted per experiment on ",
+  paste0("One Gaussian `glmmTMB(relative_cover ~ treatment * year * species + (1 | plot_id:species), ",
+         "dispformula = ~ species, REML = TRUE)` (one residual variance per species) was fitted per experiment on ",
          "the resident species' rows in origin controls and warmed plots (", fmt(nrow(resident)), " rows, ",
          length(experiment_ids), " experiments), year as a factor. `emmeans` gave the warmed minus origin-control contrast ",
          "per species and survey year (`by_year`, for step 03) and averaged over each experiment's years (`strength`), ",
@@ -181,10 +198,19 @@ report <- c(
          q(strength_df$strength_se), ". Effects with the contrast's 95% interval excluding zero: ",
          fmt(sum(abs(strength_df$strength) > 1.96 * strength_df$strength_se)), " of ", fmt(nrow(strength_df)), "."),
   "", "![strength and strength_se](../figures/diagnostics/02_strength.png)", "",
-  paste0("Within an experiment the SE does not differ between species: the model has one residual variance and the ",
-         "plots are balanced, so `distinct_se` (distinct SEs to 6 significant digits) is 1 in ",
-         sum(fit_table$distinct_se == 1), " of ", nrow(fit_table), " experiments. V in the later `rma.mv` calls therefore ",
-         "weights experiments rather than species within an experiment."),
+  paste0("With one residual variance per species, the SE follows each species' own scatter: within an experiment ",
+         "the largest SE is a median of ", round(stats::median(fit_table$se_max / fit_table$se_min)), " times the smallest ",
+         "(range ", round(min(fit_table$se_max / fit_table$se_min)), " to ", round(max(fit_table$se_max / fit_table$se_min)),
+         "), and the Spearman correlation of SE with the species' mean relative cover in the experiment is ",
+         sprintf("%.2f", cor(se_cover$strength_se, se_cover$mean_cover, method = "spearman")), ". Rare species therefore ",
+         "get the smallest SEs on the absolute cover scale, and the largest weights in the later `rma.mv` calls."),
+  "",
+  paste0("Against the lmer fit with one residual variance per experiment (step 02 before 30 Oct, commit 912bc69): ",
+         "strength moved by more than 1e-6 in ", sum(moved), " of ", nrow(lmer_run), " effects (largest change ",
+         sprintf("%.4f", max(abs(lmer_run$strength - lmer_run$strength_lmer))), ", in experiments with unequal plot numbers ",
+         "across years); effects whose 95% interval excludes zero went from ",
+         sum(abs(lmer_run$strength_lmer) > 1.96 * lmer_run$se_lmer), " to ",
+         sum(abs(lmer_run$strength) > 1.96 * lmer_run$strength_se), " (step 03 classifies by p < 0.05)."),
   "", "## Fits per experiment", "", md_table(fit_table),
   "", "## Property coverage on the residents (added 26 Oct)", "",
   "Species and effects with each property, after steps 01 and 02:", "", md_table(coverage),
@@ -197,7 +223,9 @@ report <- c(
   "", "## Warnings captured", "",
   if (length(fit_warnings) + length(warns)) paste("-", c(fit_warnings, unique(warns))) else "None.",
   "", "## Deviations from PLAN.md", "",
-  paste("None in the model. Decisions taken where PLAN.md is silent (30 Oct, Bills): asymptotic degrees of freedom for",
+  paste("The residual variance is one per species (`glmmTMB`, `dispformula = ~ species`) instead of PLAN.md's `lmer`",
+        "with one per experiment (decided 30 Oct, Bills; PLAN.md Step A updated): with one variance per experiment",
+        "every species of an experiment got the same SE. Decisions taken where PLAN.md is silent (30 Oct, Bills): asymptotic degrees of freedom for",
         "every experiment; PEV1 to PEV3 carried; properties standardised across the residents that have them, traits",
         "logged first; graminoid and woody as 0/1. MILESTONES' expected count (about 1,596 effects in 41 experiments)",
         "is 1,655 in 43, after FR_AlpeHuez (26 Oct) and US_Arizona (28 Oct) were included.")

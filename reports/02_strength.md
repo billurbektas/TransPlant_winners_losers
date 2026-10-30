@@ -1,6 +1,6 @@
 # Step 02: Strength (Step A, residents)
 
-One `lmer(relative_cover ~ treatment * year * species + (1 | plot_id:species))` was fitted per experiment on the resident species' rows in origin controls and warmed plots (108,884 rows, 43 experiments), year as a factor. `emmeans` gave the warmed minus origin-control contrast per species and survey year (`by_year`, for step 03) and averaged over each experiment's years (`strength`), with asymptotic degrees of freedom in every experiment. Each effect carries the experiment's W, T and P (summer, log) standardised across the 43 experiments, TP = T x P, A0 at origin and destination standardised across the 1,655 effects, and the species properties standardised across the residents that have them. Strength is in relative-cover units (proportion of plot cover).
+One Gaussian `glmmTMB(relative_cover ~ treatment * year * species + (1 | plot_id:species), dispformula = ~ species, REML = TRUE)` (one residual variance per species) was fitted per experiment on the resident species' rows in origin controls and warmed plots (108,884 rows, 43 experiments), year as a factor. `emmeans` gave the warmed minus origin-control contrast per species and survey year (`by_year`, for step 03) and averaged over each experiment's years (`strength`), with asymptotic degrees of freedom in every experiment. Each effect carries the experiment's W, T and P (summer, log) standardised across the 43 experiments, TP = T x P, A0 at origin and destination standardised across the 1,655 effects, and the species properties standardised across the residents that have them. Strength is in relative-cover units (proportion of plot cover).
 
 ## Counts
 
@@ -16,59 +16,61 @@ One `lmer(relative_cover ~ treatment * year * species + (1 | plot_id:species))` 
 
 ## Strength
 
-Quantiles (min / 25% / median / 75% / max). strength: -0.2965 / -0.0090 / -0.0016 / 0.0020 / 0.1885; strength_se: 0.0070 / 0.0091 / 0.0138 / 0.0191 / 0.0667. Effects with the contrast's 95% interval excluding zero: 232 of 1,655.
+Quantiles (min / 25% / median / 75% / max). strength: -0.2965 / -0.0091 / -0.0016 / 0.0019 / 0.1885; strength_se: 0.0001 / 0.0027 / 0.0061 / 0.0106 / 0.0730. Effects with the contrast's 95% interval excluding zero: 491 of 1,655.
 
 ![strength and strength_se](../figures/diagnostics/02_strength.png)
 
-Within an experiment the SE does not differ between species: the model has one residual variance and the plots are balanced, so `distinct_se` (distinct SEs to 6 significant digits) is 1 in 43 of 43 experiments. V in the later `rma.mv` calls therefore weights experiments rather than species within an experiment.
+With one residual variance per species, the SE follows each species' own scatter: within an experiment the largest SE is a median of 8 times the smallest (range 1 to 389), and the Spearman correlation of SE with the species' mean relative cover in the experiment is 0.79. Rare species therefore get the smallest SEs on the absolute cover scale, and the largest weights in the later `rma.mv` calls.
+
+Against the lmer fit with one residual variance per experiment (step 02 before 30 Oct, commit 912bc69): strength moved by more than 1e-6 in 385 of 1655 effects (largest change 0.0114, in experiments with unequal plot numbers across years); effects whose 95% interval excludes zero went from 232 to 491 (step 03 classifies by p < 0.05).
 
 ## Fits per experiment
 
-| experiment_id | rows | species | years | singular | distinct_se | warnings |
-| --- | --- | --- | --- | --- | --- | --- |
-| CH_Calanda::Cal::Nes | 7739 | 71 | 6 | FALSE | 1 | 1 |
-| CH_Calanda::Pea::Cal | 4080 | 34 | 6 | FALSE | 1 | 1 |
-| CH_Calanda2::Cal::Nes | 4240 | 53 | 4 | FALSE | 1 | 1 |
-| CH_Lavey::RIO::CRE | 3780 | 63 | 3 | FALSE | 1 | 1 |
-| CH_Lavey::RIO::MAR | 3780 | 63 | 3 | FALSE | 1 | 1 |
-| CH_Lavey::RIO::PRA | 3717 | 63 | 3 | FALSE | 1 | 1 |
-| CN_Damxung::HIGH::LOW | 2560 | 32 | 4 | TRUE | 1 | 2 |
-| CN_Gongga::A::M | 1848 | 33 | 4 | FALSE | 1 | 1 |
-| CN_Gongga::H::A | 1800 | 36 | 4 | FALSE | 1 | 1 |
-| CN_Gongga::H::L | 1800 | 36 | 4 | FALSE | 1 | 1 |
-| CN_Gongga::M::L | 1568 | 28 | 4 | FALSE | 1 | 1 |
-| CN_Heibei::3400::3200 | 2310 | 55 | 7 | FALSE | 1 | 1 |
-| CN_Heibei::3800::3200 | 1360 | 34 | 7 | FALSE | 1 | 1 |
-| CN_Heibei::3800::3400 | 1360 | 34 | 7 | FALSE | 1 | 1 |
-| DE_Grainau::HIGH::LOW | 4160 | 52 | 4 | FALSE | 1 | 1 |
-| DE_Susalps::EB::BT | 3240 | 45 | 4 | FALSE | 1 | 1 |
-| DE_Susalps::EB::FE | 3240 | 45 | 4 | FALSE | 1 | 1 |
-| DE_Susalps::EB::GW | 3240 | 45 | 4 | FALSE | 1 | 1 |
-| DE_Susalps::FE::BT | 864 | 12 | 4 | FALSE | 1 | 1 |
-| DE_Susalps::GW::BT | 3168 | 44 | 4 | FALSE | 1 | 1 |
-| DE_Susalps::GW::FE | 3168 | 44 | 4 | FALSE | 1 | 1 |
-| DE_TransAlps::FP::BT | 1512 | 21 | 4 | FALSE | 1 | 1 |
-| DE_TransAlps::SP::BT | 2520 | 35 | 4 | FALSE | 1 | 1 |
-| FR_AlpeHuez::HIGH::LOW | 9720 | 54 | 9 | FALSE | 1 | 1 |
-| FR_Lautaret::G::L | 4960 | 62 | 4 | FALSE | 1 | 1 |
-| IT_MatschMazia1::High::Low | 1122 | 34 | 3 | FALSE | 1 | 1 |
-| IT_MatschMazia2::High::Low | 720 | 24 | 3 | FALSE | 1 | 1 |
-| NO_Gudmedalen::Gudmedalen::Rambera | 2450 | 49 | 5 | FALSE | 1 | 1 |
-| NO_Gudmedalen::Rambera::Arhelleren | 2000 | 40 | 5 | FALSE | 1 | 1 |
-| NO_Lavisdalen::Hogsete::Vikesland | 1300 | 26 | 5 | FALSE | 1 | 1 |
-| NO_Lavisdalen::Lavisdalen::Hogsete | 2700 | 54 | 5 | FALSE | 1 | 1 |
-| NO_Skjellingahaugen::Skjellingahaugen::Veskre | 2050 | 41 | 5 | FALSE | 1 | 1 |
-| NO_Skjellingahaugen::Veskre::Ovstedal | 2400 | 48 | 5 | FALSE | 1 | 1 |
-| NO_Ulvhaugen::Alrust::Fauske | 1911 | 39 | 5 | FALSE | 1 | 1 |
-| NO_Ulvhaugen::Ulvhaugen::Alrust | 2250 | 45 | 5 | FALSE | 1 | 1 |
-| SE_Abisko::High::Low | 480 | 16 | 3 | FALSE | 1 | 1 |
-| SE_Abisko::High::Mid | 480 | 16 | 3 | FALSE | 1 | 1 |
-| SE_Abisko::Mid::Low | 390 | 13 | 3 | FALSE | 1 | 1 |
-| US_Arizona::MC::PP | 448 | 8 | 4 | FALSE | 1 | 1 |
-| US_Colorado::mo::pf | 1593 | 27 | 5 | FALSE | 1 | 1 |
-| US_Colorado::mo::um | 1728 | 27 | 5 | FALSE | 1 | 1 |
-| US_Colorado::pf::um | 1560 | 26 | 5 | FALSE | 1 | 1 |
-| US_Montana::High::Low | 1568 | 28 | 3 | FALSE | 1 | 1 |
+| experiment_id | rows | species | years | convergence | pdHess | sd_plot_species | se_min | se_median | se_max | warnings |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CH_Calanda::Cal::Nes | 7739 | 71 | 6 | 0 | TRUE | 0.00247 | 0.00111 | 0.00158 | 0.0274 | 1 |
+| CH_Calanda::Pea::Cal | 4080 | 34 | 6 | 0 | TRUE | 0.00666 | 0.00298 | 0.00343 | 0.0243 | 1 |
+| CH_Calanda2::Cal::Nes | 4240 | 53 | 4 | 0 | TRUE | 0.00812 | 0.00363 | 0.00371 | 0.0149 | 1 |
+| CH_Lavey::RIO::CRE | 3780 | 63 | 3 | 0 | TRUE | 0.000379 | 0.000239 | 0.00222 | 0.0178 | 1 |
+| CH_Lavey::RIO::MAR | 3780 | 63 | 3 | 0 | TRUE | 0.000634 | 0.000359 | 0.00256 | 0.019 | 1 |
+| CH_Lavey::RIO::PRA | 3717 | 63 | 3 | 0 | TRUE | 0.000373 | 0.000239 | 0.00222 | 0.0207 | 1 |
+| CN_Damxung::HIGH::LOW | 2560 | 32 | 4 | 0 | TRUE | 3.71e-07 | 0.000243 | 0.00328 | 0.0285 | 1 |
+| CN_Gongga::A::M | 1848 | 33 | 4 | 0 | TRUE | 0.00924 | 0.00495 | 0.00562 | 0.0328 | 1 |
+| CN_Gongga::H::A | 1800 | 36 | 4 | 0 | TRUE | 0.00931 | 0.00498 | 0.00626 | 0.0308 | 1 |
+| CN_Gongga::H::L | 1800 | 36 | 4 | 0 | TRUE | 0.00771 | 0.00413 | 0.00527 | 0.0245 | 1 |
+| CN_Gongga::M::L | 1568 | 28 | 4 | 0 | TRUE | 4.11e-07 | 0.000402 | 0.0068 | 0.0212 | 1 |
+| CN_Heibei::3400::3200 | 2310 | 55 | 7 | 0 | TRUE | 0.000319 | 0.000455 | 0.00254 | 0.0178 | 1 |
+| CN_Heibei::3800::3200 | 1360 | 34 | 7 | 0 | TRUE | 0.000397 | 0.000552 | 0.00254 | 0.0235 | 1 |
+| CN_Heibei::3800::3400 | 1360 | 34 | 7 | 0 | TRUE | 0.000839 | 0.000962 | 0.00308 | 0.0227 | 1 |
+| DE_Grainau::HIGH::LOW | 4160 | 52 | 4 | 0 | TRUE | 0.00411 | 0.00184 | 0.00317 | 0.0196 | 1 |
+| DE_Susalps::EB::BT | 3240 | 45 | 4 | 0 | TRUE | 0.000298 | 0.000177 | 0.00767 | 0.0353 | 1 |
+| DE_Susalps::EB::FE | 3240 | 45 | 4 | 0 | TRUE | 0.000756 | 0.000431 | 0.00543 | 0.0408 | 1 |
+| DE_Susalps::EB::GW | 3240 | 45 | 4 | 0 | TRUE | 0.000902 | 0.000544 | 0.00566 | 0.0425 | 1 |
+| DE_Susalps::FE::BT | 864 | 12 | 4 | 0 | TRUE | 0.000784 | 0.00159 | 0.0293 | 0.073 | 1 |
+| DE_Susalps::GW::BT | 3168 | 44 | 4 | 0 | TRUE | 0.000596 | 0.000362 | 0.00507 | 0.0576 | 1 |
+| DE_Susalps::GW::FE | 3168 | 44 | 4 | 0 | TRUE | 0.000501 | 0.000331 | 0.00202 | 0.0487 | 1 |
+| DE_TransAlps::FP::BT | 1512 | 21 | 4 | 0 | TRUE | 0.0138 | 0.00653 | 0.00773 | 0.0642 | 1 |
+| DE_TransAlps::SP::BT | 2520 | 35 | 4 | 0 | TRUE | 0.000126 | 0.000106 | 0.00446 | 0.0412 | 1 |
+| FR_AlpeHuez::HIGH::LOW | 9720 | 54 | 9 | 0 | TRUE | 0.00775 | 0.00347 | 0.00413 | 0.0179 | 1 |
+| FR_Lautaret::G::L | 4960 | 62 | 4 | 0 | TRUE | 9.06e-05 | 9.38e-05 | 0.000831 | 0.0218 | 1 |
+| IT_MatschMazia1::High::Low | 1122 | 34 | 3 | 0 | TRUE | 0.0075 | 0.00515 | 0.00937 | 0.0204 | 1 |
+| IT_MatschMazia2::High::Low | 720 | 24 | 3 | 0 | TRUE | 0.00201 | 0.00162 | 0.00818 | 0.0376 | 1 |
+| NO_Gudmedalen::Gudmedalen::Rambera | 2450 | 49 | 5 | 0 | TRUE | 0.0134 | 0.00851 | 0.00894 | 0.018 | 1 |
+| NO_Gudmedalen::Rambera::Arhelleren | 2000 | 40 | 5 | 0 | TRUE | 0.0117 | 0.00741 | 0.00808 | 0.0308 | 1 |
+| NO_Lavisdalen::Hogsete::Vikesland | 1300 | 26 | 5 | 0 | TRUE | 0.0226 | 0.0144 | 0.0153 | 0.0319 | 1 |
+| NO_Lavisdalen::Lavisdalen::Hogsete | 2700 | 54 | 5 | 0 | TRUE | 0.0107 | 0.00679 | 0.007 | 0.0274 | 1 |
+| NO_Skjellingahaugen::Skjellingahaugen::Veskre | 2050 | 41 | 5 | 0 | TRUE | 0.0119 | 0.00757 | 0.00799 | 0.0425 | 1 |
+| NO_Skjellingahaugen::Veskre::Ovstedal | 2400 | 48 | 5 | 0 | TRUE | 0.00658 | 0.00419 | 0.00497 | 0.0324 | 1 |
+| NO_Ulvhaugen::Alrust::Fauske | 1911 | 39 | 5 | 0 | TRUE | 0.0101 | 0.00639 | 0.00738 | 0.0283 | 1 |
+| NO_Ulvhaugen::Ulvhaugen::Alrust | 2250 | 45 | 5 | 0 | TRUE | 0.00648 | 0.00412 | 0.00493 | 0.0309 | 1 |
+| SE_Abisko::High::Low | 480 | 16 | 3 | 0 | TRUE | 0.0628 | 0.0398 | 0.0416 | 0.0503 | 1 |
+| SE_Abisko::High::Mid | 480 | 16 | 3 | 0 | TRUE | 0.053 | 0.0337 | 0.0356 | 0.0542 | 1 |
+| SE_Abisko::Mid::Low | 390 | 13 | 3 | 0 | TRUE | 0.0334 | 0.0212 | 0.028 | 0.0634 | 1 |
+| US_Arizona::MC::PP | 448 | 8 | 4 | 0 | TRUE | 0.049 | 0.0281 | 0.0368 | 0.0639 | 1 |
+| US_Colorado::mo::pf | 1593 | 27 | 5 | 0 | TRUE | 0.0145 | 0.00871 | 0.0103 | 0.056 | 1 |
+| US_Colorado::mo::um | 1728 | 27 | 5 | 0 | TRUE | 0.0645 | 0.0368 | 0.0371 | 0.0457 | 1 |
+| US_Colorado::pf::um | 1560 | 26 | 5 | 0 | TRUE | 0.0318 | 0.0187 | 0.0195 | 0.0411 | 1 |
+| US_Montana::High::Low | 1568 | 28 | 3 | 0 | TRUE | 0.000698 | 0.000897 | 0.00896 | 0.0324 | 1 |
 
 ## Property coverage on the residents (added 26 Oct)
 
@@ -107,7 +109,6 @@ Raw values before standardisation:
 - CH_Lavey::RIO::CRE: NOTE: Results may be misleading due to involvement in interactions
 - CH_Lavey::RIO::MAR: NOTE: Results may be misleading due to involvement in interactions
 - CH_Lavey::RIO::PRA: NOTE: Results may be misleading due to involvement in interactions
-- CN_Damxung::HIGH::LOW: boundary (singular) fit: see help('isSingular')
 - CN_Damxung::HIGH::LOW: NOTE: Results may be misleading due to involvement in interactions
 - CN_Gongga::A::M: NOTE: Results may be misleading due to involvement in interactions
 - CN_Gongga::H::A: NOTE: Results may be misleading due to involvement in interactions
@@ -148,4 +149,4 @@ Raw values before standardisation:
 
 ## Deviations from PLAN.md
 
-None in the model. Decisions taken where PLAN.md is silent (30 Oct, Bills): asymptotic degrees of freedom for every experiment; PEV1 to PEV3 carried; properties standardised across the residents that have them, traits logged first; graminoid and woody as 0/1. MILESTONES' expected count (about 1,596 effects in 41 experiments) is 1,655 in 43, after FR_AlpeHuez (26 Oct) and US_Arizona (28 Oct) were included.
+The residual variance is one per species (`glmmTMB`, `dispformula = ~ species`) instead of PLAN.md's `lmer` with one per experiment (decided 30 Oct, Bills; PLAN.md Step A updated): with one variance per experiment every species of an experiment got the same SE. Decisions taken where PLAN.md is silent (30 Oct, Bills): asymptotic degrees of freedom for every experiment; PEV1 to PEV3 carried; properties standardised across the residents that have them, traits logged first; graminoid and woody as 0/1. MILESTONES' expected count (about 1,596 effects in 41 experiments) is 1,655 in 43, after FR_AlpeHuez (26 Oct) and US_Arizona (28 Oct) were included.
