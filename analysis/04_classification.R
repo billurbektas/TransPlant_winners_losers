@@ -139,13 +139,13 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   # legend labels carry the total count of each class (all eligible species, shown or not)
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
-  scale_colour_gradient(name = "Gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
-  guides(fill = guide_legend(override.aes = list(size = 10), ncol = 1)) +
-  labs(title = "a)", x = "Losing-winning strength\n(warmed minus origin-control relative cover)", y = NULL) +
+  scale_colour_gradient(name = "Number of gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
+  guides(fill = guide_legend(override.aes = list(size = 10), nrow = 1)) +
+  labs(title = "a)", x = "Losing-winning strength", y = NULL) +
   theme_classic(base_size = 32) +
   theme(plot.title = element_text(face = "bold", size = 42), legend.position = "bottom", legend.box = "vertical",
-        legend.text = element_text(size = 40, face = "bold"), legend.title = element_text(size = 40, face = "bold"),
-        legend.key.width = unit(3.5, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 46), axis.text.x = element_text(size = 36),
+        legend.text = element_text(size = 38, face = "bold"), legend.title = element_text(size = 38, face = "bold"),
+        legend.key.width = unit(3.5, "cm"), legend.spacing.x = unit(0.1, "cm"), legend.key.spacing.x = unit(0.6, "cm"), legend.justification = "center", legend.location = "plot", axis.title.x = element_text(face = "bold", size = 46), axis.text.x = element_text(size = 36),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
         plot.margin = margin(15, 40, 15, 380))
 # ---- Fig S6 panels b) and c): best winner and worst loser among the most widely sampled species
@@ -181,17 +181,20 @@ corner <- function(sp, tag) {
                                    "Cover lost under warming" = cols[["Consistent loser"]]), guide = "none") +
     scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
     guides(shape = guide_legend(override.aes = list(size = 11, colour = "grey20", fill = c("white", "grey20")))) +
-    labs(title = tag, subtitle = sp, x = "Mean relative cover (%), years 3 and later", y = NULL) +
+    labs(tag = tag, title = sp, x = "Mean relative cover (%)", y = NULL) +
     theme_classic(base_size = 32) +
-    theme(plot.title = element_text(face = "bold", size = 42), axis.title.x = element_text(face = "bold", size = 46),
-          plot.subtitle = element_text(face = "bold.italic", size = 44, colour = cols[[as.character(info$class)]]),
+    theme(plot.tag = element_text(face = "bold", size = 42), plot.tag.position = c(0, 0.985),
+          plot.title = element_text(face = "bold.italic", size = 44, colour = cols[[as.character(info$class)]],
+                                    margin = margin(l = 70, b = 15)), plot.title.position = "plot",
+          axis.title.x = element_text(face = "bold", size = 46),
           axis.text.y = element_text(size = 31), axis.text.x = element_text(size = 36),
           legend.position = "bottom", legend.box = "vertical", legend.text = element_text(size = 42, face = "bold"))
 }
-bc <- patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species[2], "c)"), ncol = 1) +
-  patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom") # one legend for b) and c)
+bc <- patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species[2], "c)"), ncol = 1)
 fig_s6 <- patchwork::wrap_plots(figS6, bc,
-                                ncol = 2, widths = c(1.25, 1))
+                                ncol = 2, widths = c(1.6, 1)) +
+  # all legends collected in one row under the whole figure
+  patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical")
 ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 42, height = 30, dpi = 110, bg = "white")
 
 # ---- Report --------------------------------------------------------------
@@ -231,7 +234,7 @@ report <- c(
   "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
   "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)", "",
   paste0("Fig S6 b) and c): ", panel_species[1], " and ", panel_species[2], ", the highest and lowest pooled strength among ",
-         "species in at least ", top_g, " gradients; one row per experiment, mean relative cover over years 3 and later in ",
+         "species in at least ", top_g, " gradients; one row per experiment (country, origin to destination elevation), mean relative cover over years 3 and later in ",
          "origin controls (hollow) and warmed plots (filled)."),
   paste0("Fig S6 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
          "(a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). ",
