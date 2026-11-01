@@ -122,7 +122,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   # (to the right of the upper end where the interval starts too close to the left edge)
   geom_text(aes(x = ifelse(lower < x_lim[1] + 0.15 * diff(x_lim), upper + 0.004 * diff(x_lim), lower - 0.004 * diff(x_lim)),
                 hjust = ifelse(lower < x_lim[1] + 0.15 * diff(x_lim), 0, 1),
-                label = paste0("G: ", n_gradients, " (E: ", n_experiments, ")")), size = 4.6, colour = "grey20") +
+                label = paste0(n_gradients, " (", n_experiments, ")")), size = 4.6, colour = "grey20") +
   # species names in their class colour, set directly (one colour scale per plot)
   geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 5.2,
             fontface = "italic") +
@@ -178,7 +178,7 @@ report <- c(
   "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
   "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)", "",
   paste0("Fig S6: point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
-         "(a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled G: gradients (E: experiments). ",
+         "(a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). ",
          n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +", min_shown,
          " are not shown."),
   "", "## Warnings captured", "",

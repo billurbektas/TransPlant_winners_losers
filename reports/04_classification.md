@@ -61,7 +61,7 @@ Fig 2 corner panels follow once four species are named (MILESTONES).
 
 ![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)
 
-Fig S6: point = pooled strength, filled by class; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled G: gradients (E: experiments). 63 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
+Fig S6: point = pooled strength, filled by class; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). 63 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
 
 ## Warnings captured
 
