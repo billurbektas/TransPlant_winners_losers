@@ -131,7 +131,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
-  guides(fill = guide_legend(override.aes = list(size = 7))) +
+  guides(fill = guide_legend(override.aes = list(size = 7), nrow = 3)) +
   labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
   theme_classic(base_size = 27) +
   theme(plot.title = element_text(face = "bold", size = 42), legend.position = "top", legend.box = "vertical",
@@ -139,7 +139,44 @@ figS6 <- ggplot(ranges, aes(y = species)) +
         legend.key.width = unit(2.8, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 28), axis.text.x = element_text(size = 24),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
         plot.margin = margin(15, 40, 15, 300))
-ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 21, height = 25, dpi = 150, bg = "white")
+# ---- Fig S6 panels b) and c): best winner and worst loser among the most widely sampled species
+# (Bills, 1 Nov): among species in the largest number of gradients reached by at least two
+# species (here 12), the highest and the lowest pooled strength; one row per experiment,
+# grouped by gradient, arrow from origin-control cover (hollow) to warmed cover (filled),
+# mean relative cover over years >= 3 as the strength
+top_g <- sort(unique(species_summary$n_gradients), decreasing = TRUE)
+top_g <- top_g[sapply(top_g, function(g) sum(species_summary$n_gradients >= g) >= 2)][1]
+top <- filter(species_summary, n_gradients >= top_g)
+panel_species <- c(top$species[which.max(top$mu)], top$species[which.min(top$mu)])
+sites <- utils::read.csv("data/derived/01_relative_cover/experiments_kept.csv")
+panel_cover <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
+  filter(species %in% panel_species, species_pool == "resident", treatment %in% c("origin_control", "warmed"),
+         as.integer(as.character(year)) >= 3) |>
+  summarise(cover = 100 * mean(relative_cover), .by = c(species, experiment_id, gradient_id, treatment)) |>
+  tidyr::pivot_wider(names_from = treatment, values_from = cover) |>
+  left_join(select(sites, experiment_id, origin_site, destination_site), by = "experiment_id") |>
+  mutate(row = paste0(gradient_id, ": ", origin_site, " \u2192 ", destination_site),
+         direction = ifelse(warmed >= origin_control, "gained", "lost"))
+corner <- function(sp, tag) {
+  d <- filter(panel_cover, species == sp) |> arrange(gradient_id, row) |> mutate(row = factor(row, levels = rev(row)))
+  info <- filter(species_summary, species == sp)
+  ggplot(d, aes(y = row)) +
+    geom_segment(aes(x = origin_control, xend = warmed, yend = row, colour = direction), linewidth = 1.6,
+                 arrow = grid::arrow(length = grid::unit(0.35, "cm"), type = "closed")) +
+    geom_point(aes(x = origin_control), shape = 21, fill = "white", colour = "grey20", size = 4.5, stroke = 1) +
+    geom_point(aes(x = warmed, colour = direction), size = 4.5) +
+    scale_colour_manual(values = c(gained = cols[["Consistent winner"]], lost = cols[["Consistent loser"]]), guide = "none") +
+    labs(title = tag, subtitle = paste0(sp, "\n", info$class, "\n", info$n_gradients, " gradients (", info$n_experiments,
+                                        " experiments), pooled strength ", sprintf("%+.3f", info$mu)),
+         x = "Relative cover (%), years 3 and later: origin control (hollow) to warmed (filled)", y = NULL) +
+    theme_classic(base_size = 22) +
+    theme(plot.title = element_text(face = "bold", size = 42), axis.title.x = element_text(face = "bold", size = 22),
+          plot.subtitle = element_text(face = "bold.italic", size = 24, colour = cols[[as.character(info$class)]]),
+          axis.text.y = element_text(size = 17))
+}
+fig_s6 <- patchwork::wrap_plots(figS6, patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species[2], "c)"), ncol = 1),
+                                ncol = 2, widths = c(1.25, 1))
+ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 36, height = 25, dpi = 120, bg = "white")
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
@@ -177,7 +214,10 @@ report <- c(
   "![Fig 2 draft](../figures/diagnostics/04_fig2_draft.png)", "",
   "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
   "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)", "",
-  paste0("Fig S6: point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
+  paste0("Fig S6 b) and c): ", panel_species[1], " and ", panel_species[2], ", the highest and lowest pooled strength among ",
+         "species in at least ", top_g, " gradients; one row per experiment, mean relative cover over years 3 and later in ",
+         "origin controls (hollow) and warmed plots (filled)."),
+  paste0("Fig S6 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
          "(a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). ",
          n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +", min_shown,
          " are not shown."),

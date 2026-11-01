@@ -61,7 +61,8 @@ Fig 2 corner panels follow once four species are named (MILESTONES).
 
 ![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)
 
-Fig S6: point = pooled strength, filled by class; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). 63 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
+Fig S6 b) and c): Festuca rubra and Bistorta vivipara, the highest and lowest pooled strength among species in at least 12 gradients; one row per experiment, mean relative cover over years 3 and later in origin controls (hollow) and warmed plots (filled).
+Fig S6 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). 63 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
 
 ## Warnings captured
 
