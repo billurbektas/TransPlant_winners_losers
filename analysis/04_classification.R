@@ -140,7 +140,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Number of gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
-  guides(fill = guide_legend(override.aes = list(size = 10), nrow = 1)) +
+  guides(fill = guide_legend(override.aes = list(size = 18), nrow = 1)) +
   labs(title = "a)", x = "Losing-winning strength", y = NULL) +
   theme_classic(base_size = 32) +
   theme(plot.title = element_text(face = "bold", size = 42), legend.position = "bottom", legend.box = "vertical",
@@ -179,7 +179,7 @@ corner <- function(sp, tag) {
     geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey50", size = 6, alpha = 0.55) +
     scale_y_discrete(labels = setNames(d$row, d$row_id)) +
     scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
-    guides(shape = guide_legend(override.aes = list(size = 11, colour = c("grey20", "grey50"), fill = c("white", "grey50"), alpha = c(1, 0.55)))) +
+    guides(shape = guide_legend(override.aes = list(size = 18, stroke = 1.6, colour = c("grey20", "grey50"), fill = c("white", "grey50"), alpha = c(1, 0.55)))) +
     labs(tag = tag, title = sp, x = "Mean relative cover (%)", y = NULL) +
     theme_classic(base_size = 32) +
     theme(plot.tag = element_text(face = "bold", size = 42), plot.tag.position = c(0, 0.985),
