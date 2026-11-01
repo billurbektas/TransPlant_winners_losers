@@ -107,6 +107,13 @@ ggsave("figures/diagnostics/04_fig2_draft.png", fig2, width = 10, height = 9, dp
 # ---- Fig S6 draft: species overview -------------------------------------
 # one row per species: pooled mean (point) and the model's prediction interval
 # for a new experiment (line), the interval that sets the class (Bills, 30 Oct)
+# species shown in panels b) and c), chosen here so that a) can mark them:
+# highest and lowest pooled strength among species in the most gradients
+# reached by at least two species
+top_g <- sort(unique(species_summary$n_gradients), decreasing = TRUE)
+top_g <- top_g[sapply(top_g, function(g) sum(species_summary$n_gradients >= g) >= 2)][1]
+top <- filter(species_summary, n_gradients >= top_g)
+panel_species <- c(top$species[which.max(top$mu)], top$species[which.min(top$mu)])
 # readable version (Bills, 30 Oct): species with a pooled strength of at least
 # half a percentage point of relative cover, plus every consistent species
 min_shown <- 0.005
@@ -124,10 +131,10 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 3.8, stroke = 0.5) +
   # gradients (experiments), right of each interval's upper end, never left of the zero line
   geom_label(aes(x = pmax(upper, 0) + 0.006 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
-             size = 6.2, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
+             size = 7.4, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
   # species names in their class colour, set directly (one colour scale per plot)
-  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 7,
-            fontface = "italic") +
+  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 8.6,
+            fontface = ifelse(ranges$species %in% panel_species, "bold.italic", "italic")) +
   coord_cartesian(xlim = x_lim, ylim = c(0.2, nrow(ranges) + 0.8), expand = FALSE, clip = "off") +
   # legend labels carry the total count of each class (all eligible species, shown or not)
   scale_fill_manual(values = cols, name = NULL,
@@ -135,21 +142,17 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   scale_colour_gradient(name = "Gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
   guides(fill = guide_legend(override.aes = list(size = 7), nrow = 1)) +
   labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
-  theme_classic(base_size = 27) +
+  theme_classic(base_size = 32) +
   theme(plot.title = element_text(face = "bold", size = 42), legend.position = "bottom", legend.box = "vertical",
-        legend.text = element_text(size = 26, face = "bold"), legend.title = element_text(size = 26, face = "bold"),
-        legend.key.width = unit(2.8, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 28), axis.text.x = element_text(size = 24),
+        legend.text = element_text(size = 32, face = "bold"), legend.title = element_text(size = 32, face = "bold"),
+        legend.key.width = unit(2.8, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 38), axis.text.x = element_text(size = 32),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
-        plot.margin = margin(15, 40, 15, 300))
+        plot.margin = margin(15, 40, 15, 380))
 # ---- Fig S6 panels b) and c): best winner and worst loser among the most widely sampled species
 # (Bills, 1 Nov): among species in the largest number of gradients reached by at least two
 # species (here 12), the highest and the lowest pooled strength; one row per experiment,
 # grouped by gradient, arrow from origin-control cover (hollow) to warmed cover (filled),
 # mean relative cover over years >= 3 as the strength
-top_g <- sort(unique(species_summary$n_gradients), decreasing = TRUE)
-top_g <- top_g[sapply(top_g, function(g) sum(species_summary$n_gradients >= g) >= 2)][1]
-top <- filter(species_summary, n_gradients >= top_g)
-panel_species <- c(top$species[which.max(top$mu)], top$species[which.min(top$mu)])
 sites <- utils::read.csv("data/derived/01_relative_cover/experiments_kept.csv")
 site_elev <- readRDS("data/derived/prep/sites.rds") |> select(region, site_id, elevation)
 panel_cover <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
@@ -171,24 +174,23 @@ corner <- function(sp, tag) {
   ggplot(d, aes(y = row_id)) +
     geom_segment(aes(x = origin_control, xend = warmed, yend = row_id, colour = direction), linewidth = 1.6,
                  arrow = grid::arrow(length = grid::unit(0.35, "cm"), type = "closed")) +
-    geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 4.5, stroke = 1) +
-    geom_point(aes(x = warmed, shape = "Warmed", colour = direction), size = 4.5) +
+    geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 6, stroke = 1.3) +
+    geom_point(aes(x = warmed, shape = "Warmed", colour = direction), size = 6) +
     scale_y_discrete(labels = setNames(d$row, d$row_id)) +
     scale_colour_manual(values = c("Cover gained under warming" = cols[["Consistent winner"]],
-                                   "Cover lost under warming" = cols[["Consistent loser"]]), name = NULL) +
+                                   "Cover lost under warming" = cols[["Consistent loser"]]), guide = "none") +
     scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
-    guides(shape = guide_legend(override.aes = list(size = 6, colour = "grey20", fill = c("white", "grey20"))),
-           colour = guide_legend(override.aes = list(linewidth = 2.5))) +
+    guides(shape = guide_legend(override.aes = list(size = 8, colour = "grey20", fill = c("white", "grey20")))) +
     labs(title = tag, subtitle = sp, x = "Mean relative cover (%), years 3 and later", y = NULL) +
-    theme_classic(base_size = 24) +
-    theme(plot.title = element_text(face = "bold", size = 42), axis.title.x = element_text(face = "bold", size = 26),
-          plot.subtitle = element_text(face = "bold.italic", size = 36, colour = cols[[as.character(info$class)]]),
-          axis.text.y = element_text(size = 21), axis.text.x = element_text(size = 21),
-          legend.position = "bottom", legend.box = "vertical", legend.text = element_text(size = 22, face = "bold"))
+    theme_classic(base_size = 32) +
+    theme(plot.title = element_text(face = "bold", size = 42), axis.title.x = element_text(face = "bold", size = 38),
+          plot.subtitle = element_text(face = "bold.italic", size = 44, colour = cols[[as.character(info$class)]]),
+          axis.text.y = element_text(size = 29), axis.text.x = element_text(size = 30),
+          legend.position = "bottom", legend.box = "vertical", legend.text = element_text(size = 32, face = "bold"))
 }
 fig_s6 <- patchwork::wrap_plots(figS6, patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species[2], "c)"), ncol = 1),
                                 ncol = 2, widths = c(1.25, 1))
-ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 36, height = 25, dpi = 120, bg = "white")
+ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 42, height = 30, dpi = 110, bg = "white")
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
