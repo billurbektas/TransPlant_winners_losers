@@ -1,7 +1,9 @@
 # Step 04: consistency across experiments (Step C, residents).
 #
 # PLAN.md: Step C (model as revised 30 Oct); Fig 2 caption; Appendix Fig S6.
-# Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3)
+# Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3);
+#         data/derived/01_relative_cover/cover_long.rds, experiments_kept.csv and
+#         data/derived/prep/sites.rds (Fig S6 b, c)
 # Writes: data/derived/04_classification/m_C.rds, species_summary.csv;
 #         figures/diagnostics/04_fig2_draft.png, 04_figS6_draft.png;
 #         reports/04_classification.md
@@ -131,10 +133,10 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
-  guides(fill = guide_legend(override.aes = list(size = 7), nrow = 3)) +
+  guides(fill = guide_legend(override.aes = list(size = 7), nrow = 1)) +
   labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
   theme_classic(base_size = 27) +
-  theme(plot.title = element_text(face = "bold", size = 42), legend.position = "top", legend.box = "vertical",
+  theme(plot.title = element_text(face = "bold", size = 42), legend.position = "bottom", legend.box = "vertical",
         legend.text = element_text(size = 26, face = "bold"), legend.title = element_text(size = 26, face = "bold"),
         legend.key.width = unit(2.8, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 28), axis.text.x = element_text(size = 24),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
@@ -149,30 +151,40 @@ top_g <- top_g[sapply(top_g, function(g) sum(species_summary$n_gradients >= g) >
 top <- filter(species_summary, n_gradients >= top_g)
 panel_species <- c(top$species[which.max(top$mu)], top$species[which.min(top$mu)])
 sites <- utils::read.csv("data/derived/01_relative_cover/experiments_kept.csv")
+site_elev <- readRDS("data/derived/prep/sites.rds") |> select(region, site_id, elevation)
 panel_cover <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
   filter(species %in% panel_species, species_pool == "resident", treatment %in% c("origin_control", "warmed"),
          as.integer(as.character(year)) >= 3) |>
   summarise(cover = 100 * mean(relative_cover), .by = c(species, experiment_id, gradient_id, treatment)) |>
   tidyr::pivot_wider(names_from = treatment, values_from = cover) |>
   left_join(select(sites, experiment_id, origin_site, destination_site), by = "experiment_id") |>
-  mutate(row = paste0(gradient_id, ": ", origin_site, " \u2192 ", destination_site),
-         direction = ifelse(warmed >= origin_control, "gained", "lost"))
+  left_join(transmute(site_elev, gradient_id = region, origin_site = site_id, elev_origin = elevation),
+            by = c("gradient_id", "origin_site")) |>
+  left_join(transmute(site_elev, gradient_id = region, destination_site = site_id, elev_dest = elevation),
+            by = c("gradient_id", "destination_site")) |>
+  mutate(row = paste0(substr(gradient_id, 1, 2), "  ", elev_origin, " \u2192 ", elev_dest, " m"),
+         direction = ifelse(warmed >= origin_control, "Cover gained under warming", "Cover lost under warming"))
 corner <- function(sp, tag) {
-  d <- filter(panel_cover, species == sp) |> arrange(gradient_id, row) |> mutate(row = factor(row, levels = rev(row)))
+  d <- filter(panel_cover, species == sp) |> arrange(gradient_id, row) |>
+    mutate(row_id = factor(seq_len(n()), levels = rev(seq_len(n()))))  # one row per experiment, labels may repeat
   info <- filter(species_summary, species == sp)
-  ggplot(d, aes(y = row)) +
-    geom_segment(aes(x = origin_control, xend = warmed, yend = row, colour = direction), linewidth = 1.6,
+  ggplot(d, aes(y = row_id)) +
+    geom_segment(aes(x = origin_control, xend = warmed, yend = row_id, colour = direction), linewidth = 1.6,
                  arrow = grid::arrow(length = grid::unit(0.35, "cm"), type = "closed")) +
-    geom_point(aes(x = origin_control), shape = 21, fill = "white", colour = "grey20", size = 4.5, stroke = 1) +
-    geom_point(aes(x = warmed, colour = direction), size = 4.5) +
-    scale_colour_manual(values = c(gained = cols[["Consistent winner"]], lost = cols[["Consistent loser"]]), guide = "none") +
-    labs(title = tag, subtitle = paste0(sp, "\n", info$class, "\n", info$n_gradients, " gradients (", info$n_experiments,
-                                        " experiments), pooled strength ", sprintf("%+.3f", info$mu)),
-         x = "Relative cover (%), years 3 and later: origin control (hollow) to warmed (filled)", y = NULL) +
-    theme_classic(base_size = 22) +
-    theme(plot.title = element_text(face = "bold", size = 42), axis.title.x = element_text(face = "bold", size = 22),
-          plot.subtitle = element_text(face = "bold.italic", size = 24, colour = cols[[as.character(info$class)]]),
-          axis.text.y = element_text(size = 17))
+    geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 4.5, stroke = 1) +
+    geom_point(aes(x = warmed, shape = "Warmed", colour = direction), size = 4.5) +
+    scale_y_discrete(labels = setNames(d$row, d$row_id)) +
+    scale_colour_manual(values = c("Cover gained under warming" = cols[["Consistent winner"]],
+                                   "Cover lost under warming" = cols[["Consistent loser"]]), name = NULL) +
+    scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
+    guides(shape = guide_legend(override.aes = list(size = 6, colour = "grey20", fill = c("white", "grey20"))),
+           colour = guide_legend(override.aes = list(linewidth = 2.5))) +
+    labs(title = tag, subtitle = sp, x = "Mean relative cover (%), years 3 and later", y = NULL) +
+    theme_classic(base_size = 24) +
+    theme(plot.title = element_text(face = "bold", size = 42), axis.title.x = element_text(face = "bold", size = 26),
+          plot.subtitle = element_text(face = "bold.italic", size = 36, colour = cols[[as.character(info$class)]]),
+          axis.text.y = element_text(size = 21), axis.text.x = element_text(size = 21),
+          legend.position = "bottom", legend.box = "vertical", legend.text = element_text(size = 22, face = "bold"))
 }
 fig_s6 <- patchwork::wrap_plots(figS6, patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species[2], "c)"), ncol = 1),
                                 ncol = 2, widths = c(1.25, 1))
