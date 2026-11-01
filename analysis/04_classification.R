@@ -131,9 +131,9 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 3.8, stroke = 0.5) +
   # gradients (experiments), right of each interval's upper end, never left of the zero line
   geom_label(aes(x = pmax(upper, 0) + 0.006 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
-             size = 8.4, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
+             size = 10.4, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
   # species names in their class colour, set directly (one colour scale per plot)
-  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 9.6,
+  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 11.6,
             fontface = ifelse(ranges$species %in% panel_species, "bold.italic", "italic")) +
   coord_cartesian(xlim = x_lim, ylim = c(0.2, nrow(ranges) + 0.8), expand = FALSE, clip = "off") +
   # legend labels carry the total count of each class (all eligible species, shown or not)
@@ -147,7 +147,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
         legend.text = element_text(size = 38, face = "bold"), legend.title = element_text(size = 38, face = "bold"),
         legend.key.width = unit(3.5, "cm"), legend.spacing.x = unit(0.1, "cm"), legend.key.spacing.x = unit(0.6, "cm"), legend.justification = "center", legend.location = "plot", axis.title.x = element_text(face = "bold", size = 46), axis.text.x = element_text(size = 36),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
-        plot.margin = margin(15, 40, 15, 430))
+        plot.margin = margin(15, 40, 15, 520))
 # ---- Fig S6 panels b) and c): best winner and worst loser among the most widely sampled species
 # (Bills, 1 Nov): among species in the largest number of gradients reached by at least two
 # species (here 12), the highest and the lowest pooled strength; one row per experiment,
@@ -194,7 +194,7 @@ fig_s6 <- patchwork::wrap_plots(figS6, bc,
                                 ncol = 2, widths = c(2.2, 1)) +
   # all legends collected in one row under the whole figure
   patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical")
-ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 42, height = 30, dpi = 110, bg = "white")
+ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 44, height = 40, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
