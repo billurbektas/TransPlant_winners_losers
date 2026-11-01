@@ -1,11 +1,11 @@
 # Step 04: consistency across experiments (Step C, residents).
 #
-# PLAN.md: Step C (model as revised 30 Oct); Fig 2 caption; Appendix Fig S6.
+# PLAN.md: Step C (model as revised 30 Oct); Fig 2 (redesigned 1 Nov).
 # Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3);
 #         data/derived/01_relative_cover/cover_long.rds, experiments_kept.csv and
-#         data/derived/prep/sites.rds (Fig S6 b, c)
+#         data/derived/prep/sites.rds (Fig 2 b, c)
 # Writes: data/derived/04_classification/m_C.rds, species_summary.csv;
-#         figures/diagnostics/04_fig2_draft.png, 04_figS6_draft.png;
+#         figures/main/fig2.png;
 #         reports/04_classification.md
 # Checks: 1,655 effects; 137 species with at least 4 experiments (998 effects);
 #         one tau2_s per eligible species, in species order; the prediction
@@ -17,9 +17,10 @@
 # comes from the prediction interval of predict(), which carries tau2_s and the
 # uncertainty of mu_s (the species random intercept of the first version had
 # its variance estimated at about zero, pulling every mean onto the grand
-# mean). Approved with the plan: se_mu in species_summary; draft figures in
-# figures/diagnostics/; Fig 2 corner panels once four species are named. The
-# all-years sensitivity run was dropped on 30 Oct (Bills: not needed for now).
+# mean). Approved with the plan: se_mu in species_summary. The all-years
+# sensitivity run was dropped on 30 Oct (Bills: not needed for now). On 1 Nov
+# (Bills) the species overview with two species panels became Fig 2, replacing
+# the lower-vs-upper scatter with corner panels of the original plan.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/md_table.R")
@@ -84,27 +85,9 @@ saveRDS(m_C, file.path(out_dir, "m_C.rds"))
 utils::write.csv(mutate(species_summary, class = as.character(class)), file.path(out_dir, "species_summary.csv"),
                  row.names = FALSE)
 
-# ---- Fig 2 draft (corner panels once four species are named) --------------
-lim_x <- range(species_summary$lower); lim_y <- range(species_summary$upper)
 named <- filter(species_summary, class != "Context-dependent")
-fig2 <- ggplot(species_summary, aes(lower, upper)) +
-  annotate("rect", xmin = -Inf, xmax = 0, ymin = 0, ymax = Inf, fill = cols[["Context-dependent"]], alpha = 0.07) +
-  annotate("rect", xmin = 0, xmax = Inf, ymin = 0, ymax = Inf, fill = cols[["Consistent winner"]], alpha = 0.09) +
-  annotate("rect", xmin = -Inf, xmax = 0, ymin = -Inf, ymax = 0, fill = cols[["Consistent loser"]], alpha = 0.09) +
-  geom_hline(yintercept = 0, colour = "grey60") + geom_vline(xintercept = 0, colour = "grey60") +
-  geom_abline(linetype = "dashed", colour = "grey70") +
-  geom_point(aes(colour = class), size = 3, alpha = 0.85) +
-  ggrepel::geom_text_repel(data = named, aes(label = species, colour = class), size = 4.6, fontface = "bold.italic",
-                           min.segment.length = 0, seed = 1, max.overlaps = Inf, show.legend = FALSE) +
-  scale_colour_manual(values = cols, name = NULL) +
-  labs(title = "a)", x = "Lower bound of the prediction interval",
-       y = "Upper bound of the prediction interval") +
-  theme_classic(base_size = 17) +
-  theme(plot.title = element_text(face = "bold", size = 26), legend.position = "top",
-        legend.text = element_text(size = 15, face = "bold"))
-ggsave("figures/diagnostics/04_fig2_draft.png", fig2, width = 10, height = 9, dpi = 150, bg = "white")
 
-# ---- Fig S6 draft: species overview -------------------------------------
+# ---- Fig 2 (main figure, Bills 1 Nov): a) species overview, b) c) two species --
 # one row per species: pooled mean (point) and the model's prediction interval
 # for a new experiment (line), the interval that sets the class (Bills, 30 Oct)
 # species shown in panels b) and c), chosen here so that a) can mark them:
@@ -148,7 +131,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
         legend.key.width = unit(3.5, "cm"), legend.spacing.x = unit(0.1, "cm"), legend.key.spacing.x = unit(0.6, "cm"), legend.justification = "center", legend.location = "plot", axis.title.x = element_text(face = "bold", size = 46), axis.text.x = element_text(size = 36),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
         plot.margin = margin(15, 40, 15, 565))
-# ---- Fig S6 panels b) and c): best winner and worst loser among the most widely sampled species
+# ---- Fig 2 panels b) and c): best winner and worst loser among the most widely sampled species
 # (Bills, 1 Nov): among species in the largest number of gradients reached by at least two
 # species (here 12), the highest and the lowest pooled strength; one row per experiment,
 # grouped by gradient, grey arrow from origin-control cover (hollow) to warmed cover (filled; no class colours, Bills),
@@ -194,7 +177,8 @@ fig_s6 <- patchwork::wrap_plots(figS6, bc,
                                 ncol = 2, widths = c(2.2, 1)) +
   # all legends collected in one row under the whole figure
   patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical")
-ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 44, height = 40, dpi = 100, bg = "white")
+dir.create("figures/main", recursive = TRUE, showWarnings = FALSE)
+ggsave("figures/main/fig2.png", fig_s6, width = 44, height = 40, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
@@ -228,14 +212,12 @@ report <- c(
   "", "Consistent winners and losers:", "", md_table(consistent),
   "", paste0("Species with tau2_s at about zero (their interval is the uncertainty of the mean alone): ",
              paste(tau0$species, collapse = ", "), "."),
-  "", "## Figures (drafts)", "",
-  "![Fig 2 draft](../figures/diagnostics/04_fig2_draft.png)", "",
-  "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
-  "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)", "",
-  paste0("Fig S6 b) and c): ", panel_species[1], " and ", panel_species[2], ", the highest and lowest pooled strength among ",
+  "", "## Fig 2", "",
+  "![Fig 2](../figures/main/fig2.png)", "",
+  paste0("Fig 2 b) and c): ", panel_species[1], " and ", panel_species[2], ", the highest and lowest pooled strength among ",
          "species in at least ", top_g, " gradients; one row per experiment (country, origin to destination elevation), mean relative cover over years 3 and later in ",
          "origin controls (hollow) and warmed plots (filled)."),
-  paste0("Fig S6 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
+  paste0("Fig 2 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
          "(a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). ",
          n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +", min_shown,
          " are not shown."),
@@ -244,9 +226,9 @@ report <- c(
                                paste(fallback, collapse = ", "), ".") else character(),
   if (length(warns)) paste("-", unique(warns)) else if (!length(fallback)) "None." else character(),
   "", "## Deviations from PLAN.md", "",
-  paste("None: PLAN.md Step C was revised on 30 Oct (Bills) to fixed species means with predict() intervals. Decisions",
-        "approved with the plan: se_mu added to species_summary; draft figures in figures/diagnostics/ rather than",
-        "data/derived/04_classification/.")
+  paste("None: PLAN.md Step C was revised on 30 Oct (Bills) to fixed species means with predict() intervals, and Fig 2",
+        "was redesigned on 1 Nov (Bills: species overview with two species panels; PLAN.md updated). Decision approved",
+        "with the plan: se_mu added to species_summary.")
 )
 writeLines(report, "reports/04_classification.md")
 message("Step 04 written: ", paste(sprintf("%s %d", names(table(species_summary$class)), table(species_summary$class)),

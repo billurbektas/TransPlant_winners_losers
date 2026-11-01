@@ -53,16 +53,12 @@ Consistent winners and losers:
 
 Species with tau2_s at about zero (their interval is the uncertainty of the mean alone): Agrostis stolonifera, Alchemilla conjuncta, Alopecurus pratensis, Androsace septentrionalis, Bartsia alpina, Campanula rotundifolia, Carex bigelowii, Carex myosuroides, Carex norvegica, Centaurea jacea, Cerastium fontanum, Dactylorhiza viridis, Empetrum nigrum, Euphrasia minima, Festuca halleri, Fragaria virginiana, Gentiana nivalis, Gentianella campestris, Helianthemum nummularium, Hieracium alpinum, Kalmia procumbens, Leucanthemum ircutianum, Luzula spicata, Oreojuncus trifidus, Phleum alpinum, Pinguicula vulgaris, Primula veris, Prunella vulgaris, Ranunculus brotherusii, Rumex acetosa, Salix reticulata, Silene dioica, Silene flos-cuculi, Soldanella alpina, Thesium alpinum, Trifolium badium, Vaccinium uliginosum, Veronica alpina, Vicia cracca, Viola riviniana.
 
-## Figures (drafts)
+## Fig 2
 
-![Fig 2 draft](../figures/diagnostics/04_fig2_draft.png)
+![Fig 2](../figures/main/fig2.png)
 
-Fig 2 corner panels follow once four species are named (MILESTONES).
-
-![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)
-
-Fig S6 b) and c): Festuca rubra and Bistorta vivipara, the highest and lowest pooled strength among species in at least 12 gradients; one row per experiment (country, origin to destination elevation), mean relative cover over years 3 and later in origin controls (hollow) and warmed plots (filled).
-Fig S6 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). 63 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
+Fig 2 b) and c): Festuca rubra and Bistorta vivipara, the highest and lowest pooled strength among species in at least 12 gradients; one row per experiment (country, origin to destination elevation), mean relative cover over years 3 and later in origin controls (hollow) and warmed plots (filled).
+Fig 2 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). 63 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
 
 ## Warnings captured
 
@@ -72,4 +68,4 @@ Fig S6 a): point = pooled strength, filled by class; line = 95% interval includi
 
 ## Deviations from PLAN.md
 
-None: PLAN.md Step C was revised on 30 Oct (Bills) to fixed species means with predict() intervals. Decisions approved with the plan: se_mu added to species_summary; draft figures in figures/diagnostics/ rather than data/derived/04_classification/.
+None: PLAN.md Step C was revised on 30 Oct (Bills) to fixed species means with predict() intervals, and Fig 2 was redesigned on 1 Nov (Bills: species overview with two species panels; PLAN.md updated). Decision approved with the plan: se_mu added to species_summary.
