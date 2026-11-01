@@ -128,7 +128,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   geom_segment(aes(x = x_lim[1], xend = lower, yend = species), colour = "grey90", linewidth = 0.35) +
   geom_vline(xintercept = 0, colour = "grey50") +
   geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.8) +
-  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 3.8, stroke = 0.5) +
+  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 6, stroke = 0.6) +
   # gradients (experiments), right of each interval's upper end, never left of the zero line
   geom_label(aes(x = pmax(upper, 0) + 0.006 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
              size = 10.4, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
@@ -175,8 +175,8 @@ corner <- function(sp, tag) {
     geom_vline(xintercept = 0, colour = "grey50", linewidth = 0.8) +   # zero cover
     geom_segment(aes(x = origin_control, xend = warmed, yend = row_id), colour = "black", linewidth = 1.6,
                  arrow = grid::arrow(length = grid::unit(0.35, "cm"), type = "closed")) +
-    geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 6, stroke = 1.3) +
-    geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey50", size = 6, alpha = 0.55) +
+    geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 9, stroke = 1.6) +
+    geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey50", size = 9, alpha = 0.55) +
     scale_y_discrete(labels = setNames(d$row, d$row_id)) +
     scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
     guides(shape = guide_legend(override.aes = list(size = 18, stroke = 1.6, colour = c("grey20", "grey50"), fill = c("white", "grey50"), alpha = c(1, 0.55)))) +
