@@ -172,13 +172,14 @@ corner <- function(sp, tag) {
     mutate(row_id = factor(seq_len(n()), levels = rev(seq_len(n()))))  # one row per experiment, labels may repeat
   info <- filter(species_summary, species == sp)
   ggplot(d, aes(y = row_id)) +
-    geom_segment(aes(x = origin_control, xend = warmed, yend = row_id), colour = "grey45", linewidth = 1.6,
+    geom_vline(xintercept = 0, colour = "grey50", linewidth = 0.8) +   # zero cover
+    geom_segment(aes(x = origin_control, xend = warmed, yend = row_id), colour = "black", linewidth = 1.6,
                  arrow = grid::arrow(length = grid::unit(0.35, "cm"), type = "closed")) +
     geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 6, stroke = 1.3) +
-    geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey20", size = 6) +
+    geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey50", size = 6, alpha = 0.55) +
     scale_y_discrete(labels = setNames(d$row, d$row_id)) +
     scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
-    guides(shape = guide_legend(override.aes = list(size = 11, colour = "grey20", fill = c("white", "grey20")))) +
+    guides(shape = guide_legend(override.aes = list(size = 11, colour = c("grey20", "grey50"), fill = c("white", "grey50"), alpha = c(1, 0.55)))) +
     labs(tag = tag, title = sp, x = "Mean relative cover (%)", y = NULL) +
     theme_classic(base_size = 32) +
     theme(plot.tag = element_text(face = "bold", size = 42), plot.tag.position = c(0, 0.985),
