@@ -67,6 +67,7 @@ tau2 <- sapply(m_C, function(m) m$sigma2)
 stopifnot(length(tau2) == length(eligible), identical(names(m_C), sp)) # one tau2_s per eligible species, in order
 pred <- lapply(m_C, predict)
 species_summary <- tibble::tibble(species = sp, n_experiments = as.integer(table(d_c$species)[sp]),
+                                  n_gradients = as.integer(tapply(d_c$gradient_id, d_c$species, dplyr::n_distinct)[sp]),
                                   mu = sapply(pred, `[[`, "pred"), se_mu = sapply(pred, `[[`, "se"), tau = sqrt(tau2),
                                   lower = sapply(pred, `[[`, "pi.lb"), upper = sapply(pred, `[[`, "pi.ub"))
 stopifnot(max(abs(species_summary$upper - (species_summary$mu + qnorm(0.975) * sqrt(species_summary$tau^2 + species_summary$se_mu^2)))) < 1e-10,
@@ -109,16 +110,16 @@ ggsave("figures/diagnostics/04_fig2_draft.png", fig2, width = 10, height = 9, dp
 min_shown <- 0.005
 ranges <- species_summary |>
   filter(abs(mu) >= min_shown | class != "Context-dependent") |>
-  arrange(mu) |> mutate(species = factor(species, levels = species))
+  arrange(n_gradients, mu) |> mutate(species = factor(species, levels = species)) # ordered by gradients, then strength
 n_hidden <- nrow(species_summary) - nrow(ranges)
 x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(ranges$lower, ranges$upper)))
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
   geom_vline(xintercept = 0, colour = "grey50") +
-  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_experiments), linewidth = 1.3) +
+  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.3) +
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.8, stroke = 0.4) +
-  # number of experiments, just left of each interval's lower end
-  geom_text(aes(x = lower - 0.004 * diff(x_lim), label = n_experiments), hjust = 1, size = 4.6, colour = "grey20") +
+  # number of gradients, just left of each interval's lower end
+  geom_text(aes(x = lower - 0.004 * diff(x_lim), label = n_gradients), hjust = 1, size = 4.6, colour = "grey20") +
   # species names in their class colour, set directly (one colour scale per plot)
   geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 5.2,
             fontface = "italic") +
@@ -126,7 +127,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   # legend labels carry the total count of each class (all eligible species, shown or not)
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
-  scale_colour_gradient(name = "Experiments", low = "grey85", high = "black", breaks = c(4, 8, 12, 16, 20)) +
+  scale_colour_gradient(name = "Gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
   guides(fill = guide_legend(override.aes = list(size = 5))) +
   labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
   theme_classic(base_size = 20) +
@@ -174,7 +175,7 @@ report <- c(
   "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
   "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)", "",
   paste0("Fig S6: point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
-         "(a line that does not cross zero marks a consistent loser or winner), shaded by the number of experiments. ",
+         "(a line that does not cross zero marks a consistent loser or winner), shaded and labelled by the number of gradients; rows ordered by the number of gradients, then by strength. ",
          n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +", min_shown,
          " are not shown."),
   "", "## Warnings captured", "",
