@@ -66,6 +66,8 @@ Fig S6: point = pooled strength, filled by class; line = 95% interval including 
 ## Warnings captured
 
 - Refitted with the bobyqa optimizer after nlminb did not declare convergence (tau2_s at 0): Bartsia alpina.
+- The `label.size` argument of `geom_label()` is deprecated as of ggplot2 3.5.0.
+ℹ Please use the `linewidth` argument instead.
 
 ## Deviations from PLAN.md
 
