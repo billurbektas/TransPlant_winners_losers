@@ -192,7 +192,7 @@ corner <- function(sp, tag) {
 }
 bc <- patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species[2], "c)"), ncol = 1)
 fig_s6 <- patchwork::wrap_plots(figS6, bc,
-                                ncol = 2, widths = c(1.6, 1)) +
+                                ncol = 2, widths = c(2.2, 1)) +
   # all legends collected in one row under the whole figure
   patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical")
 ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 42, height = 30, dpi = 110, bg = "white")
