@@ -110,7 +110,7 @@ ggsave("figures/diagnostics/04_fig2_draft.png", fig2, width = 10, height = 9, dp
 min_shown <- 0.005
 ranges <- species_summary |>
   filter(abs(mu) >= min_shown | class != "Context-dependent") |>
-  arrange(n_gradients, mu) |> mutate(species = factor(species, levels = species)) # ordered by gradients, then strength
+  arrange(mu) |> mutate(species = factor(species, levels = species))
 n_hidden <- nrow(species_summary) - nrow(ranges)
 x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(ranges$lower, ranges$upper)))
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
@@ -118,8 +118,11 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   geom_vline(xintercept = 0, colour = "grey50") +
   geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.3) +
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.8, stroke = 0.4) +
-  # number of gradients, just left of each interval's lower end
-  geom_text(aes(x = lower - 0.004 * diff(x_lim), label = n_gradients), hjust = 1, size = 4.6, colour = "grey20") +
+  # gradients and experiments, just left of each interval's lower end
+  # (to the right of the upper end where the interval starts too close to the left edge)
+  geom_text(aes(x = ifelse(lower < x_lim[1] + 0.15 * diff(x_lim), upper + 0.004 * diff(x_lim), lower - 0.004 * diff(x_lim)),
+                hjust = ifelse(lower < x_lim[1] + 0.15 * diff(x_lim), 0, 1),
+                label = paste0("G: ", n_gradients, " (E: ", n_experiments, ")")), size = 4.6, colour = "grey20") +
   # species names in their class colour, set directly (one colour scale per plot)
   geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 5.2,
             fontface = "italic") +
@@ -175,7 +178,7 @@ report <- c(
   "Fig 2 corner panels follow once four species are named (MILESTONES).", "",
   "![Fig S6 draft](../figures/diagnostics/04_figS6_draft.png)", "",
   paste0("Fig S6: point = pooled strength, filled by class; line = 95% interval including the variation among experiments ",
-         "(a line that does not cross zero marks a consistent loser or winner), shaded and labelled by the number of gradients; rows ordered by the number of gradients, then by strength. ",
+         "(a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled G: gradients (E: experiments). ",
          n_hidden, " context-dependent species with a pooled strength between -", min_shown, " and +", min_shown,
          " are not shown."),
   "", "## Warnings captured", "",
