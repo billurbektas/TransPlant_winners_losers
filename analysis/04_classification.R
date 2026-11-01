@@ -151,7 +151,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
 # ---- Fig S6 panels b) and c): best winner and worst loser among the most widely sampled species
 # (Bills, 1 Nov): among species in the largest number of gradients reached by at least two
 # species (here 12), the highest and the lowest pooled strength; one row per experiment,
-# grouped by gradient, arrow from origin-control cover (hollow) to warmed cover (filled),
+# grouped by gradient, grey arrow from origin-control cover (hollow) to warmed cover (filled; no class colours, Bills),
 # mean relative cover over years >= 3 as the strength
 sites <- utils::read.csv("data/derived/01_relative_cover/experiments_kept.csv")
 site_elev <- readRDS("data/derived/prep/sites.rds") |> select(region, site_id, elevation)
@@ -172,13 +172,11 @@ corner <- function(sp, tag) {
     mutate(row_id = factor(seq_len(n()), levels = rev(seq_len(n()))))  # one row per experiment, labels may repeat
   info <- filter(species_summary, species == sp)
   ggplot(d, aes(y = row_id)) +
-    geom_segment(aes(x = origin_control, xend = warmed, yend = row_id, colour = direction), linewidth = 1.6,
+    geom_segment(aes(x = origin_control, xend = warmed, yend = row_id), colour = "grey45", linewidth = 1.6,
                  arrow = grid::arrow(length = grid::unit(0.35, "cm"), type = "closed")) +
     geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 6, stroke = 1.3) +
-    geom_point(aes(x = warmed, shape = "Warmed", colour = direction), size = 6) +
+    geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey20", size = 6) +
     scale_y_discrete(labels = setNames(d$row, d$row_id)) +
-    scale_colour_manual(values = c("Cover gained under warming" = cols[["Consistent winner"]],
-                                   "Cover lost under warming" = cols[["Consistent loser"]]), guide = "none") +
     scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
     guides(shape = guide_legend(override.aes = list(size = 11, colour = "grey20", fill = c("white", "grey20")))) +
     labs(tag = tag, title = sp, x = "Mean relative cover (%)", y = NULL) +
