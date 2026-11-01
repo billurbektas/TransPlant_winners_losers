@@ -140,12 +140,12 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
-  guides(fill = guide_legend(override.aes = list(size = 7), nrow = 1)) +
-  labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
+  guides(fill = guide_legend(override.aes = list(size = 10), ncol = 1)) +
+  labs(title = "a)", x = "Losing-winning strength\n(warmed minus origin-control relative cover)", y = NULL) +
   theme_classic(base_size = 32) +
   theme(plot.title = element_text(face = "bold", size = 42), legend.position = "bottom", legend.box = "vertical",
-        legend.text = element_text(size = 32, face = "bold"), legend.title = element_text(size = 32, face = "bold"),
-        legend.key.width = unit(2.8, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 38), axis.text.x = element_text(size = 32),
+        legend.text = element_text(size = 40, face = "bold"), legend.title = element_text(size = 40, face = "bold"),
+        legend.key.width = unit(3.5, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 46), axis.text.x = element_text(size = 36),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
         plot.margin = margin(15, 40, 15, 380))
 # ---- Fig S6 panels b) and c): best winner and worst loser among the most widely sampled species
@@ -180,15 +180,17 @@ corner <- function(sp, tag) {
     scale_colour_manual(values = c("Cover gained under warming" = cols[["Consistent winner"]],
                                    "Cover lost under warming" = cols[["Consistent loser"]]), guide = "none") +
     scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
-    guides(shape = guide_legend(override.aes = list(size = 8, colour = "grey20", fill = c("white", "grey20")))) +
+    guides(shape = guide_legend(override.aes = list(size = 11, colour = "grey20", fill = c("white", "grey20")))) +
     labs(title = tag, subtitle = sp, x = "Mean relative cover (%), years 3 and later", y = NULL) +
     theme_classic(base_size = 32) +
-    theme(plot.title = element_text(face = "bold", size = 42), axis.title.x = element_text(face = "bold", size = 38),
+    theme(plot.title = element_text(face = "bold", size = 42), axis.title.x = element_text(face = "bold", size = 46),
           plot.subtitle = element_text(face = "bold.italic", size = 44, colour = cols[[as.character(info$class)]]),
-          axis.text.y = element_text(size = 29), axis.text.x = element_text(size = 30),
-          legend.position = "bottom", legend.box = "vertical", legend.text = element_text(size = 32, face = "bold"))
+          axis.text.y = element_text(size = 31), axis.text.x = element_text(size = 36),
+          legend.position = "bottom", legend.box = "vertical", legend.text = element_text(size = 42, face = "bold"))
 }
-fig_s6 <- patchwork::wrap_plots(figS6, patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species[2], "c)"), ncol = 1),
+bc <- patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species[2], "c)"), ncol = 1) +
+  patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom") # one legend for b) and c)
+fig_s6 <- patchwork::wrap_plots(figS6, bc,
                                 ncol = 2, widths = c(1.25, 1))
 ggsave("figures/diagnostics/04_figS6_draft.png", fig_s6, width = 42, height = 30, dpi = 110, bg = "white")
 
