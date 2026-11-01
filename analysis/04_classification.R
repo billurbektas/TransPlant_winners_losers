@@ -120,8 +120,8 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   geom_vline(xintercept = 0, colour = "grey50") +
   geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.3) +
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.8, stroke = 0.4) +
-  # gradients (experiments), just right of each interval's upper end
-  geom_label(aes(x = upper + 0.006 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
+  # gradients (experiments), right of each interval's upper end, never left of the zero line
+  geom_label(aes(x = pmax(upper, 0) + 0.006 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
              size = 4.6, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
   # species names in their class colour, set directly (one colour scale per plot)
   geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 5.2,
