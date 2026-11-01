@@ -115,14 +115,15 @@ n_hidden <- nrow(species_summary) - nrow(ranges)
 x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(ranges$lower, ranges$upper)))
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
+  # very light guides from each species name to its interval and on to its numbers
+  geom_segment(aes(x = x_lim[1], xend = lower, yend = species), colour = "grey90", linewidth = 0.35) +
+  geom_segment(aes(x = upper, xend = x_lim[2], yend = species), colour = "grey90", linewidth = 0.35) +
   geom_vline(xintercept = 0, colour = "grey50") +
   geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.3) +
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.8, stroke = 0.4) +
-  # gradients and experiments, just left of each interval's lower end
-  # (to the right of the upper end where the interval starts too close to the left edge)
-  geom_text(aes(x = ifelse(lower < x_lim[1] + 0.15 * diff(x_lim), upper + 0.004 * diff(x_lim), lower - 0.004 * diff(x_lim)),
-                hjust = ifelse(lower < x_lim[1] + 0.15 * diff(x_lim), 0, 1),
-                label = paste0(n_gradients, " (", n_experiments, ")")), size = 4.6, colour = "grey20") +
+  # gradients (experiments), in a column at the right-hand side
+  geom_text(aes(x = x_lim[2] + 0.01 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
+            size = 4.6, colour = "grey20") +
   # species names in their class colour, set directly (one colour scale per plot)
   geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 5.2,
             fontface = "italic") +
@@ -138,7 +139,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
         legend.text = element_text(size = 19, face = "bold"), legend.title = element_text(size = 19, face = "bold"),
         legend.key.width = unit(2, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 21), axis.text.x = element_text(size = 18),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
-        plot.margin = margin(10, 15, 10, 210))
+        plot.margin = margin(10, 110, 10, 210))
 ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 16, height = 18, dpi = 150, bg = "white")
 
 # ---- Report --------------------------------------------------------------
