@@ -118,28 +118,28 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   # very light guide from each species name to its interval
   geom_segment(aes(x = x_lim[1], xend = lower, yend = species), colour = "grey90", linewidth = 0.35) +
   geom_vline(xintercept = 0, colour = "grey50") +
-  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.3) +
-  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 2.8, stroke = 0.4) +
+  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.8) +
+  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 3.8, stroke = 0.5) +
   # gradients (experiments), right of each interval's upper end, never left of the zero line
   geom_label(aes(x = pmax(upper, 0) + 0.006 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
-             size = 4.6, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
+             size = 6.2, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
   # species names in their class colour, set directly (one colour scale per plot)
-  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 5.2,
+  geom_text(aes(x = x_lab, label = species), colour = cols[as.character(ranges$class)], hjust = 1, size = 7,
             fontface = "italic") +
   coord_cartesian(xlim = x_lim, ylim = c(0.2, nrow(ranges) + 0.8), expand = FALSE, clip = "off") +
   # legend labels carry the total count of each class (all eligible species, shown or not)
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
-  guides(fill = guide_legend(override.aes = list(size = 5))) +
+  guides(fill = guide_legend(override.aes = list(size = 7))) +
   labs(title = "a)", x = "Losing-winning strength (warmed minus origin-control relative cover)", y = NULL) +
-  theme_classic(base_size = 20) +
-  theme(plot.title = element_text(face = "bold", size = 32), legend.position = "top", legend.box = "vertical",
-        legend.text = element_text(size = 19, face = "bold"), legend.title = element_text(size = 19, face = "bold"),
-        legend.key.width = unit(2, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 21), axis.text.x = element_text(size = 18),
+  theme_classic(base_size = 27) +
+  theme(plot.title = element_text(face = "bold", size = 42), legend.position = "top", legend.box = "vertical",
+        legend.text = element_text(size = 26, face = "bold"), legend.title = element_text(size = 26, face = "bold"),
+        legend.key.width = unit(2.8, "cm"), legend.spacing.x = unit(0.2, "cm"), legend.justification = "center", axis.title.x = element_text(face = "bold", size = 28), axis.text.x = element_text(size = 24),
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
-        plot.margin = margin(10, 110, 10, 210))
-ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 16, height = 18, dpi = 150, bg = "white")
+        plot.margin = margin(15, 40, 15, 300))
+ggsave("figures/diagnostics/04_figS6_draft.png", figS6, width = 21, height = 25, dpi = 150, bg = "white")
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
