@@ -169,7 +169,8 @@ coef_panel <- function(d, tag, xlim = NULL) {
     scale_fill_manual(values = c(pool_cols, none = "white"), guide = "none") +
     (if (!is.null(xlim)) scale_x_continuous(limits = xlim)) +
     labs(title = tag, x = "Effect on relative cover per SD of the predictor", y = NULL) + big +
-    theme(legend.position = "bottom", legend.text = element_text(size = 30), legend.key.size = unit(1.6, "cm"))
+    theme(legend.position = "bottom", legend.text = element_text(size = 30), legend.key.size = unit(1.6, "cm"),
+          panel.grid.major.y = element_line(colour = "grey45", linewidth = 1.4, linetype = "dotted")) # row guides from name to estimate (Bills)
 }
 fig7 <- patchwork::wrap_plots(
   coef_panel(filter(f7_model, pool == "Residents"), "a) Residents: climate + abundance model", x_shared) + guides(colour = "none") + # the title names the pool
