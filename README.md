@@ -12,12 +12,16 @@ sequence of numbered R scripts. What the analysis is lives in
 - `prep/`: a `targets` pipeline for data preparation only, from the raw network
   SQLite, TRY, CHELSA, our GBIF download and the reviewed ledgers in
   `prep/config/` to the input tables under `data/derived/prep/`.
-- `analysis/`: one script per step (`01_relative_cover.R` to `06b_forest.R`, then
-  the colonizers and the figures), run in order; each reads only `data/derived/`.
+- `analysis/`: one script per step (`01_relative_cover.R` to `06b_forest.R`, the
+  colonizers `07a` to `07f`, and `10_figures.R`), run in order; each reads only
+  `data/derived/`.
   `analysis/additional_checks/` holds side checks that feed no step.
 - `R/`: functions shared by two or more analysis scripts.
-- `data/derived/NN_<name>/`: each step's outputs; `figures/` and `reports/` the
-  figures and review reports.
+- `data/derived/NN_<name>/`: each step's outputs; `reports/` the review reports.
+- `figures/main/fig1.png` to `fig6.png`: Sankey, residents' classification,
+  colonizers' classification, climate space, traits (pathways), the residents'
+  ladder. `figures/appendix/`: Figs S1 to S7. `tables/`: Tables S1 to S5.
+  `figures/diagnostics/`: each step's review figures.
 - `legacy/`: the old targets pipeline, kept read-only for reference.
 
 ## Running
@@ -25,7 +29,7 @@ sequence of numbered R scripts. What the analysis is lives in
 ```sh
 Rscript -e 'renv::restore()'
 Rscript -e 'targets::tar_make(script = "prep/_targets.R", store = "prep/_targets")'
-LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b
+LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b, 07a-07f, 10
 ```
 
 Run from the repository root. A UTF-8 locale keeps the figure labels (τ², ×10⁻⁴)
