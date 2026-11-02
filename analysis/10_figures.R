@@ -155,7 +155,9 @@ f7_abund <- filter(coefs, model == "Climate + start", term %in% names(abund_term
 f7_prop <- filter(coefs, model %in% c("Height", "LDMC"), term %in% names(prop_terms)) |> mutate(name = factor(trimws(prop_terms[term]), levels = rev(trimws(prop_terms))))
 stopifnot(nrow(f7_clim) == 14, nrow(f7_abund) == 6, nrow(f7_prop) == 20) # 7 climate terms and 5 terms per trait in each pool; A0_origin residents only
 pool_cols <- c(Residents = "#3D3D3D", Colonizers = "#5E3C99")
-x_shared <- range(c(f7_clim$ci_lower, f7_clim$ci_upper, f7_prop$ci_lower, f7_prop$ci_upper)) # a, c, d on one axis
+x_shared <- range(c(f7_clim$ci_lower, f7_clim$ci_upper, f7_abund$ci_lower, f7_abund$ci_upper, f7_prop$ci_lower, f7_prop$ci_upper)) # every panel on one axis
+# a) and b): the climate + abundance model, one graph per pool, climate terms above the abundance terms (Bills)
+f7_model <- bind_rows(f7_clim, f7_abund) |> mutate(name = factor(as.character(name), levels = rev(c(climate_terms, abund_terms))))
 coef_panel <- function(d, tag, xlim = NULL) {
   ggplot(d, aes(estimate, name, colour = pool, group = pool)) + geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
     geom_linerange(aes(xmin = ci_lower, xmax = ci_upper), linewidth = 1.6, position = position_dodge(width = 0.6)) +
@@ -167,10 +169,8 @@ coef_panel <- function(d, tag, xlim = NULL) {
     theme(legend.position = "bottom", legend.text = element_text(size = 30), legend.key.size = unit(1.6, "cm"))
 }
 fig7 <- patchwork::wrap_plots(
-  coef_panel(f7_clim, "a) Climate (climate + abundance model)", x_shared) + facet_wrap(~ pool, ncol = 1) + # residents and colonizers apart (Bills)
-    theme(strip.text = element_text(face = "bold", size = 28), strip.background = element_blank()),
-  coef_panel(f7_abund, "b) Abundance (same model; scaled within each pool)") + facet_wrap(~ pool, ncol = 1, scales = "free") +
-    theme(strip.text = element_text(face = "bold", size = 28), strip.background = element_blank()),
+  coef_panel(droplevels(filter(f7_model, pool == "Residents")), "a) Residents: climate + abundance model", x_shared) + guides(colour = "none"), # the title names the pool
+  coef_panel(droplevels(filter(f7_model, pool == "Colonizers")), "b) Colonizers: climate + abundance model", x_shared) + guides(colour = "none"),
   coef_panel(filter(f7_prop, model == "Height"), "c) Height model", x_shared),
   coef_panel(filter(f7_prop, model == "LDMC"), "d) LDMC model", x_shared),
   ncol = 2, guides = "collect") & theme(legend.position = "bottom", plot.title = element_text(size = 34))
