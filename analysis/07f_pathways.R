@@ -74,7 +74,7 @@ panels <- lapply(prop_names, function(p) {
     theme(plot.title = element_text(face = "bold", size = 40), axis.title.y = element_text(face = "bold", size = 30),
           axis.ticks.x = element_blank(), axis.line.x = element_blank(), plot.background = element_rect(fill = "white", colour = NA))
 })
-top <- patchwork::wrap_plots(panels, nrow = 1)
+top <- patchwork::wrap_elements(full = patchwork::wrap_plots(panels, nrow = 1)) # not aligned with b, whose row labels would push the y titles out
 share_long <- tidyr::pivot_longer(shares, c(`graminoid share`, `woody share`), names_to = "share")
 bottom <- ggplot(share_long, aes(y = 1)) +
   geom_col(data = mutate(share_long, full = 1), aes(x = full), fill = "grey92", width = 0.7, orientation = "y") + # 100% background
