@@ -5,7 +5,7 @@
 #         fits), strength_df.rds, by_year.rds
 # Writes: data/derived/03b_strength_y3/strength_df.rds, strength_df.csv;
 #         figures/diagnostics/03b_strength_y3.png; reports/03b_strength_y3.md
-# Checks: 1,655 effects, 43 experiments, 21 gradients; every experiment has a
+# Checks: 1,004 effects, 42 experiments, 20 gradients (2 Nov pool rule); every experiment has a
 #         survey in year 3 or later; every strength_se finite and positive;
 #         strength equals the mean of step 02's yearly contrasts over years >= 3;
 #         every column other than strength and strength_se identical to step 02.
@@ -29,7 +29,7 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 strength_all <- readRDS("data/derived/02_strength/strength_df.rds")
 by_year <- as.data.frame(readRDS("data/derived/02_strength/by_year.rds")) |>
   mutate(year = as.integer(as.character(year)))
-stopifnot(nrow(strength_all) == 1655) # step 02
+stopifnot(nrow(strength_all) == 1004) # step 02
 
 # ---- Contrast averaged over years >= 3, per experiment ----------------------
 experiment_ids <- sort(unique(strength_all$experiment_id))
@@ -51,7 +51,7 @@ for (e in experiment_ids) {
   years_used[[e]] <- tibble::tibble(experiment_id = e, years = paste(keep, collapse = ", "), n_years = length(keep))
 }
 y3 <- bind_rows(y3); years_used <- bind_rows(years_used)
-stopifnot(nrow(y3) == 1655, !anyDuplicated(y3[c("species", "experiment_id")])) # one per species x experiment
+stopifnot(nrow(y3) == 1004, !anyDuplicated(y3[c("species", "experiment_id")])) # one per species x experiment
 stopifnot(all(is.finite(y3$strength_se)), all(y3$strength_se > 0))
 
 # independent check: the year-3 strength is the mean of step 02's yearly
@@ -60,7 +60,7 @@ check <- by_year |>
   filter(year >= 3) |>
   summarise(mean_contrast = mean(estimate), .by = c(experiment_id, species)) |>
   inner_join(y3, by = c("experiment_id", "species"))
-stopifnot(nrow(check) == 1655, max(abs(check$mean_contrast - check$strength)) < 1e-10)
+stopifnot(nrow(check) == 1004, max(abs(check$mean_contrast - check$strength)) < 1e-10)
 
 # ---- strength_df: step 02's table with strength and its SE replaced ----------
 strength_df <- strength_all |>
@@ -69,7 +69,7 @@ strength_df <- strength_all |>
   select(all_of(names(strength_all)))
 other <- setdiff(names(strength_all), c("strength", "strength_se"))
 stopifnot(identical(strength_df[other], strength_all[other])) # covariates and properties unchanged
-stopifnot(n_distinct(strength_df$experiment_id) == 43, n_distinct(strength_df$gradient_id) == 21)
+stopifnot(n_distinct(strength_df$experiment_id) == 42, n_distinct(strength_df$gradient_id) == 20)
 
 saveRDS(strength_df, file.path(out_dir, "strength_df.rds"))
 utils::write.csv(strength_df, file.path(out_dir, "strength_df.csv"), row.names = FALSE)
@@ -127,7 +127,7 @@ report <- c(
              "effects resting on a single year >= 3", "experiments with a single year >= 3"),
     n = fmt(c(nrow(strength_df), n_distinct(strength_df$experiment_id), n_distinct(strength_df$gradient_id),
               n_distinct(strength_df$species), n_single, nrow(single))))),
-  "", "Each matches the expectation checked in the script (1,655 effects, 43 experiments, 21 gradients).",
+  "", paste0("Each matches the expectation checked in the script (", fmt(nrow(strength_df)), " effects, ", n_distinct(strength_df$experiment_id), " experiments, ", n_distinct(strength_df$gradient_id), " gradients)."),
   "", "## Years averaged per experiment", "", md_table(years_used),
   "", "## Against the all-years strength of step 02", "", md_table(agreement),
   "", paste0("Quantiles (min / 25% / median / 75% / max). Strength from year 3: ", q(strength_df$strength),
