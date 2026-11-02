@@ -94,8 +94,10 @@ fig4a <- ggplot(pies) +
   geom_point(data = distinct(filter(pies, moved), x0, y0), aes(x0, y0), size = 4) + # the true climate of a moved pie
   scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(pies, r = r), cols = names(cols), colour = "white", linewidth = 0.3) +
   ggrepel::geom_text_repel(aes(x, y, label = label, colour = diff_T_JJA), size = 7.5, fontface = "bold", bg.colour = "white", bg.r = 0.15,
-                           point.size = 48, box.padding = 0.1, force = 2, force_pull = 2, max.iter = 1e6, min.segment.length = 0.5,
-                           segment.colour = "grey60", max.overlaps = Inf, seed = 1) +
+                           point.size = 24, point.padding = 0, box.padding = 0.25,
+                           nudge_x = ifelse(pies$n_shared > 1, 2.1 * r * cos(pies$angle), 0), # fanned pies: label outward, off the shared point
+                           nudge_y = ifelse(pies$n_shared > 1, 2.1 * r * sin(pies$angle), -1.9 * r), force = 5, force_pull = 3, # point.size = the pie's size
+                           max.iter = 1e6, min.segment.length = 0.15, segment.colour = "grey45", segment.size = 0.6, max.overlaps = Inf, seed = 1) +
   scale_fill_manual(values = cols, name = NULL) + warm_scale +
   scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks) + coord_equal() +
   labs(x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
