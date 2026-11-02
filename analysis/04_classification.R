@@ -177,7 +177,8 @@ bc <- patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species
 fig_s6 <- patchwork::wrap_plots(figS6, bc,
                                 ncol = 2, widths = c(2.2, 1)) +
   # all legends collected in one row under the whole figure
-  patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical")
+  patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical",
+    legend.text = element_text(size = 42, face = "bold"), legend.title = element_text(size = 42, face = "bold")) # one legend size (Bills, 2 Nov)
 dir.create("figures/main", recursive = TRUE, showWarnings = FALSE)
 ggsave("figures/main/fig2.png", fig_s6, width = 44, height = 40, dpi = 100, bg = "white")
 
