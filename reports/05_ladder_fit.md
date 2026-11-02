@@ -138,11 +138,9 @@ The low-A0_origin half is the effects at or below the median A0_origin. Species-
 
 ## Figures
 
-![Fig 4, the ladder (row a)](../figures/diagnostics/05_fig4_ladder.png)
-
 ![Fig S4, coefficients](../figures/diagnostics/05_figS4.png)
 
-![Fig S8, surfaces](../figures/diagnostics/05_figS8.png)
+Fig 4 is drawn by step 06; Fig S8 is not drawn (Bills, 2 Nov).
 
 ## Warnings captured
 
@@ -156,5 +154,5 @@ The low-A0_origin half is the effects at or below the median A0_origin. Species-
 ## Deviations from PLAN.md
 
 - H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. Same quantity.
-- Fig S4 and Fig S8 are written to `figures/diagnostics/` (05_figS4.png, 05_figS8.png), not to `data/derived/05_ladder_fit/`, so that the report can link them; Fig S8's property surfaces are at W = its mean.
-- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 drawn here with twelve columns; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.
+- Fig S4 is written to `figures/diagnostics/05_figS4.png`, not to `data/derived/05_ladder_fit/`, so that the report can link it.
+- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.

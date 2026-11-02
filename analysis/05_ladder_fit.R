@@ -5,8 +5,7 @@
 #         data/derived/04_classification/species_summary.csv (Step C spread)
 # Writes: data/derived/05_ladder_fit/models/<rowset>/<model>.rds,
 #         heterogeneity.csv, weights.csv, coefficients.csv, tableS4.csv,
-#         tableS5.csv; figures/diagnostics/05_fig4_ladder.png, 05_figS4.png,
-#         05_figS8.png; reports/05_ladder_fit.md
+#         tableS5.csv; figures/diagnostics/05_figS4.png; reports/05_ladder_fit.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients): residents in at least 3 gradients that carry every
 #         property; every property rowset identical to all;
@@ -25,9 +24,10 @@
 # lacking a property (Carex norvegica, Veronica serpyllifolia, Bistorta
 # macrophylla) leave the whole ladder, so every model is fitted on the same rows;
 # step 02's standardisation is kept; the GEN timing run is not repeated; 7 cores.
+# Fig 4 is drawn by step 06 and Fig S8 is not drawn here (Bills, 2 Nov: both deleted).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
-source("R/fit_model.R"); source("R/h_species.R"); source("R/fig4_ladder.R"); source("R/md_table.R")
+source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R")
 
 warns <- character()
 globalCallingHandlers(warning = function(w) {
@@ -213,17 +213,6 @@ weights_table <- bind_rows(
   bind_rows(lapply(c("Null", "Start", "Climate", "Climate + start", "Species-dependent"), function(mo) {
     x <- filter(w_all, model == mo); weight_summary(x$weight, x$A0_origin, x$experiment_id, mo) })))
 
-# ---- Fig 4, the ladder: row a) from the table above, b) to d) wait for step 06 --
-het_fig <- bind_rows(
-  filter(ladder, rowset == "all", model %in% ladder_columns[1:5]) |> mutate(column = model, ref_cd = NA_real_, ref_H = NA_real_),
-  bind_rows(lapply(names(prop_vars), function(p) {
-    r <- prop_rowset[[p]]; sp <- filter(ladder, rowset == r, slug == "species")
-    filter(ladder, rowset == r, slug == p) |>
-      mutate(column = prop_label[[p]], ref_cd = sp$tau2 + sp$sigma2_experiment, ref_H = sp$H_intercept + sp$H_slope) })))
-stopifnot(nrow(het_fig) == 12, setequal(het_fig$column, ladder_columns))
-fig4_ladder(het_fig, "figures/diagnostics/05_fig4_ladder.png",
-            caption = paste0("Row a): REML fits of step 05 on the strength from year 3, every column on the same ", nrow(strength_df), " rows; dashed lines carry Species-dependent across the property columns: its context dependency total (grey), its H_species intercept piece (light gold) and its H_species total (dark gold). Rows b) to d): step 06."))
-
 # ---- Fig S4: coefficients with CR1 intervals ---------------------------------
 coef_panel <- function(x, tag, ttl) {
   x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = factor(term, levels = rev(unique(term))))
@@ -245,30 +234,6 @@ s4c <- coef_panel(prop_coefs, "c)", "Property terms, each from its own model (Cl
 ggsave("figures/diagnostics/05_figS4.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, s4b, widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)),
        width = 20, height = 22, dpi = 100, bg = "white")
 
-# ---- Fig S8: fitted surfaces over T and P (fixed effects, A0 at its mean) ----
-pred_fixed <- function(m, grid) { b <- coef(m)
-  X <- sapply(names(b), function(nm) if (nm == "intrcpt") rep(1, nrow(grid)) else Reduce(`*`, grid[strsplit(nm, ":")[[1]]]))
-  as.vector(X %*% b) }
-exps <- distinct(strength_df, experiment_id, T, P)
-grid0 <- expand.grid(T = seq(min(exps$T), max(exps$T), length.out = 60), P = seq(min(exps$P), max(exps$P), length.out = 60)) |>
-  mutate(TP = T * P, A0_origin = 0, A0_dest = 0)
-surf <- bind_rows(
-  bind_rows(lapply(c(-1, 1), function(w) mutate(grid0, W = w, strength = pred_fixed(fit_of("all", "climate_start")$m, cbind(grid0, W = w)),
-                                                  panel = sprintf("Climate + start, W %+d SD", w)))),
-  bind_rows(lapply(names(prop_vars), function(p) bind_rows(lapply(prop_vars[[p]], function(v) {
-    lv <- if (v %in% c("graminoid", "woody")) c(0, 1) else c(-1, 1)
-    bind_rows(lapply(lv, function(x) { g <- cbind(grid0, W = 0); for (u in prop_vars[[p]]) g[[u]] <- 0; g[[v]] <- x
-      mutate(g, strength = pred_fixed(fit_of(prop_rowset[[p]], p)$m, g),
-             panel = if (v %in% c("graminoid", "woody")) sprintf("%s = %d, W at mean", v, x) else sprintf("%s %+d SD, W at mean", v, x)) }))
-  }))))) |> mutate(panel = factor(panel, levels = unique(panel)))
-lim <- max(abs(surf$strength))
-s8 <- ggplot(surf, aes(T, P, fill = strength)) + geom_raster() +
-  geom_point(data = exps, aes(T, P), inherit.aes = FALSE, shape = 21, fill = "white", size = 2) +
-  facet_wrap(~ panel, ncol = 4) +
-  scale_fill_gradient2(low = "#B2182B", mid = "white", high = "#2166AC", limits = c(-lim, lim), name = "Losing-winning\nstrength") +
-  labs(x = "Destination summer temperature T (SD)", y = "Destination summer precipitation P (SD)") +
-  theme_classic(base_size = 16) + theme(strip.text = element_text(face = "bold", size = 13), strip.background = element_blank())
-ggsave("figures/diagnostics/05_figS8.png", s8, width = 20, height = 5 * ceiling(nlevels(surf$panel) / 4), dpi = 100, bg = "white", limitsize = FALSE)
 
 # ---- Report ----------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
@@ -335,15 +300,15 @@ report <- c(
              "Subspecies niche check (26 Oct): neither Solidago virgaurea nor Ranunculus acris is a resident at CH_Lavey under the original pools, so there is nothing to refit."),
   "", "## Effective weights (all rows)", "", md_table(weights_table),
   "", "The low-A0_origin half is the effects at or below the median A0_origin. Species-dependent weights include the slope variance at each effect's climate.",
-  "", "## Figures", "", "![Fig 4, the ladder (row a)](../figures/diagnostics/05_fig4_ladder.png)", "",
-  "![Fig S4, coefficients](../figures/diagnostics/05_figS4.png)", "", "![Fig S8, surfaces](../figures/diagnostics/05_figS8.png)",
+  "", "## Figures", "",
+  "![Fig S4, coefficients](../figures/diagnostics/05_figS4.png)", "", "Fig 4 is drawn by step 06; Fig S8 is not drawn (Bills, 2 Nov).",
   "", "## Warnings captured", "",
   { w <- unique(c(unlist(lapply(fits, function(f) paste0(f$rowset, " / ", f$model, ": ", f$warnings[[1]])[length(f$warnings[[1]]) > 0])), warns))
     if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   paste0("- H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. ",
          "Same quantity."),
-  "- Fig S4 and Fig S8 are written to `figures/diagnostics/` (05_figS4.png, 05_figS8.png), not to `data/derived/05_ladder_fit/`, so that the report can link them; Fig S8's property surfaces are at W = its mean.",
-  "- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 drawn here with twelve columns; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.")
+  "- Fig S4 is written to `figures/diagnostics/05_figS4.png`, not to `data/derived/05_ladder_fit/`, so that the report can link it.",
+  "- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.")
 writeLines(report, "reports/05_ladder_fit.md")
 message("Step 05 written: ", nrow(fitted), " fits in ", sprintf("%.1f", sum(fitted$minutes)), " fit-minutes")

@@ -328,7 +328,6 @@ report <- c(
   "- Climate's Spearman and skill are NA in every gradient (Bills, 2 Nov): with several experiments in a gradient they would rank experiments, not species.",
   "- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (Bills, 2 Nov); PLAN.md names no fallback.",
   "- Spearman is also NA where every prediction in the gradient is the same (MILESTONES), beside PLAN.md's fewer than 5 effects.",
-  "- Held out and scored: only the gradients with at least 5 effects (16; Bills, 2 Nov); the other four train only.",
   "- Figures written to `figures/diagnostics/`; Fig 4's prediction rows widen their y range to the data.")
 writeLines(report, "reports/06_ladder_predict.md")
 message("Step 06 written: ", nrow(fold_summary), " folds, ", nrow(failed), " failed; ",

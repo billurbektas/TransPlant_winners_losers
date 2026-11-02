@@ -1,6 +1,6 @@
 # Fig 4, the ladder (PLAN.md Figure map and caption; 12 columns, Bills 1 Nov).
-# Step 05 draws row a) from heterogeneity.csv with rows b) to d) NA; step 06 adds
-# the prediction metrics; step 10 renders the final figure. Used by steps 05, 06, 10.
+# Step 06 draws it, rows a) to d); step 10 renders the final figure. Used by steps
+# 06 and 10 (step 05 no longer draws it, 2 Nov).
 #
 # het: one row per column, with `column` (a label of ladder_columns),
 #   sigma2_experiment, tau2, H_intercept, H_slope (raw variances); since 2 Nov
