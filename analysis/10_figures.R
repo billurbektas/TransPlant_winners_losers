@@ -103,13 +103,13 @@ fig4a <- ggplot(pies) +
               legend.title = element_text(face = "bold"), panel.grid.major = element_line(colour = "grey90"))
 key <- mutate(pies, row = row_number(), first = letter %in% c("", "a"), name = ifelse(first, sub("_", " ", gradient_id), ""))
 fig4key <- ggplot(key, aes(y = -row)) +
-  geom_text(aes(x = 0, label = name, colour = diff_T_JJA), hjust = 0, size = 7.5, fontface = "bold") +
-  geom_text(aes(x = 3.1, label = letter, colour = diff_T_JJA), hjust = 0.5, size = 7.5, fontface = "bold") +
-  geom_text(aes(x = 3.4, label = elevations, colour = diff_T_JJA), hjust = 0, size = 7.5) +
-  warm_scale + guides(colour = "none") + scale_x_continuous(limits = c(0, 6), expand = c(0, 0)) +
+  geom_text(aes(x = 0, label = name, colour = diff_T_JJA), hjust = 0, size = 10, fontface = "bold") +
+  geom_text(aes(x = 3.7, label = letter, colour = diff_T_JJA), hjust = 0.5, size = 10, fontface = "bold") +
+  geom_text(aes(x = 4.0, label = elevations, colour = diff_T_JJA), hjust = 0, size = 10) +
+  warm_scale + guides(colour = "none") + scale_x_continuous(limits = c(0, 6.6), expand = c(0, 0)) +
   labs(title = "Origin → destination elevation") + theme_void() +
-  theme(plot.title = element_text(face = "bold", size = 26, margin = margin(b = 10)), plot.background = element_rect(fill = "white", colour = NA))
-fig4 <- patchwork::wrap_plots(fig4a, fig4key, ncol = 2, widths = c(2.6, 1))
+  theme(plot.title = element_text(face = "bold", size = 34, margin = margin(b = 10)), plot.background = element_rect(fill = "white", colour = NA))
+fig4 <- patchwork::wrap_plots(fig4a, fig4key, ncol = 2, widths = c(2.2, 1))
 
 # ---- Fig S1: data flow ------------------------------------------------------------------
 flow <- read.csv("data/derived/01_relative_cover/flow_counts.csv")
@@ -242,7 +242,7 @@ tableS5 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), 
 for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sprintf("tables/table%s.csv", t), row.names = FALSE)
 
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
-ggsave("figures/main/fig4.png", fig4, width = 40, height = 28, dpi = 100, bg = "white")
+ggsave("figures/main/fig4.png", fig4, width = 44, height = 28, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS2.png", figS2, width = 40, height = 14, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")
