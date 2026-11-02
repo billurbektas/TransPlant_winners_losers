@@ -103,13 +103,13 @@ fig4a <- ggplot(pies) +
   labs(x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
   big + theme(legend.position = "bottom", legend.box = "vertical", legend.key.size = unit(1.4, "cm"), legend.key.width = unit(3, "cm"),
               legend.title = element_text(face = "bold"), panel.grid.major = element_line(colour = "grey90"))
-key <- mutate(pies, row = row_number(), first = letter %in% c("", "a"), name = ifelse(first, sub("_", " ", gradient_id), ""))
+key <- arrange(pies, desc(diff_T_JJA)) |> mutate(row = row_number(), name = sub("_", " ", gradient_id)) # strongest warming first (Bills, 2 Nov)
 fig4key <- ggplot(key, aes(y = -row)) +
   geom_text(aes(x = 0, label = name, colour = diff_T_JJA), hjust = 0, size = 10, fontface = "bold") +
   geom_text(aes(x = 3.7, label = letter, colour = diff_T_JJA), hjust = 0.5, size = 10, fontface = "bold") +
   geom_text(aes(x = 4.0, label = elevations, colour = diff_T_JJA), hjust = 0, size = 10) +
   warm_scale + guides(colour = "none") + scale_x_continuous(limits = c(0, 6.6), expand = c(0, 0)) +
-  labs(title = "Origin → destination elevation") + theme_void() +
+  labs(title = "Origin → destination elevation,\nstrongest warming first") + theme_void() +
   theme(plot.title = element_text(face = "bold", size = 34, margin = margin(b = 10)), plot.background = element_rect(fill = "white", colour = NA))
 fig4 <- patchwork::wrap_plots(fig4a, fig4key, ncol = 2, widths = c(2.2, 0.7))
 
