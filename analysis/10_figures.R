@@ -167,7 +167,8 @@ coef_panel <- function(d, tag, xlim = NULL) {
     theme(legend.position = "bottom", legend.text = element_text(size = 30), legend.key.size = unit(1.6, "cm"))
 }
 fig7 <- patchwork::wrap_plots(
-  coef_panel(f7_clim, "a) Climate (climate + abundance model)", x_shared),
+  coef_panel(f7_clim, "a) Climate (climate + abundance model)", x_shared) + facet_wrap(~ pool, ncol = 1) + # residents and colonizers apart (Bills)
+    theme(strip.text = element_text(face = "bold", size = 28), strip.background = element_blank()),
   coef_panel(f7_abund, "b) Abundance (same model; scaled within each pool)") + facet_wrap(~ pool, ncol = 1, scales = "free") +
     theme(strip.text = element_text(face = "bold", size = 28), strip.background = element_blank()),
   coef_panel(filter(f7_prop, model == "Height"), "c) Height model", x_shared),
