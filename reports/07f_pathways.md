@@ -1,36 +1,42 @@
-# Step 07f: The pathways (Q4, Fig 7)
+# Step 07f: The pathways (Q4), after Fig 1
 
-Species-level properties for the classes of Fig 2 (step 04, residents in at least 3 gradients) and Fig S2 (step 07b, colonizers in at least 3 gradients), as the agreed mock: LDMC, LMA and vegetative height (logged), and the thermal and precipitation optima as dot strips with the group median, and the share of graminoids and woody species per group. Step 07b found no consistent colonizers, so the colonizers form one group, context-dependent colonizers (Bills, 2 Nov). Descriptive; no model.
+Species properties for Fig 1's year-specific classes at year 3 (Bills, 2 Nov), with Fig 1's colours: residents as Loser, Loser (ns), Winner (ns) and Winner (step 03), colonizers as Present, Present (ns) and Absent (step 07a). A class belongs to a species x experiment, so each point is one species in one experiment, as Fig 1 counts them. As the agreed mock: LDMC, LMA and vegetative height, and the thermal and precipitation optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species per group. Descriptive; no model.
 
-## Groups
+## Groups (year 3)
 
-| group | species |
-| --- | --- |
-| Consistent resident losers | 6 |
-| Consistent resident winners | 2 |
-| Context-dependent colonizers | 28 |
-| Context-dependent residents | 66 |
+| group | species x experiment | species |
+| --- | --- | --- |
+| Loser | 132 | 82 |
+| Loser (ns) | 446 | 224 |
+| Winner (ns) | 263 | 149 |
+| Winner | 38 | 32 |
+| Present | 56 | 46 |
+| Present (ns) | 122 | 101 |
+| Absent | 153 | 116 |
 
 ## Group medians and shares
 
-| group | graminoid share | woody share | LDMC (mg g⁻¹, log) | LMA (g m⁻², log) | Vegetative height (cm, log) | T optimum (°C) | P optimum (mm, log) |
+| group | graminoid share | woody share | T optimum (°C) | P optimum (mm) | LDMC (mg g⁻¹) | LMA (g m⁻²) | Vegetative height (cm) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Context-dependent residents | 30% | 5% | 5.59 (64) | 3.94 (66) | 2.34 (64) | 14.60 (66) | 5.73 (66) |
-| Consistent resident losers | 33% | 0% | 5.42 (6) | 3.76 (6) | 1.99 (6) | 10.50 (6) | 6.06 (6) |
-| Consistent resident winners | 100% | 0% | 5.95 (2) | 4.24 (2) | 2.66 (2) | 15.74 (2) | 5.54 (2) |
-| Context-dependent colonizers | 21% | 4% | 5.44 (28) | 3.86 (27) | 3.02 (27) | 16.77 (28) | 5.55 (28) |
+| Loser | 24% | 8% | 12.6 (131) | 386 (131) | 267 (119) | 52.2 (117) | 9 (116) |
+| Loser (ns) | 26% | 6% | 13.8 (440) | 342 (440) | 252 (386) | 50.8 (390) | 10.9 (377) |
+| Winner (ns) | 37% | 5% | 14.9 (256) | 309 (256) | 261 (224) | 54.2 (231) | 12.5 (220) |
+| Winner | 39% | 3% | 15.8 (38) | 278 (38) | 253 (37) | 52.2 (38) | 13.5 (35) |
+| Present | 20% | 0% | 16.5 (55) | 259 (55) | 230 (49) | 47.4 (49) | 14.8 (49) |
+| Present (ns) | 23% | 4% | 16.2 (119) | 266 (119) | 236 (109) | 47 (108) | 15 (101) |
+| Absent | 24% | 6% | 15.9 (152) | 286 (152) | 232 (127) | 50.4 (134) | 14.2 (129) |
 
-Medians with the number of species that have the property in brackets.
+Medians with the number of species x experiment that have the property in brackets; shares over species x experiment.
 
-## Fig 7
+## Figure
 
-![Fig 7](../figures/main/fig7.png)
+![Pathways](../figures/main/fig1_pathways.png)
 
 ## Warnings captured
 
-- The `fatten` argument of `geom_crossbar()` is deprecated as of ggplot2 4.0.0.
-ℹ Please use the `middle.linewidth` argument instead.
+None.
 
 ## Deviations from PLAN.md
 
-- No consistent-colonizer group: step 07b found none (Bills, 2 Nov: keep the mock without it).
+- Groups are Fig 1's year-3 classes, not Step C's consistent classes, which were nearly empty (Bills, 2 Nov); points are species x experiment.
+- The figure follows Fig 1 (`figures/main/fig1_pathways.png`); final numbering in step 10.
