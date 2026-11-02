@@ -70,9 +70,9 @@ panels <- lapply(prop_names, function(p) {
     geom_crossbar(data = filter(meds, property == p), aes(group, median, ymin = median, ymax = median), width = 0.6, linewidth = 1.6, middle.linewidth = 1.6) +
     (if (p == "T optimum (°C)") scale_y_continuous() else scale_y_log10(breaks = scales::breaks_log(6), labels = scales::label_number(big.mark = ""))) +
     scale_colour_manual(values = cols, guide = "none") + scale_x_discrete(labels = NULL) +
-    labs(title = if (p == prop_names[1]) "a)" else " ", subtitle = p, x = NULL, y = NULL) +
+    labs(title = if (p == prop_names[1]) "a)" else " ", x = NULL, y = p) +
     theme_classic(base_size = 30) +
-    theme(plot.title = element_text(face = "bold", size = 40), plot.subtitle = element_text(face = "bold", size = 28, hjust = 0.5),
+    theme(plot.title = element_text(face = "bold", size = 40), axis.title.y = element_text(face = "bold", size = 30),
           axis.ticks.x = element_blank(), axis.line.x = element_blank(), plot.background = element_rect(fill = "white", colour = NA))
 })
 top <- patchwork::wrap_plots(panels, nrow = 1)
