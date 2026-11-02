@@ -145,19 +145,22 @@ coefs <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), po
   mutate(pool = factor(pool, levels = c("Residents", "Colonizers")), excludes_zero = ci_lower > 0 | ci_upper < 0)
 climate_terms <- c(W = "Warming", T = "Temperature", P = "Precipitation", `W:T` = "Warming × temperature", `W:P` = "Warming × precipitation",
                    `T:P` = "Temperature × precipitation", `W:T:P` = "Warming × temperature × precipitation")
-abund_terms <- c(A0_origin = "Abundance at origin", A0_dest = "Abundance at destination", `W:A0_origin` = "Warming × abundance at origin",
-                 `W:A0_dest` = "Warming × abundance at destination")
+# residents' abundances are initial (first survey of the origin or destination controls, step 01);
+# the colonizers' is the mean destination-control cover over every plot and year (07a)
+abund_names <- c("Residents A0_origin" = "Initial abundance at origin", "Residents A0_dest" = "Initial abundance at destination",
+                 "Colonizers A0_dest" = "Mean abundance at destination", "Residents W:A0_origin" = "Warming × initial abundance at origin",
+                 "Residents W:A0_dest" = "Warming × initial abundance at destination", "Colonizers W:A0_dest" = "Warming × mean abundance at destination")
 trait_terms <- function(z, name) setNames(paste(name, c("", "× warming", "× temperature", "× precipitation", "× temperature × precipitation")),
                                          paste0(c("", "W:", "T:", "P:", ""), z, c("", "", "", "", ":TP")))
 prop_terms <- c(trait_terms("height_z", "Height"), trait_terms("ldmc_z", "LDMC"))
 f7_clim <- filter(coefs, model == "Climate + start", term %in% names(climate_terms)) |> mutate(name = factor(climate_terms[term], levels = rev(climate_terms)))
-f7_abund <- filter(coefs, model == "Climate + start", term %in% names(abund_terms)) |> mutate(name = factor(abund_terms[term], levels = rev(abund_terms)))
+f7_abund <- filter(coefs, model == "Climate + start", grepl("A0", term)) |> mutate(name = factor(abund_names[paste(pool, term)], levels = rev(abund_names)))
 f7_prop <- filter(coefs, model %in% c("Height", "LDMC"), term %in% names(prop_terms)) |> mutate(name = factor(trimws(prop_terms[term]), levels = rev(trimws(prop_terms))))
 stopifnot(nrow(f7_clim) == 14, nrow(f7_abund) == 6, nrow(f7_prop) == 20) # 7 climate terms and 5 terms per trait in each pool; A0_origin residents only
 pool_cols <- c(Residents = "#3D3D3D", Colonizers = "#5E3C99")
 x_shared <- range(c(f7_clim$ci_lower, f7_clim$ci_upper, f7_abund$ci_lower, f7_abund$ci_upper, f7_prop$ci_lower, f7_prop$ci_upper)) # every panel on one axis
 # a) and b): the climate + abundance model, one graph per pool, climate terms above the abundance terms (Bills)
-f7_model <- bind_rows(f7_clim, f7_abund) |> mutate(name = factor(as.character(name), levels = rev(c(climate_terms, abund_terms))))
+f7_model <- bind_rows(f7_clim, f7_abund) |> mutate(name = factor(as.character(name), levels = rev(c(climate_terms, abund_names)))) # the same rows in a and b
 coef_panel <- function(d, tag, xlim = NULL) {
   ggplot(d, aes(estimate, name, colour = pool, group = pool)) + geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
     geom_linerange(aes(xmin = ci_lower, xmax = ci_upper), linewidth = 1.6, position = position_dodge(width = 0.6)) +
@@ -169,8 +172,10 @@ coef_panel <- function(d, tag, xlim = NULL) {
     theme(legend.position = "bottom", legend.text = element_text(size = 30), legend.key.size = unit(1.6, "cm"))
 }
 fig7 <- patchwork::wrap_plots(
-  coef_panel(droplevels(filter(f7_model, pool == "Residents")), "a) Residents: climate + abundance model", x_shared) + guides(colour = "none"), # the title names the pool
-  coef_panel(droplevels(filter(f7_model, pool == "Colonizers")), "b) Colonizers: climate + abundance model", x_shared) + guides(colour = "none"),
+  coef_panel(filter(f7_model, pool == "Residents"), "a) Residents: climate + abundance model", x_shared) + guides(colour = "none") + # the title names the pool
+    scale_y_discrete(drop = FALSE), # a row stays empty where the model has no such term
+  coef_panel(filter(f7_model, pool == "Colonizers"), "b) Colonizers: climate + abundance model", x_shared) + guides(colour = "none") +
+    scale_y_discrete(drop = FALSE),
   coef_panel(filter(f7_prop, model == "Height"), "c) Height model", x_shared),
   coef_panel(filter(f7_prop, model == "LDMC"), "d) LDMC model", x_shared),
   ncol = 2, guides = "collect") & theme(legend.position = "bottom", plot.title = element_text(size = 34))
@@ -267,8 +272,8 @@ figS5 <- patchwork::wrap_plots(
   hist_panel(experiments$destination_T_JJA, "Destination JJA temperature (°C)", "a)"),
   hist_panel(experiments$diff_T_JJA, "Warming W (°C)", "b)"),
   hist_panel(experiments$destination_P_JJA, "Destination JJA precipitation (mm)", "c)", TRUE),
-  hist_panel(a0$A0_origin, "A0 origin (relative cover)", "d)"),
-  hist_panel(a0$A0_dest, "A0 destination (relative cover)", "e)"),
+  hist_panel(a0$A0_origin, "Initial abundance at origin, log(% cover + 1)", "d)"),
+  hist_panel(a0$A0_dest, "Initial abundance at destination, log(% cover + 1)", "e)"),
   hist_panel(1000 * traits$LDMC[traits$species %in% res_sp], "LDMC (mg g⁻¹)", "f)", TRUE),
   hist_panel(1000 * traits$LMA[traits$species %in% res_sp], "LMA (g m⁻²)", "g)", TRUE),
   hist_panel(100 * traits$height[traits$species %in% res_sp], "Vegetative height (cm)", "h)", TRUE),
