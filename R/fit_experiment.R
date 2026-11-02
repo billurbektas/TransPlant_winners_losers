@@ -20,29 +20,24 @@ fit_experiment <- function(d, control_level) {
     warning = function(w) { notes <<- c(notes, conditionMessage(w)); invokeRestart("muffleWarning") },
     message = function(m) { notes <<- c(notes, trimws(conditionMessage(m))); invokeRestart("muffleMessage") })
 
-  # an experiment with one species (four colonizer pools, step 07a) gets the same
-  # model without the species terms, which a one-level factor cannot carry
-  one_species <- nlevels(factor(d$species)) == 1
   m <- capture(glmmTMB::glmmTMB(
-    if (one_species) relative_cover ~ treatment * year + (1 | plot_id) else relative_cover ~ treatment * year * species + (1 | plot_id:species),
-    dispformula = if (one_species) ~ 1 else ~ species,
+    relative_cover ~ treatment * year * species + (1 | plot_id:species),
+    dispformula = ~ species,
     data = d, REML = TRUE
   ))
   if (m$fit$convergence != 0 || !isTRUE(m$sdr$pdHess))
     stop("glmmTMB did not converge (code ", m$fit$convergence, ", pdHess ", m$sdr$pdHess, "): ",
          m$fit$message, call. = FALSE)
 
-  # with one species the grid has no species column; it is added back by name
-  add_species <- function(x) if (one_species) cbind(species = factor(unique(d$species)), x) else x
-  em <- capture(emmeans::emmeans(m, if (one_species) ~ treatment | year else ~ treatment | species * year, df = df_plots))
+  em <- capture(emmeans::emmeans(m, ~ treatment | species * year, df = df_plots))
   # year-specific contrast, used in Step B
   by_year <- capture(emmeans::contrast(em, method = "revpairwise")) |>
-    as.data.frame() |> add_species() |>
+    as.data.frame() |>
     dplyr::filter(contrast == paste("warmed -", control_level))
   # contrast averaged over years, used as strength from Step C onward
-  em_mean <- capture(emmeans::emmeans(m, if (one_species) ~ treatment else ~ treatment | species, df = df_plots))
+  em_mean <- capture(emmeans::emmeans(m, ~ treatment | species, df = df_plots))
   strength <- capture(emmeans::contrast(em_mean, method = "revpairwise")) |>
-    as.data.frame() |> add_species() |>
+    as.data.frame() |>
     dplyr::filter(contrast == paste("warmed -", control_level))
 
   # residual SD per species (predict type "disp" is the SD for the Gaussian family)
@@ -52,6 +47,6 @@ fit_experiment <- function(d, control_level) {
 
   list(model = m, by_year = by_year, strength = strength, warnings = unique(notes),
        convergence = m$fit$convergence, pdHess = m$sdr$pdHess, df_plots = df_plots,
-       sd_plot_species = attr(glmmTMB::VarCorr(m)$cond[[if (one_species) "plot_id" else "plot_id:species"]], "stddev")[[1]],
-       sigma_species = sigma_species, one_species = one_species)
+       sd_plot_species = attr(glmmTMB::VarCorr(m)$cond[["plot_id:species"]], "stddev")[[1]],
+       sigma_species = sigma_species)
 }

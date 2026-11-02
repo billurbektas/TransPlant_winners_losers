@@ -11,7 +11,10 @@
 #         presence_classes.csv, stability.csv, never_present.csv;
 #         figures/main/fig1.png (panel a unchanged, panel b below);
 #         figures/diagnostics/07a_stability.png; reports/07a_colonizers.md
-# Checks: 402 colonizer effects, 236 species, 39 experiments, 20 gradients;
+# Checks: 402 colonizer effects, 236 species, 39 experiments, 20 gradients in the
+#         destination pool; the pool-size rule (at least 5 colonizer species) drops 11
+#         experiments and CN_Damxung, leaving 379 effects, 229 species, 28 experiments,
+#         19 gradients;
 #         every fit converged with a positive-definite Hessian (R/fit_experiment.R
 #         stops otherwise); one strength per species x experiment, SEs finite and
 #         positive; absence read from raw warmed cover; no A0_origin anywhere;
@@ -21,8 +24,9 @@
 # (glmmTMB, one residual variance per species, R/fit_experiment.R) with the
 # destination control as reference; strength averaged over all years and over
 # years 3 and later, both kept until Bills reads the stability; Fig 1 panel b
-# below panel a, three classes (absent, present (ns), present); the 47 species
-# never present in a warmed plot reported as a count.
+# below panel a, three classes (absent, present (ns), present); the 46 species
+# never present in a warmed plot reported as a count; the residents' pool-size rule
+# applied to colonizers too, at least 5 colonizer species per experiment (consistency).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/fit_experiment.R"); source("R/md_table.R")
@@ -43,6 +47,14 @@ colonizers <- filter(cover_long, species_pool == "destination_pool", treatment %
 effects <- distinct(colonizers, experiment_id, gradient_id, species)
 stopifnot(nrow(effects) == 402, n_distinct(effects$species) == 236,
           n_distinct(effects$experiment_id) == 39, n_distinct(effects$gradient_id) == 20) # step 01, destination pool
+# pool-size rule, as for residents (PLAN.md Data rules): at least 5 colonizer species per experiment
+pool_size <- count(effects, experiment_id, gradient_id, name = "species")
+dropped_k <- filter(pool_size, species < 5)
+stopifnot(nrow(dropped_k) == 11, sum(dropped_k$species) == 23) # 11 experiments with 1 to 4 colonizer species
+colonizers <- filter(colonizers, !experiment_id %in% dropped_k$experiment_id)
+effects <- distinct(colonizers, experiment_id, gradient_id, species)
+stopifnot(nrow(effects) == 379, n_distinct(effects$species) == 229, n_distinct(effects$experiment_id) == 28,
+          n_distinct(effects$gradient_id) == 19, !"CN_Damxung" %in% effects$gradient_id) # after the pool-size rule
 
 # ---- Step A: one model per experiment, destination control as reference --------
 experiment_ids <- sort(unique(colonizers$experiment_id))
@@ -55,11 +67,9 @@ names(fits) <- experiment_ids
 
 # marginal means of both groups from the same fit: warmed = strength, destination
 # control = A0_dest (PLAN.md); averaged over all years, or over years >= 3 (as 03b)
-# an experiment with one colonizer species has no species term (R/fit_experiment.R): its name is added back
-with_species <- function(fit, x) if (fit$one_species) cbind(species = names(fit$sigma_species), x) else x
 means_of <- function(fit, years) {
-  em <- emmeans::emmeans(fit$model, if (fit$one_species) ~ treatment else ~ treatment | species,
-                         at = list(year = years), df = fit$df_plots) |> as.data.frame() |> with_species(fit = fit)
+  em <- emmeans::emmeans(fit$model, ~ treatment | species,
+                         at = list(year = years), df = fit$df_plots) |> as.data.frame()
   w <- filter(em, treatment == "warmed"); d <- filter(em, treatment == "destination_control")
   tibble::tibble(species = as.character(w$species), strength = w$emmean, strength_se = w$SE,
                  A0_dest = d$emmean[match(w$species, d$species)], A0_dest_se = d$SE[match(w$species, d$species)], df = fit$df_plots)
@@ -77,16 +87,15 @@ finish <- function(s) s |>
   select(effect_id, species, experiment_id, gradient_id, strength, strength_se, A0_dest, A0_dest_se, df, n_years, W, T, P, TP)
 strength_df <- finish(strength_of(1L))
 strength_df_y3 <- finish(strength_of(3L))
-stopifnot(nrow(strength_df) == 402, !anyDuplicated(strength_df$effect_id), !anyNA(strength_df$W), # every colonizer effect once
+stopifnot(nrow(strength_df) == 379, !anyDuplicated(strength_df$effect_id), !anyNA(strength_df$W), # every colonizer effect once
           all(is.finite(strength_df$strength_se)), all(strength_df$strength_se > 0),
           all(strength_df_y3$effect_id %in% strength_df$effect_id), !any(grepl("A0_origin", c(names(strength_df), names(strength_df_y3)))))
 n_y3_missing <- nrow(strength_df) - nrow(strength_df_y3)
 
 # ---- Step B: warmed cover per year, presence classes at the anchors ------------
 by_year <- bind_rows(lapply(experiment_ids, function(e) {
-  em <- emmeans::emmeans(fits[[e]]$model, if (fits[[e]]$one_species) ~ treatment | year else ~ treatment | species * year,
-                         df = fits[[e]]$df_plots)
-  as.data.frame(emmeans::test(em, side = ">")) |> with_species(fit = fits[[e]]) |> # p-value for warmed cover above zero
+  em <- emmeans::emmeans(fits[[e]]$model, ~ treatment | species * year, df = fits[[e]]$df_plots)
+  as.data.frame(emmeans::test(em, side = ">")) |> # p-value for warmed cover above zero
     filter(treatment == "warmed") |>
     transmute(experiment_id = e, species = as.character(species), year = as.integer(as.character(year)), estimate = emmean, SE, p.value)
 }))
@@ -119,7 +128,7 @@ never <- colonizers |> filter(treatment == "warmed") |>
   summarise(any = any(relative_cover > 0), .by = c(experiment_id, gradient_id, species)) |>
   summarise(never = all(!any), n_gradients = n_distinct(gradient_id), gradients = paste(sort(unique(gradient_id)), collapse = ", "),
             n_experiments = n(), .by = species) |> filter(never) |> select(-never) |> arrange(desc(n_gradients), species)
-stopifnot(nrow(never) == 47, all(never$n_gradients < 3)) # none reaches the Step C rule (Bills, 2 Nov)
+stopifnot(nrow(never) == 46, all(never$n_gradients < 3)) # none reaches the Step C rule (Bills, 2 Nov)
 
 # ---- Write ----------------------------------------------------------------------
 saveRDS(by_year, file.path(out_dir, "by_year.rds"))
@@ -229,10 +238,15 @@ report <- c(
          "in any warmed plot that year, from the raw data), present (warmed mean above zero at one-sided p < 0.05) or present (ns), and ",
          "presence agreement and the concordance correlation of warmed cover were computed between adjacent anchors."),
   "", "## Counts", "",
-  md_table(tibble::tibble(rule = c("colonizer effects (species x experiment)", "species", "experiments", "gradients",
+  md_table(tibble::tibble(rule = c("colonizer effects in the destination pool (species x experiment)",
+                                   "experiments dropped by the pool-size rule (fewer than 5 colonizer species)", "their effects",
+                                   "colonizer effects kept", "species", "experiments", "gradients",
                                    "effects with a strength from years 3 and later", "species never present in a warmed plot (any gradient)"),
-                          n = c(nrow(strength_df), n_distinct(strength_df$species), length(experiment_ids), n_distinct(strength_df$gradient_id),
-                                nrow(strength_df_y3), nrow(never)))),
+                          n = c(402, nrow(dropped_k), sum(dropped_k$species), nrow(strength_df), n_distinct(strength_df$species),
+                                length(experiment_ids), n_distinct(strength_df$gradient_id), nrow(strength_df_y3), nrow(never)))),
+  "", paste0("Dropped by the pool-size rule, as for residents (Bills, 2 Nov): ",
+             paste(sprintf("%s (%d)", dropped_k$experiment_id, dropped_k$species), collapse = ", "),
+             "; CN_Damxung leaves with its only experiment."),
   "", paste0(n_y3_missing, " effects have no strength from years 3 and later (their experiment has no survey in year 3 or later)."),
   "", "## Fits", "", md_table(fit_tab),
   "", "## Presence classes per anchor", "", md_table(anchor_tab),
@@ -252,6 +266,7 @@ report <- c(
   "", "## Warnings captured", "", { w <- unique(c(fit_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   "- The residents' glmmTMB model with one residual variance per species, not PLAN.md's `lmer` for colonizers (Bills, 2 Nov).",
+  "- The pool-size rule applied to colonizers too, at least 5 colonizer species per experiment (Bills, 2 Nov; PLAN.md updated).",
   "- Strength kept twice, all years and years 3 and later, until the stability is read (Bills, 2 Nov).",
   "- Presence is tested one-sided (warmed mean above zero); PLAN.md's `test()` call leaves the side open.",
   "- Figures written to `figures/main/` and `figures/diagnostics/` so that the report can link them.")
