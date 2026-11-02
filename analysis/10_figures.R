@@ -60,7 +60,7 @@ stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pie
           sum(pies$Colonizers > 0) == n_distinct(col$experiment_id[col$strength > 0])) # one denominator: counts, not cover
 write.csv(pies, file.path(out_dir, "fig4_pie_counts.csv"), row.names = FALSE)
 # pies need equal units on both axes: log precipitation rescaled to the temperature range
-k <- diff(range(pies$destination_T_JJA)) / diff(range(log(pies$destination_P_JJA))) * 0.65
+k <- diff(range(pies$destination_T_JJA)) / diff(range(log(pies$destination_P_JJA))) * 1.1
 r <- 0.21
 pies <- mutate(pies, x0 = destination_T_JJA, y0 = log(destination_P_JJA) * k)
 # experiments sharing a destination climate fan out around the shared point on short lines
@@ -69,23 +69,42 @@ pies <- pies |> mutate(n_shared = n(), i = row_number(), .by = c(x0, y0)) |>
   mutate(d = ifelse(n_shared > 1, pmax(1.7 * r, 1.1 * r / sin(pi / n_shared)), 0),
          angle = pi / 2 + 2 * pi * (i - 1) / n_shared, x = x0 + d * cos(angle), y = y0 + d * sin(angle))
 stopifnot(sum(pies$n_shared > 1) == 15, n_distinct(paste(pies$x0, pies$y0)) == 33) # 5 pairs and one five sharing a destination
+# pies of different climates that touch are pushed apart; each moved pie keeps a dot at its
+# true climate and a line to it, the same mark as the shared destinations (Bills, 2 Nov)
+for (it in 1:500) for (i in seq_len(nrow(pies) - 1)) for (j in (i + 1):nrow(pies)) {
+  dx <- pies$x[j] - pies$x[i]; dy <- pies$y[j] - pies$y[i]; d <- sqrt(dx^2 + dy^2)
+  if (d < 2.1 * r) { m <- (2.1 * r - d) / 2; pies$x[i] <- pies$x[i] - m * dx / d; pies$y[i] <- pies$y[i] - m * dy / d
+                     pies$x[j] <- pies$x[j] + m * dx / d; pies$y[j] <- pies$y[j] + m * dy / d }
+}
+pies <- mutate(pies, moved = sqrt((x - x0)^2 + (y - y0)^2) > 0.01)
 centre_d <- as.matrix(dist(cbind(pies$x, pies$y)))
-n_overlap <- sum(centre_d[upper.tri(centre_d)] < 2 * r) # pies of different climates that still touch, reported
+stopifnot(all(centre_d[upper.tri(centre_d)] >= 2 * r * 0.99)) # no two pies overlap
 pies <- mutate(pies, label = paste0(round(origin_elevation), " → ", round(destination_elevation), " m"))
-p_breaks <- c(150, 200, 300, 400, 600, 800, 1000)
-fig4 <- ggplot(pies) +
-  geom_segment(data = filter(pies, n_shared > 1), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9) +
-  geom_point(data = distinct(filter(pies, n_shared > 1), x0, y0), aes(x0, y0), size = 4) + # the shared destination climate
-  scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(pies, r = r), cols = names(cols), colour = "white", linewidth = 0.3) +
-  ggrepel::geom_text_repel(aes(x, y, label = label, colour = diff_T_JJA), size = 6.5, fontface = "bold", point.size = 34, # keeps labels off the pies
-                           box.padding = 0.15, force = 3, max.iter = 1e5, min.segment.length = 0.4, segment.colour = "grey70", max.overlaps = Inf, seed = 1) +
-  scale_fill_manual(values = cols, name = NULL) +
-  scale_colour_gradient(low = "#C99A1C", high = "#7B0D1E", name = "Warming\n(°C, JJA)") +
-  scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks) +
-  coord_equal() +
-  labs(x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
-  big + theme(legend.position = "right", legend.key.size = unit(1.4, "cm"), legend.title = element_text(face = "bold"),
-              panel.grid.major = element_line(colour = "grey90"))
+# the dense middle of climate space is shown again enlarged in panel b (Bills, 2 Nov: declutter)
+zoom <- c(xmin = 11.3, xmax = 14.8, ymin = log(325) * k, ymax = log(490) * k)
+pies <- mutate(pies, in_zoom = x0 > zoom["xmin"] & x0 < zoom["xmax"] & y0 > zoom["ymin"] & y0 < zoom["ymax"])
+climate_panel <- function(d, rr, pt, nudge, p_breaks, tag) { # d carries `labelled`: which pies get a label
+  ggplot(d) +
+    geom_segment(data = filter(d, moved), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9) +
+    geom_point(data = distinct(filter(d, moved), x0, y0), aes(x0, y0), size = 4) + # the true climate of a moved pie
+    scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(d, r = rr), cols = names(cols), colour = "white", linewidth = 0.3) +
+    ggrepel::geom_text_repel(data = filter(d, labelled), aes(x, y, label = label, colour = diff_T_JJA), size = 8, fontface = "bold",
+                             bg.colour = "white", bg.r = 0.15, point.size = pt, nudge_y = nudge, box.padding = 0.1, force = 2, force_pull = 2,
+                             max.iter = 1e6, min.segment.length = 0.5, segment.colour = "grey60", max.overlaps = Inf, seed = 1) +
+    scale_fill_manual(values = cols, name = NULL, drop = FALSE) +
+    scale_colour_gradient(low = "#C99A1C", high = "#7B0D1E", limits = range(pies$diff_T_JJA), name = "Warming\n(°C, JJA)") +
+    scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks) +
+    labs(title = tag, x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
+    big + theme(legend.key.size = unit(1.4, "cm"), legend.title = element_text(face = "bold"), panel.grid.major = element_line(colour = "grey90"))
+}
+fig4a <- climate_panel(mutate(pies, labelled = !in_zoom), r, 48, 0, c(150, 200, 300, 400, 600, 800, 1000), "a)") +
+  annotate("rect", xmin = zoom["xmin"], xmax = zoom["xmax"], ymin = zoom["ymin"], ymax = zoom["ymax"], fill = NA, colour = "grey30", linetype = "dashed", linewidth = 0.9) +
+  coord_equal()
+fig4b <- climate_panel(mutate(filter(pies, in_zoom), labelled = TRUE), r * 0.7, 0, -r * 0.7 - 0.1, # labels under their pies
+                        c(350, 400, 450), "b)") +
+  coord_equal(xlim = zoom[c("xmin", "xmax")], ylim = zoom[c("ymin", "ymax")], expand = FALSE) +
+  theme(panel.border = element_rect(fill = NA, colour = "grey30", linetype = "dashed", linewidth = 0.9))
+fig4 <- patchwork::wrap_plots(fig4a, fig4b, ncol = 2, widths = c(1.25, 1), guides = "collect")
 
 # ---- Fig S1: data flow ------------------------------------------------------------------
 flow <- read.csv("data/derived/01_relative_cover/flow_counts.csv")
@@ -214,7 +233,7 @@ tableS5 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), 
 for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sprintf("tables/table%s.csv", t), row.names = FALSE)
 
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
-ggsave("figures/main/fig4.png", fig4, width = 30, height = 18, dpi = 100, bg = "white")
+ggsave("figures/main/fig4.png", fig4, width = 44, height = 22, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS2.png", figS2, width = 40, height = 14, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")
@@ -260,7 +279,8 @@ report <- c(
          "(Fig 5's classes, Bills 2 Nov); Fig S1 the data flow; Fig S2 and Table S3 the phylogenetic axes; Fig S4 the predictors before ",
          "standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
          "(six main figures, Bills 2 Nov). Pies are drawn to one radius at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
-         "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines. ", n_overlap, " pairs of pies at different climates still touch."),
+         "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
+         "The dense middle of climate space (", sum(pies$in_zoom), " experiments, ", round(zoom[["xmin"]], 1), " to ", round(zoom[["xmax"]], 1), " °C, 325 to 490 mm) is drawn again enlarged in panel b, where its pies are labelled."),
   "", "## Counts", "", md_table(count_tab),
   "", "## Fig 4 pies", "",
   md_table(transmute(pies, experiment_id, elevations = label, `T (°C)` = round(destination_T_JJA, 1), `P (mm)` = round(destination_P_JJA),
