@@ -34,3 +34,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include 06b_forest.md >}}
 
 {{< include 07a_colonizers.md >}}
+
+{{< include 07b_classification.md >}}
