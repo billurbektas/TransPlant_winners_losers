@@ -3,9 +3,9 @@
 # the prediction metrics; step 10 renders the final figure. Used by steps 05, 06, 10.
 #
 # het: one row per column, with `column` (a label of ladder_columns),
-#   sigma2_experiment, tau2, H_intercept, H_slope (raw variances), and for the
-#   property columns ref_cd and ref_H, the grey and gold totals of the
-#   Species-dependent model on the same rows (NA elsewhere).
+#   sigma2_experiment, tau2, H_intercept, H_slope (raw variances); since 2 Nov
+#   every column has the same rows, and the Species-dependent totals are drawn
+#   as dashed lines across the property columns (ref_cd, ref_H are ignored).
 # metrics: NULL, or one row per column x metric with `column`, `metric`
 #   ("R2", "Spearman", "Skill"), `fit`, `pred`.
 # gradients: NULL, or one row per column x metric x held-out gradient with
@@ -70,10 +70,11 @@ fig4_ladder <- function(het, file, metrics = NULL, gradients = NULL, caption = N
     dplyr::mutate(ymax = cumsum(value), ymin = ymax - value, .by = c(x, bar)) %>%
     dplyr::mutate(piece = factor(piece, levels = c("tau2", "sigma2_experiment", "H_slope", "H_intercept")))
   totals <- dplyr::summarise(bars, value = max(ymax), .by = c(x, bar, xb))
-  refs <- het %>% dplyr::mutate(x = match(column, ladder_columns)) %>%
-    tidyr::pivot_longer(c(ref_cd, ref_H), names_to = "bar", values_to = "value") %>%
-    dplyr::filter(!is.na(value)) %>%
-    dplyr::mutate(value = sc * value, xb = x + ifelse(bar == "ref_cd", -0.17, 0.17), mark = "Species-dependent on the same rows")
+  # since 2 Nov every column has the same rows: the Species-dependent totals are
+  # drawn as two dashed lines from its two bars across all property columns (Bills)
+  sd_x <- match("Species-dependent", ladder_columns)
+  refs <- dplyr::filter(totals, x == sd_x) %>%
+    dplyr::mutate(xend = n + 0.4, mark = "Species-dependent")
   na_a <- setdiff(seq_len(n), unique(bars$x))
   ymax <- max(c(totals$value, refs$value)) * 1.15
   fills <- c(tau2 = "#6E7380", sigma2_experiment = "#B9BCC6", H_slope = "#8C6D1F", H_intercept = "#DDB54F")
@@ -83,12 +84,12 @@ fig4_ladder <- function(het, file, metrics = NULL, gradients = NULL, caption = N
                  H_intercept = "H species: intercept piece (average)")
   pa <- ggplot() +
     geom_rect(data = bars, aes(xmin = xb - 0.15, xmax = xb + 0.15, ymin = ymin, ymax = ymax, fill = piece)) +
-    geom_segment(data = refs, aes(x = xb - 0.22, xend = xb + 0.22, y = value, yend = value, linetype = mark),
-                 colour = "black", linewidth = 1.3) +
+    geom_segment(data = refs, aes(x = xb + 0.15, xend = xend, y = value, yend = value, linetype = mark),
+                 colour = "grey15", linewidth = 1) +
     geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 5.2, fontface = "bold") +
     annotate("text", x = na_a, y = ymax * 0.25, label = rep("NA", length(na_a)), size = 8, colour = "grey55", fontface = "bold") +
     scale_fill_manual(values = fills, labels = fill_labs, name = NULL) +
-    scale_linetype_manual(values = "solid", name = NULL) + xs +
+    scale_linetype_manual(values = "dashed", name = NULL) + xs +
     scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
     labs(title = "a)", x = NULL, y = "Heterogeneity (×10⁻⁴)") +
     base + no_x + theme(legend.position = "inside", legend.position.inside = c(0.995, 0.99), legend.justification = c(1, 1),

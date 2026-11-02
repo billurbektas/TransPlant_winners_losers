@@ -222,7 +222,7 @@ het_fig <- bind_rows(
       mutate(column = prop_label[[p]], ref_cd = sp$tau2 + sp$sigma2_experiment, ref_H = sp$H_intercept + sp$H_slope) })))
 stopifnot(nrow(het_fig) == 12, setequal(het_fig$column, ladder_columns))
 fig4_ladder(het_fig, "figures/diagnostics/05_fig4_ladder.png",
-            caption = paste0("Row a): REML fits of step 05 on the strength from year 3, every column on the same ", nrow(strength_df), " rows; the black mark on each property column is Species-dependent. Rows b) to d): step 06."))
+            caption = paste0("Row a): REML fits of step 05 on the strength from year 3, every column on the same ", nrow(strength_df), " rows; the dashed lines carry the Species-dependent totals across the property columns. Rows b) to d): step 06."))
 
 # ---- Fig S4: coefficients with CR1 intervals ---------------------------------
 coef_panel <- function(x, tag, ttl) {
