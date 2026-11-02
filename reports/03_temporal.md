@@ -48,9 +48,9 @@ Each resident species x experiment was classified at years 2, 3, 4 and 6 after t
 | Winner (ns) | 1 | 46 | 49 | 5 |
 | Winner | 0 | 3 | 7 | 2 |
 
-## Fig 1 panel a (draft)
+## Fig 1 panel a (main figure)
 
-![Fig 1a draft](../figures/diagnostics/03_fig1_residents_draft.png)
+![Fig 1a](../figures/main/fig1.png)
 
 Strata are drawn to one absolute scale, so columns shrink as experiments end and as species are absent from both groups. The final figure, with panel b (colonizers, step 07), is drawn in step 10. Columns are evenly spaced: the gap from year 4 to year 6 spans two years, the others one.
 
@@ -75,4 +75,4 @@ The same classes and flows, restricted to the 74 resident species found in at le
 
 ## Deviations from PLAN.md
 
-Combinations absent from both groups in an anchor year ( 93  of  3,032  anchor contrasts) are not classified there, where PLAN.md's rule would have put their zero contrast in Loser (ns) (decided 30 Oct). Anchors are years 2, 3, 4 and 6 rather than 2, 4 and 6 (decided 30 Oct: agreement between consecutive years rises from year 3 on; PLAN.md updated), labelled Year 2, 3, 4, 6 rather than the mock's First 2, 4, 6 years. The draft figure is written to figures/diagnostics/ rather than data/derived/03_temporal/, so that it is committed with the report.
+Combinations absent from both groups in an anchor year ( 93  of  3,032  anchor contrasts) are not classified there, where PLAN.md's rule would have put their zero contrast in Loser (ns) (decided 30 Oct). Anchors are years 2, 3, 4 and 6 rather than 2, 4 and 6 (decided 30 Oct: agreement between consecutive years rises from year 3 on; PLAN.md updated), labelled Year 2, 3, 4, 6 rather than the mock's First 2, 4, 6 years. Fig 1a is written to figures/main/fig1.png (anchored 2 Nov, Bills) and the appendix version to figures/diagnostics/, not to data/derived/03_temporal/, so that they are committed with the report.

@@ -5,7 +5,7 @@
 # Reads:  data/derived/02_strength/by_year.rds;
 #         data/derived/01_relative_cover/cover_long.rds (absence per year)
 # Writes: data/derived/03_temporal/classes_by_anchor.rds, stability.csv,
-#         flows.rds; figures/diagnostics/03_fig1_residents_draft.png;
+#         flows.rds; figures/main/fig1.png (panel a; anchored 2 Nov), figures/diagnostics/03_figS_residents_3gradients_draft.png;
 #         reports/03_temporal.md
 # Checks: 4,537 yearly contrasts; 3,032 at the anchors (1,004, 900, 700,
 #         428), of which 93 absent from both groups (40, 21, 12, 20),
@@ -92,7 +92,7 @@ saveRDS(select(classes, species, experiment_id, year, estimate, class), file.pat
 utils::write.csv(select(stability, pair, n, sign_agreement, ccc), file.path(out_dir, "stability.csv"), row.names = FALSE)
 saveRDS(setNames(stability$flows, stability$pair), file.path(out_dir, "flows.rds"))
 
-# ---- Fig 1 panel a (draft) ---------------------------------------------------
+# ---- Fig 1 panel a (main figure, anchored 2 Nov, Bills) -------------------------
 # Strata are stacked bars on one absolute count scale (top down: Loser to
 # Winner); a ribbon joins the combinations present at two adjacent anchors.
 # Drawn by hand: a stratum also holds combinations without a ribbon.
@@ -164,7 +164,7 @@ fig <- ggplot() +
 ggsave(file, fig, width = 14, height = 8.5, dpi = 150, bg = "white")
 switches
 }
-switches <- draw_fig1(classes, stability, "figures/diagnostics/03_fig1_residents_draft.png")
+switches <- draw_fig1(classes, stability, "figures/main/fig1.png")
 
 # appendix: the same figure on the residents in at least 3 gradients (2 Nov,
 # Bills), the species that steps 04 and 05 use
@@ -202,8 +202,8 @@ report <- c(
                   sign_agreement = sprintf("%.3f", sign_agreement), ccc = sprintf("%.3f", ccc))),
   "", "## Flows (`flows.rds`)", "",
   unlist(lapply(seq_len(nrow(stability)), function(k) flow_md(stability$flows[[k]], paste0("Year ", anchors[k], " to year ", anchors[k + 1])))),
-  "## Fig 1 panel a (draft)", "",
-  "![Fig 1a draft](../figures/diagnostics/03_fig1_residents_draft.png)", "",
+  "## Fig 1 panel a (main figure)", "",
+  "![Fig 1a](../figures/main/fig1.png)", "",
   paste0("Strata are drawn to one absolute scale, so columns shrink as experiments end and as species are absent from ",
          "both groups. The final figure, with panel b (colonizers, ",
          "step 07), is drawn in step 10. Columns are evenly spaced: the gap from year 4 to year 6 spans two years, ",
@@ -225,8 +225,8 @@ report <- c(
   paste("Combinations absent from both groups in an anchor year (", sum(absent_counts$absent), " of ", fmt(nrow(at_anchor)),
         " anchor contrasts) are not classified there, where PLAN.md's rule would have put their zero contrast in",
         "Loser (ns) (decided 30 Oct). Anchors are years 2, 3, 4 and 6 rather than 2, 4 and 6 (decided 30 Oct: agreement between consecutive years rises from year 3 on; PLAN.md updated), labelled Year 2, 3, 4, 6 rather than the mock's First 2, 4, 6 years.",
-        "The draft figure is written to figures/diagnostics/ rather than data/derived/03_temporal/, so that it is",
-        "committed with the report.")
+        "Fig 1a is written to figures/main/fig1.png (anchored 2 Nov, Bills) and the appendix version to figures/diagnostics/, not to",
+        "data/derived/03_temporal/, so that they are committed with the report.")
 )
 writeLines(report, "reports/03_temporal.md")
 message("Step 03 written: ", paste(sprintf("%s n = %d", stability$pair, stability$n), collapse = "; "))
