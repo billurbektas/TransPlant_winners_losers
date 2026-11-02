@@ -73,8 +73,11 @@ fig4_ladder <- function(het, file, metrics = NULL, gradients = NULL, caption = N
   # since 2 Nov every column has the same rows: the Species-dependent totals are
   # drawn as two dashed lines from its two bars across all property columns (Bills)
   sd_x <- match("Species-dependent", ladder_columns)
-  refs <- dplyr::filter(totals, x == sd_x) %>%
-    dplyr::mutate(xend = n + 0.4, mark = "Species-dependent")
+  # context dependency: its total; H_species: the top of the intercept piece and the
+  # top of the slope piece, each in a darker shade of its piece (Bills, 2 Nov)
+  refs <- dplyr::filter(bars, x == sd_x, piece %in% c("tau2", "H_intercept", "H_slope")) %>%
+    dplyr::transmute(xb, value = ymax, piece = as.character(piece), xend = n + 0.4, mark = "Species-dependent")
+  ref_cols <- c(tau2 = "grey15", H_intercept = "#B08A1E", H_slope = "#5C4510")
   na_a <- setdiff(seq_len(n), unique(bars$x))
   ymax <- max(c(totals$value, refs$value)) * 1.15
   fills <- c(tau2 = "#6E7380", sigma2_experiment = "#B9BCC6", H_slope = "#8C6D1F", H_intercept = "#DDB54F")
@@ -85,7 +88,7 @@ fig4_ladder <- function(het, file, metrics = NULL, gradients = NULL, caption = N
   pa <- ggplot() +
     geom_rect(data = bars, aes(xmin = xb - 0.15, xmax = xb + 0.15, ymin = ymin, ymax = ymax, fill = piece)) +
     geom_segment(data = refs, aes(x = xb + 0.15, xend = xend, y = value, yend = value, linetype = mark),
-                 colour = "grey15", linewidth = 1) +
+                 colour = ref_cols[refs$piece], linewidth = 1) +
     geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 5.2, fontface = "bold") +
     annotate("text", x = na_a, y = ymax * 0.25, label = rep("NA", length(na_a)), size = 8, colour = "grey55", fontface = "bold") +
     scale_fill_manual(values = fills, labels = fill_labs, name = NULL) +
