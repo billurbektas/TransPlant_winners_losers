@@ -306,8 +306,17 @@ tableS2 <- tibble::tibble(species = sort(analysed)) |>
   mutate(LDMC = species %in% traits$species[!is.na(traits$LDMC)], LMA = species %in% traits$species[!is.na(traits$LMA)],
          height = species %in% traits$species[!is.na(traits$height)], PEV = species %in% phy$scores$species, niche = species %in% niche$species)
 stopifnot(nrow(tableS2) == length(analysed), !anyNA(tableS2$graminoid))
+# step 07c's heterogeneity table lacks the counts, parameters and W slope variance of Table S4;
+# they are read from its saved fits so both pools carry the same columns
+col_fits <- lapply(list.files("data/derived/07c_ladder_fit/models", full.names = TRUE), readRDS)
+col_extra <- tibble::tibble(model = sapply(col_fits, `[[`, "model"), n_parameters = sapply(col_fits, function(f) f$m$parms),
+                            tau2_W = sapply(col_fits, function(f) if (isTRUE(f$m$withG)) f$m$tau2 else NA_real_),
+                            struct = sapply(col_fits, function(f) if (isTRUE(f$m$withG)) paste(f$m$struct, collapse = ", ") else "none (no slopes)"))
+col_het <- read.csv("data/derived/07c_ladder_fit/heterogeneity.csv") |> left_join(col_extra, by = "model") |>
+  mutate(rowset = "all", fitted_on = "all", n_species = n_distinct(lad_col$species), n_experiments = n_distinct(lad_col$experiment_id))
+stopifnot(nrow(col_het) == 12, !anyNA(col_het$n_parameters)) # every colonizer model found
 tableS4 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS4.csv"), pool = "residents"),
-                     mutate(read.csv("data/derived/07c_ladder_fit/heterogeneity.csv"), pool = "colonizers")) |> relocate(pool)
+                     mutate(col_het, pool = "colonizers")) |> relocate(pool)
 tableS5 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), pool = "residents"),
                      mutate(read.csv("data/derived/07c_ladder_fit/coefficients.csv"), pool = "colonizers")) |> relocate(pool)
 for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sprintf("tables/table%s.csv", t), row.names = FALSE)
