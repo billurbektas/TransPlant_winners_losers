@@ -16,11 +16,13 @@
 ladder_columns <- c("Null", "Start", "Climate", "Climate + start", "Species-dependent",
                     "LDMC", "LMA", "Height", "Graminoid", "Woody", "Phylogeny", "Niche")
 
-fig4_ladder <- function(het, file, gradients = NULL, caption = NULL) {
+# labels: display names of the 12 columns (NULL: the residents'); skill: draw the
+# loser/winner skill row (FALSE for colonizers, which have no loser class; step 07d)
+fig4_ladder <- function(het, file, gradients = NULL, caption = NULL, labels = NULL, skill = TRUE) {
   `%>%` <- dplyr::`%>%`
   library(ggplot2)
   n <- length(ladder_columns)
-  labels <- c("Null", "Initial\nabundances", "Climate", "Climate +\ninitial\nabundances", "Species-\ndependent",
+  if (is.null(labels)) labels <- c("Null", "Initial\nabundances", "Climate", "Climate +\ninitial\nabundances", "Species-\ndependent",
               "LDMC", "LMA", "Height", "Graminoid", "Woody", "Phylogeny", "Niche")
   stopifnot(all(het$column %in% ladder_columns))
   sc <- 1e4 # drawn as x 10^-4
@@ -149,10 +151,11 @@ fig4_ladder <- function(het, file, gradients = NULL, caption = NULL) {
       if (last) theme(axis.text.x = element_text(size = 33, face = "bold", colour = "black")) else no_x
   }
   pb <- metric_row("R2", "b)", "R²", c(-0.2, 0.8), FALSE)
-  pc <- metric_row("Spearman", "c)", "Spearman ρ", c(-0.2, 0.6), FALSE)
-  pd <- metric_row("Skill", "d)", "Loser/winner skill", c(-0.2, 0.6), TRUE)
+  pc <- metric_row("Spearman", "c)", "Spearman ρ", c(-0.2, 0.6), !skill)
+  pd <- if (skill) metric_row("Skill", "d)", "Loser/winner skill", c(-0.2, 0.6), TRUE)
 
-  fig <- patchwork::wrap_plots(p_top, pa, pb, pc, pd, ncol = 1, heights = c(1.1, 1.7, 1, 1, 1))
+  fig <- if (skill) patchwork::wrap_plots(p_top, pa, pb, pc, pd, ncol = 1, heights = c(1.1, 1.7, 1, 1, 1)) else
+    patchwork::wrap_plots(p_top, pa, pb, pc, ncol = 1, heights = c(1.1, 1.7, 1, 1))
   if (!is.null(caption))
     fig <- fig + patchwork::plot_annotation(caption = caption, theme = theme(
       plot.caption = element_text(size = 26, colour = "grey40"), plot.background = element_rect(fill = "white", colour = NA)))

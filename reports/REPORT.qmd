@@ -34,3 +34,13 @@ Step reports are included below in order. Each is written by its script.
 {{< include 06b_forest.md >}}
 
 {{< include 07a_colonizers.md >}}
+
+{{< include 07b_classification.md >}}
+
+{{< include 07c_ladder_fit.md >}}
+
+{{< include 07d_ladder_predict.md >}}
+
+{{< include 07e_forest.md >}}
+
+{{< include 07f_pathways.md >}}
