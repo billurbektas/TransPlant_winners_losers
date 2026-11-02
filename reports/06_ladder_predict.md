@@ -130,10 +130,6 @@ Every held-out species had training data: each ladder species occurs in at least
 
 ![Fig 4, the ladder](../figures/diagnostics/06_fig4.png)
 
-![Fig 5, held-out R² per gradient](../figures/diagnostics/06_fig5.png)
-
-The best property in Fig 5 is Niche, chosen once as the property level with the highest median held-out R² against Null.
-
 ![Fig S7, per-gradient view](../figures/diagnostics/06_figS7.png)
 
 ## Warnings captured

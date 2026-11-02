@@ -8,7 +8,7 @@
 # Writes: data/derived/06_ladder_predict/folds/<level>_<gradient_id>.rds,
 #         pred_metrics.csv, fit_metrics.csv, summary_metrics.csv,
 #         fold_summary.csv; figures/diagnostics/06_fig4.png,
-#         06_fig5.png, 06_figS7.png; reports/06_ladder_predict.md
+#         06_figS7.png; reports/06_ladder_predict.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients) as in step 05, every rowset equal to them; 16 scored
 #         gradients (at least 5 effects), one fold each per fitted level; every
@@ -250,31 +250,9 @@ fig4_ladder(het_fig, "figures/diagnostics/06_fig4.png", gradients = fig4_grad,
                              "R² = 1 - error(level) / error(Null) on that gradient, so Null is 0 and not drawn. ",
                              "Dashed line = Species-dependent predictive median. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."))
 
-# Fig 5: held-out R2 per gradient, gradients ordered by destination summer temperature
+# Fig S7 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
 grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_id) |>
   summarise(T_dest = mean(T), spread = sd(strength), .groups = "drop") |> arrange(T_dest)
-best_prop <- summary_metrics |> filter(level %in% names(prop_vars), metric == "r2") |> slice_max(pred, n = 1, with_ties = FALSE) |> pull(level)
-f5 <- pred_metrics |> filter(level %in% c("climate_start", "species", best_prop), !is.na(r2)) |>
-  mutate(gradient_id = factor(gradient_id, levels = grad_info$gradient_id),
-         level = factor(level_display[level], levels = level_display[c("climate_start", "species", best_prop)]))
-spread_scale <- max(abs(f5$r2), na.rm = TRUE) / max(grad_info$spread)
-fig5 <- ggplot() +
-  geom_col(data = mutate(grad_info, gradient_id = factor(gradient_id, levels = gradient_id)),
-           aes(gradient_id, spread * spread_scale), fill = "grey88", width = 0.8) +
-  geom_hline(yintercept = 0, colour = "grey50") +
-  geom_point(data = f5, aes(gradient_id, r2, colour = level, shape = level), size = 5, stroke = 1.5,
-             position = position_dodge(width = 0.6)) +
-  scale_colour_manual(values = c("#B5651D", "#2F80D8", "#7442A0"), name = NULL) +
-  scale_shape_manual(values = c(16, 17, 15), name = NULL) +
-  scale_y_continuous(sec.axis = sec_axis(~ . / spread_scale, breaks = function(l) pretty(c(0, l[2]))[pretty(c(0, l[2])) >= 0], name = "Observed spread of strength (standard deviation, grey bars)")) +
-  labs(title = "a)", x = "Held-out gradient, ordered by destination summer temperature (cold to warm)",
-       y = "Held-out R² against Null",
-       subtitle = paste0("Best property, chosen once by its median held-out R²: ", prop_label[[best_prop]])) +
-  theme_classic(base_size = 22) +
-  theme(plot.title = element_text(face = "bold", size = 28), axis.title = element_text(face = "bold"),
-        axis.text.x = element_text(angle = 45, hjust = 1, size = 16), legend.position = "top",
-        legend.text = element_text(size = 20), plot.background = element_rect(fill = "white", colour = NA))
-ggsave("figures/diagnostics/06_fig5.png", fig5, width = 22, height = 11, dpi = 100, bg = "white")
 
 # Fig S7: the complete per-gradient view, every metric x level, in sample and held out
 s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics, version = "Held out")) |>
@@ -341,8 +319,6 @@ report <- c(
          "the species' weighted residual, so in practice the deviation is the species' intercept, W slope and T slope."),
   "", paste0("Every held-out species had training data: each ladder species occurs in at least 3 gradients, so at least 2 remain in training (checked)."),
   "", "## Figures", "", "![Fig 4, the ladder](../figures/diagnostics/06_fig4.png)", "",
-  paste0("![Fig 5, held-out R² per gradient](../figures/diagnostics/06_fig5.png)"), "",
-  paste0("The best property in Fig 5 is ", prop_label[[best_prop]], ", chosen once as the property level with the highest median held-out R² against Null."), "",
   "![Fig S7, per-gradient view](../figures/diagnostics/06_figS7.png)",
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
