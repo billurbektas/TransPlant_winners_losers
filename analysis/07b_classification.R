@@ -140,8 +140,7 @@ corner <- function(sp, tag) {
   info <- filter(species_summary, species == sp)
   ggplot(d, aes(y = row_id)) +
     geom_vline(xintercept = 0, colour = "grey50", linewidth = 0.8) +
-    geom_segment(aes(x = destination_control, xend = warmed, yend = row_id), colour = "black", linewidth = 1.6,
-                 arrow = grid::arrow(length = grid::unit(0.35, "cm"), type = "closed")) +
+    geom_segment(aes(x = destination_control, xend = warmed, yend = row_id), colour = "grey40", linewidth = 1.2) + # no arrow: not a change (Bills, 2 Nov)
     geom_point(aes(x = destination_control, shape = "Destination control"), fill = "white", colour = "grey20", size = 13, stroke = 2) +
     geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey50", size = 13, alpha = 0.55) +
     scale_y_discrete(labels = setNames(d$row, d$row_id)) +
