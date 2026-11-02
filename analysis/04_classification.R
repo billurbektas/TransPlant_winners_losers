@@ -7,7 +7,7 @@
 # Writes: data/derived/04_classification/m_C.rds, species_summary.csv;
 #         figures/main/fig2.png;
 #         reports/04_classification.md
-# Checks: 1,655 effects; 137 species with at least 4 experiments (998 effects);
+# Checks: 1,004 effects; 129 species in at least 2 gradients (676 effects);
 #         one tau2_s per eligible species, in species order; the prediction
 #         interval equals mu +/- 1.96 sqrt(tau2 + se(mu)^2); class counts sum to
 #         the eligible count; no interval or whisker on tau anywhere.
@@ -35,15 +35,15 @@ class_levels <- c("Consistent loser", "Context-dependent", "Consistent winner")
 cols <- c("Consistent loser" = "#D95F2B", "Context-dependent" = "#3A86D6", "Consistent winner" = "#1B9E77")
 
 strength_df <- readRDS("data/derived/03b_strength_y3/strength_df.rds")
-stopifnot(nrow(strength_df) == 1655) # step 03b
+stopifnot(nrow(strength_df) == 1004) # step 03b
 
 # ---- Eligible species (PLAN.md Step C) ------------------------------------
 eligible <- strength_df |>
-  dplyr::count(species) |>
-  dplyr::filter(n >= 4) |>
+  dplyr::summarise(n_gradients = dplyr::n_distinct(gradient_id), .by = species) |>
+  dplyr::filter(n_gradients >= 2) |>   # 2 Nov: at least 2 gradients
   dplyr::pull(species)
 d_c <- dplyr::filter(strength_df, species %in% eligible) |> mutate(species = factor(species))
-stopifnot(length(eligible) == 137, nrow(d_c) == 998) # at least 4 experiments
+stopifnot(length(eligible) == 129, nrow(d_c) == 676) # at least 2 gradients
 
 # ---- Model and prediction interval per species ------------------------------
 # The model (mods = ~ 0 + species, random = ~ species | effect_id, DIAG) shares
@@ -77,7 +77,7 @@ stopifnot(max(abs(species_summary$upper - (species_summary$mu + qnorm(0.975) * s
           max(abs(species_summary$lower - (species_summary$mu - qnorm(0.975) * sqrt(species_summary$tau^2 + species_summary$se_mu^2)))) < 1e-10)
 species_summary <- mutate(species_summary, class = factor(case_when(lower > 0 ~ "Consistent winner", upper < 0 ~ "Consistent loser",
                                                                     TRUE ~ "Context-dependent"), levels = class_levels))
-stopifnot(sum(table(species_summary$class)) == 137) # classes sum to the eligible count
+stopifnot(sum(table(species_summary$class)) == 129) # classes sum to the eligible count
 
 
 # ---- Write -------------------------------------------------------------------
@@ -189,7 +189,7 @@ consistent <- named |> arrange(class, mu) |>
 tau0 <- filter(species_summary, tau < 1e-4)
 report <- c(
   "# Step 04: Consistency across experiments (Step C, residents)", "",
-  paste0("For the ", length(eligible), " resident species found in at least four experiments (", fmt(nrow(d_c)),
+  paste0("For the ", length(eligible), " resident species found in at least two gradients (", fmt(nrow(d_c)),
          " effects in ", n_distinct(d_c$experiment_id), " experiments), one `rma.mv` estimated a pooled losing-winning ",
          "strength per species and a species-specific among-experiment variance, on the strength from year 3 (step 03b). ",
          "Each species' prediction interval for a new experiment, which carries both its among-experiment variance and the ",
@@ -204,7 +204,7 @@ report <- c(
   "# lower, upper = p$pi.lb, p$pi.ub = mu_s -/+ 1.96 * sqrt(tau2_s + se(mu_s)^2)",
   "```", "",
   "## Counts", "",
-  md_table(tibble::tibble(rule = c("effects (step 03b)", "species with >= 4 experiments", "their effects",
+  md_table(tibble::tibble(rule = c("effects (step 03b)", "species in >= 2 gradients", "their effects",
                                    "experiments they occur in", "species with tau2_s estimated at about 0 (< 1e-8)"),
                           n = fmt(c(nrow(strength_df), length(eligible), nrow(d_c), n_distinct(d_c$experiment_id),
                                     nrow(tau0))))),
