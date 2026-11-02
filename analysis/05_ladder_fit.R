@@ -182,15 +182,15 @@ stopifnot(var_mu > 0, all(filter(fitted, model == "Null")$sigma2_species > 1e-8)
 slope_rows <- filter(fitted, struct == "DIAG")
 stopifnot(nrow(slope_rows) == 8, all(vapply(fits, function(f) !f$slopes || identical(f$m$struct, slope_struct), logical(1))))
 
-# ---- Fixed effects with CR1 clustered on experiment (Table S5) ---------------
+# ---- Fixed effects, model-based (REML Wald) intervals (Table S5, Fig S4) -------
+# model-based rather than CR1 clustered on experiment (Bills, 2 Nov)
 coefs <- bind_rows(lapply(fits, function(f) {
   if (f$slug == "null") return(NULL)
-  r <- robust(f$m, cluster = rows[[f$rowset]]$experiment_id, adjust = TRUE)
-  s <- coef(summary(r))
-  tibble::tibble(rowset = f$rowset, model = f$model, term = rownames(s), estimate = s$estimate, se_CR1 = s$se,
-                 ci_lower = s$ci.lb, ci_upper = s$ci.ub, df = s$df, pval = s$pval)
+  s <- coef(summary(f$m))
+  tibble::tibble(rowset = f$rowset, model = f$model, term = rownames(s), estimate = s$estimate, se = s$se,
+                 ci_lower = s$ci.lb, ci_upper = s$ci.ub, zval = s$zval, pval = s$pval)
 }))
-write.csv(select(coefs, rowset, model, term, estimate, se_CR1, ci_lower, ci_upper), file.path(out_dir, "coefficients.csv"), row.names = FALSE)
+write.csv(select(coefs, rowset, model, term, estimate, se, ci_lower, ci_upper), file.path(out_dir, "coefficients.csv"), row.names = FALSE)
 write.csv(coefs, file.path(out_dir, "tableS5.csv"), row.names = FALSE)
 
 # ---- Effective weights 1/(V + tau2 + sigma2_experiment + sigma2_species [+ slopes]) --
@@ -213,7 +213,7 @@ weights_table <- bind_rows(
   bind_rows(lapply(c("Null", "Start", "Climate", "Climate + start", "Species-dependent"), function(mo) {
     x <- filter(w_all, model == mo); weight_summary(x$weight, x$A0_origin, x$experiment_id, mo) })))
 
-# ---- Fig S4: coefficients with CR1 intervals ---------------------------------
+# ---- Fig S4: coefficients with model-based intervals ------------------------
 coef_panel <- function(x, tag, ttl) {
   x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = factor(term, levels = rev(unique(term))))
   ggplot(x, aes(estimate, term)) + geom_vline(xintercept = 0, colour = "grey60") +
@@ -224,7 +224,7 @@ coef_panel <- function(x, tag, ttl) {
     theme_classic(base_size = 17) + theme(plot.title = element_text(face = "bold", size = 22), legend.position = "bottom",
                                           strip.text = element_text(face = "bold", size = 15), strip.background = element_blank())
 }
-s4a <- coef_panel(filter(coefs, rowset == "all", model == "Climate + start", term != "intrcpt"), "a)", "Residents, Climate + start (CR1)")
+s4a <- coef_panel(filter(coefs, rowset == "all", model == "Climate + start", term != "intrcpt"), "a)", "Residents, Climate + start (model-based intervals)")
 s4b <- ggplot() + annotate("text", x = 0, y = 0, label = "Colonizers: step 07", size = 7, colour = "grey50") +
   labs(title = "b)") + theme_void(base_size = 17) + theme(plot.title = element_text(face = "bold", size = 22))
 prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model == prop_label[[p]]) |>
@@ -261,7 +261,7 @@ fit_code <- c("```r",
   paste0("# Null ~ 1; Start ", deparse(f_start), "; Climate ", deparse(f_env)),
   paste0("# Climate + start and Species-dependent ", paste(deparse(f_both), collapse = "")),
   "# property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes",
-  "robust(m, cluster = experiment_id, adjust = TRUE)   # CR1 for Table S5", "```")
+  "coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S4", "```")
 report <- c(
   "# Step 05: The ladder, fitted (Step D, route 1, residents)", "",
   paste0("The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the ",
@@ -271,7 +271,7 @@ report <- c(
          "height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, ",
          nrow(fitted), " REML fits, all on the same rows. Each model reports τ² (species × site), σ²_experiment (shared site ",
          "shift) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). ",
-         "Fixed effects carry CR1 standard errors clustered on experiment. Fits ran in parallel on ", cores, " cores, ",
+         "Fixed effects carry model-based (REML Wald) standard errors (Bills, 2 Nov; CR1 before). Fits ran in parallel on ", cores, " cores, ",
          sprintf("%.1f", sum(fitted$minutes)), " fit-minutes in all; this run took ",
          sprintf("%.0f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min."),
   "", "## Slope structure", "",

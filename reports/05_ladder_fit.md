@@ -1,6 +1,6 @@
 # Step 05: The ladder, fitted (Step D, route 1, residents)
 
-The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the 512 effects of the 71 residents found in at least 3 gradients that carry every property (39 experiments, 20 gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, 12 REML fits, all on the same rows. Each model reports τ² (species × site), σ²_experiment (shared site shift) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry CR1 standard errors clustered on experiment. Fits ran in parallel on 7 cores, 11.7 fit-minutes in all; this run took 0 min.
+The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the 512 effects of the 71 residents found in at least 3 gradients that carry every property (39 experiments, 20 gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, 12 REML fits, all on the same rows. Each model reports τ² (species × site), σ²_experiment (shared site shift) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry model-based (REML Wald) standard errors (Bills, 2 Nov; CR1 before). Fits ran in parallel on 7 cores, 11.7 fit-minutes in all; this run took 0 min.
 
 ## Slope structure
 
@@ -17,7 +17,7 @@ rma.mv(yi = strength, V = strength_se^2, mods = <formula>, random = <re_base or 
 # Null ~ 1; Start ~A0_origin + A0_dest + A0_origin:W + A0_dest:W; Climate ~W * T * P
 # Climate + start and Species-dependent ~W * T * P + A0_origin + A0_dest + A0_origin:W + A0_dest:W
 # property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes
-robust(m, cluster = experiment_id, adjust = TRUE)   # CR1 for Table S5
+coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S4
 ```
 
 ## Counts per rowset
