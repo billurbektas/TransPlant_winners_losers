@@ -134,7 +134,7 @@ spread <- filter(folds, level != "null") |>
 # ---- Fig S11: metafor (left) beside forest (right), held out ---------------------
 cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 4; Okabe-Ito orange
 fills <- c(metafor = "#8DB8EA", forest = "#F3C766")
-col_levels <- all_levels; n <- length(col_levels)
+col_levels <- setdiff(all_levels, "null"); n <- length(col_levels) # Null is the R² reference, not drawn (Bills, 2 Nov)
 xlabs <- sub(" \\+ species$", "\n+ species", sub("Climate \\+ initial abundances", "Climate +\ninitial\nabundances",
              sub("Initial abundances", "Initial\nabundances", sub("Species-dependent", "Species-\ndependent", level_display[col_levels]))))
 xs <- scale_x_continuous(limits = c(0.4, n + 0.6), breaks = seq_len(n), labels = xlabs, expand = c(0, 0))
@@ -149,7 +149,7 @@ half <- function(v, x0, side) { # one half violin, as R/fig4_ladder.R
   data.frame(x = x0 + side * c(0, w, 0), y = c(d$x[1], d$x, d$x[128]))
 }
 metric_row <- function(key, tag, ylab, lims, last) {
-  g <- filter(vs, metric == key) |> tidyr::pivot_longer(c(metafor, forest), names_to = "model") |>
+  g <- filter(vs, metric == key, level != "null") |> tidyr::pivot_longer(c(metafor, forest), names_to = "model") |>
     filter(!is.na(value)) |> mutate(x = match(level, col_levels))
   s <- summarise(g, med = median(value), .by = c(x, model))
   lims <- range(c(lims, g$value)); lims[2] <- lims[2] + 0.14 * diff(lims)
@@ -179,7 +179,7 @@ metric_row <- function(key, tag, ylab, lims, last) {
           legend.key.spacing.y = unit(0.4, "cm"), legend.text = element_text(size = 33), legend.key.size = unit(1.6, "cm")) +
     if (last) theme(axis.text.x = element_text(size = 26, face = "bold", colour = "black")) else no_x
 }
-br <- data.frame(x = c(0.7, 4.75, 5.75, 12.75), xend = c(4.3, 5.25, 12.25, 19.3), y = 1,
+br <- data.frame(x = c(0.7, 3.75, 4.75, 11.75), xend = c(3.3, 4.25, 11.25, 18.3), y = 1,
                  lab = c("floor: without the species", "ceiling", "one property", "one property + species"))
 p_top <- ggplot(br) + geom_segment(aes(x = x, xend = xend, y = y, yend = y), colour = "grey40", linewidth = 0.9) +
   geom_text(aes(x = (x + xend) / 2, y = y + 0.5, label = lab), size = 13.5, colour = "grey25") +
@@ -189,8 +189,8 @@ figS11 <- patchwork::wrap_plots(p_top, metric_row("r2", "a)", "R² against Null"
                                 metric_row("skill", "c)", "Loser/winner skill", c(-0.2, 0.6), TRUE), ncol = 1, heights = c(0.35, 1, 1, 1)) +
   patchwork::plot_annotation(caption = paste0(
     "Each half violin is the ", length(scored), " scored gradients, held out (leave one gradient out); left (blue) the meta-regression of step 06, right (orange) the random forest ",
-    "on the same rows, predictors and folds, no case weights; points and numbers = medians.\nR² = 1 - error / error of the metafor Null on that gradient. Null column: the metafor Null (0) beside the forest Null, ",
-    "the mean of the training effects. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."),
+    "on the same rows, predictors and folds, no case weights; points and numbers = medians.\nR² = 1 - error / error of the metafor Null on that gradient, so Null is 0 and not drawn (the forest Null, ",
+    "the mean of the training effects, is in the report). Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."),
     theme = theme(plot.caption = element_text(size = 24, colour = "grey40"), plot.background = element_rect(fill = "white", colour = NA)))
 ggsave("figures/diagnostics/06b_figS11.png", figS11, width = 48, height = 30, dpi = 100, bg = "white")
 
