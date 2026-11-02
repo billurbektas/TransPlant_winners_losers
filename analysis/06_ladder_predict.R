@@ -243,12 +243,8 @@ fig4_grad <- bind_rows(mutate(fit_metrics, type = "fit"), mutate(pred_metrics, t
   filter(level %in% levels_fit$level, level != "null") |>
   tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
   transmute(column = level_label[level], metric = met_name[metric], type, value) |> filter(!is.na(value))
-fig4_ladder(het_fig, "figures/diagnostics/06_fig4.png", gradients = fig4_grad,
-            caption = paste0("Row a): step 05, every column on the same ", nrow(strength_df), " rows; dashed lines carry Species-dependent across the property columns.\n",
-                             "Rows b) to d): each half violin is the ", length(scored), " scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all ", length(gradients),
-                             " gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians.\n",
-                             "R² = 1 - error(level) / error(Null) on that gradient, so Null is 0 and not drawn. ",
-                             "Dashed line = Species-dependent predictive median. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."))
+# no caption on the figure (Bills, 2 Nov): the report says what each row shows
+fig4_ladder(het_fig, "figures/diagnostics/06_fig4.png", gradients = fig4_grad)
 
 # Fig S7 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
 grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_id) |>
@@ -319,6 +315,11 @@ report <- c(
          "the species' weighted residual, so in practice the deviation is the species' intercept, W slope and T slope."),
   "", paste0("Every held-out species had training data: each ladder species occurs in at least 3 gradients, so at least 2 remain in training (checked)."),
   "", "## Figures", "", "![Fig 4, the ladder](../figures/diagnostics/06_fig4.png)", "",
+  paste0("Fig 4. Row a): step 05, every column on the same ", nrow(strength_df), " rows; dashed lines carry Species-dependent across the property columns. ",
+         "Rows b) to d): each half violin is the ", length(scored), " scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all ", length(gradients),
+         " gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, ",
+         "so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. ",
+         "Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."), "",
   "![Fig S7, per-gradient view](../figures/diagnostics/06_figS7.png)",
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },

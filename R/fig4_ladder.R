@@ -110,7 +110,6 @@ fig4_ladder <- function(het, file, gradients = NULL, caption = NULL) {
                if (last) theme(axis.text.x = element_text(size = 33, face = "bold", colour = "black")) else no_x)
     g <- dplyr::filter(gradients, metric == key, !is.na(value)) %>% dplyr::mutate(x = match(column, ladder_columns))
     s <- dplyr::summarise(g, med = median(value), .by = c(column, x, type))
-    have <- c(unique(g$x), 1) # Null not drawn in rows b) to d)
     lims <- range(c(lims, g$value), na.rm = TRUE); lims[2] <- lims[2] + 0.14 * diff(lims)
     half <- function(v, x0, side) {
       if (length(unique(v)) < 3) return(NULL)
@@ -129,11 +128,13 @@ fig4_ladder <- function(het, file, gradients = NULL, caption = NULL) {
     top <- dplyr::summarise(g, top = max(value), .by = x)
     lab_xy <- dplyr::left_join(s, top, by = "x") %>% dplyr::mutate(xl = x + ifelse(type == "fit", -0.22, 0.22), yl = top + 0.07 * diff(lims))
     vcol <- c(fit = "#C9D3DE", pred = "#8DB8EA")
+    # empty columns stay empty (no "NA"); the Species-dependent medians, explanatory
+    # in grey and predictive in blue, run as dashed lines from its column to the right (Bills, 2 Nov)
     p <- ggplot() + geom_hline(yintercept = 0, colour = "grey60")
-    if (length(setdiff(seq_len(n), have)))
-      p <- p + annotate("text", x = setdiff(seq_len(n), have), y = mean(lims), label = "NA", size = 12.5, colour = "grey55", fontface = "bold")
-    ceil <- s$med[s$column == "Species-dependent" & s$type == "pred"]
-    if (length(ceil)) p <- p + geom_hline(yintercept = ceil, linetype = "dashed", colour = "grey30")
+    sd_x <- match("Species-dependent", ladder_columns)
+    ceil <- dplyr::filter(s, column == "Species-dependent")
+    if (nrow(ceil)) p <- p + geom_segment(data = ceil, aes(x = sd_x - 0.45, xend = n + 0.45, y = med, yend = med, colour = type),
+                                          linetype = "dashed", linewidth = 1, show.legend = FALSE)
     p <- p + geom_polygon(data = vio, aes(x, y, group = id, fill = type), colour = NA, alpha = 0.4) +
       geom_point(data = g, aes(xj, value, colour = type), size = 2.4, alpha = 0.25, show.legend = FALSE) +
       geom_segment(data = sw, aes(x = x - 0.06, xend = x + 0.06, y = fit, yend = pred), colour = "grey40", linewidth = 1.2) +
