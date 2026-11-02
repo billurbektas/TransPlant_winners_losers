@@ -7,8 +7,9 @@
 #         pool_sizes.csv); data/derived/03b_strength_y3/strength_df.rds;
 #         data/derived/07a_colonizers/strength_df_y3.rds; the species summaries of steps
 #         04 and 07b; the tables of steps 05 and 07c; the reviewed PNGs of steps 03 to 07f.
-# Writes: figures/main/fig1.png ... fig6.png; figures/appendix/figS1.png ... figS7b.png;
-#         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_pie_counts.csv;
+# Writes: figures/main/fig1.png ... fig6.png; figures/appendix/figS1.png ... figS8b.png;
+#         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_pie_cover.csv,
+#         fig4_pie_counts.csv;
 #         reports/10_figures.md
 # Checks: 42 experiments; 1004 resident effects (703 losers, 301 winners); 262
 #         colonizer effects with warmed cover above zero in 28 experiments; every pie's
@@ -17,7 +18,7 @@
 # Decided 2 Nov (Bills): one script for the whole step, run without stopping. Six main
 # figures: 1 Sankey, 2 residents' classification, 3 colonizers' classification, 4
 # climate space, 5 traits (pathways), 6 the residents' ladder; the results-dependent
-# Fig 6 and Fig S8 are dropped and the appendix closes up. The climate-space pies use
+# Fig 6 and the old Fig S8 are dropped. The climate-space pies (Fig 4 as cover, Fig S2 as counts) use
 # Fig 5's classes per experiment: residents by the sign of their net strength from
 # year 3 on, colonizers with net warmed cover above zero (07a, so the 14 experiments
 # below the colonizer pool-size rule have no purple); one radius, pies sharing a
@@ -59,6 +60,23 @@ pies <- left_join(select(experiments, experiment_id, origin_elevation, destinati
 stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pies$Colonizers) == 262,
           sum(pies$Colonizers > 0) == n_distinct(col$experiment_id[col$strength > 0])) # one denominator: counts, not cover
 write.csv(pies, file.path(out_dir, "fig4_pie_counts.csv"), row.names = FALSE)
+# main Fig 4 shows the same classes as shares of the warmed turf's relative cover, years 3 and
+# later (Bills, 2 Nov); the counts move to Fig S2. Relative cover is over all vascular cover of
+# the plot-year (step 01), so what no class holds is a slice of its own: species outside the
+# pools, unidentified and genus-level records
+cv <- readRDS("data/derived/01_relative_cover/cover_long.rds") |> mutate(year = as.integer(as.character(year))) |>
+  filter(experiment_id %in% res$experiment_id, treatment == "warmed", year >= 3)
+cls <- bind_rows(transmute(res, experiment_id, species, group = ifelse(strength < 0, "Resident losers", "Resident winners")),
+                 transmute(filter(col, strength > 0), experiment_id, species, group = "Colonizers"))
+cover_shares <- cv |> inner_join(cls, by = c("experiment_id", "species")) |>
+  summarise(cover = sum(relative_cover), .by = c(experiment_id, group)) |>
+  left_join(summarise(cv, n_py = n_distinct(paste(plot_id, year)), .by = experiment_id), by = "experiment_id") |>
+  mutate(cover = cover / n_py) |> select(-n_py) |> tidyr::pivot_wider(names_from = group, values_from = cover, values_fill = 0)
+cover_shares <- left_join(select(experiments, experiment_id), cover_shares, by = "experiment_id") |>
+  mutate(across(all_of(names(cols)), ~ coalesce(.x, 0)), `Not analysed` = 1 - `Resident losers` - `Resident winners` - Colonizers)
+stopifnot(nrow(cover_shares) == 42, all(cover_shares$`Not analysed` > -1e-9)) # shares of one turf: the classes never exceed it
+write.csv(cover_shares, file.path(out_dir, "fig4_pie_cover.csv"), row.names = FALSE)
+cols_cover <- c(cols, "Not analysed" = "grey80")
 # pies need equal units on both axes: log precipitation rescaled to the temperature range
 k <- diff(range(pies$destination_T_JJA)) / diff(range(log(pies$destination_P_JJA))) * 1.1
 r <- 0.21
@@ -89,20 +107,23 @@ pies <- pies |> left_join(distinct(res, experiment_id, gradient_id), by = "exper
 stopifnot(n_distinct(pies$label) == 42, n_distinct(pies$gradient_id) == 20) # one name per pie, 20 gradients
 warm_scale <- scale_colour_gradient(low = "#C99A1C", high = "#7B0D1E", limits = range(pies$diff_T_JJA), name = "Warming\n(°C, JJA)")
 p_breaks <- c(150, 200, 300, 400, 600, 800, 1000)
-fig4a <- ggplot(pies) +
-  geom_segment(data = filter(pies, moved), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9) +
-  geom_point(data = distinct(filter(pies, moved), x0, y0), aes(x0, y0), size = 4) + # the true climate of a moved pie
-  scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(pies, r = r), cols = names(cols), colour = "white", linewidth = 0.3) +
+climate_map <- function(slices, fill_values) { # the same layout, slices as counts or as cover shares
+  d <- left_join(select(pies, -any_of(names(cols_cover))), slices, by = "experiment_id")
+  ggplot(d) +
+  geom_segment(data = filter(d, moved), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9) +
+  geom_point(data = distinct(filter(d, moved), x0, y0), aes(x0, y0), size = 4) + # the true climate of a moved pie
+  scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(d, r = r), cols = names(fill_values), colour = "white", linewidth = 0.3) +
   ggrepel::geom_text_repel(aes(x, y, label = label, colour = diff_T_JJA), size = 7.5, fontface = "bold", bg.colour = "white", bg.r = 0.15,
                            point.size = 24, point.padding = 0, box.padding = 0.25,
-                           nudge_x = ifelse(pies$n_shared > 1, 2.1 * r * cos(pies$angle), 0), # fanned pies: label outward, off the shared point
-                           nudge_y = ifelse(pies$n_shared > 1, 2.1 * r * sin(pies$angle), -1.9 * r), force = 5, force_pull = 3, # point.size = the pie's size
+                           nudge_x = ifelse(d$n_shared > 1, 2.1 * r * cos(d$angle), 0), # fanned pies: label outward, off the shared point
+                           nudge_y = ifelse(d$n_shared > 1, 2.1 * r * sin(d$angle), -1.9 * r), force = 5, force_pull = 3, # point.size = the pie's size
                            max.iter = 1e6, min.segment.length = 0.15, segment.colour = "grey45", segment.size = 0.6, max.overlaps = Inf, seed = 1) +
-  scale_fill_manual(values = cols, name = NULL) + warm_scale +
+  scale_fill_manual(values = fill_values, breaks = names(fill_values), name = NULL) + warm_scale +
   scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks) + coord_equal() +
   labs(x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
   big + theme(legend.position = "bottom", legend.box = "vertical", legend.key.size = unit(1.4, "cm"), legend.key.width = unit(3, "cm"),
               legend.title = element_text(face = "bold"), panel.grid.major = element_line(colour = "grey90"))
+}
 key <- arrange(pies, desc(diff_T_JJA)) |> mutate(row = row_number(), name = sub("_", " ", gradient_id)) # strongest warming first (Bills, 2 Nov)
 fig4key <- ggplot(key, aes(y = -row)) +
   geom_text(aes(x = 0, label = name, colour = diff_T_JJA), hjust = 0, size = 10, fontface = "bold") +
@@ -111,7 +132,8 @@ fig4key <- ggplot(key, aes(y = -row)) +
   warm_scale + guides(colour = "none") + scale_x_continuous(limits = c(0, 6.6), expand = c(0, 0)) +
   labs(title = "Origin → destination elevation,\nstrongest warming first") + theme_void() +
   theme(plot.title = element_text(face = "bold", size = 34, margin = margin(b = 10)), plot.background = element_rect(fill = "white", colour = NA))
-fig4 <- patchwork::wrap_plots(fig4a, fig4key, ncol = 2, widths = c(2.2, 0.7))
+fig4 <- patchwork::wrap_plots(climate_map(cover_shares, cols_cover), fig4key, ncol = 2, widths = c(2.2, 0.7))
+figS2 <- patchwork::wrap_plots(climate_map(select(pies, experiment_id, all_of(names(cols))), cols), fig4key, ncol = 2, widths = c(2.2, 0.7))
 
 # ---- Fig S1: data flow ------------------------------------------------------------------
 flow <- read.csv("data/derived/01_relative_cover/flow_counts.csv")
@@ -137,7 +159,7 @@ nodes <- tibble::tribble(
   8, -1, 2, "Residents: the ladder (Fig 6)", box(h05$n_experiments, h05$n_species, h05$n_effects),
   9, 1, 4, "Colonizers: warmed cover from year 3", box(n_distinct(col$experiment_id), n_distinct(col$species), nrow(col)),
   10, 1, 3, "Colonizers: Step C (Fig 3)", box(NA_integer_, nrow(s07b), sum(s07b$n_experiments)),
-  11, 1, 2, "Colonizers: the ladder (Fig S6)", box(n_distinct(lad_col$experiment_id), n_distinct(lad_col$species), nrow(lad_col))) |>
+  11, 1, 2, "Colonizers: the ladder (Fig S7)", box(n_distinct(lad_col$experiment_id), n_distinct(lad_col$species), nrow(lad_col))) |>
   mutate(counts = sub("NA experiments · ", "", counts))
 edges <- tibble::tribble(
   ~from, ~to, ~rule,
@@ -162,7 +184,7 @@ figS1 <- ggplot() +
   scale_x_continuous(limits = c(-1.9, 2.3)) + scale_y_continuous(limits = c(1.5, 9.5)) +
   theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA))
 
-# ---- Fig S2 and Table S3: phylogenetic axes -------------------------------------------
+# ---- Fig S3 and Table S3: phylogenetic axes -------------------------------------------
 phy <- readRDS("data/derived/prep/phylogeny_axes.rds")
 fg <- readRDS("data/derived/prep/functional_groups.rds")
 analysed <- union(res$species, col$species)
@@ -176,7 +198,7 @@ pev_panel <- function(a, tag) {
     scale_colour_manual(values = c(`TRUE` = "#B8860B", `FALSE` = "grey45"), labels = c(`TRUE` = "graminoid", `FALSE` = "other"), name = NULL) +
     labs(title = tag) + big + theme(legend.position = "bottom")
 }
-figS2 <- patchwork::wrap_plots(pev_panel("PEV2", "a)"), pev_panel("PEV3", "b)"),
+figS3 <- patchwork::wrap_plots(pev_panel("PEV2", "a)"), pev_panel("PEV3", "b)"),
                                ggplot(eig, aes(PEV, percent_positive_variation, fill = axis_number <= 3)) + geom_col() +
                                  scale_fill_manual(values = c(`TRUE` = "grey25", `FALSE` = "grey75"), guide = "none") +
                                  labs(title = "c)", x = NULL, y = "Variation (%)") + big, nrow = 1, widths = c(1, 1, 0.8))
@@ -188,7 +210,7 @@ ends <- bind_rows(lapply(c("PEV1", "PEV2", "PEV3"), function(a) {
 tableS3 <- tidyr::pivot_wider(ends, names_from = end, values_from = families, names_prefix = "most common families of the 15 most extreme species, ") |>
   left_join(transmute(phy$eigenvalues, axis = PEV, `variation (%)` = round(percent_positive_variation, 1)), by = "axis") |> relocate(axis, `variation (%)`)
 
-# ---- Fig S4: the predictors before standardisation -------------------------------------
+# ---- Fig S5: the predictors before standardisation -------------------------------------
 traits <- readRDS("data/derived/prep/traits.rds")
 niche <- readRDS("data/derived/prep/niche_optima.rds") |> filter(n_obs_sub >= 30)
 a0 <- readRDS("data/derived/01_relative_cover/a0.rds") |> semi_join(res, by = c("experiment_id", "species"))
@@ -201,7 +223,7 @@ hist_panel <- function(v, xlab, tag, log_x = FALSE) {
     (if (log_x) scale_x_log10(labels = scales::label_number(big.mark = "")) else scale_x_continuous()) +
     labs(title = tag, x = paste0(xlab, " (n = ", nrow(d), ")"), y = NULL) + big + theme(axis.title.x = element_text(size = 24))
 }
-figS4 <- patchwork::wrap_plots(
+figS5 <- patchwork::wrap_plots(
   hist_panel(experiments$destination_T_JJA, "Destination JJA temperature (°C)", "a)"),
   hist_panel(experiments$diff_T_JJA, "Warming W (°C)", "b)"),
   hist_panel(experiments$destination_P_JJA, "Destination JJA precipitation (mm)", "c)", TRUE),
@@ -246,33 +268,35 @@ for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sp
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
 ggsave("figures/main/fig4.png", fig4, width = 38, height = 28, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
-ggsave("figures/appendix/figS2.png", figS2, width = 40, height = 14, dpi = 100, bg = "white")
-ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS2.png", figS2, width = 38, height = 28, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS3.png", figS3, width = 40, height = 14, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS5.png", figS5, width = 40, height = 26, dpi = 100, bg = "white")
 copies <- c("figures/main/fig3.png" = "figures/diagnostics/07b_figS2.png",
             "figures/main/fig6.png" = "figures/diagnostics/06_fig4.png",
-            "figures/appendix/figS3a.png" = "figures/diagnostics/05_figS4.png",
-            "figures/appendix/figS3b.png" = "figures/diagnostics/07c_figS4b.png",
-            "figures/appendix/figS5a.png" = "figures/diagnostics/06_figS7.png",
-            "figures/appendix/figS5b.png" = "figures/diagnostics/07d_figS7.png",
-            "figures/appendix/figS6.png" = "figures/diagnostics/07d_figS9.png",
-            "figures/appendix/figS7a.png" = "figures/diagnostics/06b_figS11.png",
-            "figures/appendix/figS7b.png" = "figures/diagnostics/07e_figS11.png")
+            "figures/appendix/figS4a.png" = "figures/diagnostics/05_figS4.png",
+            "figures/appendix/figS4b.png" = "figures/diagnostics/07c_figS4b.png",
+            "figures/appendix/figS6a.png" = "figures/diagnostics/06_figS7.png",
+            "figures/appendix/figS6b.png" = "figures/diagnostics/07d_figS7.png",
+            "figures/appendix/figS7.png" = "figures/diagnostics/07d_figS9.png",
+            "figures/appendix/figS8a.png" = "figures/diagnostics/06b_figS11.png",
+            "figures/appendix/figS8b.png" = "figures/diagnostics/07e_figS11.png")
 stopifnot(all(file.copy(copies, names(copies), overwrite = TRUE)))
 fig_index <- tibble::tribble(
   ~figure, ~file, ~content, ~from,
   "Fig 1", "figures/main/fig1.png", "Sankey of year-specific classes, residents and colonizers", "steps 03, 07a",
   "Fig 2", "figures/main/fig2.png", "Residents' classification (Step C)", "step 04",
   "Fig 3", "figures/main/fig3.png", "Colonizers' classification (Step C)", "step 07b",
-  "Fig 4", "figures/main/fig4.png", "The experiments in climate space, count pies", "this step",
+  "Fig 4", "figures/main/fig4.png", "The experiments in climate space, pies of warmed-turf cover", "this step",
   "Fig 5", "figures/main/fig5.png", "Traits of losers, winners and colonizers (pathways)", "step 07f",
   "Fig 6", "figures/main/fig6.png", "The residents' ladder", "step 06",
   "Fig S1", "figures/appendix/figS1.png", "Data flow", "this step",
-  "Fig S2", "figures/appendix/figS2.png", "Phylogenetic axes (with Table S3)", "this step",
-  "Fig S3a, b", "figures/appendix/figS3a.png", "Coefficients, residents (a) and colonizers (b)", "steps 05, 07c",
-  "Fig S4", "figures/appendix/figS4.png", "Predictors before standardisation, niche checks", "this step",
-  "Fig S5a, b", "figures/appendix/figS5a.png", "Held-out metrics per gradient, residents (a) and colonizers (b)", "steps 06, 07d",
-  "Fig S6", "figures/appendix/figS6.png", "The colonizers' ladder", "step 07d",
-  "Fig S7a, b", "figures/appendix/figS7a.png", "Random forest beside metafor, residents (a) and colonizers (b)", "steps 06b, 07e")
+  "Fig S2", "figures/appendix/figS2.png", "Fig 4 with species counts in the pies", "this step",
+  "Fig S3", "figures/appendix/figS3.png", "Phylogenetic axes (with Table S3)", "this step",
+  "Fig S4a, b", "figures/appendix/figS4a.png", "Coefficients, residents (a) and colonizers (b)", "steps 05, 07c",
+  "Fig S5", "figures/appendix/figS5.png", "Predictors before standardisation, niche checks", "this step",
+  "Fig S6a, b", "figures/appendix/figS6a.png", "Held-out metrics per gradient, residents (a) and colonizers (b)", "steps 06, 07d",
+  "Fig S7", "figures/appendix/figS7.png", "The colonizers' ladder", "step 07d",
+  "Fig S8a, b", "figures/appendix/figS8a.png", "Random forest beside metafor, residents (a) and colonizers (b)", "steps 06b, 07e")
 main_files <- sort(list.files("figures/main", pattern = "^fig[0-9]+\\.png$"))
 stopifnot(identical(main_files, paste0("fig", 1:6, ".png"))) # six main figures, each exactly once
 stopifnot(all(file.exists(fig_index$file)), all(file.exists(sub("a\\.png$", "b.png", fig_index$file[grepl("a, b", fig_index$figure)]))))
@@ -286,19 +310,28 @@ count_tab <- tibble::tibble(
 report <- c(
   "# Step 10: Figures, appendix and report", "",
   paste0("Draws what no earlier step produced: Fig 4, the ", nrow(experiments), " experiments in climate space with one pie per experiment ",
-         "counting resident losers and winners by the sign of their net strength from year 3 on and colonizers with net warmed cover above zero ",
-         "(Fig 5's classes, Bills 2 Nov); Fig S1 the data flow; Fig S2 and Table S3 the phylogenetic axes; Fig S4 the predictors before ",
+         "splitting the warmed turf's relative cover, years 3 and later, among resident losers and winners (by the sign of their net strength from year 3 on), ",
+         "colonizers (net warmed cover above zero) and what was not analysed (species outside the pools, unidentified and genus-level records) (Bills, 2 Nov); ",
+         "Fig S2 the same map with the pies counting species; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S5 the predictors before ",
          "standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
          "(six main figures, Bills 2 Nov). Pies are drawn to one radius at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
          "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
          "Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation."),
   "", "## Counts", "", md_table(count_tab),
-  "", "## Fig 4 pies", "",
-  md_table(transmute(pies, experiment_id, name = label, elevations, `T (°C)` = round(destination_T_JJA, 1), `P (mm)` = round(destination_P_JJA),
-                     `W (°C)` = round(diff_T_JJA, 1), `Resident losers`, `Resident winners`, Colonizers)),
+  "", "## Fig 4 and Fig S2 pies", "", "Cover shares (Fig 4) in per cent of the warmed turf; species counts (Fig S2) in brackets.", "",
+  md_table(transmute(left_join(pies, rename_with(cover_shares, ~ paste0("cover_", .x), -experiment_id), by = "experiment_id"),
+                     experiment_id, name = label, elevations, `T (°C)` = round(destination_T_JJA, 1), `P (mm)` = round(destination_P_JJA),
+                     `W (°C)` = round(diff_T_JJA, 1),
+                     `Resident losers` = sprintf("%.0f%% (%d)", 100 * `cover_Resident losers`, `Resident losers`),
+                     `Resident winners` = sprintf("%.0f%% (%d)", 100 * `cover_Resident winners`, `Resident winners`),
+                     Colonizers = sprintf("%.0f%% (%d)", 100 * cover_Colonizers, Colonizers),
+                     `Not analysed` = sprintf("%.0f%%", 100 * `cover_Not analysed`))),
+  "", paste0("Mean over experiments, per cent of the warmed turf: resident losers ", round(100 * mean(cover_shares$`Resident losers`)),
+             ", resident winners ", round(100 * mean(cover_shares$`Resident winners`)), ", colonizers ", round(100 * mean(cover_shares$Colonizers)),
+             ", not analysed ", round(100 * mean(cover_shares$`Not analysed`)), "."),
   "", "## Figures", "", md_table(fig_index), "",
   "![Fig 4](../figures/main/fig4.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S2](../figures/appendix/figS2.png)", "",
-  "![Fig S4](../figures/appendix/figS4.png)",
+  "![Fig S3](../figures/appendix/figS3.png)", "", "![Fig S5](../figures/appendix/figS5.png)",
   "", "## Tables", "",
   md_table(tibble::tibble(table = paste("Table", c("S1", "S2", "S3", "S4", "S5")), file = sprintf("tables/table%s.csv", c("S1", "S2", "S3", "S4", "S5")),
                           content = c("Experiments", "Species list", "Phylogenetic axes", "Variance components per model", "Fixed-effect coefficients per model"),
@@ -308,8 +341,8 @@ report <- c(
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- One script for the whole step (Bills, 2 Nov).",
-  "- Six main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6; the results-dependent Fig 6 and Fig S8 dropped; the appendix closes up.",
-  "- Fig 4's pies count Fig 5's classes per experiment (sign of the net effect from year 3 on), not last-year significance classes; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).",
+  "- Six main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6; the results-dependent Fig 6 and the old Fig S8 dropped; appendix renumbered with the count version of Fig 4 as Fig S2.",
+  "- Fig 4's pies split the warmed turf's relative cover (years 3 and later) among Fig 5's classes per experiment, not counts of last-year significance classes; the counts are Fig S2; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).",
   "- Coefficients, per-gradient metrics and the random forest stay as residents (a) and colonizers (b) files.",
   "- `REPORT.html` not rendered: Quarto is not installed.")
 writeLines(report, "reports/10_figures.md")
