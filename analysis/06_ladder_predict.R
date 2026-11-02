@@ -13,11 +13,11 @@
 #         gradients) as in step 05, every rowset equal to them; 16 scored
 #         gradients (at least 5 effects), one fold each per fitted level; every
 #         held-out species seen in training; the held-out
-#         gradient absent from every training set; V_pred from training rows
-#         only; intercept renamed before matching coef(m); species deviations
-#         only for species seen in training; hand BLUPs equal ranef() to 1e-8;
-#         Null R2fit equals -(intercept - mean of gradient means)^2 / V_fit;
-#         every slope fold with the diagonal T, P, TP block.
+#         gradient absent from every training set; intercept renamed before
+#         matching coef(m); species deviations only for species seen in
+#         training; hand BLUPs equal ranef() to 1e-8; Null R2 exactly 0 on
+#         every scored gradient, in sample and held out; every slope fold with
+#         the diagonal T, P, TP block.
 #
 # Decided 2 Nov (Bills): the ladder rows of step 05 (residents in at least 3
 # gradients that carry every property); every gradient trains, but only the 16
@@ -28,9 +28,13 @@
 # gradient (climate cannot order species within a gradient); supplement levels
 # <property>+species from the property fold models; no all-years sensitivity;
 # per fold the predictions and a one-row summary, no model objects.
+# Reopened 2 Nov (Bills): R2 per gradient against the Null model on the same
+# gradient, 1 - MSE(level) / MSE(Null), replacing the shared yardstick V; every
+# metric summarised by its median over the scored gradients; Fig 4 rows b) to d)
+# as half violins; display labels "Initial abundances", "Loser/winner skill".
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
-source("R/fit_model.R"); source("R/h_species.R"); source("R/yardstick.R"); source("R/metrics_gradient.R")
+source("R/fit_model.R"); source("R/h_species.R"); source("R/metrics_gradient.R")
 source("R/species_deviation.R"); source("R/fig4_ladder.R"); source("R/md_table.R")
 
 warns <- character()
@@ -90,6 +94,8 @@ levels_fit <- tibble::tibble(
 level_mods <- c(list(null = ~ 1, start = f_start, climate = f_env, climate_start = f_both, species = f_both), f_prop)
 supp <- paste0(names(prop_vars), "+species") # supplement: property model plus species deviations
 level_label <- c(setNames(levels_fit$column, levels_fit$level), setNames(paste(prop_label, "+ species"), supp))
+# what readers see (Bills, 2 Nov); level_label stays the key of Fig 4's columns
+level_display <- replace(level_label, c("start", "climate_start"), c("Initial abundances", "Climate + initial abundances"))
 
 fixed_part <- function(m, mods, d) { # experiment term silent at prediction: its expected value, 0
   X <- model.matrix(mods, d)
@@ -130,7 +136,7 @@ fit_fold <- function(task) {
                          experiment_id = test$experiment_id, observed = test$strength,
                          fixed = if (ok) fixed_part(m, mods, test) else NA_real_,
                          deviation = if (ok && lv$slopes) species_deviation(m, train, test) else if (ok) 0 else NA_real_,
-                         V_pred = yardstick(filter(train, gradient_id %in% scored)), species_known = test$species %in% train$species)
+                         species_known = test$species %in% train$species)
   stopifnot(all(pred$deviation[!pred$species_known] %in% c(0, NA))) # deviations only for species seen in training
   summary <- tibble::tibble(level = task$level, gradient_id = g, status = if (ok) "converged" else m,
                             optimizer = optimizer, first_error = first_error,
@@ -160,12 +166,6 @@ folds <- bind_rows(lapply(out, `[[`, "pred"))
 fold_summary <- bind_rows(lapply(out, `[[`, "summary"))
 stopifnot(nrow(fold_summary) == nrow(levels_fit) * length(scored), all(folds$species_known),
           !anyDuplicated(fold_summary[c("level", "gradient_id")])) # one fold per gradient per level
-# yardstick from scored gradients only (Bills, 2 Nov): the four small gradients
-# train the models but enter neither V, so they cannot inflate it
-V_fit <- sapply(rows, function(r) yardstick(filter(r, gradient_id %in% scored)))
-V_pred_of <- sapply(scored, function(g) yardstick(filter(rows$all, gradient_id %in% setdiff(scored, g))))
-folds$V_pred <- V_pred_of[folds$gradient_id] # every rowset has the same rows, so one V per held-out gradient
-stopifnot(all(folds$V_pred != V_fit[levels_fit$rowset[match(folds$level, levels_fit$level)]])) # V_pred from training rows only
 write.csv(fold_summary, file.path(out_dir, "fold_summary.csv"), row.names = FALSE)
 
 # ---- Predictions per level: fitted levels and the supplement levels -------------
@@ -180,40 +180,38 @@ fit_long <- bind_rows(lapply(seq_len(nrow(levels_fit)), function(i) {
   m <- readRDS(file.path("data/derived/05_ladder_fit/models", dir, paste0(lv$level, ".rds")))$m
   fx <- fixed_part(m, level_mods[[lv$level]], d)
   dev <- if (lv$slopes) species_deviation(m, d, d) else 0
-  base <- tibble::tibble(gradient_id = d$gradient_id, observed = d$strength, V = V_fit[[lv$rowset]], intercept = coef(m)[1])
+  base <- tibble::tibble(gradient_id = d$gradient_id, effect_id = d$effect_id, observed = d$strength)
   bind_rows(mutate(base, level = lv$level, predicted = fx + if (lv$level == "species") dev else 0),
             if (lv$level %in% names(prop_vars)) mutate(base, level = paste0(lv$level, "+species"), predicted = fx + dev))
 }))
 
 # ---- Metrics per level x gradient ---------------------------------------------------
-score <- function(d, V) {
+# R2 against the Null on the same gradient (Bills, 2 Nov): V is the Null's error on
+# the same effects, its held-out fold for pred and its full-data fit for fit
+score <- function(d) {
+  d <- inner_join(d, filter(d, level == "null") |> select(effect_id, null_pred = predicted), by = "effect_id")
   bind_rows(lapply(split(d, list(d$level, d$gradient_id), drop = TRUE), function(x) {
     if (anyNA(x$predicted)) met <- tibble::tibble(r2 = NA_real_, spearman = NA_real_, skill = NA_real_)
-    else met <- metrics_gradient(x$observed, x$predicted, x[[V]][1])
+    else met <- metrics_gradient(x$observed, x$predicted, mean((x$observed - x$null_pred)^2))
     if (x$level[1] == "climate") met$spearman <- met$skill <- NA_real_ # cannot order species within a gradient (Bills, 2 Nov)
     tibble::tibble(level = x$level[1], gradient_id = x$gradient_id[1], met, n = nrow(x))
   }))
 }
-pred_metrics <- score(pred_long, "V_pred")
-fit_metrics  <- score(filter(fit_long, gradient_id %in% scored), "V") # the same 16 gradients as held out (Bills, 2 Nov)
-stopifnot(setequal(pred_metrics$gradient_id, scored), setequal(fit_metrics$gradient_id, scored))
+pred_metrics <- score(pred_long)
+fit_metrics  <- score(filter(fit_long, gradient_id %in% scored)) # the same 16 gradients as held out (Bills, 2 Nov)
+stopifnot(setequal(pred_metrics$gradient_id, scored), setequal(fit_metrics$gradient_id, scored),
+          all(filter(pred_metrics, level == "null")$r2 == 0), all(filter(fit_metrics, level == "null")$r2 == 0)) # Null is the reference
 write.csv(pred_metrics, file.path(out_dir, "pred_metrics.csv"), row.names = FALSE)
 write.csv(fit_metrics, file.path(out_dir, "fit_metrics.csv"), row.names = FALSE)
 
-# Null with all rows predicts its REML intercept; its R2fit, averaged over
-# gradients, is -(intercept - mean of gradient means)^2 / V_fit, zero only if the
-# two means coincide (PLAN.md says "exactly zero")
-null_fit <- filter(fit_long, level == "null", gradient_id %in% scored)
-gm <- mean(tapply(null_fit$observed, null_fit$gradient_id, mean))
-null_r2_expected <- -(null_fit$intercept[1] - gm)^2 / V_fit[["all"]]
-stopifnot(abs(mean(filter(fit_metrics, level == "null")$r2) - null_r2_expected) < 1e-12) # over the 16 scored gradients
-
 all_levels <- c(levels_fit$level, supp)
 summary_metrics <- bind_rows(lapply(c("r2", "spearman", "skill"), function(k) {
-  f <- fit_metrics |> group_by(level) |> summarise(fit = mean(.data[[k]], na.rm = TRUE), n_gradients_fit = sum(!is.na(.data[[k]])))
-  p <- pred_metrics |> group_by(level) |> summarise(pred = mean(.data[[k]], na.rm = TRUE), n_gradients_pred = sum(!is.na(.data[[k]])))
+  f <- fit_metrics |> group_by(level) |> summarise(fit = median(.data[[k]], na.rm = TRUE), n_gradients_fit = sum(!is.na(.data[[k]])))
+  p <- pred_metrics |> group_by(level) |>
+    summarise(pred = median(.data[[k]], na.rm = TRUE), n_gradients_pred = sum(!is.na(.data[[k]])),
+              n_better_than_null = if (k == "r2") sum(.data[[k]] > 0, na.rm = TRUE) else NA_integer_)
   full_join(f, p, by = "level") |> mutate(metric = k, .after = level)
-})) |> mutate(across(c(fit, pred), ~ ifelse(is.nan(.x), NA_real_, .x))) |>
+})) |>
   arrange(match(level, all_levels), match(metric, c("r2", "spearman", "skill")))
 write.csv(summary_metrics, file.path(out_dir, "summary_metrics.csv"), row.names = FALSE)
 # every held-out species was seen in training (checked above with the fold counts)
@@ -240,16 +238,17 @@ het_fig <- bind_rows(
     filter(het05, rowset == r, model == prop_label[[p]]) |>
       mutate(column = prop_label[[p]], ref_cd = sp$tau2 + sp$sigma2_experiment, ref_H = sp$H_intercept + sp$H_slope) })))
 stopifnot(nrow(het_fig) == 12)
-fig4_metrics <- summary_metrics |> filter(level %in% levels_fit$level) |>
-  transmute(column = level_label[level], metric = met_name[metric], fit, pred)
-fig4_grad <- pred_metrics |> filter(level %in% levels_fit$level) |>
-  tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric", values_to = "pred") |>
-  transmute(column = level_label[level], metric = met_name[metric], pred) |> filter(!is.na(pred))
-fig4_ladder(het_fig, "figures/diagnostics/06_fig4.png", metrics = fig4_metrics, gradients = fig4_grad,
+# rows b) to d): every scored gradient, in sample (fit) and held out (pred); Null is the R² reference and not drawn
+fig4_grad <- bind_rows(mutate(fit_metrics, type = "fit"), mutate(pred_metrics, type = "pred")) |>
+  filter(level %in% levels_fit$level, level != "null") |>
+  tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
+  transmute(column = level_label[level], metric = met_name[metric], type, value) |> filter(!is.na(value))
+fig4_ladder(het_fig, "figures/diagnostics/06_fig4.png", gradients = fig4_grad,
             caption = paste0("Row a): step 05, every column on the same ", nrow(strength_df), " rows; dashed lines carry Species-dependent across the property columns.\n",
-                             "Rows b) to d): hollow = in sample (fitted to all ", length(gradients), " gradients), filled = held out (leave one gradient out), small points = the ",
-                             length(scored), " held-out gradients with at least 5 effects; dashed line = Species-dependent held out.\n",
-                             "Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient; Climate + start is the first level where ordering is defined."))
+                             "Rows b) to d): each half violin is the ", length(scored), " scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all ", length(gradients),
+                             " gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians.\n",
+                             "R² = 1 - error(level) / error(Null) on that gradient, so Null is 0 and not drawn. ",
+                             "Dashed line = Species-dependent predictive median. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."))
 
 # Fig 5: held-out R2 per gradient, gradients ordered by destination summer temperature
 grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_id) |>
@@ -257,7 +256,7 @@ grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_i
 best_prop <- summary_metrics |> filter(level %in% names(prop_vars), metric == "r2") |> slice_max(pred, n = 1, with_ties = FALSE) |> pull(level)
 f5 <- pred_metrics |> filter(level %in% c("climate_start", "species", best_prop), !is.na(r2)) |>
   mutate(gradient_id = factor(gradient_id, levels = grad_info$gradient_id),
-         level = factor(level_label[level], levels = level_label[c("climate_start", "species", best_prop)]))
+         level = factor(level_display[level], levels = level_display[c("climate_start", "species", best_prop)]))
 spread_scale <- max(abs(f5$r2), na.rm = TRUE) / max(grad_info$spread)
 fig5 <- ggplot() +
   geom_col(data = mutate(grad_info, gradient_id = factor(gradient_id, levels = gradient_id)),
@@ -269,8 +268,8 @@ fig5 <- ggplot() +
   scale_shape_manual(values = c(16, 17, 15), name = NULL) +
   scale_y_continuous(sec.axis = sec_axis(~ . / spread_scale, breaks = function(l) pretty(c(0, l[2]))[pretty(c(0, l[2])) >= 0], name = "Observed spread of strength (standard deviation, grey bars)")) +
   labs(title = "a)", x = "Held-out gradient, ordered by destination summer temperature (cold to warm)",
-       y = "Held-out R² of losing-winning strength",
-       subtitle = paste0("Best property, chosen once by its mean held-out R²: ", prop_label[[best_prop]])) +
+       y = "Held-out R² against Null",
+       subtitle = paste0("Best property, chosen once by its median held-out R²: ", prop_label[[best_prop]])) +
   theme_classic(base_size = 22) +
   theme(plot.title = element_text(face = "bold", size = 28), axis.title = element_text(face = "bold"),
         axis.text.x = element_text(angle = 45, hjust = 1, size = 16), legend.position = "top",
@@ -281,7 +280,7 @@ ggsave("figures/diagnostics/06_fig5.png", fig5, width = 22, height = 11, dpi = 1
 s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics, version = "Held out")) |>
   tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
   mutate(gradient_id = factor(gradient_id, levels = rev(grad_info$gradient_id)),
-         level = factor(level_label[level], levels = level_label[all_levels]),
+         level = factor(level_display[level], levels = level_display[all_levels]),
          version = factor(version, levels = c("In sample", "Held out")))
 s7_panel <- function(k, title, tags) lapply(seq_along(levels(s7$version)), function(j) {
   v <- levels(s7$version)[j]; d <- filter(s7, metric == k, version == v)
@@ -293,18 +292,19 @@ s7_panel <- function(k, title, tags) lapply(seq_along(levels(s7$version)), funct
     theme(plot.title = element_text(face = "bold", size = 24), axis.text.x = element_text(angle = 50, hjust = 1),
           panel.grid = element_blank(), plot.background = element_rect(fill = "white", colour = NA))
 })
-figS7 <- patchwork::wrap_plots(c(s7_panel("r2", "R²", c("a)", "b)")), s7_panel("spearman", "Spearman ρ", c("c)", "d)")),
-                                 s7_panel("skill", "Winner/loser skill", c("e)", "f)"))), ncol = 2)
+figS7 <- patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")), s7_panel("spearman", "Spearman ρ", c("c)", "d)")),
+                                 s7_panel("skill", "Loser/winner skill", c("e)", "f)"))), ncol = 2)
 ggsave("figures/diagnostics/06_figS7.png", figS7, width = 30, height = 33, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
-sum_tab <- summary_metrics |> transmute(level = level_label[level], metric = c(r2 = "R²", spearman = "Spearman ρ", skill = "skill")[metric],
-                                        fit = f3(fit), pred = f3(pred), `gradients (fit / pred)` = paste(n_gradients_fit, "/", n_gradients_pred))
-fold_tab <- fold_summary |> group_by(level = level_label[level]) |>
+sum_tab <- summary_metrics |> transmute(level = level_display[level], metric = c(r2 = "R² against Null", spearman = "Spearman ρ", skill = "loser/winner skill")[metric],
+                                        fit = f3(fit), pred = f3(pred), `gradients (fit / pred)` = paste(n_gradients_fit, "/", n_gradients_pred),
+                                        `held out better than Null` = ifelse(is.na(n_better_than_null), "", paste(n_better_than_null, "of", n_gradients_pred)))
+fold_tab <- fold_summary |> group_by(level = level_display[level]) |>
   summarise(folds = n(), converged = sum(status == "converged"), `bobyqa retries` = sum(optimizer == "bobyqa"),
             `median minutes` = sprintf("%.1f", median(minutes)), `max minutes` = sprintf("%.1f", max(minutes)), .groups = "drop") |>
-  arrange(match(level, level_label))
+  arrange(match(level, level_display))
 grad_counts <- n_eff |> transmute(gradient_id, effects = n, species = sapply(gradient_id, function(g) n_distinct(strength_df$species[strength_df$gradient_id == g])),
   held_out = ifelse(gradient_id %in% scored, "yes", "no (fewer than 5 effects; trains only)"))
 fold_warn <- unique(unlist(lapply(out, function(x) if (length(x$warnings)) paste0(x$summary$level, " / ", x$summary$gradient_id, ": ", x$warnings))))
@@ -312,24 +312,23 @@ fold_warn <- fold_warn[!grepl("struct' argument is disregaded", fold_warn)]
 report <- c(
   "# Step 06: The ladder, predicted (Step D, route 2, residents)", "",
   paste0("Every level of the ladder was refitted ", length(scored), " times on the ", nrow(strength_df), " ladder rows of step 05, each time without one of the ", length(scored), " gradients that have at least 5 effects, and asked to predict ",
-         "the strengths of the gradient left out: Null, Start, Climate, Climate + start, Species-dependent and one level per property, ",
+         "the strengths of the gradient left out: Null, Initial abundances, Climate, Climate + initial abundances, Species-dependent and one level per property, ",
          nrow(fold_summary), " fold fits on ", cores, " cores (", sprintf("%.0f", sum(fold_summary$minutes)), " fit-minutes). ",
          "Predictions are fixed effects only, the experiment term at its expected value zero; Species-dependent adds each species' ",
          "intercept and slope deviations learnt from the training gradients (zero for a species not seen there), and the seven ",
-         "supplement levels add the same to each property model. Each level is scored per gradient by R² against the training yardstick, ",
-         "Spearman ρ within the gradient and winner/loser skill, held out and in sample (step 05 full-data fits, the same rule), ",
-         "then averaged over gradients with equal weight."),
+         "supplement levels add the same to each property model. Each level is scored per gradient by R² against the Null model on the same gradient ",
+         "(1 − its error / the Null's error, so Null is 0), Spearman ρ within the gradient and loser/winner skill, held out and in sample ",
+         "(step 05 full-data fits, the same rule), then summarised by the median over gradients (Bills, 2 Nov)."),
   "", "## Counts", "", paste0(length(gradients), " gradients train; the ", length(scored), " with at least 5 effects are held out and scored, each in one fold (Bills, 2 Nov). Effects and species per gradient:"), "", md_table(grad_counts),
   "", "## Fold fits", "", md_table(fold_tab),
   "", if (nrow(failed)) md_table(transmute(failed, level, gradient_id, `nlminb error` = first_error, `bobyqa error` = status))
       else "Every fold fit converged.",
   if (any(fold_summary$optimizer == "bobyqa")) c("", "Folds that needed the bobyqa retry:", "",
       md_table(filter(fold_summary, optimizer == "bobyqa") |> transmute(level, gradient_id, `nlminb error` = first_error, status))),
-  "", "## Prediction metrics, mean over gradients", "", md_table(sum_tab),
+  "", "## Prediction metrics, median over gradients", "", md_table(sum_tab),
   "", "Gradients without a value, per level and metric:", "",
   if (nrow(missing)) md_table(missing) else "None.",
-  "", paste0("Null in sample: R² averaged over gradients is ", sprintf("%.2e", null_r2_expected), ", which is −(intercept − mean of gradient means)² / V; ",
-             "it is exactly zero only when the REML intercept equals the gradient-weighted mean, which PLAN.md assumes."),
+  "", "Null's R² is 0 on every scored gradient, in sample and held out (checked): it is the reference of every R².",
   "", "## Species deviations", "",
   paste0("metafor 5.0.1 gives no BLUPs for a GEN or GDIAG slope block, so the species deviations are computed by hand, jointly for every ",
          "random term, as D Z′ M⁻¹ (y − Xβ) from each fit's variance components, V and β (`R/species_deviation.R`). On the step 05 ",
@@ -343,7 +342,7 @@ report <- c(
   "", paste0("Every held-out species had training data: each ladder species occurs in at least 3 gradients, so at least 2 remain in training (checked)."),
   "", "## Figures", "", "![Fig 4, the ladder](../figures/diagnostics/06_fig4.png)", "",
   paste0("![Fig 5, held-out R² per gradient](../figures/diagnostics/06_fig5.png)"), "",
-  paste0("The best property in Fig 5 is ", prop_label[[best_prop]], ", chosen once as the property level with the highest mean held-out R²."), "",
+  paste0("The best property in Fig 5 is ", prop_label[[best_prop]], ", chosen once as the property level with the highest median held-out R² against Null."), "",
   "![Fig S7, per-gradient view](../figures/diagnostics/06_figS7.png)",
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
@@ -352,8 +351,7 @@ report <- c(
   "- Climate's Spearman and skill are NA in every gradient (Bills, 2 Nov): with several experiments in a gradient they would rank experiments, not species.",
   "- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (Bills, 2 Nov); PLAN.md names no fallback.",
   "- Spearman is also NA where every prediction in the gradient is the same (MILESTONES), beside PLAN.md's fewer than 5 effects.",
-  "- Null R²fit is not exactly zero (see above); the check tests the identity instead.",
-  "- Held out and scored: only the gradients with at least 5 effects (16; Bills, 2 Nov); the other four train only. The R² yardstick V is built from scored gradients only, in sample and held out (Bills, 2 Nov): PLAN.md builds it from all training gradients, which let US_Colorado (2 effects, mean strength -0.097) inflate V by about 16% and lift every R² by about 0.14.",
+  "- Held out and scored: only the gradients with at least 5 effects (16; Bills, 2 Nov); the other four train only.",
   "- Figures written to `figures/diagnostics/`; Fig 4's prediction rows widen their y range to the data.")
 writeLines(report, "reports/06_ladder_predict.md")
 message("Step 06 written: ", nrow(fold_summary), " folds, ", nrow(failed), " failed; ",
