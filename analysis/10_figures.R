@@ -20,8 +20,8 @@
 # Fig 6 and Fig S8 are dropped and the appendix closes up. The climate-space pies use
 # Fig 5's classes per experiment: residents by the sign of their net strength from
 # year 3 on, colonizers with net warmed cover above zero (07a, so the 14 experiments
-# below the colonizer pool-size rule have no purple); one radius, overlapping pies
-# nudged apart. Reviewed figures are copied byte for byte, so what was approved ships.
+# below the colonizer pool-size rule have no purple); one radius, pies sharing a
+# destination climate fanned out around it. Reviewed figures are copied byte for byte.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/md_table.R")
@@ -61,23 +61,21 @@ stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pie
 write.csv(pies, file.path(out_dir, "fig4_pie_counts.csv"), row.names = FALSE)
 # pies need equal units on both axes: log precipitation rescaled to the temperature range
 k <- diff(range(pies$destination_T_JJA)) / diff(range(log(pies$destination_P_JJA))) * 0.65
-r <- 0.26
-pies <- mutate(pies, x0 = destination_T_JJA, y0 = log(destination_P_JJA) * k, x = x0, y = y0)
-for (it in 1:300) { # nudge overlapping pies apart (Bills): pairwise push to 2.1 radii
-  for (i in seq_len(nrow(pies) - 1)) for (j in (i + 1):nrow(pies)) {
-    dx <- pies$x[j] - pies$x[i]; dy <- pies$y[j] - pies$y[i]; d <- sqrt(dx^2 + dy^2)
-    if (d < 2.1 * r) {
-      if (d < 1e-9) { dx <- 1; dy <- 0; d <- 1 }
-      m <- (2.1 * r - d) / 2
-      pies$x[i] <- pies$x[i] - m * dx / d; pies$y[i] <- pies$y[i] - m * dy / d
-      pies$x[j] <- pies$x[j] + m * dx / d; pies$y[j] <- pies$y[j] + m * dy / d
-    }
-  }
-}
+r <- 0.21
+pies <- mutate(pies, x0 = destination_T_JJA, y0 = log(destination_P_JJA) * k)
+# experiments sharing a destination climate fan out around the shared point on short lines
+# (Bills, 2 Nov); every other pie sits at its own climate
+pies <- pies |> mutate(n_shared = n(), i = row_number(), .by = c(x0, y0)) |>
+  mutate(d = ifelse(n_shared > 1, pmax(1.7 * r, 1.1 * r / sin(pi / n_shared)), 0),
+         angle = pi / 2 + 2 * pi * (i - 1) / n_shared, x = x0 + d * cos(angle), y = y0 + d * sin(angle))
+stopifnot(sum(pies$n_shared > 1) == 15, n_distinct(paste(pies$x0, pies$y0)) == 33) # 5 pairs and one five sharing a destination
+centre_d <- as.matrix(dist(cbind(pies$x, pies$y)))
+n_overlap <- sum(centre_d[upper.tri(centre_d)] < 2 * r) # pies of different climates that still touch, reported
 pies <- mutate(pies, label = paste0(round(origin_elevation), " → ", round(destination_elevation), " m"))
 p_breaks <- c(150, 200, 300, 400, 600, 800, 1000)
 fig4 <- ggplot(pies) +
-  geom_segment(data = filter(pies, sqrt((x - x0)^2 + (y - y0)^2) > 0.02), aes(x0, y0, xend = x, yend = y), colour = "grey55", linewidth = 0.6) +
+  geom_segment(data = filter(pies, n_shared > 1), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9) +
+  geom_point(data = distinct(filter(pies, n_shared > 1), x0, y0), aes(x0, y0), size = 4) + # the shared destination climate
   scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(pies, r = r), cols = names(cols), colour = "white", linewidth = 0.3) +
   ggrepel::geom_text_repel(aes(x, y, label = label, colour = diff_T_JJA), size = 6.5, fontface = "bold", point.size = 34, # keeps labels off the pies
                            box.padding = 0.15, force = 3, max.iter = 1e5, min.segment.length = 0.4, segment.colour = "grey70", max.overlaps = Inf, seed = 1) +
@@ -255,14 +253,14 @@ count_tab <- tibble::tibble(
            "net warmed cover above zero", "experiments with colonizers", "experiments without purple", "species analysed (residents or colonizers)"),
   n = c(nrow(experiments), nrow(res), sum(res$strength < 0), sum(res$strength > 0), nrow(col), sum(col$strength > 0),
         sum(pies$Colonizers > 0), sum(pies$Colonizers == 0), length(analysed)))
-moved <- sum(sqrt((pies$x - pies$x0)^2 + (pies$y - pies$y0)^2) > 0.02)
 report <- c(
   "# Step 10: Figures, appendix and report", "",
   paste0("Draws what no earlier step produced: Fig 4, the ", nrow(experiments), " experiments in climate space with one pie per experiment ",
          "counting resident losers and winners by the sign of their net strength from year 3 on and colonizers with net warmed cover above zero ",
          "(Fig 5's classes, Bills 2 Nov); Fig S1 the data flow; Fig S2 and Table S3 the phylogenetic axes; Fig S4 the predictors before ",
          "standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
-         "(six main figures, Bills 2 Nov). Pies are drawn to one radius; ", moved, " pies sharing a climate were nudged apart, with a grey line to their true position."),
+         "(six main figures, Bills 2 Nov). Pies are drawn to one radius at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
+         "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines. ", n_overlap, " pairs of pies at different climates still touch."),
   "", "## Counts", "", md_table(count_tab),
   "", "## Fig 4 pies", "",
   md_table(transmute(pies, experiment_id, elevations = label, `T (°C)` = round(destination_T_JJA, 1), `P (mm)` = round(destination_P_JJA),

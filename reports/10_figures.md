@@ -1,6 +1,6 @@
 # Step 10: Figures, appendix and report
 
-Draws what no earlier step produced: Fig 4, the 42 experiments in climate space with one pie per experiment counting resident losers and winners by the sign of their net strength from year 3 on and colonizers with net warmed cover above zero (Fig 5's classes, Bills 2 Nov); Fig S1 the data flow; Fig S2 and Table S3 the phylogenetic axes; Fig S4 the predictors before standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers (six main figures, Bills 2 Nov). Pies are drawn to one radius; 25 pies sharing a climate were nudged apart, with a grey line to their true position.
+Draws what no earlier step produced: Fig 4, the 42 experiments in climate space with one pie per experiment counting resident losers and winners by the sign of their net strength from year 3 on and colonizers with net warmed cover above zero (Fig 5's classes, Bills 2 Nov); Fig S1 the data flow; Fig S2 and Table S3 the phylogenetic axes; Fig S4 the predictors before standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers (six main figures, Bills 2 Nov). Pies are drawn to one radius at their destination climate; the 15 experiments that share a destination climate (6 points) fan out around a black dot at that climate on short lines. 2 pairs of pies at different climates still touch.
 
 ## Counts
 
