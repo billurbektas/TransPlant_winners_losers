@@ -9,15 +9,16 @@
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients) as in step 05; 16 scored gradients, the same as step 06;
 #         test rows of every fold equal step 06's; the held-out gradient absent
-#         from training; case weights equal 1 / strength_se^2; 16 gradients per level.
+#         from training; 16 gradients per level.
 #
 # Decided 2 Nov (Bills): held-out predictions only, no in-sample or out-of-bag
 # value (not comparable with metafor's fit); R² against the metafor Null on the
 # same gradient, as step 06; medians; fixed settings, no tuning (1000 trees,
 # min.node.size 40, mtry floor(sqrt(p))); one seed per fold and one rerun with a
-# second seed; species also in the property forests (<property>+species); case
-# weights 1 / SE² as PLAN.md writes; no partial dependence; the half-violin code
-# copied from R/fig4_ladder.R into this script (few functions in analysis scripts).
+# second seed; species also in the property forests (<property>+species); no
+# case weights (1 / SE² let a few near-zero effects decide every forest, because
+# the most precise effects are the smallest ones); no partial dependence; the
+# half-violin code copied from R/fig4_ladder.R into this script (few functions).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/metrics_gradient.R"); source("R/md_table.R")
@@ -71,15 +72,13 @@ fit_fold <- function(task, seed, cache) {
   train <- filter(strength_df, gradient_id != g); test <- filter(strength_df, gradient_id == g)
   null06 <- readRDS(file.path("data/derived/06_ladder_predict/folds", paste0("null_", g, ".rds")))$pred
   stopifnot(!g %in% train$gradient_id, setequal(test$effect_id, null06$effect_id)) # same fold as step 06
-  w <- 1 / train$strength_se^2
-  stopifnot(isTRUE(all.equal(w, 1 / train$strength_se^2))) # PLAN.md: case weights 1 / SE²
-  rf <- ranger::ranger(x = train[vars], y = train$strength, case.weights = w, num.trees = 1000L,
+  rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 1000L, # no case weights (Bills, 2 Nov)
                        mtry = max(1L, floor(sqrt(length(vars)))), min.node.size = 40L, replace = TRUE,
                        respect.unordered.factors = "order", seed = seed + match(g, scored), num.threads = 1L)
   pred <- tibble::tibble(level = task$level, gradient_id = g, effect_id = test$effect_id, species = as.character(test$species),
                          observed = test$strength, predicted = predict(rf, test[vars], num.threads = 1L)$predictions,
                          null_metafor = null06$fixed[match(test$effect_id, null06$effect_id)],
-                         null_forest = sum(w * train$strength) / sum(w)) # what a forest without predictors predicts
+                         null_forest = mean(train$strength)) # what a forest without predictors predicts
   if (cache) saveRDS(pred, path)
   pred
 }
@@ -88,7 +87,7 @@ tasks <- lapply(seq_len(nrow(tasks)), function(i) as.list(tasks[i, ]))
 run <- function(seed, cache) bind_rows(parallel::mclapply(tasks, fit_fold, seed = seed, cache = cache, mc.cores = cores))
 folds <- run(seeds[["main"]], cache = TRUE)
 stopifnot(nrow(distinct(folds, level, gradient_id)) == 18 * 16)
-# the forest Null: the weighted mean of the training effects, one per fold
+# the forest Null: the mean of the training effects, one per fold
 folds <- bind_rows(folds, distinct(filter(folds, level == "start"), gradient_id, effect_id, .keep_all = TRUE) |>
                      mutate(level = "null", predicted = null_forest))
 
@@ -123,7 +122,7 @@ med <- vs |> group_by(level, metric) |>
             `forest higher` = sum(difference > 0, na.rm = TRUE), .groups = "drop") |>
   arrange(match(level, all_levels), match(metric, c("r2", "spearman", "skill")))
 
-# ---- Weights: how many effects carry them -------------------------------------
+# ---- Why no case weights: how few effects would carry 1 / SE² ------------------
 w_all <- 1 / strength_df$strength_se^2
 w_share <- sort(w_all, decreasing = TRUE) / sum(w_all)
 top <- strength_df[which.max(w_all), ]
@@ -190,8 +189,8 @@ figS11 <- patchwork::wrap_plots(p_top, metric_row("r2", "a)", "R² against Null"
                                 metric_row("skill", "c)", "Loser/winner skill", c(-0.2, 0.6), TRUE), ncol = 1, heights = c(0.35, 1, 1, 1)) +
   patchwork::plot_annotation(caption = paste0(
     "Each half violin is the ", length(scored), " scored gradients, held out (leave one gradient out); left (blue) the meta-regression of step 06, right (orange) the random forest ",
-    "on the same rows, predictors and folds; points and numbers = medians.\nR² = 1 - error / error of the metafor Null on that gradient. Null column: the metafor Null (0) beside the forest Null, ",
-    "the 1 / SE²-weighted mean of the training effects. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."),
+    "on the same rows, predictors and folds, no case weights; points and numbers = medians.\nR² = 1 - error / error of the metafor Null on that gradient. Null column: the metafor Null (0) beside the forest Null, ",
+    "the mean of the training effects. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."),
     theme = theme(plot.caption = element_text(size = 24, colour = "grey40"), plot.background = element_rect(fill = "white", colour = NA)))
 ggsave("figures/diagnostics/06b_figS11.png", figS11, width = 48, height = 30, dpi = 100, bg = "white")
 
@@ -210,29 +209,34 @@ report <- c(
   paste0("Every level of the ladder except Null was refitted as a random forest (ranger ", as.character(packageVersion("ranger")), ") on the ", nrow(strength_df),
          " ladder rows of step 05, with the variables of the step 06 formulas as predictors and species as a factor in the Species-dependent and the seven ",
          "property + species forests. Each forest was fitted ", length(scored), " times, once without each scored gradient, and asked to predict it, with fixed settings ",
-         "(1000 trees, minimum node size 40, mtry the square root of the number of predictors, case weights 1 / SE²). Only held-out predictions are read. ",
+         "(1000 trees, minimum node size 40, mtry the square root of the number of predictors, no case weights). Only held-out predictions are read. ",
          "They are scored as in step 06: R² against the metafor Null on the same gradient, Spearman ρ within the gradient and loser/winner skill, ",
-         "and set beside step 06's held-out values per gradient and as medians. The forest Null is the 1 / SE²-weighted mean of the training effects."),
+         "and set beside step 06's held-out values per gradient and as medians. The forest Null is the mean of the training effects."),
   "", "## Counts", "", md_table(count_tab),
-  "", "## Case weights", "",
-  paste0("The case weights 1 / SE² (PLAN.md) span a factor of ", format(round(w_read[["range"]]), big.mark = ","), " on the ", nrow(strength_df), " rows. ",
-         "Their effective number of rows, (Σw)² / Σw², is ", sprintf("%.1f", w_read[["n_eff"]]), "; the 5 most precise effects carry ", sprintf("%.0f%%", 100 * w_read[["top5"]]),
-         " of the weight and the single most precise one (", top$species, " at ", top$gradient_id, ") ", sprintf("%.0f%%", 100 * w_read[["top1"]]), ". ",
-         "ranger draws each tree's bootstrap rows in proportion to these weights, so the trees are built mostly from a few effects. ",
-         "The meta-regressions weight by 1 / (SE² + the random-effect variances), which is far more even."),
-  "", paste0("The forest predictions are strongly shrunk towards the weighted mean: within a held-out gradient their standard deviation is a median ",
+  "", "## No case weights", "",
+  paste0("PLAN.md's case weights 1 / SE² were dropped (Bills, 2 Nov). Precision is tied to effect size here (Spearman ρ between |strength| and SE ",
+         sprintf("%.2f", cor(abs(strength_df$strength), strength_df$strength_se, method = "spearman")), "): the most precise effects are the near-zero ones. ",
+         "On the ", nrow(strength_df), " rows the 1 / SE² weights span a factor of ", format(round(w_read[["range"]]), big.mark = ","),
+         ", their effective number of rows, (Σw)² / Σw², is ", sprintf("%.1f", w_read[["n_eff"]]), ", the 5 most precise effects carry ", sprintf("%.0f%%", 100 * w_read[["top5"]]),
+         " of the weight and the single most precise one (", top$species, " at ", top$gradient_id, ") ", sprintf("%.0f%%", 100 * w_read[["top1"]]), "; ",
+         "ranger draws bootstrap rows in proportion to case weights, so the weighted forests predicted about zero everywhere (first run, 2 Nov). ",
+         "The meta-regressions do not weight by 1 / SE² either: rma.mv, given the sampling variances only, weights by the inverse of SE² plus the ",
+         "random-effect variances it estimates in the same fit, which is far more even."),
+  "", paste0("Spread of the forest predictions: within a held-out gradient their standard deviation is a median ",
              sprintf("%.0f%%", 100 * median(spread$sd_ratio)), " of the observed one, and ", sum(spread$one_sign), " of ", nrow(spread),
-             " forests predict one sign for every effect of the gradient (skill exactly 0 there). ",
-             "Low forest skill therefore reflects these settings (1 / SE² weights, minimum node size 40) rather than a test of shape."),
+             " forests predict one sign for every effect of the gradient (skill exactly 0 there)."),
   "", "## Forest beside meta-regression, held out, median over gradients", "", md_table(med_tab),
   "", paste0("R² against Null, median held out: the forest is above the meta-regression at ", sum(r2_main$`median difference` > 0 & r2_main$level != "null"),
              " of ", sum(r2_main$level != "null"), " levels."),
   "", "## Seed check", "",
   paste0("Every forest refitted with a second seed: the largest change in a per-gradient value is ", sprintf("%.3f", max(abs(seed_diff$value - seed_diff$value2))),
-         " and the largest change in a median ", sprintf("%.3f", max(seed_med$d)), "."),
+         " and the largest change in a median ", sprintf("%.3f", max(seed_med$d)), ". Largest change in a median per metric: ",
+         paste0(c("R² ", "Spearman ρ ", "skill "), sprintf("%.3f", sapply(c("r2", "spearman", "skill"), function(k) max(seed_med$d[seed_med$metric == k]))), collapse = ", "),
+         "; skill moves most because a prediction near zero can change sign between seeds."),
   "", "## Figures", "", "![Fig S11, forest beside meta-regression](../figures/diagnostics/06b_figS11.png)",
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
+  "- No case weights, instead of 1 / SE² (Bills, 2 Nov; PLAN.md edited).",
   "- Held-out values only, no fit values (Bills, 2 Nov; PLAN.md edited).",
   "- No partial-dependence plots (Bills, 2 Nov; PLAN.md edited).",
   "- Forests also for the seven property + species levels (Bills, 2 Nov).",
