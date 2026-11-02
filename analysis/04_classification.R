@@ -107,8 +107,9 @@ n_hidden <- nrow(species_summary) - nrow(ranges)
 x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(ranges$lower, ranges$upper)))
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
-  # guide from each species name to its interval, shaded by number of gradients like the interval (Bills, 2 Nov)
-  geom_segment(aes(x = x_lim[1], xend = lower, yend = species, colour = n_gradients), linewidth = 0.9, alpha = 0.55) +
+  # guide from each species name to its interval, in the class colour of the name (Bills, 2 Nov)
+  geom_segment(aes(x = x_lim[1], xend = lower, yend = species), colour = cols[as.character(ranges$class)],
+               linewidth = 0.9, alpha = 0.45) +
   geom_vline(xintercept = 0, colour = "grey50") +
   geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.8) +
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 6, stroke = 0.6) +
