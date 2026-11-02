@@ -65,7 +65,7 @@ class_counts <- count(classes, year, class) |> tidyr::pivot_wider(names_from = c
 stopifnot(all(rowSums(class_counts[class_levels]) == c(964, 879, 688, 408))) # classes sum to the anchor's combinations
 
 # ---- Sign agreement, CCC and flows between adjacent anchors -----------------
-pair <- function(y1, y2) {
+pair <- function(y1, y2, classes) {
   wide <- classes |>
     dplyr::filter(year %in% c(y1, y2)) |>
     tidyr::pivot_wider(id_cols = c(species, experiment_id),
@@ -80,7 +80,8 @@ pair <- function(y1, y2) {
     flows = list(table(wide[[paste0("class_", y1)]], wide[[paste0("class_", y2)]]))
   )
 }
-stability <- dplyr::bind_rows(pair(2L, 3L), pair(3L, 4L), pair(4L, 6L))
+stability_of <- function(cl) dplyr::bind_rows(pair(2L, 3L, cl), pair(3L, 4L, cl), pair(4L, 6L, cl))
+stability <- stability_of(classes)
 both <- function(y1, y2) nrow(inner_join(filter(classes, year == y1), filter(classes, year == y2),
                                          by = c("species", "experiment_id")))
 stopifnot(stability$n == c(both(2L, 3L), both(3L, 4L), both(4L, 6L))) # n per pair = present at both anchors
@@ -96,6 +97,9 @@ saveRDS(setNames(stability$flows, stability$pair), file.path(out_dir, "flows.rds
 # Winner); a ribbon joins the combinations present at two adjacent anchors.
 # Drawn by hand: a stratum also holds combinations without a ribbon.
 cols <- c("Loser" = "#D95F2B", "Loser (ns)" = "#F0A07A", "Winner (ns)" = "#8FD3B6", "Winner" = "#1B9E77")
+# drawn twice (Bills, 2 Nov): all residents (main Fig 1a) and the residents in at
+# least 3 gradients that the classification and the ladder use (appendix)
+draw_fig1 <- function(classes, stability, file) {
 gap <- 0.025 * max(table(classes$year)); w <- 0.08; xpos <- setNames(seq_along(anchors), anchors)
 strata <- count(classes, year, class) |>
   arrange(year, class) |>
@@ -157,7 +161,22 @@ fig <- ggplot() +
   labs(title = "a)") +
   theme_void() + theme(plot.title = element_text(face = "bold", size = 24, colour = "grey20"),
                        plot.margin = margin(10, 10, 10, 10))
-ggsave("figures/diagnostics/03_fig1_residents_draft.png", fig, width = 14, height = 8.5, dpi = 150, bg = "white")
+ggsave(file, fig, width = 14, height = 8.5, dpi = 150, bg = "white")
+switches
+}
+switches <- draw_fig1(classes, stability, "figures/diagnostics/03_fig1_residents_draft.png")
+
+# appendix: the same figure on the residents in at least 3 gradients (2 Nov,
+# Bills), the species that steps 04 and 05 use
+grad3 <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
+  filter(species_pool == "resident") |>
+  summarise(n_gradients = n_distinct(gradient_id), .by = species) |>
+  filter(n_gradients >= 3) |> pull(species)
+stopifnot(length(grad3) == 74) # residents in at least 3 gradients (step 04)
+classes3 <- filter(classes, species %in% grad3)
+stability3 <- stability_of(classes3)
+switches3 <- draw_fig1(classes3, stability3, "figures/diagnostics/03_figS_residents_3gradients_draft.png")
+utils::write.csv(select(stability3, pair, n, sign_agreement, ccc), file.path(out_dir, "stability_3gradients.csv"), row.names = FALSE)
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
@@ -193,6 +212,14 @@ report <- c(
   paste0("Switches between a significant winner and a significant loser, in either direction: ",
          paste(sprintf("%s: %d", stability$pair, switches["lw", ] + switches["wl", ]), collapse = "; "),
          ". Ribbons that cross zero with a significant class at either end are drawn darker; every ribbon that crosses zero is labelled where it enters the next anchor with its count and its share of the class it started from."),
+  "", "## Appendix: residents in at least 3 gradients", "",
+  paste0("The same classes and flows, restricted to the ", length(grad3), " resident species found in at least 3 gradients, ",
+         "the species on which the classification (step 04) and the ladder (step 05) rest (decided 2 Nov). Classified ",
+         "combinations per anchor: ", paste(sprintf("year %d: %d", anchors, as.integer(table(factor(classes3$year, anchors)))), collapse = ", "),
+         "."), "",
+  md_table(mutate(select(stability3, pair, n, sign_agreement, ccc),
+                  sign_agreement = sprintf("%.3f", sign_agreement), ccc = sprintf("%.3f", ccc))), "",
+  "![Fig 1a, residents in at least 3 gradients (appendix draft)](../figures/diagnostics/03_figS_residents_3gradients_draft.png)",
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   paste("Combinations absent from both groups in an anchor year (", sum(absent_counts$absent), " of ", fmt(nrow(at_anchor)),

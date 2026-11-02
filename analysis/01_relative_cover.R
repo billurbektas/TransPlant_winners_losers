@@ -303,15 +303,18 @@ pc <- ggplot(pc_dat, aes(n, experiment, fill = status)) + geom_col(width = 0.75)
 kept_grad <- pools |> mutate(gradient_id = sub("::.*", "", experiment_id),
                              pool = ifelse(species_pool == "resident", "Residents", "Colonizers")) |>
   summarise(gradients = n_distinct(gradient_id), .by = c(pool, species)) |> mutate(pool = factor(pool, levels = c("Residents", "Colonizers")))
-pd <- ggplot(kept_grad, aes(gradients, fill = pool, alpha = gradients >= 2)) +
+pd <- ggplot(kept_grad, aes(gradients, fill = pool, alpha = gradients >= 3)) +
   geom_bar(position = position_dodge(preserve = "single"), width = 0.8) +
   geom_text(stat = "count", aes(label = after_stat(count)), position = position_dodge(width = 0.8), vjust = -0.3, size = 5.6,
             fontface = "bold", alpha = 1) +
-  geom_vline(xintercept = 1.5, colour = "#D95F2B", linetype = "dashed", linewidth = 0.9) +
+  # the cut-off used downstream (Bills, 2 Nov): classification and ladder on species in at least 3 gradients
+  geom_vline(xintercept = 2.5, colour = "#D95F2B", linetype = "dashed", linewidth = 0.9) +
+  annotate("text", x = 2.6, y = Inf, label = "classification and ladder (steps 04, 05): at least 3",
+           hjust = 0, vjust = 1.5, size = 6, fontface = "bold", colour = "#D95F2B") +
   scale_fill_manual(values = c(Residents = "#1B9E77", Colonizers = "#7442A0"), name = NULL) +
   scale_alpha_manual(values = c(`FALSE` = 0.4, `TRUE` = 1), guide = "none") + scale_x_continuous(breaks = 1:21) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.12))) +
-  labs(title = "d)", subtitle = "Kept species by the number of gradients they occur in\n(dashed: at least 2, as in steps 04 and 05)",
+  labs(title = "d)", subtitle = "Kept species by the number of gradients they occur in\n(dashed: the cut-off of steps 04 and 05; pale: left out there)",
        x = "Gradients", y = "Species") + big
 ggsave("figures/diagnostics/01_pool_rule.png",
        # each panel drawn on its own, so its axis titles sit close instead of aligning to c)'s long labels (Bills, 2 Nov)
@@ -343,7 +346,7 @@ report <- c(
   "", "## What the pool rule keeps and leaves behind", "",
   paste0("Every species x experiment recorded in a control group, by its plot-year records there and by what the rule ",
          "did with it (a); totals (b); per experiment, the species recorded in the origin controls (c); kept species by the ",
-         "number of gradients they occur in, with the at-least-2 cut-off that steps 04 and 05 apply (d). The rule is not a ",
+         "number of gradients they occur in, with the cut-off applied downstream, at least 3 gradients for the classification (step 04) and the ladder (step 05) (d). The rule is not a ",
          "cut-off on records: combinations with many records but in few plots or few years are left behind, and some with ",
          "few records are kept where the plots are few."), "",
   "![Kept and left behind](../figures/diagnostics/01_pool_rule.png)", "",

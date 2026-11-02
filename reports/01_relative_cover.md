@@ -24,7 +24,7 @@ Species x experiment combinations in neither pool (before the pool-size rule):
 
 ## What the pool rule keeps and leaves behind
 
-Every species x experiment recorded in a control group, by its plot-year records there and by what the rule did with it (a); totals (b); per experiment, the species recorded in the origin controls (c); kept species by the number of gradients they occur in, with the at-least-2 cut-off that steps 04 and 05 apply (d). The rule is not a cut-off on records: combinations with many records but in few plots or few years are left behind, and some with few records are kept where the plots are few.
+Every species x experiment recorded in a control group, by its plot-year records there and by what the rule did with it (a); totals (b); per experiment, the species recorded in the origin controls (c); kept species by the number of gradients they occur in, with the cut-off applied downstream, at least 3 gradients for the classification (step 04) and the ladder (step 05) (d). The rule is not a cut-off on records: combinations with many records but in few plots or few years are left behind, and some with few records are kept where the plots are few.
 
 ![Kept and left behind](../figures/diagnostics/01_pool_rule.png)
 

@@ -56,6 +56,18 @@ Strata are drawn to one absolute scale, so columns shrink as experiments end and
 
 Switches between a significant winner and a significant loser, in either direction: 2 to 3: 0; 3 to 4: 0; 4 to 6: 0. Ribbons that cross zero with a significant class at either end are drawn darker; every ribbon that crosses zero is labelled where it enters the next anchor with its count and its share of the class it started from.
 
+## Appendix: residents in at least 3 gradients
+
+The same classes and flows, restricted to the 74 resident species found in at least 3 gradients, the species on which the classification (step 04) and the ladder (step 05) rest (decided 2 Nov). Classified combinations per anchor: year 2: 515, year 3: 488, year 4: 387, year 6: 233.
+
+| pair | n | sign_agreement | ccc |
+| --- | --- | --- | --- |
+| 2 to 3 | 485 | 0.728 | 0.510 |
+| 3 to 4 | 383 | 0.828 | 0.784 |
+| 4 to 6 | 201 | 0.806 | 0.799 |
+
+![Fig 1a, residents in at least 3 gradients (appendix draft)](../figures/diagnostics/03_figS_residents_3gradients_draft.png)
+
 ## Warnings captured
 
 - The `label.size` argument of `geom_label()` is deprecated as of ggplot2 3.5.0.
