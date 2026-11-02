@@ -238,8 +238,8 @@ fig <- ggplot(pool_sizes, aes(resident)) +
   geom_histogram(binwidth = 2, boundary = 0, fill = "grey60", colour = "white") +
   geom_vline(xintercept = k_min, colour = "#B2182B", linetype = "dashed") +
   labs(x = "Resident pool size (species; dashed: pool-size rule)", y = "Experiments") +
-  theme_classic()
-ggsave("figures/diagnostics/01_pool_sizes.png", fig, width = 5, height = 3.5, dpi = 150)
+  theme_classic(base_size = 14)
+ggsave("figures/diagnostics/01_pool_sizes.png", fig, width = 6, height = 4, dpi = 150)
 
 # ---- Pool-rule diagnostic: what the rule keeps and leaves behind (2 Nov) -----
 # every species x experiment recorded in a control group, by its plot-year
@@ -265,9 +265,9 @@ status_long <- bind_rows(
 stopifnot(sum(status_long$status == "kept") == nrow(pools)) # every kept combination appears once
 status_cols <- c("kept" = "#1B9E77", "left behind: fails the pool rule" = "grey70",
                  "left behind: recorded in origin controls" = "#E6A15C", "left behind: experiment under 5 residents" = "#B2182B")
-big <- theme_classic(base_size = 18) + theme(plot.title = element_text(face = "bold", size = 26), axis.title = element_text(face = "bold"),
-  strip.text = element_text(face = "bold", size = 16), strip.background = element_blank(), legend.position = "top",
-  legend.text = element_text(size = 14), plot.background = element_rect(fill = "white", colour = NA))
+big <- theme_classic(base_size = 21) + theme(plot.title = element_text(face = "bold", size = 29), axis.title = element_text(face = "bold"),
+  strip.text = element_text(face = "bold", size = 19), strip.background = element_blank(), legend.position = "top",
+  legend.text = element_text(size = 17), plot.background = element_rect(fill = "white", colour = NA))
 pa <- ggplot(status_long, aes(pmin(plot_years, 40), fill = status)) +
   geom_histogram(binwidth = 1, boundary = 0.5, colour = "white", linewidth = 0.2) +
   facet_wrap(~ pool, ncol = 1, scales = "free_y") + scale_fill_manual(values = status_cols, name = NULL, drop = FALSE) +
@@ -276,37 +276,38 @@ pa <- ggplot(status_long, aes(pmin(plot_years, 40), fill = status)) +
        x = "Plot-year records in the control group (40 or more in the last bar)", y = "Species x experiment") + big
 pb_dat <- count(status_long, pool, status)
 pb <- ggplot(pb_dat, aes(status, n, fill = status)) + geom_col(width = 0.7) +
-  geom_text(aes(label = format(n, big.mark = ",")), vjust = -0.3, size = 5.5, fontface = "bold") +
+  geom_text(aes(label = format(n, big.mark = ",")), vjust = -0.3, size = 6.6, fontface = "bold") +
   facet_wrap(~ pool, ncol = 1, scales = "free") + scale_fill_manual(values = status_cols, guide = "none") +
   scale_x_discrete(labels = function(x) gsub("(.{1,16})(\\s|$)", "\\1\n", sub("left behind: ", "left behind: ", x))) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +
   labs(title = "b)", subtitle = paste0("Kept: ", n_distinct(pools$species[pools$species_pool == "resident"]), " resident and ",
                                        n_distinct(pools$species[pools$species_pool == "destination_pool"]), " colonizer species"),
-       x = NULL, y = "Species x experiment") + big + theme(axis.text.x = element_text(size = 12))
+       x = NULL, y = "Species x experiment") + big + theme(axis.text.x = element_text(size = 15))
 pc_dat <- status |> filter(!is.na(resident_status)) |> count(experiment_id, status = resident_status) |>
   mutate(status = factor(status, levels = levels(status_long$status)),
          experiment = factor(sub("::", " ", experiment_id), levels = rev(sort(unique(sub("::", " ", experiment_id))))))
 pc <- ggplot(pc_dat, aes(n, experiment, fill = status)) + geom_col(width = 0.75) +
   geom_vline(xintercept = k_min, colour = "#B2182B", linetype = "dashed") +
   scale_fill_manual(values = status_cols, guide = "none") +
-  labs(title = "c)", subtitle = paste0("Species recorded in each experiment's origin controls (dashed: ", k_min, " residents)"),
-       x = "Species", y = NULL) + big + theme(axis.text.y = element_text(size = 11))
+  labs(title = "c)", subtitle = paste0("Species recorded in each experiment's origin controls\n(dashed: ", k_min, " residents)"),
+       x = "Species", y = NULL) + big + theme(axis.text.y = element_text(size = 14))
 kept_grad <- pools |> mutate(gradient_id = sub("::.*", "", experiment_id),
                              pool = ifelse(species_pool == "resident", "Residents", "Colonizers")) |>
   summarise(gradients = n_distinct(gradient_id), .by = c(pool, species)) |> mutate(pool = factor(pool, levels = c("Residents", "Colonizers")))
 pd <- ggplot(kept_grad, aes(gradients, fill = pool, alpha = gradients >= 2)) +
   geom_bar(position = position_dodge(preserve = "single"), width = 0.8) +
-  geom_text(stat = "count", aes(label = after_stat(count)), position = position_dodge(width = 0.8), vjust = -0.3, size = 4.5,
+  geom_text(stat = "count", aes(label = after_stat(count)), position = position_dodge(width = 0.8), vjust = -0.3, size = 5.6,
             fontface = "bold", alpha = 1) +
   geom_vline(xintercept = 1.5, colour = "#D95F2B", linetype = "dashed", linewidth = 0.9) +
   scale_fill_manual(values = c(Residents = "#1B9E77", Colonizers = "#7442A0"), name = NULL) +
   scale_alpha_manual(values = c(`FALSE` = 0.4, `TRUE` = 1), guide = "none") + scale_x_continuous(breaks = 1:21) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.12))) +
-  labs(title = "d)", subtitle = "Kept species by the number of gradients they occur in (dashed: at least 2, steps 04 and 05)",
+  labs(title = "d)", subtitle = "Kept species by the number of gradients they occur in\n(dashed: at least 2, as in steps 04 and 05)",
        x = "Gradients", y = "Species") + big
 ggsave("figures/diagnostics/01_pool_rule.png",
-       patchwork::wrap_plots(patchwork::wrap_plots(pa, pb, widths = c(1.4, 1)),
-                             patchwork::wrap_plots(pc, pd, widths = c(1, 1.2)), ncol = 1, heights = c(1, 1.3)),
+       # each panel drawn on its own, so its axis titles sit close instead of aligning to c)'s long labels (Bills, 2 Nov)
+       patchwork::wrap_plots(lapply(list(pa, pb, pc, pd), function(p) patchwork::wrap_elements(full = p)),
+                             design = "AB\nCD", widths = c(1.3, 1), heights = c(1, 1.3)),
        width = 24, height = 24, dpi = 110, bg = "white")
 criteria <- pools |> transmute(pool = species_pool,
   A = ifelse(pool == "resident", A_origin_control, A_destination_control), B = ifelse(pool == "resident", B_origin_control, B_destination_control)) |>
