@@ -6,7 +6,7 @@
 #         sites.rds (elevations, for the experiment labels of the pool-rule figure)
 # Writes: data/derived/01_relative_cover/cover_long.rds, a0.rds,
 #         experiments_kept.csv, pool_sizes.csv, flow_counts.csv;
-#         figures/diagnostics/01_pool_rule.png, 01_pool_sizes.png;
+#         figures/appendix/figS5.png, figS6.png;
 #         reports/01_relative_cover.md
 # Checks: relative cover sums to 1 per plot-year over all vascular records;
 #         the six deep-lineage taxa absent afterwards; 43 included experiments;
@@ -40,7 +40,7 @@ globalCallingHandlers(warning = function(w) {
 })
 out_dir <- "data/derived/01_relative_cover"
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-dir.create("figures/diagnostics", recursive = TRUE, showWarnings = FALSE)
+dir.create("figures/appendix", recursive = TRUE, showWarnings = FALSE)
 
 deep_lineage <- c("Gymnocarpium dryopteris", "Athyrium spinulosum", "Botrychium lunaria",
                   "Equisetum arvense", "Selaginella selaginoides", "Juniperus communis")
@@ -240,7 +240,7 @@ fig <- ggplot(pool_sizes, aes(resident)) +
   geom_vline(xintercept = k_min, colour = "#B2182B", linetype = "dashed") +
   labs(x = "Resident pool size (species; dashed: pool-size rule)", y = "Experiments") +
   theme_classic(base_size = 14)
-ggsave("figures/diagnostics/01_pool_sizes.png", fig, width = 6, height = 4, dpi = 150)
+ggsave("figures/appendix/figS6.png", fig, width = 6, height = 4, dpi = 150)
 
 # ---- Pool-rule diagnostic: what the rule keeps and leaves behind (2 Nov) -----
 # every species x experiment recorded in a control group, by its plot-year
@@ -316,7 +316,7 @@ pd <- ggplot(kept_grad, aes(gradients, fill = pool, alpha = gradients >= 3)) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.12))) +
   labs(title = "d)", subtitle = "Kept species by the number of gradients they occur in\n(dashed: the cut-off of steps 04 and 05; pale: left out there)",
        x = "Gradients", y = "Species") + big
-ggsave("figures/diagnostics/01_pool_rule.png",
+ggsave("figures/appendix/figS5.png",
        # each panel drawn on its own, so its axis titles sit close instead of aligning to c)'s long labels (Bills, 2 Nov)
        patchwork::wrap_plots(lapply(list(pa, pb, pc, pd), function(p) patchwork::wrap_elements(full = p)),
                              design = "AB\nCD", widths = c(1.3, 1), heights = c(1, 1.3)),
@@ -349,7 +349,7 @@ report <- c(
          "number of gradients they occur in, with the cut-off applied downstream, at least 3 gradients for the classification (step 04) and the ladder (step 05) (d). The rule is not a ",
          "cut-off on records: combinations with many records but in few plots or few years are left behind, and some with ",
          "few records are kept where the plots are few."), "",
-  "![Kept and left behind](../figures/diagnostics/01_pool_rule.png)", "",
+  "![Kept and left behind](../figures/appendix/figS5.png)", "",
   md_table(tidyr::pivot_wider(count(status_long, pool, status), names_from = status, values_from = n, values_fill = 0)),
   "", "Kept effects by criterion (A: at least 2 plots in at least half of the survey years; B: at least half of the plots in at least 2 survey years):", "",
   md_table(mutate(criteria, pool = ifelse(pool == "resident", "residents", "destination pool"))),
@@ -367,7 +367,7 @@ report <- c(
           paste(sprintf("%s %d", head(filter(pool_sizes, kept)$experiment_id, 3), head(filter(pool_sizes, kept)$resident, 3)),
                 collapse = "; ")),
   sprintf("Gradients (`gradient_id` = region) after the rule: %d.", n_distinct(filter(pool_sizes, kept)$region)),
-  "", "![Resident pool size per experiment](../figures/diagnostics/01_pool_sizes.png)", "",
+  "", "![Resident pool size per experiment](../figures/appendix/figS6.png)", "",
   md_table(head(pool_sizes, 10)),
   "", sprintf("## Survey years failing the both-groups rule (%d experiment-years)", nrow(year_fails)), "",
   "A year enters a pool's table only if both of that pool's groups were surveyed in it.", "",

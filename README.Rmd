@@ -84,7 +84,9 @@ Here, we use a network of `r length(unique(res$experiment_id))` whole-community 
 | [07f](#pathways) | Traits of losers, winners and colonizers | Fig 5 |
 | [10](#the-experiments-in-climate-space) | Synthesis figures, appendix and this page | Figs 4, 7, S1–S18 |
 
-![Fig S1. Data flow: every filter, with the experiments, species and effects that survive it.](figures/appendix/figS1.png)
+![Figure S1](figures/appendix/figS1.png)
+
+**Figure S1.** Data flow from the network database to each analysis. Each box gives the number of experiments, species and species × experiment effects that remain after the rule written on the arrow above it. The shared steps (grey) split into the resident branch (orange, left), which leads to the classification (Figure 2) and the model ladder (Figure 6), and the colonizer branch (purple, right), which leads to the colonizer classification (Figure 3) and the colonizer ladder (Figure S16). The classification boxes count species and their effects.
 
 ## Data and selection
 
@@ -97,14 +99,25 @@ The community data are the TransPlant network database (`data/transplant_network
 
 Properties: LDMC, LMA and vegetative height from TRY, screened for outliers and unit slips (Fig S2); graminoid and woody growth form; the first three phylogenetic eigenvectors (PEV1–3, Fig S3, Table S3); the thermal and precipitation optima from GBIF occurrences and CHELSA (bio10, bio18). Their distributions and the check of the niche climatology against the experiments' own climate are in Fig S4.
 
-| | |
-|---|---|
-| ![Fig S2](figures/appendix/figS2.png) | ![Fig S3](figures/appendix/figS3.png) |
-| **Fig S2.** TRY records kept and removed by the screening. | **Fig S3.** Phylogenetic axes of the analysed species; Table S3 names the families at each end. |
-| ![Fig S4](figures/appendix/figS4.png) | ![Fig S5](figures/appendix/figS5.png) |
-| **Fig S4.** Predictors before standardisation and the niche checks. | **Fig S5.** The pool rule: who is kept, who left behind and why. |
+![Figure S2](figures/appendix/figS2.png)
 
-![Fig S6. Resident pool sizes; dashed: the pool-size rule.](figures/appendix/figS6.png)
+**Figure S2.** Screening of the TRY trait records. Every record of leaf dry matter content (LDMC, g g⁻¹), leaf mass per area (LMA, mg mm⁻²) and vegetative height (m), in its natural units on a log-spaced axis; the number of records is on a square-root scale. Grey records were kept. Coloured records were removed: outliers more than 3.5 robust standard deviations from their species' median on the log scale (yellow), unit slips of about 10, 100 or 1000 times their species' median (orange), records that are both (pink), all records of the seven tree species (green), and species × trait values set to missing after review (blue).
+
+![Figure S3](figures/appendix/figS3.png)
+
+**Figure S3.** Phylogenetic axes of the analysed species. Phylogenetic eigenvector 1 (PEV1) against (a) PEV2 and (b) PEV3, one point per species, graminoids in gold and other species in grey; the species at the extremes of each axis are named. (c) Share of the positive variation in phylogenetic distances captured by each of the first ten eigenvectors; the three axes used as the phylogeny property are dark. Table S3 lists the families at each end of each axis.
+
+![Figure S4](figures/appendix/figS4.png)
+
+**Figure S4.** Distributions of the predictors before standardization, and checks of the niche climatology. Across the `r length(unique(res$experiment_id))` experiments: (a) destination June–August mean temperature, (b) experimental warming, the difference in June–August temperature between destination and origin, and (c) destination June–August precipitation. Across the `r n(nrow(res))` resident species × experiment: initial abundance, log(% cover + 1) at the first survey, in (d) origin and (e) destination controls. Across resident species: (f) LDMC, (g) LMA, (h) vegetative height, (i) thermal optimum and (j) precipitation optimum. Panels c, f–h and j have log axes; the number of values is given in each axis label. (k) CHELSA bio10 against the destination June–August temperature used in the models and (l) CHELSA bio18 against the destination June–August precipitation; dashed lines are 1:1.
+
+![Figure S5](figures/appendix/figS5.png)
+
+**Figure S5.** Assignment of species to the resident and colonizer pools. A species is kept in an experiment's pool if it is recorded in the control group in at least two plots in half of the years, or in half of the plots in at least two years: in the origin controls for residents, in the destination controls for colonizers, which must also be absent from the origin controls. (a) Each species × experiment recorded in the control group, by its number of plot-year records there (40 or more in the last bar): kept (green), failing the pool rule (grey), destination species recorded in the origin controls (orange), and in an experiment with fewer than five residents (red). (b) The same categories counted. (c) Species recorded in each experiment's origin controls, kept (green) and left behind; the dashed line marks the five residents an experiment needs. (d) Kept species by the number of gradients in which they occur, residents (green) and colonizers (purple); the dashed line marks the three gradients required by the classification and the model ladder, and pale bars are species left out of them.
+
+![Figure S6](figures/appendix/figS6.png)
+
+**Figure S6.** Number of resident species per experiment. The dashed line marks the pool-size rule of five residents; the one experiment below it, US_Arizona, is excluded.
 
 Code: [`prep/`](prep/) · [`analysis/01_relative_cover.R`](analysis/01_relative_cover.R) · report [`reports/01_relative_cover.md`](reports/01_relative_cover.md)
 
@@ -136,14 +149,21 @@ strength_y3 <- emmeans::contrast(em_y3, method = "revpairwise")
 DescTools::CCC(contrast_year_a, contrast_year_b)$rho.c$est
 ```
 
-![Fig 1. Year-specific classes of residents (a) and colonizers (b) at years 2, 3, 4 and 6, with sign or presence agreement and Lin's concordance under each gap.](figures/main/fig1.png)
+![Figure 1](figures/main/fig1.png)
 
-| | |
-|---|---|
-| ![Fig S7](figures/appendix/figS7.png) | ![Fig S9](figures/appendix/figS9.png) |
-| **Fig S7.** Strength and its SE, all years (step 02). | **Fig S9.** Strength from year 3 against all years (step 03b). |
+**Figure 1.** Temporal consistency of winners, losers and colonizers. (a) Resident species: each species × experiment is classified at years 2, 3, 4 and 6 after transplantation from its year-specific difference in relative cover between warmed and origin-control turfs, as a significant loser (dark orange), non-significant loser (light orange), non-significant winner (light green) or significant winner (dark green). Stratum height is the number of species × experiment in each class, drawn to one scale across years, so that columns shrink as shorter experiments drop out. Ribbons follow the same species × experiment between years; ribbons that change sign are labelled with their count and the share of their starting class. Below each gap: the share of species × experiment whose difference kept its sign, and Lin's concordance correlation coefficient between the two years' differences, which is 1 only if every species × experiment had the same strength in both years. (b) Colonizing species, the species of the destination vegetation, classified from their year-specific relative cover in warmed turfs as absent, present but not significantly above zero, or present (purple); the numbers below each gap are the share whose presence agreed and the concordance correlation of warmed cover. Year 1 is omitted as transplant shock.
 
-![Fig S8. Fig 1a for the residents in at least 3 gradients, the species of the classification and the ladder.](figures/appendix/figS8.png)
+![Figure S7](figures/appendix/figS7.png)
+
+**Figure S7.** Losing-winning strength averaged over all survey years. Top: distributions of strength, the difference in relative cover between warmed and origin-control turfs estimated by one mixed model per experiment, and of its standard error, across the `r n(nrow(res_all))` resident species × experiment. Bottom: strength against its standard error. Positive values indicate higher relative cover in warmed than in origin-control turfs.
+
+![Figure S8](figures/appendix/figS8.png)
+
+**Figure S8.** Temporal consistency of the residents occurring in at least three gradients, the species of the classification (Figure 2) and the model ladder (Figure 6). As Figure 1a: each species × experiment is classified at years 2, 3, 4 and 6 as a significant or non-significant loser or winner; ribbons follow the same species × experiment between years, and the boxes give the sign agreement and Lin's concordance correlation coefficient between adjacent years.
+
+![Figure S9](figures/appendix/figS9.png)
+
+**Figure S9.** Losing-winning strength averaged over years 3 and later, the strength used in all downstream analyses. (a) Strength from year 3 against strength over all years (Figure S7), one point per resident species × experiment; the line is 1:1. (b) Distributions of strength from year 3 and of its standard error, in relative cover (proportion).
 
 Code: [`02_strength.R`](analysis/02_strength.R) · [`03_temporal.R`](analysis/03_temporal.R) · [`03b_strength_y3.R`](analysis/03b_strength_y3.R) · reports [02](reports/02_strength.md), [03](reports/03_temporal.md), [03b](reports/03b_strength_y3.md)
 
@@ -165,7 +185,9 @@ m <- metafor::rma.mv(yi = strength, V = strength_se^2, random = ~ 1 | effect_id,
 predict(m)   # pi.lb, pi.ub: the prediction interval against zero
 ```
 
-![Fig 2. Residents in at least 3 gradients: pooled strength and prediction interval for a new experiment; b, c the best winner and the worst loser among the most widespread species.](figures/main/fig2.png)
+![Figure 2](figures/main/fig2.png)
+
+**Figure 2.** Consistent winners, consistent losers and context-dependent species among residents. (a) Each row is a resident species occurring in at least three gradients: the point is its pooled losing-winning strength across experiments, coloured by class, and the line its prediction interval for a new experiment, μ ± 1.96 √(τ² + SE²), which carries both the species' variance among experiments (τ²) and the uncertainty of its pooled strength. A species whose interval lies entirely below zero is a consistent loser, entirely above zero a consistent winner, and otherwise context-dependent. Lines are shaded by the number of gradients the species occurs in, and the numbers give gradients (experiments). Context-dependent species with a pooled strength between −0.005 and 0.005 are omitted, and their number is given. (b, c) The species with the highest and the lowest pooled strength among those found in the most gradients: one row per experiment, labelled by country and the elevation of origin and destination, with an arrow from the species' mean relative cover in origin-control turfs (hollow) to its cover in warmed turfs (filled), years 3 and later.
 
 Code: [`04_classification.R`](analysis/04_classification.R) · report [04](reports/04_classification.md)
 
@@ -175,9 +197,13 @@ Code: [`04_classification.R`](analysis/04_classification.R) · report [04](repor
 
 **Decisions.** Cover, not counts, in the main figure; the counts are Fig S10 (2 Nov). Pies at their true climate; experiments sharing a destination fan out around a black dot. No purple where an experiment has fewer than 5 colonizers.
 
-![Fig 4. The experiments in climate space: share of the warmed turf's cover by class; labels name the gradient and are coloured by the warming applied; the key gives origin and destination elevation, strongest warming first.](figures/main/fig4.png)
+![Figure 4](figures/main/fig4.png)
 
-![Fig S10. The same map with species counts in the pies.](figures/appendix/figS10.png)
+**Figure 4.** The experiments in climate space, and the share of the warmed turf held by losers, winners and colonizers. Each pie is one experiment, placed at its destination's June–August mean temperature and June–August precipitation (log scale), both from monthly CHELSA data averaged over the experiment's years. Slices give the share of relative cover in warmed turfs from year 3 on held by resident losers (orange) and resident winners (green), classified by the sign of their losing-winning strength in that experiment, by colonizers with warmed cover above zero (purple), and by species not analysed (grey: species outside the resident and colonizer pools, and records identified only to genus or not at all). Experiments with fewer than five colonizing species have no colonizer slice. Experiments that share a destination fan out around a black dot at the shared climate. Labels name the gradient, with a letter where a gradient holds several experiments, and are coloured by the experimental warming, the difference in June–August temperature between destination and origin; the key on the right gives the origin and destination elevations, from the strongest to the weakest warming. The same map with species counts is Figure S10.
+
+![Figure S10](figures/appendix/figS10.png)
+
+**Figure S10.** The experiments in climate space with species counts. As Figure 4, but each pie counts species: resident species with a negative (losers) or positive (winners) losing-winning strength from year 3 on in that experiment, and colonizers with warmed cover above zero (`r n(sum(res$strength < 0))`, `r n(sum(res$strength > 0))` and `r n(sum(col$strength > 0))` species × experiment in total).
 
 Code: [`10_figures.R`](analysis/10_figures.R) · report [10](reports/10_figures.md)
 
@@ -225,14 +251,21 @@ rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
                      mtry = mtry, min.node.size = node)      # no case weights
 ```
 
-![Fig 6. The ladder: heterogeneity per model (top) and, per gradient, R² against the Null, Spearman and loser/winner skill, in sample (grey) and held out (blue); the dashed lines are the Species-dependent medians.](figures/main/fig6.png)
+![Figure 6](figures/main/fig6.png)
 
-| | |
-|---|---|
-| ![Fig S11](figures/appendix/figS11.png) | ![Fig S13](figures/appendix/figS13.png) |
-| **Fig S11.** Coefficients of every resident model, model-based 95% intervals. | **Fig S13.** Random forest beside the meta-regression, held out. |
+**Figure 6.** How much of the variation in losing-winning strength is explained, and how much is predicted for an unseen gradient. Models from left to right: Null; initial abundances at origin and destination (Q3a); warming and background climate (Climate, Q3b); both (Q3b); species-specific intercepts and climate slopes (Species-dependent, the ceiling, Q3c); and one model per species property added to the climate and initial-abundance model with the species terms kept (Q3d): leaf dry matter content (LDMC), leaf mass per area (LMA), vegetative height, graminoid and woody growth form, phylogenetic position (eigenvectors 1–3) and climatic niche (thermal and precipitation optima). Arcs mark the pairs of models that answer each question. (a) Heterogeneity left after each model (×10⁻⁴): context dependency (grey), stacked as the shift shared by all species of a site (σ²_experiment, light) under the species × site piece (τ², dark), and the variance among species in their fitted response (H_species, gold), stacked as the intercept piece (average differences among species) and the slope piece (differences in climate response). (b) R² against the Null model on the same gradient, (c) Spearman's rank correlation within the gradient and (d) loser/winner skill, loser recall plus winner recall minus one, on the `r length(unique(pred06$gradient_id))` gradients with at least five effects: half violins of the gradient values in sample (grey, model fitted to all gradients) and for the gradient held out of the fit (blue), with medians as large points and numbers. Dashed lines are the Species-dependent values. The Null is zero by construction and not drawn; Climate predicts one value per gradient and has no Spearman or skill.
 
-![Fig S12. Every metric, level and gradient, in sample and held out.](figures/appendix/figS12.png)
+![Figure S11](figures/appendix/figS11.png)
+
+**Figure S11.** Fixed effects of the resident models. (a) Standardized effects of the climate and initial-abundance model on losing-winning strength: warming (W), destination temperature (T) and precipitation (P), their interactions, and initial abundance at origin (A0_origin) and at destination (A0_dest), each with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes: the property and its interactions with W, T, P and T × P. Phylogenetic eigenvectors 1–3 and the thermal and precipitation optima are fitted together and shown in one panel each. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor.
+
+![Figure S12](figures/appendix/figS12.png)
+
+**Figure S12.** Fit and prediction of every resident model, gradient by gradient. Rows are the `r length(unique(pred06$gradient_id))` gradients with at least five effects, ordered by destination temperature (coldest at the top); columns are the models, followed by each property model with species-specific deviations (+ species). (a, b) R² against the Null model on the same gradient, (c, d) Spearman's rank correlation between observed and predicted strength within the gradient, and (e, f) loser/winner skill, loser recall plus winner recall minus one; (a, c, e) in sample and (b, d, f) for the gradient held out of the fit. Blue cells are better and red cells worse than zero; colours are capped at ±1, and grey cells are undefined because Climate predicts one value per gradient.
+
+![Figure S13](figures/appendix/figS13.png)
+
+**Figure S13.** Random forests beside the meta-regressions, residents. For each model of the ladder, (a) R² against the Null meta-regression on the same gradient, (b) Spearman's rank correlation and (c) loser/winner skill on each of the `r length(unique(pred06$gradient_id))` gradients held out of the fit, for the meta-regression (blue, left) and a random forest on the same rows, predictors and folds (orange, right). Half violins show the distribution over gradients, small points the gradients, and large points and numbers the medians. The forests use no case weights and one setting of minimum node size and number of candidate predictors, chosen by out-of-bag R² over all models. The Null is not drawn; Climate has no Spearman or skill because it predicts one value per gradient.
 
 In sample the Species-dependent model reaches a median R² of `r f2(pm(fit06, "species"))`; held out it drops to `r f2(pm(pred06, "species"))`, below initial abundances alone (`r f2(pm(pred06, "start"))`). No property level beats the Climate + start floor held out by much (`r f2(pm(pred06, "climate_start"))`; Niche `r f2(pm(pred06, "niche"))`, LDMC `r f2(pm(pred06, "ldmc"))`, Height `r f2(pm(pred06, "height"))`), and the forest beats the meta-regression only at `r paste(for_better_name, collapse = ", ")` (median over levels `r f2(med(fl["forest", ]))` against `r f2(med(fl["metafor", ]))`): the weak relationships are weak, not misspecified.
 
@@ -261,16 +294,29 @@ strength <- emmeans::emmeans(m, ~ species, at = list(year = years_3_on), df = df
 f_both_col <- ~ W * T * P + A0_dest + A0_dest:W
 ```
 
-![Fig 3. Colonizers in at least 3 gradients: pooled warmed cover and prediction interval; no species arrived in every experiment.](figures/main/fig3.png)
+![Figure 3](figures/main/fig3.png)
 
-| | |
-|---|---|
-| ![Fig S14](figures/appendix/figS14.png) | ![Fig S15](figures/appendix/figS15.png) |
-| **Fig S14.** Colonizer strength, years 3 and later against all years, and its distribution. | **Fig S15.** Coefficients of every colonizer model. |
-| ![Fig S16](figures/appendix/figS16.png) | ![Fig S18](figures/appendix/figS18.png) |
-| **Fig S16.** The colonizers' ladder. | **Fig S18.** Random forest beside the meta-regression, colonizers. |
+**Figure 3.** Consistent colonizers, context-dependent colonizers and consistent non-colonizers. (a) Each row is a colonizing species occurring in at least three gradients: the point is its pooled relative cover in warmed turfs from year 3 on, across experiments, and the line its prediction interval for a new experiment. A species whose interval lies entirely above zero arrived in every experiment (consistent colonizer); one whose interval reaches zero arrived in some experiments and not in others (context-dependent). Species never present in warmed turfs from year 3 on are consistent non-colonizers, given as a count. Lines are shaded by the number of gradients, and the numbers give gradients (experiments). (b, c) The colonizers with the highest and the lowest pooled warmed cover among those in the most gradients: one row per experiment, with the species' mean relative cover in destination-control turfs (hollow) joined by a line to its cover in warmed turfs (filled).
 
-![Fig S17. Every metric, level and gradient for colonizers.](figures/appendix/figS17.png)
+![Figure S14](figures/appendix/figS14.png)
+
+**Figure S14.** Colonizer strength, the relative cover of a colonizing species in warmed turfs. (a) Warmed cover from year 3 against warmed cover over all years, one point per colonizer species × experiment; the line is 1:1. (b) Distributions of warmed cover from year 3 and of its standard error. Species never recorded in an experiment's warmed turfs are measured absences, with strength and standard error of zero.
+
+![Figure S15](figures/appendix/figS15.png)
+
+**Figure S15.** Fixed effects of the colonizer models. (a) Standardized effects of the climate and destination-abundance model on relative cover in warmed turfs: warming (W), destination temperature (T) and precipitation (P), their interactions, and the mean abundance in the destination controls (A0_dest) with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor, on the residents' scale for the climate and property terms.
+
+![Figure S16](figures/appendix/figS16.png)
+
+**Figure S16.** How much of the variation in colonizer strength is explained, and how much is predicted for an unseen gradient. As Figure 6, for the `r nrow(lad07)` colonizer effects of `r length(unique(lad07$species))` species: (a) heterogeneity left after each model, (b) R² against the Null model on the same gradient and (c) Spearman's rank correlation, on the `r length(unique(pred07$gradient_id))` gradients with at least five effects, in sample (grey) and held out (blue). The start model holds destination abundance only, since colonizers have no abundance at origin. There is no loser/winner skill, since colonizers have no losers. An R² below −100 (Woody at CH_Lavey) is left out of the R² row.
+
+![Figure S17](figures/appendix/figS17.png)
+
+**Figure S17.** Fit and prediction of every colonizer model, gradient by gradient. As Figure S12, for the `r length(unique(pred07$gradient_id))` colonizer gradients with at least five effects: (a, b) R² against the Null model and (c, d) Spearman's rank correlation, (a, c) in sample and (b, d) held out. Values below −10 are printed as "< −10".
+
+![Figure S18](figures/appendix/figS18.png)
+
+**Figure S18.** Random forests beside the meta-regressions, colonizers. As Figure S13, for the `r length(unique(pred07$gradient_id))` colonizer gradients held out of the fit: (a) R² against the Null meta-regression and (b) Spearman's rank correlation, meta-regression (blue, left) and random forest (orange, right).
 
 The ladder rows are `r nrow(lad07)` colonizer effects of `r length(unique(lad07$species))` species. Only destination abundance transfers to a held-out gradient (median R² `r f2(pm(pred07, "start"))`); climate, species identity and every property predict worse than the Null held out (Species-dependent `r f2(pm(pred07, "species"))`).
 
@@ -280,7 +326,9 @@ Code: [`07a_colonizers.R`](analysis/07a_colonizers.R) · [`07b_classification.R`
 
 **What and why.** Do resident winners and colonizers draw on different kinds of species? Step C found too few consistent species for the planned groups, so the figure takes the plan's fallback, with losers added: residents by the sign of their pooled strength (Fig 2), colonizers with pooled warmed cover above zero (Fig 3), one point per species. Descriptive, no model.
 
-![Fig 5. LDMC, LMA, vegetative height and the thermal and precipitation optima of resident losers, resident winners and colonizers, with group medians (a), and the share of graminoids and woody species (b).](figures/main/fig5.png)
+![Figure 5](figures/main/fig5.png)
+
+**Figure 5.** Species properties of resident losers, resident winners and colonizers. Residents are grouped by the sign of their pooled losing-winning strength across experiments (Figure 2), and colonizers are those with a pooled warmed cover above zero (Figure 3); one point per species. (a) Leaf dry matter content (LDMC), leaf mass per area (LMA), vegetative height, thermal optimum and precipitation optimum, with the group median as a horizontal bar; log axes except for the thermal optimum. Climatic optima are shown only for species with at least 30 occurrence records. (b) Share of graminoids and of woody species in each group; group sizes are given above. A species that is a resident in some experiments and a colonizer in others appears in both groups.
 
 Code: [`07f_pathways.R`](analysis/07f_pathways.R) · report [07f](reports/07f_pathways.md)
 
@@ -288,7 +336,9 @@ Code: [`07f_pathways.R`](analysis/07f_pathways.R) · report [07f](reports/07f_pa
 
 The climate + abundance model for each pool, and the trait terms of the Height and LDMC models with residents beside colonizers. Climate and trait terms share one axis; the abundance terms are scaled within each pool and are compared only within a panel.
 
-![Fig 7. Effects on relative cover per SD of each predictor, model-based 95% intervals; filled where the interval excludes zero.](figures/main/fig7.png)
+![Figure 7](figures/main/fig7.png)
+
+**Figure 7.** Effects of climate, abundance and traits on the response of residents and colonizers. Standardized effects, per standard deviation of the predictor, on losing-winning strength for residents (grey) and on relative cover in warmed turfs for colonizers (purple). (a) Residents and (b) colonizers: the model with warming, destination temperature and precipitation, their interactions, and abundance, for residents the initial abundance at origin and at destination at the first survey, for colonizers the mean abundance in the destination controls, each with its interaction with warming; empty rows are terms absent from that pool's model. (c) Vegetative height and (d) leaf dry matter content (LDMC): the trait and its interactions with warming, temperature, precipitation and temperature × precipitation, each from a model that also includes the terms of (a) or (b) and species-specific intercepts and climate slopes. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Climate and trait terms are on one scale across pools; abundance terms are standardized within each pool and are not comparable between (a) and (b).
 
 Code: [`10_figures.R`](analysis/10_figures.R) · tables [`tables/`](tables/) (S1 experiments, S2 species, S3 phylogenetic axes, S4 variance components, S5 coefficients)
 
@@ -314,8 +364,8 @@ data/                               raw inputs, read only (SQLite network databa
   derived/NN_<step>/                  each step's outputs: tables, fitted models (.rds), fold caches
 figures/
   main/                               Figs 1 to 7, each written by the step that makes it
-  appendix/                           Figs S1 to S18, in the order of the analysis
-  diagnostics/                        the steps' review figures, copied into the appendix
+  appendix/                           Figs S1 to S18, in the order of the analysis, each written by
+                                      the step that makes it
 tables/                             Tables S1 to S5
 reports/                            one review report per step; REPORT.qmd collects them
 plan_figures/                       the mock figures agreed while planning

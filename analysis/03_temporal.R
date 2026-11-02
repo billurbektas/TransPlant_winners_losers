@@ -5,7 +5,7 @@
 # Reads:  data/derived/02_strength/by_year.rds;
 #         data/derived/01_relative_cover/cover_long.rds (absence per year)
 # Writes: data/derived/03_temporal/classes_by_anchor.rds, stability.csv,
-#         flows.rds; figures/main/fig1.png (panel a; anchored 2 Nov), figures/diagnostics/03_figS_residents_3gradients_draft.png;
+#         flows.rds; figures/main/fig1.png (panel a; anchored 2 Nov), figures/appendix/figS8.png;
 #         reports/03_temporal.md
 # Checks: 4,537 yearly contrasts; 3,032 at the anchors (1,004, 900, 700,
 #         428), of which 93 absent from both groups (40, 21, 12, 20),
@@ -18,7 +18,7 @@
 # no ribbon, not in sign agreement or CCC); absence is read from the raw cover,
 # not from estimate == 0, as PLAN.md does for colonizers. Anchor labels
 # "Year 2/3/4/6"; anchors 2, 3, 4, 6 (agreement between consecutive years
-# rises from year 3 on). The draft figure goes to figures/diagnostics/.
+# rises from year 3 on). The draft figure goes to figures/appendix/ (Fig S8).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/md_table.R")
@@ -175,7 +175,7 @@ grad3 <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
 stopifnot(length(grad3) == 74) # residents in at least 3 gradients (step 04)
 classes3 <- filter(classes, species %in% grad3)
 stability3 <- stability_of(classes3)
-switches3 <- draw_fig1(classes3, stability3, "figures/diagnostics/03_figS_residents_3gradients_draft.png")
+switches3 <- draw_fig1(classes3, stability3, "figures/appendix/figS8.png")
 utils::write.csv(select(stability3, pair, n, sign_agreement, ccc), file.path(out_dir, "stability_3gradients.csv"), row.names = FALSE)
 
 # ---- Report --------------------------------------------------------------
@@ -219,13 +219,13 @@ report <- c(
          "."), "",
   md_table(mutate(select(stability3, pair, n, sign_agreement, ccc),
                   sign_agreement = sprintf("%.3f", sign_agreement), ccc = sprintf("%.3f", ccc))), "",
-  "![Fig 1a, residents in at least 3 gradients (appendix draft)](../figures/diagnostics/03_figS_residents_3gradients_draft.png)",
+  "![Fig 1a, residents in at least 3 gradients (appendix draft)](../figures/appendix/figS8.png)",
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   paste("Combinations absent from both groups in an anchor year (", sum(absent_counts$absent), " of ", fmt(nrow(at_anchor)),
         " anchor contrasts) are not classified there, where PLAN.md's rule would have put their zero contrast in",
         "Loser (ns) (decided 30 Oct). Anchors are years 2, 3, 4 and 6 rather than 2, 4 and 6 (decided 30 Oct: agreement between consecutive years rises from year 3 on; PLAN.md updated), labelled Year 2, 3, 4, 6 rather than the mock's First 2, 4, 6 years.",
-        "Fig 1a is written to figures/main/fig1.png (anchored 2 Nov, Bills) and the appendix version to figures/diagnostics/, not to",
+        "Fig 1a is written to figures/main/fig1.png (anchored 2 Nov, Bills) and the appendix version to figures/appendix/, not to",
         "data/derived/03_temporal/, so that they are committed with the report.")
 )
 writeLines(report, "reports/03_temporal.md")

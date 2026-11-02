@@ -10,7 +10,7 @@
 #         strength_df.rds/.csv (all years), strength_df_y3.rds/.csv (years >= 3),
 #         presence_classes.csv, stability.csv, never_present.csv;
 #         figures/main/fig1.png (panel a unchanged, panel b below);
-#         figures/diagnostics/07a_stability.png; reports/07a_colonizers.md
+#         figures/appendix/figS14.png; reports/07a_colonizers.md
 # Checks: 402 colonizer effects, 236 species, 39 experiments, 20 gradients in the
 #         destination pool; the pool-size rule (at least 5 colonizer species) drops 11
 #         experiments and CN_Damxung, leaving 379 effects, 229 species, 28 experiments,
@@ -264,7 +264,7 @@ d2 <- ggplot(long, aes(value)) + geom_histogram(bins = 60, fill = "#5E3C99", col
   labs(title = "b)", x = "Relative cover (proportion), years 3 and later", y = "Species x experiment") +
   theme_classic(base_size = 18) + theme(plot.title = element_text(face = "bold", size = 24),
                                         strip.text = element_text(face = "bold", size = 17), strip.background = element_blank())
-ggsave("figures/diagnostics/07a_stability.png", patchwork::wrap_plots(d1, d2, widths = c(1.1, 1)), width = 16, height = 8, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS14.png", patchwork::wrap_plots(d1, d2, widths = c(1.1, 1)), width = 16, height = 8, dpi = 100, bg = "white")
 
 # ---- Report -------------------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
@@ -307,7 +307,7 @@ report <- c(
   "", paste0("Residents (step 03), for the year-3 read: ", paste(sprintf("%s sign agreement %.2f, CCC %.2f", res_stab$pair, res_stab$sign_agreement, res_stab$ccc), collapse = "; "), "."),
   "", paste0("All years against years 3 and later, on the ", nrow(cmp), " effects with both: Pearson r ", f3(cor(cmp$all_years, cmp$from_year_3)),
              ", concordance correlation ", f3(DescTools::CCC(cmp$all_years, cmp$from_year_3)$rho.c$est), "."),
-  "", "![Stability](../figures/diagnostics/07a_stability.png)",
+  "", "![Stability](../figures/appendix/figS14.png)",
   "", "## Fig 1", "", "![Fig 1](../figures/main/fig1.png)", "",
   paste0("Panel a is step 03's, redrawn from its saved classes and flows with the same code; panel b the colonizers below it (Bills, 2 Nov). ",
          "Ribbons between absent and present are labelled where they enter the next anchor, with their count and their share of the class they started from; ",
@@ -321,6 +321,6 @@ report <- c(
   "- The pool-size rule applied to colonizers too, at least 5 colonizer species per experiment (Bills, 2 Nov; PLAN.md updated).",
   "- Strength kept twice, all years and years 3 and later, until the stability is read (Bills, 2 Nov).",
   "- Presence is tested one-sided (warmed mean above zero); PLAN.md's `test()` call leaves the side open.",
-  "- Figures written to `figures/main/` and `figures/diagnostics/` so that the report can link them.")
+  "- Figures written to `figures/main/` and `figures/appendix/` so that the report can link them.")
 writeLines(report, "reports/07a_colonizers.md")
 message("Step 07a written: ", length(experiment_ids), " fits; ", paste(sprintf("%s CCC %.2f", stability$pair, stability$ccc), collapse = "; "))

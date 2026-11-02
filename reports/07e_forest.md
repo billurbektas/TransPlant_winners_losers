@@ -86,7 +86,7 @@ Every forest refitted with a second seed: the largest change in a per-gradient v
 
 ## Figures
 
-![Fig S11, colonizers: forest beside meta-regression](../figures/diagnostics/07e_figS11.png)
+![Fig S11, colonizers: forest beside meta-regression](../figures/appendix/figS18.png)
 
 ## Warnings captured
 

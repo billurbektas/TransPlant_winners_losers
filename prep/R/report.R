@@ -210,7 +210,7 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
     dplyr::mutate(dplyr::across(c(median_before, median_after), ~ signif(.x, 3))) |>
     dplyr::arrange(dplyr::desc(abs(change_pct)))
   # every record of each trait in its own units, the removed ones coloured by reason
-  fig_path <- "figures/diagnostics/P2_trait_screening.png"
+  fig_path <- "figures/appendix/figS2.png"
   status_levels <- c("kept", "outlier (robust z > 3.5)", "unit signature", "outlier and unit signature",
                      "tree (trait_trees.csv)", "reviewed value set to NA (trait_review.csv)")
   screen_plot <- dplyr::bind_rows(
@@ -306,7 +306,7 @@ write_p2_report <- function(try_ids, try_attached, try_clean, try_climate, trait
           "(log scale, species x trait with at least 5 records) or at a 10, 100 or 1000x unit slip (at least 3 records) are",
           "dropped. No dataset is removed as a whole. Every removed record is in `data/derived/prep/trait_screen_removed.csv`."), "",
     md_table(screen_counts), "",
-    "![Every TRY record of each trait in its own units, removed records coloured by reason](../figures/diagnostics/P2_trait_screening.png)", "",
+    "![Every TRY record of each trait in its own units, removed records coloured by reason](../figures/appendix/figS2.png)", "",
     paste("Kept records in grey, removed records as coloured bars, each counted from zero; log value axis in natural units, square-root",
           "count axis so the few removed records are visible. Outliers are judged against their own species, so they lie across the",
           "whole range of a trait, not only in its tails; the trees are the long right tail of height."), "",

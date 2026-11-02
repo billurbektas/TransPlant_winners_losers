@@ -74,11 +74,11 @@ Every held-out species had training data: TRUE.
 
 ## Figures
 
-![Fig S9, the colonizer ladder](../figures/diagnostics/07d_figS9.png)
+![Fig S9, the colonizer ladder](../figures/appendix/figS16.png)
 
 Fig S9 as Fig 4: row a) step 07c; rows b) c): half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No skill row.
 
-![Fig S7, colonizers](../figures/diagnostics/07d_figS7.png)
+![Fig S7, colonizers](../figures/appendix/figS17.png)
 
 ## Warnings captured
 

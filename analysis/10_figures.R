@@ -6,7 +6,7 @@
 #         data/derived/01_relative_cover/ (flow_counts.csv, cover_long.rds, a0.rds,
 #         pool_sizes.csv); data/derived/03b_strength_y3/strength_df.rds;
 #         data/derived/07a_colonizers/strength_df_y3.rds; the species summaries of steps
-#         04 and 07b; the tables of steps 05 and 07c; the reviewed PNGs of steps 03 to 07f.
+#         04 and 07b; the tables of steps 05 and 07c; the appendix figures written by the steps.
 # Writes: figures/main/fig4.png, fig7.png (the other main figures are written by their steps);
 #         figures/appendix/figS1.png ... figS18.png;
 #         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_pie_cover.csv,
@@ -23,7 +23,7 @@
 # Fig 5's classes per experiment: residents by the sign of their net strength from
 # year 3 on, colonizers with net warmed cover above zero (07a, so the 14 experiments
 # below the colonizer pool-size rule have no purple); one radius, pies sharing a
-# destination climate fanned out around it. Reviewed figures are copied byte for byte.
+# destination climate fanned out around it. Each appendix figure is written by its own step.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/md_table.R")
@@ -328,23 +328,8 @@ ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, 
 ggsave("figures/appendix/figS3.png", figS3, width = 40, height = 14, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS10.png", figS10, width = 38, height = 28, dpi = 100, bg = "white")
-# the appendix follows the order of the analysis (Bills, 2 Nov): data and inputs, then the steps
-# in turn; each step's reviewed diagnostic is copied unchanged under its number
-copies <- c("figures/appendix/figS2.png" = "figures/diagnostics/P2_trait_screening.png",
-            "figures/appendix/figS5.png" = "figures/diagnostics/01_pool_rule.png",
-            "figures/appendix/figS6.png" = "figures/diagnostics/01_pool_sizes.png",
-            "figures/appendix/figS7.png" = "figures/diagnostics/02_strength.png",
-            "figures/appendix/figS8.png" = "figures/diagnostics/03_figS_residents_3gradients_draft.png",
-            "figures/appendix/figS9.png" = "figures/diagnostics/03b_strength_y3.png",
-            "figures/appendix/figS11.png" = "figures/diagnostics/05_figS4.png",
-            "figures/appendix/figS12.png" = "figures/diagnostics/06_figS7.png",
-            "figures/appendix/figS13.png" = "figures/diagnostics/06b_figS11.png",
-            "figures/appendix/figS14.png" = "figures/diagnostics/07a_stability.png",
-            "figures/appendix/figS15.png" = "figures/diagnostics/07c_figS4b.png",
-            "figures/appendix/figS16.png" = "figures/diagnostics/07d_figS9.png",
-            "figures/appendix/figS17.png" = "figures/diagnostics/07d_figS7.png",
-            "figures/appendix/figS18.png" = "figures/diagnostics/07e_figS11.png")
-stopifnot(all(file.copy(copies, names(copies), overwrite = TRUE)))
+# the appendix follows the order of the analysis (Bills, 2 Nov); every other appendix figure is
+# written under its number by the step that makes it (S2 by prep P2, S5 to S18 by steps 01 to 07e)
 fig_index <- tibble::tribble(
   ~figure, ~file, ~content, ~from,
   "Fig 1", "figures/main/fig1.png", "Sankey of year-specific classes, residents and colonizers", "steps 03, 07a",

@@ -269,7 +269,7 @@ s7_panel <- function(k, title, tags) lapply(seq_along(levels(s7$version)), funct
 })
 figS7 <- patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")), s7_panel("spearman", "Spearman ρ", c("c)", "d)")),
                                  s7_panel("skill", "Loser/winner skill", c("e)", "f)"))), ncol = 2)
-ggsave("figures/diagnostics/06_figS7.png", figS7, width = 46, height = 48, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS12.png", figS7, width = 46, height = 48, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
@@ -321,7 +321,7 @@ report <- c(
          " gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, ",
          "so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. ",
          "Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."), "",
-  "![Fig S7, per-gradient view](../figures/diagnostics/06_figS7.png)",
+  "![Fig S7, per-gradient view](../figures/appendix/figS12.png)",
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
@@ -329,7 +329,7 @@ report <- c(
   "- Climate's Spearman and skill are NA in every gradient (Bills, 2 Nov): with several experiments in a gradient they would rank experiments, not species.",
   "- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (Bills, 2 Nov); PLAN.md names no fallback.",
   "- Spearman is also NA where every prediction in the gradient is the same (MILESTONES), beside PLAN.md's fewer than 5 effects.",
-  "- The ladder figure is written to `figures/main/fig6.png` (main Fig 6), the per-gradient view to `figures/diagnostics/`; the ladder's prediction rows widen their y range to the data.")
+  "- The ladder figure is written to `figures/main/fig6.png` (main Fig 6), the per-gradient view to `figures/appendix/`; the ladder's prediction rows widen their y range to the data.")
 writeLines(report, "reports/06_ladder_predict.md")
 message("Step 06 written: ", nrow(fold_summary), " folds, ", nrow(failed), " failed; ",
         sprintf("%.0f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

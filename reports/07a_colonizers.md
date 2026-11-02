@@ -76,7 +76,7 @@ Residents (step 03), for the year-3 read: 2 to 3 sign agreement 0.75, CCC 0.54; 
 
 All years against years 3 and later, on the 379 effects with both: Pearson r 0.917, concordance correlation 0.861.
 
-![Stability](../figures/diagnostics/07a_stability.png)
+![Stability](../figures/appendix/figS14.png)
 
 ## Fig 1
 
@@ -100,4 +100,4 @@ Panel a is step 03's, redrawn from its saved classes and flows with the same cod
 - The pool-size rule applied to colonizers too, at least 5 colonizer species per experiment (Bills, 2 Nov; PLAN.md updated).
 - Strength kept twice, all years and years 3 and later, until the stability is read (Bills, 2 Nov).
 - Presence is tested one-sided (warmed mean above zero); PLAN.md's `test()` call leaves the side open.
-- Figures written to `figures/main/` and `figures/diagnostics/` so that the report can link them.
+- Figures written to `figures/main/` and `figures/appendix/` so that the report can link them.
