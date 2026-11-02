@@ -93,7 +93,7 @@ by_year <- bind_rows(lapply(experiment_ids, function(e) {
 stopifnot(!anyDuplicated(by_year[c("experiment_id", "species", "year")]))
 present <- colonizers |> filter(treatment == "warmed") |> mutate(year = as.integer(as.character(year))) |>
   summarise(present = any(relative_cover > 0), .by = c(experiment_id, species, year))
-class_levels <- c("Absent", "Present (ns)", "Present")
+class_levels <- c("Present", "Present (ns)", "Absent") # top down in Fig 1b (Bills, 2 Nov)
 classes <- by_year |> filter(year %in% anchors) |>
   left_join(present, by = c("experiment_id", "species", "year")) |>
   mutate(class = factor(case_when(!present ~ "Absent", # read from the raw warmed cover (PLAN.md)
@@ -186,12 +186,12 @@ pa <- draw_panel(res_classes, res_stab, res_levels,
                  c("Loser" = "#D95F2B", "Loser (ns)" = "#F0A07A", "Winner (ns)" = "#8FD3B6", "Winner" = "#1B9E77"),
                  side = function(cl) ifelse(cl %in% c("Loser", "Loser (ns)"), "loser side", "winner side"), strong = c("Loser", "Winner"),
                  box_text = sprintf("Sign agreement: %.2f\nConcordance correlation\ncoefficient: %.2f", res_stab$sign_agreement, res_stab$ccc),
-                 box_title = "Agreement of losing-winning strength between adjacent years", tag = "a)")
+                 box_title = "Agreement of losing-winning strength between adjacent years", tag = "a)   Resident species")
 pb <- draw_panel(classes, stability, class_levels,
                  c("Absent" = "#CFC6DD", "Present (ns)" = "#A68BC8", "Present" = "#5E3C99"), # colonizers purple (PLAN.md)
                  side = function(cl) ifelse(cl == "Absent", "absent", "present"), strong = "Present",
                  box_text = sprintf("Presence agreement: %.2f\nConcordance correlation\ncoefficient: %.2f", stability$presence_agreement, stability$ccc),
-                 box_title = "Agreement of colonizer warmed cover between adjacent years", tag = "b)")
+                 box_title = "Agreement of colonizer warmed cover between adjacent years", tag = "b)   Colonizing species")
 ggsave("figures/main/fig1.png", patchwork::wrap_plots(pa, pb, ncol = 1), width = 14, height = 17, dpi = 150, bg = "white")
 
 # ---- Diagnostic: all years against years >= 3, and agreement by anchor pair ---------

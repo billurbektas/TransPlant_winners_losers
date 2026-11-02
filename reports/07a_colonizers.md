@@ -61,12 +61,12 @@ Each of the 39 experiments with destination-pool species got one mixed model of 
 
 ## Presence classes per anchor
 
-| year | combinations | Absent | Present (ns) | Present |
+| year | combinations | Present | Present (ns) | Absent |
 | --- | --- | --- | --- | --- |
-| 2 | 402 | 212 | 167 | 23 |
-| 3 | 347 | 158 | 155 | 34 |
-| 4 | 203 | 46 | 120 | 37 |
-| 6 | 173 | 41 | 87 | 45 |
+| 2 | 402 | 23 | 167 | 212 |
+| 3 | 347 | 34 | 155 | 158 |
+| 4 | 203 | 37 | 120 | 46 |
+| 6 | 173 | 45 | 87 | 41 |
 
 ## Stability between anchors (`stability.csv`)
 
