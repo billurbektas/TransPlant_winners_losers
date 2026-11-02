@@ -2,7 +2,8 @@
 #
 # PLAN.md: Step A "Data rules"; The colonizer story (destination pool);
 #   Appendix Fig S1 (flow counts).
-# Reads:  data/derived/prep/community.rds, experiments.rds, species_taxonomy.rds
+# Reads:  data/derived/prep/community.rds, experiments.rds, species_taxonomy.rds,
+#         sites.rds (elevations, for the experiment labels of the pool-rule figure)
 # Writes: data/derived/01_relative_cover/cover_long.rds, a0.rds,
 #         experiments_kept.csv, pool_sizes.csv, flow_counts.csv;
 #         figures/diagnostics/01_pool_rule.png, 01_pool_sizes.png;
@@ -283,9 +284,17 @@ pb <- ggplot(pb_dat, aes(status, n, fill = status)) + geom_col(width = 0.7) +
   labs(title = "b)", subtitle = paste0("Kept: ", n_distinct(pools$species[pools$species_pool == "resident"]), " resident and ",
                                        n_distinct(pools$species[pools$species_pool == "destination_pool"]), " colonizer species"),
        x = NULL, y = "Species x experiment") + big + theme(axis.text.x = element_text(size = 15))
+# experiments labelled by gradient and the elevation shift, origin -> destination (Bills, 2 Nov)
+site_elev <- readRDS("data/derived/prep/sites.rds") |> select(region, site_id, elevation)
+exp_label <- included |>
+  left_join(transmute(site_elev, region, origin_site = site_id, elev_origin = elevation), by = c("region", "origin_site")) |>
+  left_join(transmute(site_elev, region, destination_site = site_id, elev_dest = elevation), by = c("region", "destination_site")) |>
+  transmute(experiment_id, label = paste0(region, ": ", elev_origin, " → ", elev_dest, " m"), region, elev_origin) |>
+  arrange(region, desc(elev_origin))
+stopifnot(!anyNA(exp_label$label), !anyDuplicated(exp_label$label)) # every experiment has both elevations, labels unique
 pc_dat <- status |> filter(!is.na(resident_status)) |> count(experiment_id, status = resident_status) |>
-  mutate(status = factor(status, levels = levels(status_long$status)),
-         experiment = factor(sub("::", " ", experiment_id), levels = rev(sort(unique(sub("::", " ", experiment_id))))))
+  left_join(exp_label, by = "experiment_id") |>
+  mutate(status = factor(status, levels = levels(status_long$status)), experiment = factor(label, levels = rev(exp_label$label)))
 pc <- ggplot(pc_dat, aes(n, experiment, fill = status)) + geom_col(width = 0.75) +
   geom_vline(xintercept = k_min, colour = "#B2182B", linetype = "dashed") +
   scale_fill_manual(values = status_cols, guide = "none") +
