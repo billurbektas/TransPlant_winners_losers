@@ -2,34 +2,29 @@
 #
 # PLAN.md: Step D, "The six models", "The formulas, written out", "Route 1".
 # Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3);
-#         data/derived/05_ladder_fit/gate_start_values.csv (variance components
-#         of the 1 Nov gate fit of Species-dependent, the timing run's start);
 #         data/derived/04_classification/species_summary.csv (Step C spread)
 # Writes: data/derived/05_ladder_fit/models/<rowset>/<model>.rds,
 #         heterogeneity.csv, weights.csv, coefficients.csv, tableS4.csv,
 #         tableS5.csv; figures/diagnostics/05_fig4_ladder.png, 05_figS4.png,
 #         05_figS8.png; reports/05_ladder_fit.md
-# Checks: rowsets all 1,655 / ldmc 1,350 / lma 1,386 / height 1,308 /
-#         growth_form 1,655 / phylogeny 1,655 / niche 1,618 effects, 43
-#         experiments each; growth_form and phylogeny rows identical to all;
+# Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
+#         gradients): residents in at least 3 gradients that carry every
+#         property; every property rowset identical to all;
 #         random structure exactly re_base / re_slopes; property terms exactly
 #         X, X:W, X:T, X:P, X:TP; A0 interactions only A0:W; tau2 at Climate
 #         within 5% of Null; tau2 and sigma2_experiment at each property model
 #         within 5% of tau2 + sigma2_experiment of Species-dependent on the same
-#         rows; sigma2_species at Null off the boundary; all 12 slope fits with
+#         rows; sigma2_species at Null off the boundary; all 8 slope fits with
 #         the diagonal T, P, TP block.
 #
-# Decided 1 Nov (Bills): the step opens with a timing run, Species-dependent on
-# all rows under GEN, started from the gate fit, reporting time, convergence and
-# rho ("stability across refits"). It did not converge (nlminb, 2.5 min) from the
-# gate fit's own optimum, so the T, P, TP correlations are taken as unidentified
-# and the slope block is diagonal in every fit (decision 25 Oct fallback, applied
-# ladder-wide; the GEN attempt is kept and reported). Every other fit starts
-# from metafor's default: two diagonal fits started from the all-rows fit did
-# not converge, and both did from the default (Bills, 1 Nov). No ML refits (AICc
-# dropped, decision-log row 7), no profile CIs, no all-years sensitivity.
-# growth_form and phylogeny rows equal all rows, so those rowsets reuse the
-# all-rows Null to Species-dependent fits. Fits run in parallel on 8 cores.
+# Decided 1 Nov (Bills): the T, P, TP slope block is diagonal in every slope fit
+# (the 1 Nov GEN timing run did not converge from the gate fit's own optimum;
+# MILESTONES step 05 notes), every fit from metafor's default start; no ML refits
+# (AICc dropped), no profile CIs, no all-years sensitivity. Decided 2 Nov
+# (Bills): the ladder runs on residents in at least 3 gradients, and the species
+# lacking a property (Carex norvegica, Veronica serpyllifolia, Bistorta
+# macrophylla) leave the whole ladder, so every model is fitted on the same rows;
+# step 02's standardisation is kept; the GEN timing run is not repeated; 7 cores.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/fit_model.R"); source("R/h_species.R"); source("R/fig4_ladder.R"); source("R/md_table.R")
@@ -40,12 +35,19 @@ globalCallingHandlers(warning = function(w) {
 })
 t_start <- Sys.time()
 out_dir <- "data/derived/05_ladder_fit"
-cores <- 8L
+cores <- 7L
 
 strength_df <- readRDS("data/derived/03b_strength_y3/strength_df.rds")
-stopifnot(nrow(strength_df) == 1655) # step 03b
+stopifnot(nrow(strength_df) == 1004) # step 03b
 
-# ---- Rowsets: each property's complete-case rows (PLAN.md Step D) ----------
+# ---- Ladder rows: residents in at least 3 gradients with every property (2 Nov)
+props <- c("ldmc_z", "lma_z", "height_z", "graminoid", "woody", "PEV1", "PEV2", "PEV3", "T_opt", "P_opt")
+g3 <- summarise(strength_df, n_g = n_distinct(gradient_id), .by = species) |> filter(n_g >= 3)
+strength_df <- filter(strength_df, species %in% g3$species) |> filter(if_all(all_of(props), ~ !is.na(.x)))
+stopifnot(nrow(strength_df) == 512, n_distinct(strength_df$species) == 71,
+          n_distinct(strength_df$experiment_id) == 39, n_distinct(strength_df$gradient_id) == 20) # ladder rows
+
+# ---- Rowsets: each property's complete-case rows, all equal to the ladder rows -
 rows <- list(all         = strength_df,
              ldmc        = filter(strength_df, !is.na(ldmc_z)),
              lma         = filter(strength_df, !is.na(lma_z)),
@@ -56,10 +58,8 @@ rows <- list(all         = strength_df,
 counts <- tibble::tibble(rowset = names(rows), effects = sapply(rows, nrow),
                          species = sapply(rows, function(x) n_distinct(x$species)),
                          experiments = sapply(rows, function(x) n_distinct(x$experiment_id)))
-stopifnot(identical(unname(counts$effects), c(1655L, 1350L, 1386L, 1308L, 1655L, 1655L, 1618L)),
-          all(counts$experiments == 43)) # complete cases per property
-stopifnot(identical(rows$growth_form$effect_id, rows$all$effect_id),
-          identical(rows$phylogeny$effect_id, rows$all$effect_id)) # reuse the all-rows ladder
+stopifnot(all(counts$effects == 512), all(counts$experiments == 39)) # complete cases per property
+stopifnot(all(sapply(rows, function(r) identical(r$effect_id, rows$all$effect_id)))) # one set of rows: reuse the all-rows ladder
 # subspecies niche check (26 Oct): neither species is a resident at CH_Lavey
 stopifnot(!any(grepl("^CH_Lavey", strength_df$experiment_id) &
                strength_df$species %in% c("Solidago virgaurea", "Ranunculus acris")))
@@ -79,7 +79,7 @@ prop_terms <- function(v) unlist(lapply(v, function(x) paste0(x, c("", ":W", ":T
 f_prop <- lapply(prop_vars, function(v) reformulate(c(attr(terms(f_both), "term.labels"), prop_terms(v))))
 floor_models <- list(null = list("Null", ~ 1), start = list("Start", f_start),
                      climate = list("Climate", f_env), climate_start = list("Climate + start", f_both))
-fit_rowsets <- c("all", "ldmc", "lma", "height", "niche")
+fit_rowsets <- "all" # every rowset equals the ladder rows (2 Nov)
 
 # ---- One fit, cached: skipped when its file exists ----------------------------
 run_fit <- function(task) {
@@ -87,23 +87,22 @@ run_fit <- function(task) {
   if (file.exists(path)) return(readRDS(path))
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
   w <- character(); t0 <- Sys.time()
-  struct <- switch(task$kind, floor = "GEN", slopes = slope_struct, gen_timing = c("GEN", "GEN"))
+  struct <- if (task$kind == "floor") "GEN" else slope_struct
   res <- withCallingHandlers(
     tryCatch(list(m = fit_model(task$mods, if (task$kind == "floor") re_base else re_slopes, rows[[task$rowset]],
                                 struct = struct, control = task$control)),
              error = function(e) list(error = conditionMessage(e))),
     warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
   res <- c(res, list(rowset = task$rowset, slug = task$slug, model = task$model, slopes = task$kind != "floor",
-                     struct = switch(task$kind, floor = "none (no slopes)", slopes = "DIAG", gen_timing = "GEN"),
+                     struct = if (task$kind == "floor") "none (no slopes)" else "DIAG",
                      minutes = as.numeric(difftime(Sys.time(), t0, units = "mins")), warnings = list(w)))
-  # the GEN timing run is kept whether or not it converged: it is the reason for DIAG
-  if (is.null(res$error) || task$kind == "gen_timing") saveRDS(res, path)
+  if (is.null(res$error)) saveRDS(res, path)
   res
 }
 run_wave <- function(tasks) {
   out <- parallel::mclapply(tasks, run_fit, mc.cores = cores, mc.preschedule = FALSE)
   failed <- vapply(seq_along(out), function(i) inherits(out[[i]], "try-error") ||
-                     (!is.null(out[[i]]$error) && tasks[[i]]$kind != "gen_timing"), logical(1))
+                     !is.null(out[[i]]$error), logical(1))
   if (any(failed)) stop("fits failed: ", paste(vapply(tasks[failed], function(t) paste(t$rowset, t$slug), ""), collapse = ", "),
                         "\n", paste(vapply(out[failed], function(r) as.character(if (is.list(r)) r$error else r), ""), collapse = "\n"))
   out
@@ -111,24 +110,16 @@ run_wave <- function(tasks) {
 task <- function(rowset, slug, model, mods, kind, control = list())
   list(rowset = rowset, slug = slug, model = model, mods = mods, kind = kind, control = control)
 
-# ---- All fits in one wave: the GEN timing run (from the gate fit), the 20 floor
-# fits and the 12 diagonal slope fits, the last two from metafor's default start --
-gate <- read.csv(file.path(out_dir, "gate_start_values.csv"))
-gv <- setNames(gate$value, gate$component)
-start_gate <- list(sigma2.init = unname(gv[c("sigma2_species", "sigma2_experiment_id", "sigma2_effect_id")]),
-                   tau2.init = unname(gv["tau2_W"]), gamma2.init = unname(gv[c("gamma2_T", "gamma2_P", "gamma2_TP")]),
-                   phi.init = unname(gv[c("phi_T_P", "phi_T_TP", "phi_P_TP")]))
-wave <- c(list(task("all", "species_gen_timing", "Species-dependent (GEN timing run)", f_both, "gen_timing", start_gate)),
-          lapply(fit_rowsets, function(r) task(r, "species", "Species-dependent", f_both, "slopes")),
+# ---- All fits in one wave: 4 floor fits and 8 diagonal slope fits, each from
+# metafor's default start --------------------------------------------------------
+wave <- c(lapply(fit_rowsets, function(r) task(r, "species", "Species-dependent", f_both, "slopes")),
           lapply(names(prop_vars), function(p) task(prop_rowset[[p]], p, prop_label[[p]], f_prop[[p]], "slopes")),
           unlist(lapply(fit_rowsets, function(r) lapply(names(floor_models), function(s)
             task(r, s, floor_models[[s]][[1]], floor_models[[s]][[2]], "floor"))), recursive = FALSE))
-out <- run_wave(wave)
-timing <- out[[1]]; fits <- out[-1]
-stopifnot(!is.null(timing$error) || !is.null(timing$m)) # the GEN attempt either converged or left its error
+fits <- run_wave(wave)
+stopifnot(length(fits) == 12) # 4 floor, Species-dependent, 7 property models
 names(fits) <- vapply(fits, function(f) paste(f$rowset, f$slug, sep = "/"), "")
-fit_of <- function(rowset, slug) fits[[paste(if (rowset %in% c("growth_form", "phylogeny") &&
-                                               !slug %in% names(prop_vars)) "all" else rowset, slug, sep = "/")]]
+fit_of <- function(rowset, slug) fits[[paste(if (!slug %in% names(prop_vars)) "all" else rowset, slug, sep = "/")]]
 
 # ---- The ladder table: one row per rowset x model -------------------------
 ladder <- bind_rows(lapply(names(rows), function(r) {
@@ -189,7 +180,7 @@ species_summary <- read.csv("data/derived/04_classification/species_summary.csv"
 var_mu <- var(species_summary$mu)
 stopifnot(var_mu > 0, all(filter(fitted, model == "Null")$sigma2_species > 1e-8)) # no collapse of the species intercept
 slope_rows <- filter(fitted, struct == "DIAG")
-stopifnot(nrow(slope_rows) == 12, all(vapply(fits, function(f) !f$slopes || identical(f$m$struct, slope_struct), logical(1))))
+stopifnot(nrow(slope_rows) == 8, all(vapply(fits, function(f) !f$slopes || identical(f$m$struct, slope_struct), logical(1))))
 
 # ---- Fixed effects with CR1 clustered on experiment (Table S5) ---------------
 coefs <- bind_rows(lapply(fits, function(f) {
@@ -231,7 +222,7 @@ het_fig <- bind_rows(
       mutate(column = prop_label[[p]], ref_cd = sp$tau2 + sp$sigma2_experiment, ref_H = sp$H_intercept + sp$H_slope) })))
 stopifnot(nrow(het_fig) == 12, setequal(het_fig$column, ladder_columns))
 fig4_ladder(het_fig, "figures/diagnostics/05_fig4_ladder.png",
-            caption = "Row a): REML fits of step 05 on the strength from year 3; property columns on their own complete rows, the black mark is Species-dependent on those rows. Rows b) to d): step 06.")
+            caption = paste0("Row a): REML fits of step 05 on the strength from year 3, every column on the same ", nrow(strength_df), " rows; the black mark on each property column is Species-dependent. Rows b) to d): step 06."))
 
 # ---- Fig S4: coefficients with CR1 intervals ---------------------------------
 coef_panel <- function(x, tag, ttl) {
@@ -282,9 +273,17 @@ ggsave("figures/diagnostics/05_figS8.png", s8, width = 20, height = 5 * ceiling(
 # ---- Report ----------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
 e4 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", 1e4 * x))
-md_all <- fits[["all/species"]]$m
-gate_comp <- tibble::tibble(component = gate$component[1:7], `gate fit, GEN` = signif(gate$value[1:7], 4),
-                            `step 05, diagonal` = signif(c(md_all$sigma2, md_all$tau2, md_all$gamma2), 4))
+# step 02's standardisation, read on the ladder rows (kept, Bills 2 Nov)
+exp_cov <- distinct(strength_df, experiment_id, W, T, P)
+sp_prop <- distinct(strength_df, species, across(all_of(c("ldmc_z", "lma_z", "height_z", "PEV1", "PEV2", "PEV3", "T_opt", "P_opt"))))
+drift <- bind_rows(
+  tibble::tibble(variable = c("W", "T", "P"), across = "the 39 experiments",
+                 mean = sapply(exp_cov[c("W", "T", "P")], mean), sd = sapply(exp_cov[c("W", "T", "P")], sd)),
+  tibble::tibble(variable = c("A0_origin", "A0_dest"), across = "the 512 effects",
+                 mean = sapply(strength_df[c("A0_origin", "A0_dest")], mean), sd = sapply(strength_df[c("A0_origin", "A0_dest")], sd)),
+  tibble::tibble(variable = names(sp_prop)[-1], across = "the 71 species",
+                 mean = sapply(sp_prop[-1], mean), sd = sapply(sp_prop[-1], sd))) |>
+  mutate(mean = sprintf("%.2f", mean), sd = sprintf("%.2f", sd))
 het_tab <- ladder |> transmute(rowset, model, fitted_on, effects = fmt(n_effects), species = fmt(n_species),
   `τ²` = e4(tau2), `σ²_experiment` = e4(sigma2_experiment), `H intercept` = e4(H_intercept), `H slope` = e4(H_slope),
   struct, minutes = ifelse(fitted_on == rowset, sprintf("%.1f", minutes), "reused"))
@@ -300,35 +299,28 @@ fit_code <- c("```r",
   "robust(m, cluster = experiment_id, adjust = TRUE)   # CR1 for Table S5", "```")
 report <- c(
   "# Step 05: The ladder, fitted (Step D, route 1, residents)", "",
-  paste0("The model ladder was fitted on the strength from year 3 (step 03b): Null, Start, Climate, Climate + start and ",
-         "Species-dependent on all ", fmt(nrow(strength_df)), " effects and again on each property's complete rows, plus one ",
-         "property model per property (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) ",
-         "with the species slopes kept, ", nrow(fitted), " REML fits in all. Each model reports τ² (species × site), ",
-         "σ²_experiment (shared site shift) and the two H_species pieces as raw values. The step opened with a timing run of ",
-         "Species-dependent under GEN from the gate fit's variance components (Bills, 1 Nov); it did not converge, so the T, P, TP ",
-         "slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry CR1 standard errors clustered ",
-         "on experiment. Fits ran in parallel on ", cores, " cores, ", sprintf("%.0f", sum(fitted$minutes)),
-         " fit-minutes in all (each fit's own time in the heterogeneity table; this run, reusing cached fits, took ",
-         sprintf("%.0f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min)."),
-  "", "## Stability across refits: the timing run", "",
-  paste0("Species-dependent on all rows, GEN, `sparse = TRUE`, started from `gate_start_values.csv` (the variance components ",
-         "of the 1 Nov gate fit of the same model on the same rows, ρ(T, P) = ", sprintf("%.3f", gate$value[gate$component == "phi_T_P"]),
-         ", fitted from metafor's default start in 54 min, scratchpad run before this step): ",
-         if (is.null(timing$error)) paste0("converged in ", sprintf("%.1f", timing$minutes), " min, ρ(T, P) = ", sprintf("%.4f", timing$m$phi[1]))
-         else paste0("did not converge, stopping after ", sprintf("%.1f", timing$minutes), " min with \"", timing$error, "\""),
-         ". A fit that converges from metafor's default start but not from its own optimum sits on a flat ridge: with the ",
-         "experiments' T and P correlated at r = ", sprintf("%.2f", cor(distinct(strength_df, experiment_id, T, P)$T, distinct(strength_df, experiment_id, T, P)$P)),
-         ", the T and P slope correlation is not identified. Decided 1 Nov (Bills): the T, P, TP slope block is diagonal in all ",
-         "12 slope fits (the 25 Oct fallback, applied ladder-wide so that one structure runs through the ladder). The variance ",
-         "components of the all-rows Species-dependent fit, diagonal, against the gate fit:"), "", md_table(gate_comp),
+  paste0("The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the ",
+         fmt(nrow(strength_df)), " effects of the ", n_distinct(strength_df$species), " residents found in at least 3 gradients ",
+         "that carry every property (", n_distinct(strength_df$experiment_id), " experiments, ", n_distinct(strength_df$gradient_id),
+         " gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, ",
+         "height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, ",
+         nrow(fitted), " REML fits, all on the same rows. Each model reports τ² (species × site), σ²_experiment (shared site ",
+         "shift) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). ",
+         "Fixed effects carry CR1 standard errors clustered on experiment. Fits ran in parallel on ", cores, " cores, ",
+         sprintf("%.1f", sum(fitted$minutes)), " fit-minutes in all; this run took ",
+         sprintf("%.0f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min."),
+  "", "## Slope structure", "",
+  paste0("The 1 Nov GEN timing run (Species-dependent on the 1,655 rows of the 28 Oct pools, started from the gate fit's own ",
+         "optimum) did not converge, so the T, P, TP slope block is diagonal in every slope fit; the case is in MILESTONES step 05 ",
+         "notes. It is not repeated on the new rows (Bills, 2 Nov). The experiments' T and P are correlated at r = ",
+         sprintf("%.2f", cor(exp_cov$T, exp_cov$P)), " on the ladder rows."),
   "", "## Model as fitted (for reviewers)", "", fit_code,
   "", "## Counts per rowset", "", md_table(mutate(counts, across(-rowset, fmt))),
-  "", "Each matches the expectation checked in the script. growth_form and phylogeny have the same rows as all, so their Null to Species-dependent are the all-rows fits (marked `reused`).",
+  "", "Each matches the expectation checked in the script. Every property rowset equals the ladder rows, so Null to Species-dependent are fitted once, on `all` (marked `reused` elsewhere).",
+  "", "Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:", "", md_table(drift),
   "", "## Heterogeneity per model (×10⁻⁴)", "", md_table(het_tab),
-  "", paste0("All ", nrow(slope_rows), " slope fits converged with the diagonal T, P, TP block, each from metafor's default start. ",
-             "Started instead from the all-rows fit's variance components, Species-dependent on the niche rows and the Woody model did ",
-             "not converge (nlminb): the P and TP slope variances, at the boundary, started at 1e-10, where the optimiser stalled. ",
-             "So no fit carries starting values from another (Bills, 1 Nov). Across the ", nrow(slope_rows), " fits the T slope variance ranges ",
+  "", paste0("All ", nrow(slope_rows), " slope fits converged with the diagonal T, P, TP block, each from metafor's default start ",
+             "(Bills, 1 Nov). Across the ", nrow(slope_rows), " fits the T slope variance ranges ",
              e4(min(slope_rows$var_T)), " to ", e4(max(slope_rows$var_T)), " ×10⁻⁴; the P and TP slope variances are at most ",
              sprintf("%.1e", max(c(slope_rows$var_P, slope_rows$var_TP))), ", at the boundary."),
   "", "## Checks", "",
@@ -352,7 +344,6 @@ report <- c(
   paste0("- H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. ",
          "Same quantity."),
   "- Fig S4 and Fig S8 are written to `figures/diagnostics/` (05_figS4.png, 05_figS8.png), not to `data/derived/05_ladder_fit/`, so that the report can link them; Fig S8's property surfaces are at W = its mean.",
-  "- The T, P, TP slope block is diagonal (GDIAG) in every slope fit, where PLAN.md writes GEN with DIAG as the fallback if the correlations are unidentified (decision 25 Oct); applied ladder-wide after the GEN timing run did not converge (Bills, 1 Nov).",
-  "- Decided 1 Nov (Bills), not deviations: no ML refits and no AICc column; no profile CIs; the 5% property check is measured against τ² + σ²_experiment; Fig 4 drawn here with twelve columns.")
+  "- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 drawn here with twelve columns; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.")
 writeLines(report, "reports/05_ladder_fit.md")
-message("Step 05 written: ", nrow(fitted), " fits; GEN timing run ", sprintf("%.1f", timing$minutes), " min, ", if (is.null(timing$error)) "converged" else "did not converge")
+message("Step 05 written: ", nrow(fitted), " fits in ", sprintf("%.1f", sum(fitted$minutes)), " fit-minutes")
