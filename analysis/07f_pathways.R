@@ -65,7 +65,6 @@ glab <- setNames(paste0(groups_def, "\n(n = ", sizes$n[match(groups_def, sizes$g
 set.seed(1)
 panels <- lapply(prop_names, function(p) {
   ggplot(filter(long, property == p), aes(group, value, colour = group)) +
-    geom_vline(xintercept = 2.5, colour = "grey75", linewidth = 0.8) + # residents | colonizers
     geom_jitter(width = 0.2, height = 0, size = 4, alpha = 0.6) +
     geom_crossbar(data = filter(meds, property == p), aes(group, median, ymin = median, ymax = median), width = 0.6, linewidth = 1.6, middle.linewidth = 1.6) +
     (if (p == "T optimum (°C)") scale_y_continuous() else scale_y_log10(breaks = scales::breaks_log(6), labels = scales::label_number(big.mark = ""))) +
