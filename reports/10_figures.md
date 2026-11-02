@@ -1,6 +1,6 @@
 # Step 10: Figures, appendix and report
 
-Draws what no earlier step produced: Fig 4, the 42 experiments in climate space with one pie per experiment splitting the warmed turf's relative cover, years 3 and later, among resident losers and winners (by the sign of their net strength from year 3 on), colonizers (net warmed cover above zero) and what was not analysed (species outside the pools, unidentified and genus-level records) (Bills, 2 Nov); Fig S2 the same map with the pies counting species; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S5 the predictors before standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers (six main figures, Bills 2 Nov). Pies are drawn to one radius at their destination climate; the 15 experiments that share a destination climate (6 points) fan out around a black dot at that climate on short lines; no two pies overlap (0 pies of different climates had to be pushed apart). Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation.
+Draws what no earlier step produced: Fig 4, the 42 experiments in climate space with one pie per experiment splitting the warmed turf's relative cover, years 3 and later, among resident losers and winners (by the sign of their net strength from year 3 on), colonizers (net warmed cover above zero) and what was not analysed (species outside the pools, unidentified and genus-level records) (Bills, 2 Nov); Fig S2 the same map with the pies counting species; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S5 the predictors before standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers (seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies are drawn to one radius at their destination climate; the 15 experiments that share a destination climate (6 points) fan out around a black dot at that climate on short lines; no two pies overlap (0 pies of different climates had to be pushed apart). Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation.
 
 ## Counts
 
@@ -77,6 +77,7 @@ Mean over experiments, per cent of the warmed turf: resident losers 23, resident
 | Fig 4 | figures/main/fig4.png | The experiments in climate space, pies of warmed-turf cover | this step |
 | Fig 5 | figures/main/fig5.png | Traits of losers, winners and colonizers (pathways) | step 07f |
 | Fig 6 | figures/main/fig6.png | The residents' ladder | step 06 |
+| Fig 7 | figures/main/fig7.png | Coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers | this step |
 | Fig S1 | figures/appendix/figS1.png | Data flow | this step |
 | Fig S2 | figures/appendix/figS2.png | Fig 4 with species counts in the pies | this step |
 | Fig S3 | figures/appendix/figS3.png | Phylogenetic axes (with Table S3) | this step |
@@ -87,6 +88,8 @@ Mean over experiments, per cent of the warmed turf: resident losers 23, resident
 | Fig S8a, b | figures/appendix/figS8a.png | Random forest beside metafor, residents (a) and colonizers (b) | steps 06b, 07e |
 
 ![Fig 4](../figures/main/fig4.png)
+
+![Fig 7](../figures/main/fig7.png)
 
 ![Fig S1](../figures/appendix/figS1.png)
 
@@ -123,7 +126,7 @@ None.
 ## Deviations from PLAN.md
 
 - One script for the whole step (Bills, 2 Nov).
-- Six main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6; the results-dependent Fig 6 and the old Fig S8 dropped; appendix renumbered with the count version of Fig 4 as Fig S2.
+- Seven main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6, the coefficients of three models Fig 7 (abundance terms drawn per pool, not comparable); the results-dependent Fig 6 and the old Fig S8 dropped; appendix renumbered with the count version of Fig 4 as Fig S2.
 - Fig 4's pies split the warmed turf's relative cover (years 3 and later) among Fig 5's classes per experiment, not counts of last-year significance classes; the counts are Fig S2; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).
 - Coefficients, per-gradient metrics and the random forest stay as residents (a) and colonizers (b) files.
 - `REPORT.html` not rendered: Quarto is not installed.

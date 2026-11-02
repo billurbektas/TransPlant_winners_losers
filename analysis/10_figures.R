@@ -7,7 +7,7 @@
 #         pool_sizes.csv); data/derived/03b_strength_y3/strength_df.rds;
 #         data/derived/07a_colonizers/strength_df_y3.rds; the species summaries of steps
 #         04 and 07b; the tables of steps 05 and 07c; the reviewed PNGs of steps 03 to 07f.
-# Writes: figures/main/fig1.png ... fig6.png; figures/appendix/figS1.png ... figS8b.png;
+# Writes: figures/main/fig1.png ... fig7.png; figures/appendix/figS1.png ... figS8b.png;
 #         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_pie_cover.csv,
 #         fig4_pie_counts.csv;
 #         reports/10_figures.md
@@ -15,7 +15,7 @@
 #         colonizer effects with warmed cover above zero in 28 experiments; every pie's
 #         slices sum to its species; every figure number exists exactly once.
 #
-# Decided 2 Nov (Bills): one script for the whole step, run without stopping. Six main
+# Decided 2 Nov (Bills): one script for the whole step, run without stopping. Seven main
 # figures: 1 Sankey, 2 residents' classification, 3 colonizers' classification, 4
 # climate space, 5 traits (pathways), 6 the residents' ladder; the results-dependent
 # Fig 6 and the old Fig S8 are dropped. The climate-space pies (Fig 4 as cover, Fig S2 as counts) use
@@ -134,6 +134,45 @@ fig4key <- ggplot(key, aes(y = -row)) +
   theme(plot.title = element_text(face = "bold", size = 34, margin = margin(b = 10)), plot.background = element_rect(fill = "white", colour = NA))
 fig4 <- patchwork::wrap_plots(climate_map(cover_shares, cols_cover), fig4key, ncol = 2, widths = c(2.2, 0.7))
 figS2 <- patchwork::wrap_plots(climate_map(select(pies, experiment_id, all_of(names(cols))), cols), fig4key, ncol = 2, widths = c(2.2, 0.7))
+
+# ---- Fig 7: what the models find, residents beside colonizers --------------------------
+# Climate + abundance, Height and LDMC models (Bills, 2 Nov). Both responses are relative cover
+# and W, T, P and the traits share one scale (steps 02, 07c), so those terms sit on one axis;
+# the abundance terms are standardised within each pool and are drawn apart
+coefs <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), pool = "Residents"),
+                   mutate(read.csv("data/derived/07c_ladder_fit/coefficients.csv"), pool = "Colonizers")) |>
+  filter(model %in% c("Climate + start", "Height", "LDMC"), term != "intrcpt") |>
+  mutate(pool = factor(pool, levels = c("Residents", "Colonizers")), excludes_zero = ci_lower > 0 | ci_upper < 0)
+climate_terms <- c(W = "Warming", T = "Temperature", P = "Precipitation", `W:T` = "Warming × temperature", `W:P` = "Warming × precipitation",
+                   `T:P` = "Temperature × precipitation", `W:T:P` = "Warming × temperature × precipitation")
+abund_terms <- c(A0_origin = "Abundance at origin", A0_dest = "Abundance at destination", `W:A0_origin` = "Warming × abundance at origin",
+                 `W:A0_dest` = "Warming × abundance at destination")
+trait_terms <- function(z, name) setNames(paste(name, c("", "× warming", "× temperature", "× precipitation", "× temperature × precipitation")),
+                                         paste0(c("", "W:", "T:", "P:", ""), z, c("", "", "", "", ":TP")))
+prop_terms <- c(trait_terms("height_z", "Height"), trait_terms("ldmc_z", "LDMC"))
+f7_clim <- filter(coefs, model == "Climate + start", term %in% names(climate_terms)) |> mutate(name = factor(climate_terms[term], levels = rev(climate_terms)))
+f7_abund <- filter(coefs, model == "Climate + start", term %in% names(abund_terms)) |> mutate(name = factor(abund_terms[term], levels = rev(abund_terms)))
+f7_prop <- filter(coefs, model %in% c("Height", "LDMC"), term %in% names(prop_terms)) |> mutate(name = factor(trimws(prop_terms[term]), levels = rev(trimws(prop_terms))))
+stopifnot(nrow(f7_clim) == 14, nrow(f7_abund) == 6, nrow(f7_prop) == 20) # 7 climate terms and 5 terms per trait in each pool; A0_origin residents only
+pool_cols <- c(Residents = "#3D3D3D", Colonizers = "#5E3C99")
+x_shared <- range(c(f7_clim$ci_lower, f7_clim$ci_upper, f7_prop$ci_lower, f7_prop$ci_upper)) # a, c, d on one axis
+coef_panel <- function(d, tag, xlim = NULL) {
+  ggplot(d, aes(estimate, name, colour = pool, group = pool)) + geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
+    geom_linerange(aes(xmin = ci_lower, xmax = ci_upper), linewidth = 1.6, position = position_dodge(width = 0.6)) +
+    geom_point(aes(fill = ifelse(excludes_zero, as.character(pool), "none")), shape = 21, size = 6, stroke = 1.6, position = position_dodge(width = 0.6)) +
+    scale_colour_manual(values = pool_cols, name = NULL, breaks = names(pool_cols)) +
+    scale_fill_manual(values = c(pool_cols, none = "white"), guide = "none") +
+    (if (!is.null(xlim)) scale_x_continuous(limits = xlim)) +
+    labs(title = tag, x = "Effect on relative cover per SD of the predictor", y = NULL) + big +
+    theme(legend.position = "bottom", legend.text = element_text(size = 30), legend.key.size = unit(1.6, "cm"))
+}
+fig7 <- patchwork::wrap_plots(
+  coef_panel(f7_clim, "a) Climate (climate + abundance model)", x_shared),
+  coef_panel(f7_abund, "b) Abundance (same model; scaled within each pool)") + facet_wrap(~ pool, ncol = 1, scales = "free") +
+    theme(strip.text = element_text(face = "bold", size = 28), strip.background = element_blank()),
+  coef_panel(filter(f7_prop, model == "Height"), "c) Height model", x_shared),
+  coef_panel(filter(f7_prop, model == "LDMC"), "d) LDMC model", x_shared),
+  ncol = 2, guides = "collect") & theme(legend.position = "bottom", plot.title = element_text(size = 34))
 
 # ---- Fig S1: data flow ------------------------------------------------------------------
 flow <- read.csv("data/derived/01_relative_cover/flow_counts.csv")
@@ -267,6 +306,7 @@ for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sp
 
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
 ggsave("figures/main/fig4.png", fig4, width = 38, height = 28, dpi = 100, bg = "white")
+ggsave("figures/main/fig7.png", fig7, width = 40, height = 26, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS2.png", figS2, width = 38, height = 28, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS3.png", figS3, width = 40, height = 14, dpi = 100, bg = "white")
@@ -289,6 +329,7 @@ fig_index <- tibble::tribble(
   "Fig 4", "figures/main/fig4.png", "The experiments in climate space, pies of warmed-turf cover", "this step",
   "Fig 5", "figures/main/fig5.png", "Traits of losers, winners and colonizers (pathways)", "step 07f",
   "Fig 6", "figures/main/fig6.png", "The residents' ladder", "step 06",
+  "Fig 7", "figures/main/fig7.png", "Coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers", "this step",
   "Fig S1", "figures/appendix/figS1.png", "Data flow", "this step",
   "Fig S2", "figures/appendix/figS2.png", "Fig 4 with species counts in the pies", "this step",
   "Fig S3", "figures/appendix/figS3.png", "Phylogenetic axes (with Table S3)", "this step",
@@ -298,7 +339,7 @@ fig_index <- tibble::tribble(
   "Fig S7", "figures/appendix/figS7.png", "The colonizers' ladder", "step 07d",
   "Fig S8a, b", "figures/appendix/figS8a.png", "Random forest beside metafor, residents (a) and colonizers (b)", "steps 06b, 07e")
 main_files <- sort(list.files("figures/main", pattern = "^fig[0-9]+\\.png$"))
-stopifnot(identical(main_files, paste0("fig", 1:6, ".png"))) # six main figures, each exactly once
+stopifnot(identical(main_files, paste0("fig", 1:7, ".png"))) # seven main figures, each exactly once
 stopifnot(all(file.exists(fig_index$file)), all(file.exists(sub("a\\.png$", "b.png", fig_index$file[grepl("a, b", fig_index$figure)]))))
 
 # ---- Report --------------------------------------------------------------------------
@@ -314,7 +355,7 @@ report <- c(
          "colonizers (net warmed cover above zero) and what was not analysed (species outside the pools, unidentified and genus-level records) (Bills, 2 Nov); ",
          "Fig S2 the same map with the pies counting species; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S5 the predictors before ",
          "standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
-         "(six main figures, Bills 2 Nov). Pies are drawn to one radius at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
+         "(seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies are drawn to one radius at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
          "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
          "Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation."),
   "", "## Counts", "", md_table(count_tab),
@@ -330,7 +371,7 @@ report <- c(
              ", resident winners ", round(100 * mean(cover_shares$`Resident winners`)), ", colonizers ", round(100 * mean(cover_shares$Colonizers)),
              ", not analysed ", round(100 * mean(cover_shares$`Not analysed`)), "."),
   "", "## Figures", "", md_table(fig_index), "",
-  "![Fig 4](../figures/main/fig4.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S2](../figures/appendix/figS2.png)", "",
+  "![Fig 4](../figures/main/fig4.png)", "", "![Fig 7](../figures/main/fig7.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S2](../figures/appendix/figS2.png)", "",
   "![Fig S3](../figures/appendix/figS3.png)", "", "![Fig S5](../figures/appendix/figS5.png)",
   "", "## Tables", "",
   md_table(tibble::tibble(table = paste("Table", c("S1", "S2", "S3", "S4", "S5")), file = sprintf("tables/table%s.csv", c("S1", "S2", "S3", "S4", "S5")),
@@ -341,7 +382,7 @@ report <- c(
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- One script for the whole step (Bills, 2 Nov).",
-  "- Six main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6; the results-dependent Fig 6 and the old Fig S8 dropped; appendix renumbered with the count version of Fig 4 as Fig S2.",
+  "- Seven main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6, the coefficients of three models Fig 7 (abundance terms drawn per pool, not comparable); the results-dependent Fig 6 and the old Fig S8 dropped; appendix renumbered with the count version of Fig 4 as Fig S2.",
   "- Fig 4's pies split the warmed turf's relative cover (years 3 and later) among Fig 5's classes per experiment, not counts of last-year significance classes; the counts are Fig S2; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).",
   "- Coefficients, per-gradient metrics and the random forest stay as residents (a) and colonizers (b) files.",
   "- `REPORT.html` not rendered: Quarto is not installed.")
