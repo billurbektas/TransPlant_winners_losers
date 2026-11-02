@@ -413,4 +413,6 @@ report <- c(
   "- Coefficients, per-gradient metrics and the random forest stay as residents (a) and colonizers (b) files.",
   "- `REPORT.html` not rendered: Quarto is not installed.")
 writeLines(report, "reports/10_figures.md")
+# the repository README is the realized plan; its numbers are read from data/derived/ (Bills, 2 Nov)
+invisible(knitr::knit("README.Rmd", "README.md", quiet = TRUE))
 message("Step 10 written: ", nrow(experiments), " pies, ", nrow(fig_index), " figure entries, 5 tables")
