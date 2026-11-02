@@ -104,6 +104,8 @@ fig4_ladder <- function(het, file, metrics = NULL, gradients = NULL, caption = N
     s <- if (is.null(metrics)) NULL else dplyr::filter(metrics, metric == key) %>% dplyr::mutate(x = match(column, ladder_columns))
     g <- if (is.null(gradients)) NULL else dplyr::filter(gradients, metric == key) %>% dplyr::mutate(x = match(column, ladder_columns))
     have <- if (is.null(s)) integer() else s$x[!is.na(s$pred) | !is.na(s$fit)]
+    # the default range widens to the data: held-out R2 can fall well below zero
+    lims <- range(c(lims, s$fit, s$pred, g$pred), na.rm = TRUE)
     p <- ggplot() + geom_hline(yintercept = 0, colour = "grey60")
     if (length(setdiff(seq_len(n), have)))
       p <- p + annotate("text", x = setdiff(seq_len(n), have), y = mean(lims), label = "NA", size = 8, colour = "grey55", fontface = "bold")

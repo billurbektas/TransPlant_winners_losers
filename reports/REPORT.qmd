@@ -28,3 +28,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include 04_classification.md >}}
 
 {{< include 05_ladder_fit.md >}}
+
+{{< include 06_ladder_predict.md >}}
