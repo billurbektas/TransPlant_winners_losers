@@ -3,9 +3,11 @@
 # Asked by Bills (1 Nov): after the diagonal ladder of analysis/05_ladder_fit.R,
 # refit every slope fit with the T, P, TP block GEN, store it apart, and compare
 # the slope variances, the fixed effects and what changes in the ladder's reading.
-# Not a step of MILESTONES.md; it does not feed any later step. Kept here for
-# now, to move to an additional-checks section later (Bills, 2 Nov). Paused on
-# 2 Nov with 6 of 12 GEN fits cached; rerunning resumes from them.
+# Not a step of MILESTONES.md; it does not feed any later step. Moved to
+# analysis/additional_checks/ (Bills, 2 Nov); run from the repository root. Paused on
+# 2 Nov with 6 of 12 GEN fits cached; rerunning resumes from them. Written for the
+# 1,655 rows of the 28 Oct pools, and its cached fits are on those rows: it stops at
+# the first count check now and needs the 2 Nov ladder rows (512) before a rerun.
 # Reads:  data/derived/03b_strength_y3/strength_df.rds;
 #         data/derived/05_ladder_fit/models/<rowset>/<slug>.rds (the diagonal fits)
 # Writes: data/derived/05_ladder_fit/gen_check/models/<rowset>/<slug>.rds,

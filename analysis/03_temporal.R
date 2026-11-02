@@ -5,11 +5,11 @@
 # Reads:  data/derived/02_strength/by_year.rds;
 #         data/derived/01_relative_cover/cover_long.rds (absence per year)
 # Writes: data/derived/03_temporal/classes_by_anchor.rds, stability.csv,
-#         flows.rds; figures/diagnostics/03_fig1_residents_draft.png;
+#         flows.rds; figures/main/fig1.png (panel a; anchored 2 Nov), figures/diagnostics/03_figS_residents_3gradients_draft.png;
 #         reports/03_temporal.md
-# Checks: 7,571 yearly contrasts; 5,024 at the anchors (1,655, 1,453, 1,150,
-#         766), of which 663 absent from both groups (232, 174, 125, 132),
-#         leaving 1,423, 1,279, 1,025 and 634 classified; year 1 absent from every output; class
+# Checks: 4,537 yearly contrasts; 3,032 at the anchors (1,004, 900, 700,
+#         428), of which 93 absent from both groups (40, 21, 12, 20),
+#         leaving 964, 879, 688 and 408 classified (2 Nov pool rule); year 1 absent from every output; class
 #         counts per anchor sum to the combinations at that anchor; n per pair
 #         equals the combinations present at both anchors, counted separately.
 #
@@ -33,7 +33,7 @@ anchors <- c(2L, 3L, 4L, 6L)
 class_levels <- c("Loser", "Loser (ns)", "Winner (ns)", "Winner")
 
 by_year <- as.data.frame(readRDS("data/derived/02_strength/by_year.rds"))
-stopifnot(nrow(by_year) == 7571) # step 02
+stopifnot(nrow(by_year) == 4537) # step 02
 
 # ---- Absence from both groups in a year, from the raw cover ---------------
 present <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
@@ -45,10 +45,10 @@ at_anchor <- by_year |>
   mutate(year = as.integer(as.character(year))) |>   # emmeans returns year as a factor
   filter(year %in% anchors) |>
   left_join(present, by = c("experiment_id", "species", "year"))
-stopifnot(nrow(at_anchor) == 5024, !anyNA(at_anchor$present))
-stopifnot(identical(as.integer(table(at_anchor$year)), c(1655L, 1453L, 1150L, 766L))) # combinations per anchor
+stopifnot(nrow(at_anchor) == 3032, !anyNA(at_anchor$present))
+stopifnot(identical(as.integer(table(at_anchor$year)), c(1004L, 900L, 700L, 428L))) # combinations per anchor
 absent_counts <- count(filter(at_anchor, !present), year, name = "absent")
-stopifnot(identical(absent_counts$absent, c(232L, 174L, 125L, 132L))) # absent from both groups (decided 30 Oct)
+stopifnot(identical(absent_counts$absent, c(40L, 21L, 12L, 20L))) # absent from both groups (decided 30 Oct)
 
 # ---- Classes (PLAN.md Step B) ----------------------------------------------
 classes <- at_anchor |>
@@ -59,13 +59,13 @@ classes <- at_anchor |>
     estimate > 0 ~ "Winner (ns)",
     TRUE ~ "Loser (ns)"),
     class = factor(class, levels = class_levels))
-stopifnot(identical(as.integer(table(classes$year)), c(1423L, 1279L, 1025L, 634L))) # classified per anchor
+stopifnot(identical(as.integer(table(classes$year)), c(964L, 879L, 688L, 408L))) # classified per anchor
 stopifnot(!any(classes$year == 1L))
 class_counts <- count(classes, year, class) |> tidyr::pivot_wider(names_from = class, values_from = n, values_fill = 0)
-stopifnot(all(rowSums(class_counts[class_levels]) == c(1423, 1279, 1025, 634))) # classes sum to the anchor's combinations
+stopifnot(all(rowSums(class_counts[class_levels]) == c(964, 879, 688, 408))) # classes sum to the anchor's combinations
 
 # ---- Sign agreement, CCC and flows between adjacent anchors -----------------
-pair <- function(y1, y2) {
+pair <- function(y1, y2, classes) {
   wide <- classes |>
     dplyr::filter(year %in% c(y1, y2)) |>
     tidyr::pivot_wider(id_cols = c(species, experiment_id),
@@ -80,7 +80,8 @@ pair <- function(y1, y2) {
     flows = list(table(wide[[paste0("class_", y1)]], wide[[paste0("class_", y2)]]))
   )
 }
-stability <- dplyr::bind_rows(pair(2L, 3L), pair(3L, 4L), pair(4L, 6L))
+stability_of <- function(cl) dplyr::bind_rows(pair(2L, 3L, cl), pair(3L, 4L, cl), pair(4L, 6L, cl))
+stability <- stability_of(classes)
 both <- function(y1, y2) nrow(inner_join(filter(classes, year == y1), filter(classes, year == y2),
                                          by = c("species", "experiment_id")))
 stopifnot(stability$n == c(both(2L, 3L), both(3L, 4L), both(4L, 6L))) # n per pair = present at both anchors
@@ -91,11 +92,14 @@ saveRDS(select(classes, species, experiment_id, year, estimate, class), file.pat
 utils::write.csv(select(stability, pair, n, sign_agreement, ccc), file.path(out_dir, "stability.csv"), row.names = FALSE)
 saveRDS(setNames(stability$flows, stability$pair), file.path(out_dir, "flows.rds"))
 
-# ---- Fig 1 panel a (draft) ---------------------------------------------------
+# ---- Fig 1 panel a (main figure, anchored 2 Nov, Bills) -------------------------
 # Strata are stacked bars on one absolute count scale (top down: Loser to
 # Winner); a ribbon joins the combinations present at two adjacent anchors.
 # Drawn by hand: a stratum also holds combinations without a ribbon.
 cols <- c("Loser" = "#D95F2B", "Loser (ns)" = "#F0A07A", "Winner (ns)" = "#8FD3B6", "Winner" = "#1B9E77")
+# drawn twice (Bills, 2 Nov): all residents (main Fig 1a) and the residents in at
+# least 3 gradients that the classification and the ladder use (appendix)
+draw_fig1 <- function(classes, stability, file) {
 gap <- 0.025 * max(table(classes$year)); w <- 0.08; xpos <- setNames(seq_along(anchors), anchors)
 strata <- count(classes, year, class) |>
   arrange(year, class) |>
@@ -157,7 +161,22 @@ fig <- ggplot() +
   labs(title = "a)") +
   theme_void() + theme(plot.title = element_text(face = "bold", size = 24, colour = "grey20"),
                        plot.margin = margin(10, 10, 10, 10))
-ggsave("figures/diagnostics/03_fig1_residents_draft.png", fig, width = 14, height = 8.5, dpi = 150, bg = "white")
+ggsave(file, fig, width = 14, height = 8.5, dpi = 150, bg = "white")
+switches
+}
+switches <- draw_fig1(classes, stability, "figures/main/fig1.png")
+
+# appendix: the same figure on the residents in at least 3 gradients (2 Nov,
+# Bills), the species that steps 04 and 05 use
+grad3 <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
+  filter(species_pool == "resident") |>
+  summarise(n_gradients = n_distinct(gradient_id), .by = species) |>
+  filter(n_gradients >= 3) |> pull(species)
+stopifnot(length(grad3) == 74) # residents in at least 3 gradients (step 04)
+classes3 <- filter(classes, species %in% grad3)
+stability3 <- stability_of(classes3)
+switches3 <- draw_fig1(classes3, stability3, "figures/diagnostics/03_figS_residents_3gradients_draft.png")
+utils::write.csv(select(stability3, pair, n, sign_agreement, ccc), file.path(out_dir, "stability_3gradients.csv"), row.names = FALSE)
 
 # ---- Report --------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
@@ -183,8 +202,8 @@ report <- c(
                   sign_agreement = sprintf("%.3f", sign_agreement), ccc = sprintf("%.3f", ccc))),
   "", "## Flows (`flows.rds`)", "",
   unlist(lapply(seq_len(nrow(stability)), function(k) flow_md(stability$flows[[k]], paste0("Year ", anchors[k], " to year ", anchors[k + 1])))),
-  "## Fig 1 panel a (draft)", "",
-  "![Fig 1a draft](../figures/diagnostics/03_fig1_residents_draft.png)", "",
+  "## Fig 1 panel a (main figure)", "",
+  "![Fig 1a](../figures/main/fig1.png)", "",
   paste0("Strata are drawn to one absolute scale, so columns shrink as experiments end and as species are absent from ",
          "both groups. The final figure, with panel b (colonizers, ",
          "step 07), is drawn in step 10. Columns are evenly spaced: the gap from year 4 to year 6 spans two years, ",
@@ -193,13 +212,21 @@ report <- c(
   paste0("Switches between a significant winner and a significant loser, in either direction: ",
          paste(sprintf("%s: %d", stability$pair, switches["lw", ] + switches["wl", ]), collapse = "; "),
          ". Ribbons that cross zero with a significant class at either end are drawn darker; every ribbon that crosses zero is labelled where it enters the next anchor with its count and its share of the class it started from."),
+  "", "## Appendix: residents in at least 3 gradients", "",
+  paste0("The same classes and flows, restricted to the ", length(grad3), " resident species found in at least 3 gradients, ",
+         "the species on which the classification (step 04) and the ladder (step 05) rest (decided 2 Nov). Classified ",
+         "combinations per anchor: ", paste(sprintf("year %d: %d", anchors, as.integer(table(factor(classes3$year, anchors)))), collapse = ", "),
+         "."), "",
+  md_table(mutate(select(stability3, pair, n, sign_agreement, ccc),
+                  sign_agreement = sprintf("%.3f", sign_agreement), ccc = sprintf("%.3f", ccc))), "",
+  "![Fig 1a, residents in at least 3 gradients (appendix draft)](../figures/diagnostics/03_figS_residents_3gradients_draft.png)",
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   paste("Combinations absent from both groups in an anchor year (", sum(absent_counts$absent), " of ", fmt(nrow(at_anchor)),
         " anchor contrasts) are not classified there, where PLAN.md's rule would have put their zero contrast in",
         "Loser (ns) (decided 30 Oct). Anchors are years 2, 3, 4 and 6 rather than 2, 4 and 6 (decided 30 Oct: agreement between consecutive years rises from year 3 on; PLAN.md updated), labelled Year 2, 3, 4, 6 rather than the mock's First 2, 4, 6 years.",
-        "The draft figure is written to figures/diagnostics/ rather than data/derived/03_temporal/, so that it is",
-        "committed with the report.")
+        "Fig 1a is written to figures/main/fig1.png (anchored 2 Nov, Bills) and the appendix version to figures/diagnostics/, not to",
+        "data/derived/03_temporal/, so that they are committed with the report.")
 )
 writeLines(report, "reports/03_temporal.md")
 message("Step 03 written: ", paste(sprintf("%s n = %d", stability$pair, stability$n), collapse = "; "))

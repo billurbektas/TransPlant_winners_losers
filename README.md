@@ -1,38 +1,45 @@
 # TransPlant winners–losers analysis
 
-This repository contains the reproducible TransPlant community-response and
-resident-model workflow. Start with [`analysis_workflow.qmd`](analysis_workflow.qmd):
-it follows the science from the original data through response calculation,
-explicit model specifications, inference, figures, and tables. Its main
-analytical assignments are genuine targets through `tarchetypes::tar_tangle()`.
+The analysis for the TransPlant "winners and losers" manuscript, rebuilt as a
+sequence of numbered R scripts. What the analysis is lives in
+[`PLAN.md`](PLAN.md); the steps, their checks and their review status in
+[`MILESTONES.md`](MILESTONES.md); how the work is done in
+[`CLAUDE.md`](CLAUDE.md). Each step writes a review report under
+[`reports/`](reports/), collected by `reports/REPORT.qmd`.
 
-The target-stage table, naming rules, commands, failure behavior, and backup
-records are documented in
-[`WORKFLOW_README.md`](WORKFLOW_README.md).
+## Layout
 
-Quick start:
+- `prep/`: a `targets` pipeline for data preparation only, from the raw network
+  SQLite, TRY, CHELSA, our GBIF download and the reviewed ledgers in
+  `prep/config/` to the input tables under `data/derived/prep/`.
+- `analysis/`: one script per step (`01_relative_cover.R` to `06b_forest.R`, then
+  the colonizers and the figures), run in order; each reads only `data/derived/`.
+  `analysis/additional_checks/` holds side checks that feed no step.
+- `R/`: functions shared by two or more analysis scripts.
+- `data/derived/NN_<name>/`: each step's outputs; `figures/` and `reports/` the
+  figures and review reports.
+- `legacy/`: the old targets pipeline, kept read-only for reference.
+
+## Running
 
 ```sh
 Rscript -e 'renv::restore()'
-TRANSPLANT_CHELSA_OFFLINE=true Rscript scripts/run_pipeline.R
+Rscript -e 'targets::tar_make(script = "prep/_targets.R", store = "prep/_targets")'
+LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b
 ```
 
-The clean rebuild completed on 2 October 2026 using the validated monthly
-CHELSA cache. The final release checks and test suite passed with one explicitly
-documented, unresolved model-profile interval; see
-[`docs/rebuild_known_issues.md`](docs/rebuild_known_issues.md). The rebuilt
-scientific outputs still await review and acceptance before a new release
-reference is frozen. `TRANSPLANT_CHELSA_OFFLINE=true` requires the 336 monthly
-checkpoints and prevents new CHELSA downloads.
+Run from the repository root. A UTF-8 locale keeps the figure labels (τ², ×10⁻⁴)
+intact. Fitted models and fold results are cached under `data/derived/`, so a
+rerun skips what exists.
 
-Figure renderers are available through one dispatcher:
+## Data and citation
 
-```sh
-Rscript scripts/render_figure.R --list
-```
-
-Tracked historical sources are preserved under the annotated recovery tag
-`pre-reviewable-workflow-with-history-2026-09-30`. The archive, fixtures, and
-old reports have been retired from the working tree. Previous generated results
-and target stores are recoverable from the verified ZIP recorded in
-[`docs/pre_rebuild_backup_receipts.csv`](docs/pre_rebuild_backup_receipts.csv).
+- Community data: the TransPlant network database
+  (`data/transplant_network_clean.sqlite`, from
+  TransPlantNetwork/transplant_network_data_cleaning).
+- Species occurrences for the climatic niche: GBIF.org (28 October 2026) GBIF
+  Occurrence Download https://doi.org/10.15468/dl.7p28y9 (download key
+  0011587-261023074918325). This DOI must be cited in the methods and the data
+  availability statement; GBIF deletes downloads that are not cited after
+  28 April 2027.
+- Climate: CHELSA V2.1. Traits: the TRY database export.

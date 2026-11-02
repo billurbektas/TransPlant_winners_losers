@@ -9,18 +9,18 @@
 #         experiment, `::` written `__`), by_year.rds, strength_df.rds,
 #         strength_df.csv; figures/diagnostics/02_strength.png;
 #         reports/02_strength.md
-# Checks: 108,884 resident rows in origin controls and warmed plots, 43
-#         experiments, 1,655 species x experiment combinations, 528 species;
+# Checks: 67,952 resident rows in origin controls and warmed plots, 42
+#         experiments, 1,004 species x experiment combinations, 346 species;
 #         by_year has one row per species x survey year; strength_df one row
 #         per species x experiment; every strength_se finite and positive; W,
-#         T, P standardised across the 43 experiments, A0 across the 1,655
-#         effects; every join keeps the 1,655 rows.
+#         T, P standardised across the 42 experiments, A0 across the 1,004
+#         effects; every join keeps the 1,004 rows; 20 gradients (2 Nov pool rule).
 #
 # Decided 30 Oct (Bills): one residual variance per species (glmmTMB,
 # dispformula = ~ species, in R/fit_experiment.R), so each species gets its own
 # strength_se; degrees of freedom = origin-control plots + warmed plots - 2
 # per experiment; the plot x species variance stays one per experiment;
-# PEV1 to PEV3 only; species properties standardised across the 528 residents
+# PEV1 to PEV3 only; species properties standardised across the 346 residents
 # that have each one (as legacy/R/models/predictors.R:170-184), traits logged
 # first (same lines); graminoid and woody as 0/1, not standardised.
 
@@ -44,8 +44,8 @@ resident <- cover_long |>
   filter(species_pool == "resident", treatment %in% c("origin_control", "warmed")) |>
   mutate(treatment = factor(treatment, levels = c("origin_control", "warmed")), species = factor(species))
 combos <- distinct(resident, experiment_id, gradient_id, species)
-stopifnot(nrow(resident) == 108884, n_distinct(resident$experiment_id) == 43) # residents, step 01
-stopifnot(nrow(combos) == 1655, n_distinct(combos$species) == 528)
+stopifnot(nrow(resident) == 67952, n_distinct(resident$experiment_id) == 42) # residents, step 01 (2 Nov pool rule)
+stopifnot(nrow(combos) == 1004, n_distinct(combos$species) == 346)
 
 # ---- One fit per experiment, cached ---------------------------------------
 experiment_ids <- sort(unique(resident$experiment_id))
@@ -67,20 +67,20 @@ stopifnot(all(is.finite(by_year$estimate)), all(is.finite(by_year$SE)))
 
 strength <- bind_rows(lapply(experiment_ids, function(e) mutate(fits[[e]]$strength, experiment_id = e))) |>
   transmute(species = as.character(species), experiment_id, strength = estimate, strength_se = SE)
-stopifnot(nrow(strength) == 1655, !anyDuplicated(strength[c("species", "experiment_id")])) # one per species x experiment
+stopifnot(nrow(strength) == 1004, !anyDuplicated(strength[c("species", "experiment_id")])) # one per species x experiment
 stopifnot(all(is.finite(strength$strength_se)), all(strength$strength_se > 0))
 
 # ---- Climate covariates, standardised across experiments -------------------
 climate <- readRDS("data/derived/prep/experiment_climate.rds") |>
   filter(experiment_id %in% experiment_ids) |>
   transmute(experiment_id, W_raw = W, T_raw = T, P_raw = P_summer, W = z(W), T = z(T), P = z(P_summer), TP = T * P)
-stopifnot(nrow(climate) == 43) # every experiment has climate
+stopifnot(nrow(climate) == 42) # every experiment has climate
 stopifnot(all(abs(colMeans(climate[c("W", "T", "P")])) < 1e-8), all(abs(sapply(climate[c("W", "T", "P")], stats::sd) - 1) < 1e-8))
 
 # ---- A0, standardised across effects -------------------------------------
 a0 <- readRDS("data/derived/01_relative_cover/a0.rds") |>
   semi_join(strength, by = c("experiment_id", "species"))
-stopifnot(nrow(a0) == 1655) # every effect has both A0 values
+stopifnot(nrow(a0) == 1004) # every effect has both A0 values
 a0 <- mutate(a0, A0_origin_raw = A0_origin, A0_dest_raw = A0_dest, A0_origin = z(A0_origin), A0_dest = z(A0_dest))
 
 # ---- Species properties, standardised across the residents that have them --
@@ -98,7 +98,7 @@ niche_all <- readRDS("data/derived/prep/niche_optima.rds") |> filter(species %in
 niche <- niche_all |>
   filter(n_obs_sub >= 30) |> # PLAN.md Step D, niche paragraph
   transmute(species, T_opt = z(T_opt), P_opt = z(P_opt))
-stopifnot(nrow(groups) == 528, nrow(pev) == 528) # growth form and phylogeny for every resident
+stopifnot(nrow(groups) == 346, nrow(pev) == 346) # growth form and phylogeny for every resident
 
 strength_df <- strength |>
   left_join(distinct(combos, experiment_id, gradient_id) |> distinct(), by = "experiment_id") |>
@@ -112,10 +112,10 @@ strength_df <- strength |>
   select(effect_id, species, experiment_id, gradient_id, strength, strength_se, W, T, P, TP, A0_origin, A0_dest,
          ldmc_z, lma_z, height_z, graminoid, woody, PEV1, PEV2, PEV3, T_opt, P_opt) |>
   arrange(experiment_id, species)
-stopifnot(nrow(strength_df) == 1655, !anyDuplicated(strength_df$effect_id)) # joins kept every effect
+stopifnot(nrow(strength_df) == 1004, !anyDuplicated(strength_df$effect_id)) # joins kept every effect
 stopifnot(!anyNA(strength_df[c("gradient_id", "W", "T", "P", "TP", "A0_origin", "A0_dest", "graminoid", "woody",
                                "PEV1", "PEV2", "PEV3")]))
-stopifnot(n_distinct(strength_df$gradient_id) == 21)
+stopifnot(n_distinct(strength_df$gradient_id) == 20) # US_Arizona out by the pool-size rule (2 Nov)
 
 # ---- Write -------------------------------------------------------------------
 saveRDS(by_year, file.path(out_dir, "by_year.rds"))
@@ -264,8 +264,8 @@ report <- c(
         "(`glmmTMB`, `dispformula = ~ species`). Decisions taken where PLAN.md is silent (30 Oct, Bills): degrees",
         "of freedom = origin-control plots + warmed plots - 2 per experiment; the plot x species variance kept shared",
         "(see Model as fitted); PEV1 to PEV3 carried; properties standardised across the residents that have them, traits",
-        "logged first; graminoid and woody as 0/1. MILESTONES' expected count (about 1,596 effects in 41 experiments)",
-        "is 1,655 in 43, after FR_AlpeHuez (26 Oct) and US_Arizona (28 Oct) were included.")
+        "logged first; graminoid and woody as 0/1. Pools from step 01 under the 2 Nov pool rule, with US_Arizona out by",
+        "the pool-size rule: 1,004 effects in 42 experiments and 20 gradients, as MILESTONES expects.")
 )
 writeLines(report, "reports/02_strength.md")
 message("Step 02 written: ", length(experiment_ids), " experiments, ", fmt(nrow(strength_df)), " effects")

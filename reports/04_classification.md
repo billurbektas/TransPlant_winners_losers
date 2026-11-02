@@ -1,6 +1,6 @@
 # Step 04: Consistency across experiments (Step C, residents)
 
-For the 137 resident species found in at least four experiments (998 effects in 43 experiments), one `rma.mv` estimated a pooled losing-winning strength per species and a species-specific among-experiment variance, on the strength from year 3 (step 03b). Each species' prediction interval for a new experiment, which carries both its among-experiment variance and the uncertainty of its pooled strength, places it as a consistent winner (interval above zero), a consistent loser (below zero) or context-dependent (spanning zero).
+For the 74 resident species found in at least three gradients (523 effects in 39 experiments), one `rma.mv` estimated a pooled losing-winning strength per species and a species-specific among-experiment variance, on the strength from year 3 (step 03b). Each species' prediction interval for a new experiment, which carries both its among-experiment variance and the uncertainty of its pooled strength, places it as a consistent winner (interval above zero), a consistent loser (below zero) or context-dependent (spanning zero).
 
 ## Model as fitted (for reviewers)
 
@@ -17,52 +17,44 @@ p <- predict(m_s)
 
 | rule | n |
 | --- | --- |
-| effects (step 03b) | 1,655 |
-| species with >= 4 experiments | 137 |
-| their effects | 998 |
-| experiments they occur in | 43 |
-| species with tau2_s estimated at about 0 (< 1e-8) | 40 |
+| effects (step 03b) | 1,004 |
+| species in >= 3 gradients | 74 |
+| their effects | 523 |
+| experiments they occur in | 39 |
+| species with tau2_s estimated at about 0 (< 1e-8) | 14 |
 
 ## Classes
 
 | class | species |
 | --- | --- |
-| Consistent loser | 14 |
-| Context-dependent | 122 |
-| Consistent winner | 1 |
+| Consistent loser | 6 |
+| Context-dependent | 66 |
+| Consistent winner | 2 |
 
 Consistent winners and losers:
 
 | species | class | n_experiments | mu | se_mu | tau | lower | upper |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Festuca violacea | Consistent loser | 4 | -0.0666 | 0.0164 | 0.0272 | -0.1288 | -0.0043 |
-| Potentilla nivea | Consistent loser | 4 | -0.0375 | 0.0094 | 0.0138 | -0.0702 | -0.0048 |
-| Helictochloa versicolor | Consistent loser | 5 | -0.0343 | 0.0058 | 0.0033 | -0.0474 | -0.0212 |
-| Agrostis stolonifera | Consistent loser | 5 | -0.0300 | 0.0060 | 0.0000 | -0.0418 | -0.0182 |
-| Alpagrostis alpina | Consistent loser | 4 | -0.0173 | 0.0042 | 0.0026 | -0.0269 | -0.0076 |
-| Carex bigelowii | Consistent loser | 6 | -0.0088 | 0.0035 | 0.0000 | -0.0157 | -0.0018 |
-| Salix reticulata | Consistent loser | 4 | -0.0082 | 0.0023 | 0.0000 | -0.0127 | -0.0037 |
-| Veronica alpina | Consistent loser | 6 | -0.0078 | 0.0025 | 0.0000 | -0.0128 | -0.0029 |
-| Rhinanthus minor | Consistent loser | 7 | -0.0078 | 0.0028 | 0.0018 | -0.0143 | -0.0013 |
-| Omalotheca supina | Consistent loser | 5 | -0.0077 | 0.0029 | 0.0020 | -0.0146 | -0.0008 |
-| Soldanella alpina | Consistent loser | 5 | -0.0028 | 0.0007 | 0.0000 | -0.0041 | -0.0015 |
-| Trifolium badium | Consistent loser | 4 | -0.0022 | 0.0004 | 0.0000 | -0.0029 | -0.0014 |
-| Silene flos-cuculi | Consistent loser | 5 | -0.0016 | 0.0005 | 0.0000 | -0.0026 | -0.0006 |
-| Primula veris | Consistent loser | 6 | -0.0011 | 0.0003 | 0.0000 | -0.0017 | -0.0004 |
-| Helianthemum nummularium | Consistent winner | 5 | 0.0024 | 0.0007 | 0.0000 | 0.0010 | 0.0038 |
+| Helictochloa versicolor | Consistent loser | 5 | -0.0343 | 0.0059 | 0.0036 | -0.0478 | -0.0209 |
+| Carex vaginata | Consistent loser | 3 | -0.0274 | 0.0084 | 0.0000 | -0.0437 | -0.0110 |
+| Omalotheca supina | Consistent loser | 3 | -0.0121 | 0.0054 | 0.0000 | -0.0227 | -0.0014 |
+| Veronica alpina | Consistent loser | 6 | -0.0084 | 0.0042 | 0.0000 | -0.0167 | -0.0001 |
+| Soldanella alpina | Consistent loser | 5 | -0.0030 | 0.0007 | 0.0000 | -0.0045 | -0.0016 |
+| Trifolium repens | Consistent loser | 9 | -0.0023 | 0.0007 | 0.0000 | -0.0037 | -0.0009 |
+| Poa pratensis | Consistent winner | 12 | 0.0091 | 0.0032 | 0.0000 | 0.0028 | 0.0153 |
+| Festuca ovina | Consistent winner | 4 | 0.0171 | 0.0067 | 0.0000 | 0.0040 | 0.0303 |
 
-Species with tau2_s at about zero (their interval is the uncertainty of the mean alone): Agrostis stolonifera, Alchemilla conjuncta, Alopecurus pratensis, Androsace septentrionalis, Bartsia alpina, Campanula rotundifolia, Carex bigelowii, Carex myosuroides, Carex norvegica, Centaurea jacea, Cerastium fontanum, Dactylorhiza viridis, Empetrum nigrum, Euphrasia minima, Festuca halleri, Fragaria virginiana, Gentiana nivalis, Gentianella campestris, Helianthemum nummularium, Hieracium alpinum, Kalmia procumbens, Leucanthemum ircutianum, Luzula spicata, Oreojuncus trifidus, Phleum alpinum, Pinguicula vulgaris, Primula veris, Prunella vulgaris, Ranunculus brotherusii, Rumex acetosa, Salix reticulata, Silene dioica, Silene flos-cuculi, Soldanella alpina, Thesium alpinum, Trifolium badium, Vaccinium uliginosum, Veronica alpina, Vicia cracca, Viola riviniana.
+Species with tau2_s at about zero (their interval is the uncertainty of the mean alone): Campanula rotundifolia, Carex norvegica, Carex vaginata, Cerastium fontanum, Euphrasia minima, Festuca ovina, Myosotis alpestris, Omalotheca supina, Parnassia palustris, Poa pratensis, Soldanella alpina, Trifolium repens, Veronica alpina, Veronica serpyllifolia.
 
 ## Fig 2
 
 ![Fig 2](../figures/main/fig2.png)
 
-Fig 2 b) and c): Festuca rubra and Bistorta vivipara, the highest and lowest pooled strength among species in at least 12 gradients; one row per experiment (country, origin to destination elevation), mean relative cover over years 3 and later in origin controls (hollow) and warmed plots (filled).
-Fig 2 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). 63 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
+Fig 2 b) and c): Festuca rubra and Bistorta vivipara, the highest and lowest pooled strength among species in at least 11 gradients; one row per experiment (country, origin to destination elevation), mean relative cover over years 3 and later in origin controls (hollow) and warmed plots (filled).
+Fig 2 a): point = pooled strength, filled by class; line = 95% interval including the variation among experiments (a line that does not cross zero marks a consistent loser or winner), shaded by the number of gradients and labelled gradients (experiments). 18 context-dependent species with a pooled strength between -0.005 and +0.005 are not shown.
 
 ## Warnings captured
 
-- Refitted with the bobyqa optimizer after nlminb did not declare convergence (tau2_s at 0): Bartsia alpina.
 - The `label.size` argument of `geom_label()` is deprecated as of ggplot2 3.5.0.
 ℹ Please use the `linewidth` argument instead.
 

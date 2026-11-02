@@ -7,7 +7,7 @@
 # Writes: data/derived/04_classification/m_C.rds, species_summary.csv;
 #         figures/main/fig2.png;
 #         reports/04_classification.md
-# Checks: 1,655 effects; 137 species with at least 4 experiments (998 effects);
+# Checks: 1,004 effects; 74 species in at least 3 gradients (523 effects);
 #         one tau2_s per eligible species, in species order; the prediction
 #         interval equals mu +/- 1.96 sqrt(tau2 + se(mu)^2); class counts sum to
 #         the eligible count; no interval or whisker on tau anywhere.
@@ -35,15 +35,15 @@ class_levels <- c("Consistent loser", "Context-dependent", "Consistent winner")
 cols <- c("Consistent loser" = "#D95F2B", "Context-dependent" = "#3A86D6", "Consistent winner" = "#1B9E77")
 
 strength_df <- readRDS("data/derived/03b_strength_y3/strength_df.rds")
-stopifnot(nrow(strength_df) == 1655) # step 03b
+stopifnot(nrow(strength_df) == 1004) # step 03b
 
 # ---- Eligible species (PLAN.md Step C) ------------------------------------
 eligible <- strength_df |>
-  dplyr::count(species) |>
-  dplyr::filter(n >= 4) |>
+  dplyr::summarise(n_gradients = dplyr::n_distinct(gradient_id), .by = species) |>
+  dplyr::filter(n_gradients >= 3) |>   # 2 Nov (Bills): at least 3 gradients
   dplyr::pull(species)
 d_c <- dplyr::filter(strength_df, species %in% eligible) |> mutate(species = factor(species))
-stopifnot(length(eligible) == 137, nrow(d_c) == 998) # at least 4 experiments
+stopifnot(length(eligible) == 74, nrow(d_c) == 523) # at least 3 gradients
 
 # ---- Model and prediction interval per species ------------------------------
 # The model (mods = ~ 0 + species, random = ~ species | effect_id, DIAG) shares
@@ -77,7 +77,7 @@ stopifnot(max(abs(species_summary$upper - (species_summary$mu + qnorm(0.975) * s
           max(abs(species_summary$lower - (species_summary$mu - qnorm(0.975) * sqrt(species_summary$tau^2 + species_summary$se_mu^2)))) < 1e-10)
 species_summary <- mutate(species_summary, class = factor(case_when(lower > 0 ~ "Consistent winner", upper < 0 ~ "Consistent loser",
                                                                     TRUE ~ "Context-dependent"), levels = class_levels))
-stopifnot(sum(table(species_summary$class)) == 137) # classes sum to the eligible count
+stopifnot(sum(table(species_summary$class)) == 74) # classes sum to the eligible count
 
 
 # ---- Write -------------------------------------------------------------------
@@ -107,11 +107,12 @@ n_hidden <- nrow(species_summary) - nrow(ranges)
 x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(ranges$lower, ranges$upper)))
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
-  # very light guide from each species name to its interval
-  geom_segment(aes(x = x_lim[1], xend = lower, yend = species), colour = "grey90", linewidth = 0.35) +
+  # guide from each species name to its interval, in the class colour of the name (Bills, 2 Nov)
+  geom_segment(aes(x = x_lim[1], xend = lower, yend = species), colour = cols[as.character(ranges$class)],
+               linewidth = 0.9, alpha = 0.45) +
   geom_vline(xintercept = 0, colour = "grey50") +
-  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 1.8) +
-  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 6, stroke = 0.6) +
+  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 4) + # thicker (Bills, 2 Nov)
+  geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 10, stroke = 0.8) +
   # gradients (experiments), right of each interval's upper end, never left of the zero line
   geom_label(aes(x = pmax(upper, 0) + 0.006 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
              size = 10.4, colour = "grey20", fill = "white", label.size = 0, label.padding = unit(0.05, "lines")) +
@@ -124,7 +125,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Number of gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
   guides(fill = guide_legend(override.aes = list(size = 18), nrow = 1)) +
-  labs(title = "a)", x = "Losing-winning strength", y = NULL) +
+  labs(title = "a)   Resident species", x = "Losing-winning strength", y = NULL) +
   theme_classic(base_size = 32) +
   theme(plot.title = element_text(face = "bold", size = 42), legend.position = "bottom", legend.box = "vertical",
         legend.text = element_text(size = 38, face = "bold"), legend.title = element_text(size = 38, face = "bold"),
@@ -158,8 +159,8 @@ corner <- function(sp, tag) {
     geom_vline(xintercept = 0, colour = "grey50", linewidth = 0.8) +   # zero cover
     geom_segment(aes(x = origin_control, xend = warmed, yend = row_id), colour = "black", linewidth = 1.6,
                  arrow = grid::arrow(length = grid::unit(0.35, "cm"), type = "closed")) +
-    geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 9, stroke = 1.6) +
-    geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey50", size = 9, alpha = 0.55) +
+    geom_point(aes(x = origin_control, shape = "Origin control"), fill = "white", colour = "grey20", size = 13, stroke = 2) +
+    geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey50", size = 13, alpha = 0.55) +
     scale_y_discrete(labels = setNames(d$row, d$row_id)) +
     scale_shape_manual(values = c("Origin control" = 21, "Warmed" = 16), name = NULL) +
     guides(shape = guide_legend(override.aes = list(size = 18, stroke = 1.6, colour = c("grey20", "grey50"), fill = c("white", "grey50"), alpha = c(1, 0.55)))) +
@@ -176,7 +177,8 @@ bc <- patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species
 fig_s6 <- patchwork::wrap_plots(figS6, bc,
                                 ncol = 2, widths = c(2.2, 1)) +
   # all legends collected in one row under the whole figure
-  patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical")
+  patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical",
+    legend.text = element_text(size = 42, face = "bold"), legend.title = element_text(size = 42, face = "bold")) # one legend size (Bills, 2 Nov)
 dir.create("figures/main", recursive = TRUE, showWarnings = FALSE)
 ggsave("figures/main/fig2.png", fig_s6, width = 44, height = 40, dpi = 100, bg = "white")
 
@@ -189,7 +191,7 @@ consistent <- named |> arrange(class, mu) |>
 tau0 <- filter(species_summary, tau < 1e-4)
 report <- c(
   "# Step 04: Consistency across experiments (Step C, residents)", "",
-  paste0("For the ", length(eligible), " resident species found in at least four experiments (", fmt(nrow(d_c)),
+  paste0("For the ", length(eligible), " resident species found in at least three gradients (", fmt(nrow(d_c)),
          " effects in ", n_distinct(d_c$experiment_id), " experiments), one `rma.mv` estimated a pooled losing-winning ",
          "strength per species and a species-specific among-experiment variance, on the strength from year 3 (step 03b). ",
          "Each species' prediction interval for a new experiment, which carries both its among-experiment variance and the ",
@@ -204,7 +206,7 @@ report <- c(
   "# lower, upper = p$pi.lb, p$pi.ub = mu_s -/+ 1.96 * sqrt(tau2_s + se(mu_s)^2)",
   "```", "",
   "## Counts", "",
-  md_table(tibble::tibble(rule = c("effects (step 03b)", "species with >= 4 experiments", "their effects",
+  md_table(tibble::tibble(rule = c("effects (step 03b)", "species in >= 3 gradients", "their effects",
                                    "experiments they occur in", "species with tau2_s estimated at about 0 (< 1e-8)"),
                           n = fmt(c(nrow(strength_df), length(eligible), nrow(d_c), n_distinct(d_c$experiment_id),
                                     nrow(tau0))))),
