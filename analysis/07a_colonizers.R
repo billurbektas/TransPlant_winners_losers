@@ -250,22 +250,21 @@ pb <- draw_panel(classes, stability, class_levels,
                  box_title = "Agreement of colonizer warmed cover between adjacent years", tag = "b)   Colonizing species")
 ggsave("figures/main/fig1.png", patchwork::wrap_plots(pa, pb, ncol = 1), width = 14, height = 17, dpi = 150, bg = "white")
 
-# ---- Diagnostic: all years against years >= 3, and agreement by anchor pair ---------
+# ---- Diagnostic: all years against years >= 3, and the strength used downstream -------
+# mirrors the residents' figure of step 03b (Bills, 2 Nov): agreement between anchors is in Fig 1
 cmp <- inner_join(select(strength_df, effect_id, all_years = strength), select(strength_df_y3, effect_id, from_year_3 = strength), by = "effect_id")
 lim <- range(c(cmp$all_years, cmp$from_year_3))
 d1 <- ggplot(cmp, aes(all_years, from_year_3)) + geom_abline(colour = "grey60") + geom_point(alpha = 0.5, size = 2, colour = "#5E3C99") +
   coord_equal(xlim = lim, ylim = lim) + labs(title = "a)", x = "Warmed cover, all years", y = "Warmed cover, years 3 and later") +
   theme_classic(base_size = 18) + theme(plot.title = element_text(face = "bold", size = 24))
-agree <- bind_rows(transmute(stability, group = "Colonizers", pair, agreement = presence_agreement, ccc),
-                   transmute(res_stab, group = "Residents", pair, agreement = sign_agreement, ccc)) |>
-  tidyr::pivot_longer(c(agreement, ccc), names_to = "measure") |>
-  mutate(measure = c(agreement = "Presence (colonizers) or sign (residents) agreement", ccc = "Concordance correlation coefficient")[measure])
-d2 <- ggplot(agree, aes(pair, value, colour = group, group = group)) + geom_line(linewidth = 1.2) + geom_point(size = 4) +
-  facet_wrap(~ measure, ncol = 1) + scale_colour_manual(values = c(Colonizers = "#5E3C99", Residents = "#1B9E77"), name = NULL) +
-  scale_y_continuous(limits = c(0, 1)) + labs(title = "b)", x = "Adjacent anchors (years)", y = NULL) +
-  theme_classic(base_size = 18) + theme(plot.title = element_text(face = "bold", size = 24), legend.position = "top",
-                                        strip.text = element_text(face = "bold", size = 15), strip.background = element_blank())
-ggsave("figures/diagnostics/07a_stability.png", patchwork::wrap_plots(d1, d2, widths = c(1, 1.2)), width = 18, height = 9, dpi = 100, bg = "white")
+long <- bind_rows(tibble::tibble(panel = "Colonizer strength (warmed cover)", value = strength_df_y3$strength),
+                  tibble::tibble(panel = "Standard error", value = strength_df_y3$strength_se))
+d2 <- ggplot(long, aes(value)) + geom_histogram(bins = 60, fill = "#5E3C99", colour = "white") +
+  facet_wrap(~ panel, scales = "free", ncol = 1) +
+  labs(title = "b)", x = "Relative cover (proportion), years 3 and later", y = "Species x experiment") +
+  theme_classic(base_size = 18) + theme(plot.title = element_text(face = "bold", size = 24),
+                                        strip.text = element_text(face = "bold", size = 17), strip.background = element_blank())
+ggsave("figures/diagnostics/07a_stability.png", patchwork::wrap_plots(d1, d2, widths = c(1.1, 1)), width = 16, height = 8, dpi = 100, bg = "white")
 
 # ---- Report -------------------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)

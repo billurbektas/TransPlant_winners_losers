@@ -1,4 +1,4 @@
-# Step 07f: The pathways (Q4), Fig 4
+# Step 07f: The pathways (Q4), Fig 5
 
 PLAN.md's fallback for the pathways figure (Bills, 2 Nov), since Step C found almost nothing consistent: resident species grouped by the sign of their pooled net strength from step 04 (Fig 2), losers below zero and winners above, against colonizer species whose pooled net warmed cover from 07b (Fig S2) is above zero; one point per species. As the agreed mock: LDMC, LMA, vegetative height, and the thermal and precipitation optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species per group. 15 species are residents at some sites and colonizers at others, and appear in both pools. Descriptive; no model.
 
@@ -27,7 +27,7 @@ In both pools: Achillea millefolium, Carum carvi, Dactylis glomerata, Festuca ru
 
 ## Figure
 
-![Fig 4, pathways](../figures/main/fig4.png)
+![Fig 5, pathways](../figures/main/fig5.png)
 
 ## Warnings captured
 
@@ -36,4 +36,4 @@ None.
 ## Deviations from PLAN.md
 
 - PLAN.md's fallback, with resident losers added beside the winners (Bills, 2 Nov): groups by the sign of the net effect, not Step C classes.
-- The figure is Fig 4, after Fig 2 and Fig S2 (Bills, 2 Nov); written to `figures/main/fig4.png`.
+- The figure is main Fig 5 (final numbering, Bills 2 Nov); written to `figures/main/fig5.png`.

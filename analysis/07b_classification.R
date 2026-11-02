@@ -6,7 +6,7 @@
 #         data/derived/01_relative_cover/cover_long.rds, experiments_kept.csv and
 #         data/derived/prep/sites.rds (non-colonizers; Fig S2 b, c)
 # Writes: data/derived/07b_classification/m_C.rds, species_summary.csv;
-#         figures/diagnostics/07b_figS2.png; reports/07b_classification.md
+#         figures/main/fig3.png (main Fig 3); reports/07b_classification.md
 # Checks: 379 colonizer effects; 29 species in at least 3 gradients (117 effects,
 #         24 experiments); 1 consistent non-colonizer set aside, 28 modelled; one
 #         tau2_s per modelled species; the prediction interval equals
@@ -158,7 +158,8 @@ bc <- patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species
 fig <- patchwork::wrap_plots(pa, bc, ncol = 2, widths = c(2.2, 1)) +
   patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical",
     legend.text = element_text(size = 42, face = "bold"), legend.title = element_text(size = 42, face = "bold"))
-ggsave("figures/diagnostics/07b_figS2.png", fig, width = 44, height = 30, dpi = 100, bg = "white")
+ggsave("figures/main/fig3.png", fig, # main Fig 3, anchored (Bills, 2 Nov)
+       width = 44, height = 30, dpi = 100, bg = "white")
 
 # ---- Report ----------------------------------------------------------------------
 f4 <- function(x) ifelse(is.na(x), "", sprintf("%.4f", x))
@@ -182,7 +183,7 @@ report <- c(
   "", "Every species, by pooled warmed cover:", "",
   md_table(arrange(species_summary, desc(mu)) |> transmute(species, class = as.character(class), n_gradients, n_experiments, n_measured_absences,
                                                            mu = f4(mu), se_mu = f4(se_mu), tau = f4(tau), lower = f4(lower), upper = f4(upper))),
-  "", "## Fig S2", "", "![Fig S2](../figures/diagnostics/07b_figS2.png)", "",
+  "", "## Fig 3", "", "![Fig 3](../figures/main/fig3.png)", "",
   paste0("Fig S2 mirrors Fig 2 (Bills, 2 Nov). a): point = pooled warmed cover, filled by class; line = 95% prediction interval for a new ",
          "experiment, shaded by the number of gradients and labelled gradients (experiments); every modelled species is shown. b) and c): ",
          panel_species[1], " and ", panel_species[2], ", the highest and lowest pooled warmed cover among species in at least ", top_g,

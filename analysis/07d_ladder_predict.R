@@ -139,15 +139,16 @@ s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics,
 s7_panel <- function(k, title, tags) lapply(1:2, function(j) {
   v <- levels(s7$version)[j]; d <- filter(s7, metric == k, version == v)
   ggplot(d, aes(level, gradient_id, fill = pmax(pmin(value, 1), -1))) + geom_tile(colour = "white") +
-    geom_text(aes(label = ifelse(is.na(value), "", sprintf("%.2f", value))), size = 3.6) +
+    geom_text(aes(label = ifelse(is.na(value), "", ifelse(value < -10, "< -10", sprintf("%.2f", value)))), size = 7) + # readable at print size (Bills, 2 Nov)
     scale_fill_gradient2(low = "#B2182B", mid = "white", high = "#2166AC", limits = c(-1, 1), na.value = "grey85", name = title) +
-    labs(title = tags[j], subtitle = paste0(title, ", ", tolower(v)), x = NULL, y = NULL) + theme_minimal(base_size = 17) +
-    theme(plot.title = element_text(face = "bold", size = 24), axis.text.x = element_text(angle = 50, hjust = 1),
+    labs(title = tags[j], subtitle = paste0(title, ", ", tolower(v)), x = NULL, y = NULL) + theme_minimal(base_size = 30) +
+    theme(plot.title = element_text(face = "bold", size = 40), plot.subtitle = element_text(size = 32), axis.text.x = element_text(angle = 45, hjust = 1),
+          axis.text = element_text(size = 26), legend.key.height = unit(2, "cm"), legend.key.width = unit(1, "cm"),
           panel.grid = element_blank(), plot.background = element_rect(fill = "white", colour = NA))
 })
 ggsave("figures/diagnostics/07d_figS7.png", patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")),
                                                                    s7_panel("spearman", "Spearman ρ", c("c)", "d)"))), ncol = 2),
-       width = 30, height = 18, dpi = 100, bg = "white")
+       width = 48, height = 30, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))

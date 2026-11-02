@@ -7,7 +7,8 @@
 #         pool_sizes.csv); data/derived/03b_strength_y3/strength_df.rds;
 #         data/derived/07a_colonizers/strength_df_y3.rds; the species summaries of steps
 #         04 and 07b; the tables of steps 05 and 07c; the reviewed PNGs of steps 03 to 07f.
-# Writes: figures/main/fig1.png ... fig7.png; figures/appendix/figS1.png ... figS8b.png;
+# Writes: figures/main/fig4.png, fig7.png (the other main figures are written by their steps);
+#         figures/appendix/figS1.png ... figS18.png;
 #         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_pie_cover.csv,
 #         fig4_pie_counts.csv;
 #         reports/10_figures.md
@@ -18,7 +19,7 @@
 # Decided 2 Nov (Bills): one script for the whole step, run without stopping. Seven main
 # figures: 1 Sankey, 2 residents' classification, 3 colonizers' classification, 4
 # climate space, 5 traits (pathways), 6 the residents' ladder; the results-dependent
-# Fig 6 and the old Fig S8 are dropped. The climate-space pies (Fig 4 as cover, Fig S2 as counts) use
+# Fig 6 and the old Fig S8 are dropped. The climate-space pies (Fig 4 as cover, Fig S10 as counts) use
 # Fig 5's classes per experiment: residents by the sign of their net strength from
 # year 3 on, colonizers with net warmed cover above zero (07a, so the 14 experiments
 # below the colonizer pool-size rule have no purple); one radius, pies sharing a
@@ -61,7 +62,7 @@ stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pie
           sum(pies$Colonizers > 0) == n_distinct(col$experiment_id[col$strength > 0])) # one denominator: counts, not cover
 write.csv(pies, file.path(out_dir, "fig4_pie_counts.csv"), row.names = FALSE)
 # main Fig 4 shows the same classes as shares of the warmed turf's relative cover, years 3 and
-# later (Bills, 2 Nov); the counts move to Fig S2. Relative cover is over all vascular cover of
+# later (Bills, 2 Nov); the counts move to Fig S10. Relative cover is over all vascular cover of
 # the plot-year (step 01), so what no class holds is a slice of its own: species outside the
 # pools, unidentified and genus-level records
 cv <- readRDS("data/derived/01_relative_cover/cover_long.rds") |> mutate(year = as.integer(as.character(year))) |>
@@ -133,7 +134,7 @@ fig4key <- ggplot(key, aes(y = -row)) +
   labs(title = "Origin → destination elevation,\nstrongest warming first") + theme_void() +
   theme(plot.title = element_text(face = "bold", size = 34, margin = margin(b = 10)), plot.background = element_rect(fill = "white", colour = NA))
 fig4 <- patchwork::wrap_plots(climate_map(cover_shares, cols_cover), fig4key, ncol = 2, widths = c(2.2, 0.7))
-figS2 <- patchwork::wrap_plots(climate_map(select(pies, experiment_id, all_of(names(cols))), cols), fig4key, ncol = 2, widths = c(2.2, 0.7))
+figS10 <- patchwork::wrap_plots(climate_map(select(pies, experiment_id, all_of(names(cols))), cols), fig4key, ncol = 2, widths = c(2.2, 0.7))
 
 # ---- Fig 7: what the models find, residents beside colonizers --------------------------
 # Climate + abundance, Height and LDMC models (Bills, 2 Nov). Both responses are relative cover
@@ -205,7 +206,7 @@ nodes <- tibble::tribble(
   8, -1, 2, "Residents: the ladder (Fig 6)", box(h05$n_experiments, h05$n_species, h05$n_effects),
   9, 1, 4, "Colonizers: warmed cover from year 3", box(n_distinct(col$experiment_id), n_distinct(col$species), nrow(col)),
   10, 1, 3, "Colonizers: Step C (Fig 3)", box(NA_integer_, nrow(s07b), sum(s07b$n_experiments)),
-  11, 1, 2, "Colonizers: the ladder (Fig S7)", box(n_distinct(lad_col$experiment_id), n_distinct(lad_col$species), nrow(lad_col))) |>
+  11, 1, 2, "Colonizers: the ladder (Fig S16)", box(n_distinct(lad_col$experiment_id), n_distinct(lad_col$species), nrow(lad_col))) |>
   mutate(counts = sub("NA experiments · ", "", counts))
 edges <- tibble::tribble(
   ~from, ~to, ~rule,
@@ -256,7 +257,7 @@ ends <- bind_rows(lapply(c("PEV1", "PEV2", "PEV3"), function(a) {
 tableS3 <- tidyr::pivot_wider(ends, names_from = end, values_from = families, names_prefix = "most common families of the 15 most extreme species, ") |>
   left_join(transmute(phy$eigenvalues, axis = PEV, `variation (%)` = round(percent_positive_variation, 1)), by = "axis") |> relocate(axis, `variation (%)`)
 
-# ---- Fig S5: the predictors before standardisation -------------------------------------
+# ---- Fig S4: the predictors before standardisation -------------------------------------
 traits <- readRDS("data/derived/prep/traits.rds")
 niche <- readRDS("data/derived/prep/niche_optima.rds") |> filter(n_obs_sub >= 30)
 a0 <- readRDS("data/derived/01_relative_cover/a0.rds") |> semi_join(res, by = c("experiment_id", "species"))
@@ -269,7 +270,7 @@ hist_panel <- function(v, xlab, tag, log_x = FALSE) {
     (if (log_x) scale_x_log10(labels = scales::label_number(big.mark = "")) else scale_x_continuous()) +
     labs(title = tag, x = paste0(xlab, " (n = ", nrow(d), ")"), y = NULL) + big + theme(axis.title.x = element_text(size = 24))
 }
-figS5 <- patchwork::wrap_plots(
+figS4 <- patchwork::wrap_plots(
   hist_panel(experiments$destination_T_JJA, "Destination JJA temperature (°C)", "a)"),
   hist_panel(experiments$diff_T_JJA, "Warming W (°C)", "b)"),
   hist_panel(experiments$destination_P_JJA, "Destination JJA precipitation (mm)", "c)", TRUE),
@@ -315,18 +316,25 @@ for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sp
 ggsave("figures/main/fig4.png", fig4, width = 38, height = 28, dpi = 100, bg = "white")
 ggsave("figures/main/fig7.png", fig7, width = 40, height = 26, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
-ggsave("figures/appendix/figS2.png", figS2, width = 38, height = 28, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS3.png", figS3, width = 40, height = 14, dpi = 100, bg = "white")
-ggsave("figures/appendix/figS5.png", figS5, width = 40, height = 26, dpi = 100, bg = "white")
-copies <- c("figures/main/fig3.png" = "figures/diagnostics/07b_figS2.png",
-            "figures/main/fig6.png" = "figures/diagnostics/06_fig4.png",
-            "figures/appendix/figS4a.png" = "figures/diagnostics/05_figS4.png",
-            "figures/appendix/figS4b.png" = "figures/diagnostics/07c_figS4b.png",
-            "figures/appendix/figS6a.png" = "figures/diagnostics/06_figS7.png",
-            "figures/appendix/figS6b.png" = "figures/diagnostics/07d_figS7.png",
-            "figures/appendix/figS7.png" = "figures/diagnostics/07d_figS9.png",
-            "figures/appendix/figS8a.png" = "figures/diagnostics/06b_figS11.png",
-            "figures/appendix/figS8b.png" = "figures/diagnostics/07e_figS11.png")
+ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS10.png", figS10, width = 38, height = 28, dpi = 100, bg = "white")
+# the appendix follows the order of the analysis (Bills, 2 Nov): data and inputs, then the steps
+# in turn; each step's reviewed diagnostic is copied unchanged under its number
+copies <- c("figures/appendix/figS2.png" = "figures/diagnostics/P2_trait_screening.png",
+            "figures/appendix/figS5.png" = "figures/diagnostics/01_pool_rule.png",
+            "figures/appendix/figS6.png" = "figures/diagnostics/01_pool_sizes.png",
+            "figures/appendix/figS7.png" = "figures/diagnostics/02_strength.png",
+            "figures/appendix/figS8.png" = "figures/diagnostics/03_figS_residents_3gradients_draft.png",
+            "figures/appendix/figS9.png" = "figures/diagnostics/03b_strength_y3.png",
+            "figures/appendix/figS11.png" = "figures/diagnostics/05_figS4.png",
+            "figures/appendix/figS12.png" = "figures/diagnostics/06_figS7.png",
+            "figures/appendix/figS13.png" = "figures/diagnostics/06b_figS11.png",
+            "figures/appendix/figS14.png" = "figures/diagnostics/07a_stability.png",
+            "figures/appendix/figS15.png" = "figures/diagnostics/07c_figS4b.png",
+            "figures/appendix/figS16.png" = "figures/diagnostics/07d_figS9.png",
+            "figures/appendix/figS17.png" = "figures/diagnostics/07d_figS7.png",
+            "figures/appendix/figS18.png" = "figures/diagnostics/07e_figS11.png")
 stopifnot(all(file.copy(copies, names(copies), overwrite = TRUE)))
 fig_index <- tibble::tribble(
   ~figure, ~file, ~content, ~from,
@@ -338,16 +346,27 @@ fig_index <- tibble::tribble(
   "Fig 6", "figures/main/fig6.png", "The residents' ladder", "step 06",
   "Fig 7", "figures/main/fig7.png", "Coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers", "this step",
   "Fig S1", "figures/appendix/figS1.png", "Data flow", "this step",
-  "Fig S2", "figures/appendix/figS2.png", "Fig 4 with species counts in the pies", "this step",
-  "Fig S3", "figures/appendix/figS3.png", "Phylogenetic axes (with Table S3)", "this step",
-  "Fig S4a, b", "figures/appendix/figS4a.png", "Coefficients, residents (a) and colonizers (b)", "steps 05, 07c",
-  "Fig S5", "figures/appendix/figS5.png", "Predictors before standardisation, niche checks", "this step",
-  "Fig S6a, b", "figures/appendix/figS6a.png", "Held-out metrics per gradient, residents (a) and colonizers (b)", "steps 06, 07d",
-  "Fig S7", "figures/appendix/figS7.png", "The colonizers' ladder", "step 07d",
-  "Fig S8a, b", "figures/appendix/figS8a.png", "Random forest beside metafor, residents (a) and colonizers (b)", "steps 06b, 07e")
+  "Fig S2", "figures/appendix/figS2.png", "TRY trait screening", "prep P2",
+  "Fig S3", "figures/appendix/figS3.png", "Phylogenetic axes (with Table S3)", "this step (prep P3)",
+  "Fig S4", "figures/appendix/figS4.png", "Predictors before standardisation, niche checks", "this step (prep P4, P6)",
+  "Fig S5", "figures/appendix/figS5.png", "The pool rule", "step 01",
+  "Fig S6", "figures/appendix/figS6.png", "Resident pool sizes", "step 01",
+  "Fig S7", "figures/appendix/figS7.png", "Losing-winning strength, all years", "step 02",
+  "Fig S8", "figures/appendix/figS8.png", "Year-specific classes, residents in at least 3 gradients", "step 03",
+  "Fig S9", "figures/appendix/figS9.png", "Strength from year 3 against all years", "step 03b",
+  "Fig S10", "figures/appendix/figS10.png", "Fig 4 with species counts in the pies", "this step",
+  "Fig S11", "figures/appendix/figS11.png", "Coefficients, residents", "step 05",
+  "Fig S12", "figures/appendix/figS12.png", "Metrics per gradient, residents", "step 06",
+  "Fig S13", "figures/appendix/figS13.png", "Random forest beside metafor, residents", "step 06b",
+  "Fig S14", "figures/appendix/figS14.png", "Colonizer strength from year 3 against all years", "step 07a",
+  "Fig S15", "figures/appendix/figS15.png", "Coefficients, colonizers", "step 07c",
+  "Fig S16", "figures/appendix/figS16.png", "The colonizers' ladder", "step 07d",
+  "Fig S17", "figures/appendix/figS17.png", "Metrics per gradient, colonizers", "step 07d",
+  "Fig S18", "figures/appendix/figS18.png", "Random forest beside metafor, colonizers", "step 07e")
 main_files <- sort(list.files("figures/main", pattern = "^fig[0-9]+\\.png$"))
 stopifnot(identical(main_files, paste0("fig", 1:7, ".png"))) # seven main figures, each exactly once
-stopifnot(all(file.exists(fig_index$file)), all(file.exists(sub("a\\.png$", "b.png", fig_index$file[grepl("a, b", fig_index$figure)]))))
+app_files <- list.files("figures/appendix", pattern = "^figS[0-9]+\\.png$")
+stopifnot(all(file.exists(fig_index$file)), setequal(app_files, paste0("figS", 1:18, ".png"))) # S1 to S18, each exactly once
 
 # ---- Report --------------------------------------------------------------------------
 count_tab <- tibble::tibble(
@@ -360,13 +379,13 @@ report <- c(
   paste0("Draws what no earlier step produced: Fig 4, the ", nrow(experiments), " experiments in climate space with one pie per experiment ",
          "splitting the warmed turf's relative cover, years 3 and later, among resident losers and winners (by the sign of their net strength from year 3 on), ",
          "colonizers (net warmed cover above zero) and what was not analysed (species outside the pools, unidentified and genus-level records) (Bills, 2 Nov); ",
-         "Fig S2 the same map with the pies counting species; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S5 the predictors before ",
+         "Fig S10 the same map with the pies counting species; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S4 the predictors before ",
          "standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
          "(seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies are drawn to one radius at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
          "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
          "Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation."),
   "", "## Counts", "", md_table(count_tab),
-  "", "## Fig 4 and Fig S2 pies", "", "Cover shares (Fig 4) in per cent of the warmed turf; species counts (Fig S2) in brackets.", "",
+  "", "## Fig 4 and Fig S10 pies", "", "Cover shares (Fig 4) in per cent of the warmed turf; species counts (Fig S10) in brackets.", "",
   md_table(transmute(left_join(pies, rename_with(cover_shares, ~ paste0("cover_", .x), -experiment_id), by = "experiment_id"),
                      experiment_id, name = label, elevations, `T (°C)` = round(destination_T_JJA, 1), `P (mm)` = round(destination_P_JJA),
                      `W (°C)` = round(diff_T_JJA, 1),
@@ -378,8 +397,8 @@ report <- c(
              ", resident winners ", round(100 * mean(cover_shares$`Resident winners`)), ", colonizers ", round(100 * mean(cover_shares$Colonizers)),
              ", not analysed ", round(100 * mean(cover_shares$`Not analysed`)), "."),
   "", "## Figures", "", md_table(fig_index), "",
-  "![Fig 4](../figures/main/fig4.png)", "", "![Fig 7](../figures/main/fig7.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S2](../figures/appendix/figS2.png)", "",
-  "![Fig S3](../figures/appendix/figS3.png)", "", "![Fig S5](../figures/appendix/figS5.png)",
+  "![Fig 4](../figures/main/fig4.png)", "", "![Fig 7](../figures/main/fig7.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S3](../figures/appendix/figS3.png)", "",
+  "![Fig S4](../figures/appendix/figS4.png)", "", "![Fig S10](../figures/appendix/figS10.png)",
   "", "## Tables", "",
   md_table(tibble::tibble(table = paste("Table", c("S1", "S2", "S3", "S4", "S5")), file = sprintf("tables/table%s.csv", c("S1", "S2", "S3", "S4", "S5")),
                           content = c("Experiments", "Species list", "Phylogenetic axes", "Variance components per model", "Fixed-effect coefficients per model"),
@@ -389,8 +408,8 @@ report <- c(
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- One script for the whole step (Bills, 2 Nov).",
-  "- Seven main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6, the coefficients of three models Fig 7 (abundance terms drawn per pool, not comparable); the results-dependent Fig 6 and the old Fig S8 dropped; appendix renumbered with the count version of Fig 4 as Fig S2.",
-  "- Fig 4's pies split the warmed turf's relative cover (years 3 and later) among Fig 5's classes per experiment, not counts of last-year significance classes; the counts are Fig S2; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).",
+  "- Seven main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6, the coefficients of three models Fig 7 (abundance terms drawn per pool, not comparable); the results-dependent Fig 6 and the old Fig S8 dropped; appendix S1 to S18 in the order of the analysis (Bills, 2 Nov); the main figures are written by their own steps.",
+  "- Fig 4's pies split the warmed turf's relative cover (years 3 and later) among Fig 5's classes per experiment, not counts of last-year significance classes; the counts are Fig S10; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).",
   "- Coefficients, per-gradient metrics and the random forest stay as residents (a) and colonizers (b) files.",
   "- `REPORT.html` not rendered: Quarto is not installed.")
 writeLines(report, "reports/10_figures.md")
