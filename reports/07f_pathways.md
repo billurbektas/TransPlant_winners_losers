@@ -1,36 +1,33 @@
-# Step 07f: The pathways (Q4), after Fig 1
+# Step 07f: The pathways (Q4), Fig 4
 
-Species properties for Fig 1's year-specific classes at year 3 (Bills, 2 Nov), with Fig 1's colours: residents as Loser, Loser (ns), Winner (ns) and Winner (step 03), colonizers as Present, Present (ns) and Absent (step 07a). A class belongs to a species x experiment, so each point is one species in one experiment, as Fig 1 counts them. As the agreed mock: LDMC, LMA and vegetative height, and the thermal and precipitation optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species per group. Descriptive; no model.
+PLAN.md's fallback for the pathways figure (Bills, 2 Nov), since Step C found almost nothing consistent: resident species grouped by the sign of their pooled net strength from step 04 (Fig 2), losers below zero and winners above, against colonizer species whose pooled net warmed cover from 07b (Fig S2) is above zero; one point per species. As the agreed mock: LDMC, LMA, vegetative height, and the thermal and precipitation optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species per group. 15 species are residents at some sites and colonizers at others, and appear in both pools. Descriptive; no model.
 
-## Groups (year 3)
+## Groups
 
-| group | species x experiment | species |
-| --- | --- | --- |
-| Loser | 132 | 82 |
-| Loser (ns) | 446 | 224 |
-| Winner (ns) | 263 | 149 |
-| Winner | 38 | 32 |
-| Present | 56 | 46 |
-| Present (ns) | 122 | 101 |
-| Absent | 153 | 116 |
+| rule | n |
+| --- | --- |
+| resident species (step 04) | 74 |
+| net strength below zero | 59 |
+| net strength above zero | 15 |
+| colonizer species (07b) | 29 |
+| net warmed cover above zero | 28 |
+| in both pools | 15 |
 
 ## Group medians and shares
 
-| group | graminoid share | woody share | T optimum (°C) | P optimum (mm) | LDMC (mg g⁻¹) | LMA (g m⁻²) | Vegetative height (cm) |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Loser | 24% | 8% | 12.6 (131) | 386 (131) | 267 (119) | 52.2 (117) | 9 (116) |
-| Loser (ns) | 26% | 6% | 13.8 (440) | 342 (440) | 252 (386) | 50.8 (390) | 10.9 (377) |
-| Winner (ns) | 37% | 5% | 14.9 (256) | 309 (256) | 261 (224) | 54.2 (231) | 12.5 (220) |
-| Winner | 39% | 3% | 15.8 (38) | 278 (38) | 253 (37) | 52.2 (38) | 13.5 (35) |
-| Present | 20% | 0% | 16.5 (55) | 259 (55) | 230 (49) | 47.4 (49) | 14.8 (49) |
-| Present (ns) | 23% | 4% | 16.2 (119) | 266 (119) | 236 (109) | 47 (108) | 15 (101) |
-| Absent | 24% | 6% | 15.9 (152) | 286 (152) | 232 (127) | 50.4 (134) | 14.2 (129) |
+| group | species | graminoid share | woody share | LDMC (mg g⁻¹) | LMA (g m⁻²) | Vegetative height (cm) | T optimum (°C) | P optimum (mm) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Resident losers | 59 | 25% | 5% | 260 (57) | 51.1 (59) | 7.7 (57) | 12.9 (59) | 343 (59) |
+| Resident winners | 15 | 60% | 0% | 282 (15) | 56.1 (15) | 16.8 (15) | 15.8 (15) | 262 (15) |
+| Colonizers | 28 | 21% | 4% | 231 (28) | 47.6 (27) | 20.5 (27) | 16.8 (28) | 258 (28) |
 
-Medians with the number of species x experiment that have the property in brackets; shares over species x experiment.
+Medians with the number of species that have the property in brackets.
+
+In both pools: Achillea millefolium, Carum carvi, Dactylis glomerata, Festuca rubra, Lolium perenne, Lotus corniculatus, Phleum pratense, Poa pratensis, Rumex acetosa, Taraxacum officinale, Trifolium pratense, Trifolium repens, Trisetum flavescens, Veronica chamaedrys, Veronica officinalis.
 
 ## Figure
 
-![Pathways](../figures/main/fig1_pathways.png)
+![Fig 4, pathways](../figures/main/fig4.png)
 
 ## Warnings captured
 
@@ -38,5 +35,5 @@ None.
 
 ## Deviations from PLAN.md
 
-- Groups are Fig 1's year-3 classes, not Step C's consistent classes, which were nearly empty (Bills, 2 Nov); points are species x experiment.
-- The figure follows Fig 1 (`figures/main/fig1_pathways.png`); final numbering in step 10.
+- PLAN.md's fallback, with resident losers added beside the winners (Bills, 2 Nov): groups by the sign of the net effect, not Step C classes.
+- The figure is Fig 4, after Fig 2 and Fig S2 (Bills, 2 Nov); written to `figures/main/fig4.png`.

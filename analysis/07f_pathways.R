@@ -1,23 +1,23 @@
-# Step 07f: the pathways (Q4), placed after Fig 1.
+# Step 07f: the pathways (Q4), Fig 4.
 #
-# PLAN.md: The colonizer story, "Q4, the pathways figure"; the agreed mock
-#   plan_figures/mock_fig7_pathways.png.
-# Reads:  data/derived/03_temporal/classes_by_anchor.rds (resident classes, Fig 1a);
-#         data/derived/07a_colonizers/presence_classes.csv (colonizer classes, Fig 1b);
+# PLAN.md: The colonizer story, "Q4, the pathways figure", its fallback; the agreed
+#   mock plan_figures/mock_fig7_pathways.png.
+# Reads:  data/derived/04_classification/species_summary.csv (residents, Fig 2);
+#         data/derived/07b_classification/species_summary.csv (colonizers, Fig S2);
 #         data/derived/prep/traits.rds, functional_groups.rds, niche_optima.rds
 # Writes: data/derived/07f_pathways/group_properties.csv, group_summary.csv;
-#         figures/main/fig1_pathways.png; reports/07f_pathways.md
-# Checks: the year-3 class counts equal Fig 1's (residents 879, colonizers 331);
-#         every species has growth form; group sizes in the labels.
+#         figures/main/fig4.png; reports/07f_pathways.md
+# Checks: 74 resident species (step 04) split by the sign of their net strength;
+#         28 colonizer species with net warmed cover above zero (07b); every species
+#         has growth form; group sizes in the labels.
 #
-# Decided 2 Nov (Bills): with almost nothing consistent in Step C, the groups are
-# Fig 1's year-specific classes at year 3, with Fig 1's colours: residents Loser,
-# Loser (ns), Winner (ns), Winner; colonizers Present, Present (ns), Absent. A class
-# belongs to a species x experiment, so each point is one species in one
-# experiment, as Fig 1 counts them; the figure follows Fig 1. Raw property values in
-# their units, on log axes except the thermal optimum (Bills, 2 Nov: values on the
-# y axis); niche optima only where n_obs_sub >= 30, as in the models. Descriptive,
-# no model.
+# Decided 2 Nov (Bills): PLAN.md's fallback, since Step C found almost nothing
+# consistent: residents grouped by the sign of their pooled net strength mu (Fig 2),
+# losers and winners, against colonizers with pooled net warmed cover above zero
+# (Fig S2), one point per species; Fig 2's loser and winner colours, Fig S2's purple.
+# Placed after Fig 2 and S2 as Fig 4 (Fig 3 is the climate space). Raw property values
+# in their units, on log axes except the thermal optimum; niche optima only where
+# n_obs_sub >= 30, as in the models. Descriptive, no model.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/md_table.R")
@@ -28,18 +28,18 @@ globalCallingHandlers(warning = function(w) {
 out_dir <- "data/derived/07f_pathways"
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-# ---- Fig 1's classes at year 3 -------------------------------------------------------------
-res <- readRDS("data/derived/03_temporal/classes_by_anchor.rds") |> filter(year == 3) |>
-  transmute(species, experiment_id, group = as.character(class), pool = "Resident species")
-col <- read.csv("data/derived/07a_colonizers/presence_classes.csv") |> filter(year == 3) |>
-  transmute(species, experiment_id, group = class, pool = "Colonizing species")
-stopifnot(nrow(res) == 879, nrow(col) == 331) # Fig 1 a and b at year 3
-groups_def <- c("Loser", "Loser (ns)", "Winner (ns)", "Winner", "Present", "Present (ns)", "Absent")
-cols <- c("Loser" = "#D95F2B", "Loser (ns)" = "#F0A07A", "Winner (ns)" = "#8FD3B6", "Winner" = "#1B9E77", # Fig 1a
-          "Present" = "#5E3C99", "Present (ns)" = "#A68BC8", "Absent" = "#CFC6DD")                       # Fig 1b
+# ---- Groups by the sign of the net effect (Fig 2, Fig S2) -------------------------------
+res <- read.csv("data/derived/04_classification/species_summary.csv")
+stopifnot(nrow(res) == 74, all(res$mu != 0)) # step 04's resident species, every one with a sign
+res <- transmute(res, species, mu, group = ifelse(mu < 0, "Resident losers", "Resident winners"))
+col <- read.csv("data/derived/07b_classification/species_summary.csv") |> filter(!is.na(mu), mu > 0) # net warmed cover above zero
+stopifnot(nrow(col) == 28) # 07b's colonizers less Ranunculus acris, which never arrived
+col <- transmute(col, species, mu, group = "Colonizers")
+groups_def <- c("Resident losers", "Resident winners", "Colonizers")
+cols <- c("Resident losers" = "#D95F2B", "Resident winners" = "#1B9E77", "Colonizers" = "#5E3C99") # Fig 2, Fig S2
 members <- bind_rows(res, col)
-stopifnot(all(members$group %in% groups_def))
 sizes <- count(members, group) |> arrange(match(group, groups_def))
+both <- intersect(res$species, col$species) # residents at some sites, colonizers at others
 
 # ---- Raw properties (units as the mock) -------------------------------------------------
 traits <- readRDS("data/derived/prep/traits.rds") |>
@@ -54,7 +54,7 @@ prop_names <- c("LDMC (mg g⁻¹)", "LMA (g m⁻²)", "Vegetative height (cm)", 
 long <- props |> tidyr::pivot_longer(all_of(prop_names), names_to = "property") |> filter(!is.na(value)) |>
   mutate(property = factor(property, levels = prop_names), group = factor(group, levels = groups_def))
 meds <- summarise(long, median = median(value), n = n(), .by = c(property, group))
-shares <- summarise(props, `graminoid share` = mean(graminoid), `woody share` = mean(woody), n = n(), n_species = n_distinct(species), .by = group) |>
+shares <- summarise(props, `graminoid share` = mean(graminoid), `woody share` = mean(woody), n = n(), .by = group) |>
   mutate(group = factor(group, levels = groups_def)) |> arrange(group)
 write.csv(left_join(shares, tidyr::pivot_wider(select(meds, -n), names_from = property, values_from = median), by = "group"),
           file.path(out_dir, "group_summary.csv"), row.names = FALSE)
@@ -65,8 +65,8 @@ glab <- setNames(paste0(groups_def, "\n(n = ", sizes$n[match(groups_def, sizes$g
 set.seed(1)
 panels <- lapply(prop_names, function(p) {
   ggplot(filter(long, property == p), aes(group, value, colour = group)) +
-    geom_vline(xintercept = 4.5, colour = "grey75", linewidth = 0.8) + # residents | colonizers
-    geom_jitter(width = 0.2, height = 0, size = 2.6, alpha = 0.45) +
+    geom_vline(xintercept = 2.5, colour = "grey75", linewidth = 0.8) + # residents | colonizers
+    geom_jitter(width = 0.2, height = 0, size = 4, alpha = 0.6) +
     geom_crossbar(data = filter(meds, property == p), aes(group, median, ymin = median, ymax = median), width = 0.6, linewidth = 1.6, middle.linewidth = 1.6) +
     (if (p == "T optimum (°C)") scale_y_continuous() else scale_y_log10(breaks = scales::breaks_log(6), labels = scales::label_number(big.mark = ""))) +
     scale_colour_manual(values = cols, guide = "none") + scale_x_discrete(labels = NULL) +
@@ -88,26 +88,30 @@ bottom <- ggplot(share_long, aes(y = 1)) +
   theme(plot.title = element_text(face = "bold", size = 40), strip.text.y.left = element_text(size = 28, angle = 0, hjust = 1),
         strip.text.x = element_text(face = "bold", size = 25, lineheight = 0.9, margin = margin(b = 10)),
         strip.placement = "outside", plot.background = element_rect(fill = "white", colour = NA))
-ggsave("figures/main/fig1_pathways.png", patchwork::wrap_plots(top, bottom, ncol = 1, heights = c(2.2, 1)), width = 38, height = 20, dpi = 100, bg = "white")
+ggsave("figures/main/fig4.png", patchwork::wrap_plots(top, bottom, ncol = 1, heights = c(2.2, 1)), width = 32, height = 20, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------------------
 report <- c(
-  "# Step 07f: The pathways (Q4), after Fig 1", "",
-  paste0("Species properties for Fig 1's year-specific classes at year 3 (Bills, 2 Nov), with Fig 1's colours: residents as Loser, Loser (ns), ",
-         "Winner (ns) and Winner (step 03), colonizers as Present, Present (ns) and Absent (step 07a). A class belongs to a species x experiment, so each point is ",
-         "one species in one experiment, as Fig 1 counts them. As the agreed mock: LDMC, LMA and vegetative height, and the thermal and ",
-         "precipitation optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species per group. Descriptive; no model."),
-  "", "## Groups (year 3)", "", md_table(transmute(shares, group = as.character(group), `species x experiment` = n, species = n_species)),
+  "# Step 07f: The pathways (Q4), Fig 4", "",
+  paste0("PLAN.md's fallback for the pathways figure (Bills, 2 Nov), since Step C found almost nothing consistent: resident species grouped by the sign of ",
+         "their pooled net strength from step 04 (Fig 2), losers below zero and winners above, against colonizer species whose pooled net warmed cover ",
+         "from 07b (Fig S2) is above zero; one point per species. As the agreed mock: LDMC, LMA, vegetative height, and the thermal and precipitation ",
+         "optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species ",
+         "per group. ", length(both), " species are residents at some sites and colonizers at others, and appear in both pools. Descriptive; no model."),
+  "", "## Groups", "", md_table(tibble::tibble(rule = c("resident species (step 04)", "net strength below zero", "net strength above zero",
+                                                       "colonizer species (07b)", "net warmed cover above zero", "in both pools"),
+                                              n = c(nrow(res), sum(res$mu < 0), sum(res$mu > 0), nrow(col) + 1, nrow(col), length(both)))),
   "", "## Group medians and shares", "",
-  md_table(left_join(transmute(shares, group = as.character(group), `graminoid share` = sprintf("%.0f%%", 100 * `graminoid share`),
+  md_table(left_join(transmute(shares, group = as.character(group), species = n, `graminoid share` = sprintf("%.0f%%", 100 * `graminoid share`),
                                `woody share` = sprintf("%.0f%%", 100 * `woody share`)),
                      tidyr::pivot_wider(transmute(meds, group = as.character(group), property, median = paste0(signif(median, 3), " (", n, ")")),
                                         names_from = property, values_from = median), by = "group")),
-  "", "Medians with the number of species x experiment that have the property in brackets; shares over species x experiment.",
-  "", "## Figure", "", "![Pathways](../figures/main/fig1_pathways.png)",
+  "", "Medians with the number of species that have the property in brackets.",
+  "", paste0("In both pools: ", paste(both, collapse = ", "), "."),
+  "", "## Figure", "", "![Fig 4, pathways](../figures/main/fig4.png)",
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
-  "- Groups are Fig 1's year-3 classes, not Step C's consistent classes, which were nearly empty (Bills, 2 Nov); points are species x experiment.",
-  "- The figure follows Fig 1 (`figures/main/fig1_pathways.png`); final numbering in step 10.")
+  "- PLAN.md's fallback, with resident losers added beside the winners (Bills, 2 Nov): groups by the sign of the net effect, not Step C classes.",
+  "- The figure is Fig 4, after Fig 2 and Fig S2 (Bills, 2 Nov); written to `figures/main/fig4.png`.")
 writeLines(report, "reports/07f_pathways.md")
 message("Step 07f written: ", paste(sprintf("%s %d", sizes$group, sizes$n), collapse = "; "))
