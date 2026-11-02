@@ -1,6 +1,6 @@
 # Step 01: Relative cover table and pools
 
-Relative cover was computed per plot-year over all 58,803 vascular records (identified, genus-level and unidentified, the six deep-lineage taxa included), so it sums to 1 in every one of 3,210 plot-years. The analysis keeps identified species without a `drop_reason` and removes the deep-lineage taxa afterwards. Each of the 43 included experiments gets its warmed turfs, origin controls and destination controls; a species is resident with at least 2 plot-year records in origin controls, in the destination pool with at least 2 in destination controls and fewer than 2 in origin controls, whether or not it was ever found in warmed turfs. Every included experiment goes forward (no pool-size rule), all observed cover is kept, and every pool species gets a row, zero where unrecorded, in every surveyed plot-year of its pool's two groups.
+Relative cover was computed per plot-year over all 58,803 vascular records (identified, genus-level and unidentified, the six deep-lineage taxa included), so it sums to 1 in every one of 3,210 plot-years. The analysis keeps identified species without a `drop_reason` and removes the deep-lineage taxa afterwards. Each of the 43 included experiments gets its warmed turfs, origin controls and destination controls. Pool rule (2 Nov): a species is resident if, in the origin controls, it was recorded in at least two plots in at least half of the survey years, or in at least half of the plots in at least two survey years (halves rounded up; plots surveyed that year; years the group was surveyed); it is in the destination pool if it meets the same rule in the destination controls and has no record in the origin controls, whether or not it was ever found in warmed turfs. Pool-size rule (reinstated 2 Nov): an experiment needs at least 5 residents. All observed cover of pool species is kept, and every pool species gets a row, zero where unrecorded, in every surveyed plot-year of its pool's two groups.
 
 ## Counts at every rule (`flow_counts.csv`, Fig S1)
 
@@ -9,40 +9,36 @@ Relative cover was computed per plot-year over all 58,803 vascular records (iden
 | input (P1 community, identified species) | all | 44 | 886 | 3340 |
 | experiment exclusions (P1) | all | 43 | 869 | 3309 |
 | deep-lineage taxa removed | all | 43 | 863 | 3278 |
-| observation filter (>= 2 plot-year records in a control group) | all | 43 | 681 | 2511 |
-| pool assignment | resident | 43 | 528 | 1655 |
-| pool assignment | destination_pool | 43 | 414 | 856 |
+| pool rule (2 Nov: >= 2 plots in half the years, or half the plots in >= 2 years) | all | 43 | 437 | 1415 |
+| pool-size rule (at least 5 residents per experiment) | all | 42 | 429 | 1406 |
+| pool assignment | resident | 42 | 346 | 1004 |
+| pool assignment | destination_pool | 39 | 236 | 402 |
 
-Species x experiment combinations in neither pool:
+Species x experiment combinations in neither pool (before the pool-size rule):
 
 | reason | species_x_experiment |
 | --- | --- |
-| below the filter in both control groups | 511 |
+| below the pool rule in both control groups | 1407 |
+| destination rule met, but recorded in origin controls | 200 |
 | warmed only | 256 |
 
-## Cut-offs for pool membership (diagnostic, added 30 Oct)
+## What the pool rule keeps and leaves behind
 
-Plot-year records per species x experiment in each group, from all records before any pool rule, and what a fixed cut-off of at least k plot-year records would keep. Species with a single record are the most common count in every group (Origin controls 368, Warmed plots 475, Destination controls 403); beyond k = 2 the counts decline without a break. The pool rule in use is k = 2 (kept 30 Oct after a stricter rule of half of a group's plots and two years was tried and reverted), which keeps 1,655 resident effects.
+Every species x experiment recorded in a control group, by its plot-year records there and by what the rule did with it (a); totals (b); per experiment, the species recorded in the origin controls (c); kept species by the number of gradients they occur in, with the at-least-2 cut-off that steps 04 and 05 apply (d). The rule is not a cut-off on records: combinations with many records but in few plots or few years are left behind, and some with few records are kept where the plots are few.
 
-![Plot-year records and cut-offs](../figures/diagnostics/01_pool_cutoffs.png)
+![Kept and left behind](../figures/diagnostics/01_pool_rule.png)
 
-| k | Resident effects (species x experiment) | Species in >= 4 experiments (Step C) |
-| --- | --- | --- |
-| 1 | 2023 | 168 |
-| 2 | 1655 | 137 |
-| 3 | 1460 | 120 |
-| 4 | 1323 | 108 |
-| 5 | 1190 | 97 |
-| 6 | 1085 | 90 |
-| 7 | 993 | 82 |
-| 8 | 925 | 73 |
-| 9 | 862 | 70 |
-| 10 | 816 | 65 |
-| 11 | 765 | 61 |
-| 12 | 721 | 60 |
-| 13 | 669 | 54 |
-| 14 | 632 | 51 |
-| 15 | 604 | 50 |
+| pool | kept | left behind: fails the pool rule | left behind: experiment under 5 residents | left behind: recorded in origin controls |
+| --- | --- | --- | --- | --- |
+| Residents (origin controls) | 1004 | 1015 | 4 | 0 |
+| Colonizers (destination controls) | 402 | 788 | 5 | 200 |
+
+Kept effects by criterion (A: at least 2 plots in at least half of the survey years; B: at least half of the plots in at least 2 survey years):
+
+| pool | A only | B only | A and B |
+| --- | --- | --- | --- |
+| residents | 291 | 33 | 680 |
+| destination pool | 118 | 10 | 274 |
 
 ## Relative cover
 
@@ -77,23 +73,23 @@ Share of plot-year cover in rows not analysed, by region:
 
 ## Pool sizes (`pool_sizes.csv`)
 
-No pool-size rule (dropped 29 Oct): all 43 included experiments go forward. Smallest resident pools: US_Arizona::MC::PP 8; DE_Susalps::FE::BT 12; SE_Abisko::Mid::Low 13. US_Arizona, which PLAN.md expected to leave with about four residents in the legacy relative cover, has 8 on the SQLite's absolute cover (kept, decided 28 Oct).
-Gradients (`gradient_id` = region): 21.
+Pool-size rule: 42 of 43 experiments have at least 5 residents. Left out: US_Arizona::MC::PP, with 4 residents: 9 species were ever recorded in its origin controls, a median of 2.5 per plot-year. Smallest kept pools: DE_Susalps::FE::BT 8; SE_Abisko::High::Low 9; SE_Abisko::High::Mid 9.
+Gradients (`gradient_id` = region) after the rule: 20.
 
 ![Resident pool size per experiment](../figures/diagnostics/01_pool_sizes.png)
 
-| experiment_id | region | resident | destination_pool |
-| --- | --- | --- | --- |
-| US_Arizona::MC::PP | US_Arizona | 8 | 15 |
-| DE_Susalps::FE::BT | DE_Susalps | 12 | 18 |
-| SE_Abisko::Mid::Low | SE_Abisko | 13 | 10 |
-| SE_Abisko::High::Low | SE_Abisko | 16 | 12 |
-| SE_Abisko::High::Mid | SE_Abisko | 16 | 8 |
-| DE_TransAlps::FP::BT | DE_TransAlps | 21 | 25 |
-| IT_MatschMazia2::High::Low | IT_MatschMazia2 | 24 | 24 |
-| NO_Lavisdalen::Hogsete::Vikesland | NO_Lavisdalen | 26 | 10 |
-| US_Colorado::pf::um | US_Colorado | 26 | 13 |
-| US_Colorado::mo::pf | US_Colorado | 27 | 10 |
+| experiment_id | region | resident | destination_pool | kept |
+| --- | --- | --- | --- | --- |
+| US_Arizona::MC::PP | US_Arizona | 4 | 5 | FALSE |
+| DE_Susalps::FE::BT | DE_Susalps | 8 | 6 | TRUE |
+| SE_Abisko::High::Low | SE_Abisko | 9 | 6 | TRUE |
+| SE_Abisko::High::Mid | SE_Abisko | 9 | 5 | TRUE |
+| SE_Abisko::Mid::Low | SE_Abisko | 11 | 3 | TRUE |
+| US_Colorado::mo::pf | US_Colorado | 11 | 4 | TRUE |
+| US_Colorado::mo::um | US_Colorado | 11 | 10 | TRUE |
+| IT_MatschMazia2::High::Low | IT_MatschMazia2 | 13 | 16 | TRUE |
+| US_Montana::High::Low | US_Montana | 13 | 17 | TRUE |
+| US_Colorado::pf::um | US_Colorado | 14 | 5 | TRUE |
 
 ## Survey years failing the both-groups rule (1 experiment-years)
 
@@ -120,13 +116,13 @@ A0 = log(100 x mean relative cover over the control plots of the group's first s
 
 ## Table and spot check
 
-`cover_long`: 166,644 rows, 43 experiments, 21 gradients, 2,511 species x experiment combinations (1,655 resident, 856 destination pool); 55,233 rows observed, 111,411 zeros.
-Spot check, US_Arizona::MC::PP: pool species x surveyed plot-years of their groups = 1,288, rows written = 1,288 (1,050 zeros + 238 observed records).
+`cover_long`: 95,901 rows, 42 experiments, 20 gradients, 1,406 species x experiment combinations (1,004 resident, 402 destination pool); 45,810 rows observed, 50,091 zeros.
+Spot check, DE_Susalps::FE::BT: pool species x surveyed plot-years of their groups = 1,008, rows written = 1,008 (627 zeros + 381 observed records).
 
 ## Warnings captured
 
-- Removed 145 rows containing non-finite outside the scale range (`stat_bin()`).
+None.
 
 ## Deviations from PLAN.md
 
-Relative cover includes the six deep-lineage taxa in its denominator and removes them afterwards (decided 28 Oct; PLAN.md Data rules updated). The observation filter decides pool membership only; observed cover of pool species is kept whatever its count (decided 28 Oct; legacy removed it per treatment).
+Relative cover includes the six deep-lineage taxa in its denominator and removes them afterwards (decided 28 Oct; PLAN.md Data rules updated). The pool rule decides pool membership only; observed cover of pool species is kept whatever its count (decided 28 Oct; legacy removed it per treatment).

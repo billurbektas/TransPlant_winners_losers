@@ -2,6 +2,7 @@
 1,"input (P1 community, identified species)","all",44,886,3340
 2,"experiment exclusions (P1)","all",43,869,3309
 3,"deep-lineage taxa removed","all",43,863,3278
-4,"observation filter (>= 2 plot-year records in a control group)","all",43,681,2511
-5,"pool assignment","resident",43,528,1655
-6,"pool assignment","destination_pool",43,414,856
+4,"pool rule (2 Nov: >= 2 plots in half the years, or half the plots in >= 2 years)","all",43,437,1415
+5,"pool-size rule (at least 5 residents per experiment)","all",42,429,1406
+6,"pool assignment","resident",42,346,1004
+7,"pool assignment","destination_pool",39,236,402
