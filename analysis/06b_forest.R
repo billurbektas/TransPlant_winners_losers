@@ -4,8 +4,8 @@
 # Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3);
 #         data/derived/06_ladder_predict/folds/null_<gradient_id>.rds (the metafor
 #         Null held out, the reference of R²); data/derived/06_ladder_predict/pred_metrics.csv
-# Writes: data/derived/06b_forest/folds/<level>_<gradient_id>.rds, forest_metrics.csv,
-#         forest_vs_metafor.csv; figures/diagnostics/06b_figS11.png; reports/06b_forest.md
+# Writes: data/derived/06b_forest/folds/<setting>/<level>_<gradient_id>.rds, tuning.csv,
+#         forest_metrics.csv, forest_vs_metafor.csv; figures/diagnostics/06b_figS11.png; reports/06b_forest.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients) as in step 05; 16 scored gradients, the same as step 06;
 #         test rows of every fold equal step 06's; the held-out gradient absent
@@ -13,9 +13,10 @@
 #
 # Decided 2 Nov (Bills): held-out predictions only, no in-sample or out-of-bag
 # value (not comparable with metafor's fit); R² against the metafor Null on the
-# same gradient, as step 06; medians; fixed settings, no tuning (1000 trees,
-# min.node.size 40, mtry floor(sqrt(p))); one seed per fold and one rerun with a
-# second seed; species also in the property forests (<property>+species); no
+# same gradient, as step 06; medians; one parameter set for every level and fold,
+# chosen from a grid (node size x mtry) by the median out-of-bag R² over the
+# levels on all rows, 3000 trees; one seed per fold and one rerun with a second
+# seed; species also in the property forests (<property>+species); no
 # case weights (1 / SE² let a few near-zero effects decide every forest, because
 # the most precise effects are the smallest ones); no partial dependence; the
 # half-violin code copied from R/fig4_ladder.R into this script (few functions).
@@ -63,33 +64,33 @@ level_display <- c(null = "Null", start = "Initial abundances", climate = "Clima
                    species = "Species-dependent", prop_label, setNames(paste(prop_label, "+ species"), paste0(names(prop_vars), "+species")))
 all_levels <- c("null", names(level_vars))
 seeds <- c(main = 20261102L, check = 77L)
+n_trees <- 3000L # medians steadier between seeds than with 1000 (scratchpad check, 2 Nov)
+# one parameter set for every level and fold, chosen from this grid (Bills, 2 Nov)
+grid <- tidyr::expand_grid(node = c(5L, 10L, 20L, 40L, 80L), mtry = c("sqrt", "half")) |>
+  mutate(setting = paste0("node", node, "_", mtry))
 
 # ---- One fold: train on the other gradients, predict the held-out one ---------
-fit_fold <- function(task, seed, cache) {
-  path <- file.path(fold_dir, paste0(task$level, "_", task$gradient_id, ".rds"))
+fit_fold <- function(task, set, seed, cache) {
+  path <- file.path(fold_dir, set$setting, paste0(task$level, "_", task$gradient_id, ".rds"))
   if (cache && file.exists(path)) return(readRDS(path))
   g <- task$gradient_id; vars <- level_vars[[task$level]]
   train <- filter(strength_df, gradient_id != g); test <- filter(strength_df, gradient_id == g)
   null06 <- readRDS(file.path("data/derived/06_ladder_predict/folds", paste0("null_", g, ".rds")))$pred
   stopifnot(!g %in% train$gradient_id, setequal(test$effect_id, null06$effect_id)) # same fold as step 06
-  rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 1000L, # no case weights (Bills, 2 Nov)
-                       mtry = max(1L, floor(sqrt(length(vars)))), min.node.size = 40L, replace = TRUE,
+  mtry <- if (set$mtry == "sqrt") floor(sqrt(length(vars))) else ceiling(length(vars) / 2)
+  rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = n_trees, # no case weights (Bills, 2 Nov)
+                       mtry = max(1L, mtry), min.node.size = set$node, replace = TRUE,
                        respect.unordered.factors = "order", seed = seed + match(g, scored), num.threads = 1L)
   pred <- tibble::tibble(level = task$level, gradient_id = g, effect_id = test$effect_id, species = as.character(test$species),
                          observed = test$strength, predicted = predict(rf, test[vars], num.threads = 1L)$predictions,
                          null_metafor = null06$fixed[match(test$effect_id, null06$effect_id)],
                          null_forest = mean(train$strength)) # what a forest without predictors predicts
-  if (cache) saveRDS(pred, path)
+  if (cache) { dir.create(dirname(path), showWarnings = FALSE); saveRDS(pred, path) }
   pred
 }
 tasks <- tidyr::expand_grid(level = names(level_vars), gradient_id = scored)
 tasks <- lapply(seq_len(nrow(tasks)), function(i) as.list(tasks[i, ]))
-run <- function(seed, cache) bind_rows(parallel::mclapply(tasks, fit_fold, seed = seed, cache = cache, mc.cores = cores))
-folds <- run(seeds[["main"]], cache = TRUE)
-stopifnot(nrow(distinct(folds, level, gradient_id)) == 18 * 16)
-# the forest Null: the mean of the training effects, one per fold
-folds <- bind_rows(folds, distinct(filter(folds, level == "start"), gradient_id, effect_id, .keep_all = TRUE) |>
-                     mutate(level = "null", predicted = null_forest))
+run <- function(set, seed, cache) bind_rows(parallel::mclapply(tasks, fit_fold, set = set, seed = seed, cache = cache, mc.cores = cores))
 
 # ---- Metrics: R² against the metafor Null on the same gradient, as step 06 ------
 score <- function(d) bind_rows(lapply(split(d, list(d$level, d$gradient_id), drop = TRUE), function(x) {
@@ -97,12 +98,34 @@ score <- function(d) bind_rows(lapply(split(d, list(d$level, d$gradient_id), dro
   if (x$level[1] == "climate") met$spearman <- met$skill <- NA_real_ # cannot order species within a gradient (Bills, 2 Nov)
   tibble::tibble(level = x$level[1], gradient_id = x$gradient_id[1], met, n = nrow(x))
 }))
+
+# ---- Tuning: one setting for every level and fold, the one with the highest median
+# out-of-bag R² over the 18 levels, each forest fitted once on all 512 rows (Bills,
+# 2 Nov). Out-of-bag uses none of the held-out scores, so they stay unbiased.
+oob <- bind_rows(parallel::mclapply(seq_len(nrow(grid)), function(i) bind_rows(lapply(names(level_vars), function(l) {
+  vars <- level_vars[[l]]
+  mtry <- if (grid$mtry[i] == "sqrt") floor(sqrt(length(vars))) else ceiling(length(vars) / 2)
+  rf <- ranger::ranger(x = strength_df[vars], y = strength_df$strength, num.trees = n_trees, mtry = max(1L, mtry),
+                       min.node.size = grid$node[i], replace = TRUE, respect.unordered.factors = "order",
+                       seed = seeds[["main"]], num.threads = 1L)
+  tibble::tibble(setting = grid$setting[i], level = l, oob_r2 = rf$r.squared)
+})), mc.cores = cores))
+tuning <- left_join(grid, summarise(oob, oob_min = min(oob_r2), oob_max = max(oob_r2), oob_r2 = median(oob_r2), .by = setting), by = "setting")
+best <- slice_max(tuning, oob_r2, n = 1, with_ties = FALSE)
+stopifnot(nrow(tuning) == nrow(grid), nrow(oob) == nrow(grid) * 18, nrow(best) == 1)
+write.csv(tuning, file.path(out_dir, "tuning.csv"), row.names = FALSE)
+
+folds <- run(best, seeds[["main"]], cache = TRUE)
+stopifnot(nrow(distinct(folds, level, gradient_id)) == 18 * 16)
+# the forest Null: the mean of the training effects, one per fold
+folds <- bind_rows(folds, distinct(filter(folds, level == "start"), gradient_id, effect_id, .keep_all = TRUE) |>
+                     mutate(level = "null", predicted = null_forest))
 forest_metrics <- score(folds) |> arrange(match(level, all_levels), gradient_id)
 stopifnot(all(count(forest_metrics, level)$n == 16), n_distinct(forest_metrics$level) == 19)
 write.csv(forest_metrics, file.path(out_dir, "forest_metrics.csv"), row.names = FALSE)
 
-# seed check: every forest again with a second seed, not cached
-check <- run(seeds[["check"]], cache = FALSE)
+# seed check: every forest of the chosen setting again with a second seed, not cached
+check <- run(best, seeds[["check"]], cache = FALSE)
 check_metrics <- score(check)
 seed_diff <- inner_join(tidyr::pivot_longer(filter(forest_metrics, level != "null"), c(r2, spearman, skill), names_to = "metric"),
                         tidyr::pivot_longer(check_metrics, c(r2, spearman, skill), names_to = "metric", values_to = "value2"),
@@ -163,10 +186,8 @@ metric_row <- function(key, tag, ylab, lims, last) {
   sw <- tidyr::pivot_wider(s, id_cols = x, names_from = model, values_from = med)
   lab <- left_join(s, summarise(g, top = max(value), .by = x), by = "x") |>
     mutate(xl = x + ifelse(model == "metafor", -0.24, 0.24), yl = top + 0.07 * diff(lims))
-  na_x <- setdiff(seq_len(n), unique(g$x))
-  p <- ggplot() + geom_hline(yintercept = 0, colour = "grey60")
-  if (length(na_x)) p <- p + annotate("text", x = na_x, y = mean(lims), label = "NA", size = 12.5, colour = "grey55", fontface = "bold")
-  p + geom_polygon(data = vio, aes(x, y, group = id, fill = model), colour = NA, alpha = 0.4) +
+  # empty columns stay empty, no "NA" (as Fig 4, Bills, 2 Nov)
+  ggplot() + geom_hline(yintercept = 0, colour = "grey60") + geom_polygon(data = vio, aes(x, y, group = id, fill = model), colour = NA, alpha = 0.4) +
     geom_point(data = g, aes(xj, value, colour = model), size = 2.4, alpha = 0.25, show.legend = FALSE) +
     geom_segment(data = sw, aes(x = x - 0.06, xend = x + 0.06, y = metafor, yend = forest), colour = "grey40", linewidth = 1.2) +
     geom_point(data = s, aes(xm, med, colour = model), size = 5, show.legend = FALSE) +
@@ -208,11 +229,21 @@ report <- c(
   "# Step 06b: Sensitivity, random forest (held out)", "",
   paste0("Every level of the ladder except Null was refitted as a random forest (ranger ", as.character(packageVersion("ranger")), ") on the ", nrow(strength_df),
          " ladder rows of step 05, with the variables of the step 06 formulas as predictors and species as a factor in the Species-dependent and the seven ",
-         "property + species forests. Each forest was fitted ", length(scored), " times, once without each scored gradient, and asked to predict it, with fixed settings ",
-         "(1000 trees, minimum node size 40, mtry the square root of the number of predictors, no case weights). Only held-out predictions are read. ",
+         "property + species forests. Each forest was fitted ", length(scored), " times, once without each scored gradient, and asked to predict it, ",
+         "with ", n_trees, " trees, no case weights and one parameter set for every level and fold: minimum node size ", best$node, " and mtry ",
+         c(sqrt = "the square root of", half = "half")[[best$mtry]], " the number of predictors, chosen from ", nrow(grid), " settings as the one with the highest ",
+         "median out-of-bag R² over the ", length(level_vars), " levels (Bills, 2 Nov). Only held-out predictions are read. ",
          "They are scored as in step 06: R² against the metafor Null on the same gradient, Spearman ρ within the gradient and loser/winner skill, ",
          "and set beside step 06's held-out values per gradient and as medians. The forest Null is the mean of the training effects."),
   "", "## Counts", "", md_table(count_tab),
+  "", "## Tuning: one parameter set for all forests", "",
+  paste0("Each setting was fitted once per level on all ", nrow(strength_df), " rows, and scored by its out-of-bag R² (each effect predicted by the trees ",
+         "that did not draw it). The setting with the highest median over the ", length(level_vars), " levels (", best$setting, ") is used for every level and fold. ",
+         "Out-of-bag R² uses none of the held-out scores, so these stay unbiased; it measures prediction within known gradients (the other effects of a ",
+         "gradient stay in training), so its values say nothing about transfer: the forests with species score highest out of bag and lowest held out. ",
+         "In-sample R² would always pick the most flexible forest."), "",
+  md_table(transmute(tuning, setting, `minimum node size` = node, mtry = c(sqrt = "√p", half = "p / 2")[mtry], `out-of-bag R², median over levels` = f3(oob_r2),
+                     `lowest level` = f3(oob_min), `highest level` = f3(oob_max), chosen = ifelse(setting == best$setting, "yes", ""))),
   "", "## No case weights", "",
   paste0("PLAN.md's case weights 1 / SE² were dropped (Bills, 2 Nov). Precision is tied to effect size here (Spearman ρ between |strength| and SE ",
          sprintf("%.2f", cor(abs(strength_df$strength), strength_df$strength_se, method = "spearman")), "): the most precise effects are the near-zero ones. ",
