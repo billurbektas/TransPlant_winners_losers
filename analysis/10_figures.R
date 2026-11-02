@@ -79,32 +79,37 @@ for (it in 1:500) for (i in seq_len(nrow(pies) - 1)) for (j in (i + 1):nrow(pies
 pies <- mutate(pies, moved = sqrt((x - x0)^2 + (y - y0)^2) > 0.01)
 centre_d <- as.matrix(dist(cbind(pies$x, pies$y)))
 stopifnot(all(centre_d[upper.tri(centre_d)] >= 2 * r * 0.99)) # no two pies overlap
-pies <- mutate(pies, label = paste0(round(origin_elevation), " → ", round(destination_elevation), " m"))
-# the dense middle of climate space is shown again enlarged in panel b (Bills, 2 Nov: declutter)
-zoom <- c(xmin = 11.3, xmax = 14.8, ymin = log(325) * k, ymax = log(490) * k)
-pies <- mutate(pies, in_zoom = x0 > zoom["xmin"] & x0 < zoom["xmax"] & y0 > zoom["ymin"] & y0 < zoom["ymax"])
-climate_panel <- function(d, rr, pt, nudge, p_breaks, tag) { # d carries `labelled`: which pies get a label
-  ggplot(d) +
-    geom_segment(data = filter(d, moved), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9) +
-    geom_point(data = distinct(filter(d, moved), x0, y0), aes(x0, y0), size = 4) + # the true climate of a moved pie
-    scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(d, r = rr), cols = names(cols), colour = "white", linewidth = 0.3) +
-    ggrepel::geom_text_repel(data = filter(d, labelled), aes(x, y, label = label, colour = diff_T_JJA), size = 8, fontface = "bold",
-                             bg.colour = "white", bg.r = 0.15, point.size = pt, nudge_y = nudge, box.padding = 0.1, force = 2, force_pull = 2,
-                             max.iter = 1e6, min.segment.length = 0.5, segment.colour = "grey60", max.overlaps = Inf, seed = 1) +
-    scale_fill_manual(values = cols, name = NULL, drop = FALSE) +
-    scale_colour_gradient(low = "#C99A1C", high = "#7B0D1E", limits = range(pies$diff_T_JJA), name = "Warming\n(°C, JJA)") +
-    scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks) +
-    labs(title = tag, x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
-    big + theme(legend.key.size = unit(1.4, "cm"), legend.title = element_text(face = "bold"), panel.grid.major = element_line(colour = "grey90"))
-}
-fig4a <- climate_panel(mutate(pies, labelled = !in_zoom), r, 48, 0, c(150, 200, 300, 400, 600, 800, 1000), "a)") +
-  annotate("rect", xmin = zoom["xmin"], xmax = zoom["xmax"], ymin = zoom["ymin"], ymax = zoom["ymax"], fill = NA, colour = "grey30", linetype = "dashed", linewidth = 0.9) +
-  coord_equal()
-fig4b <- climate_panel(mutate(filter(pies, in_zoom), labelled = TRUE), r * 0.7, 0, -r * 0.7 - 0.1, # labels under their pies
-                        c(350, 400, 450), "b)") +
-  coord_equal(xlim = zoom[c("xmin", "xmax")], ylim = zoom[c("ymin", "ymax")], expand = FALSE) +
-  theme(panel.border = element_rect(fill = NA, colour = "grey30", linetype = "dashed", linewidth = 0.9))
-fig4 <- patchwork::wrap_plots(fig4a, fig4b, ncol = 2, widths = c(1.25, 1), guides = "collect")
+# each pie is named by its gradient, with a letter where the gradient has several experiments
+# (highest origin first); the key beside the figure gives each one's elevations (Bills, 2 Nov)
+pies <- pies |> left_join(distinct(res, experiment_id, gradient_id), by = "experiment_id") |>
+  arrange(gradient_id, desc(origin_elevation), desc(destination_elevation)) |>
+  mutate(letter = if (n() > 1) letters[row_number()] else "", .by = gradient_id) |>
+  mutate(label = trimws(paste(sub("_", " ", gradient_id), letter)),
+         elevations = paste0(round(origin_elevation), " → ", round(destination_elevation), " m"))
+stopifnot(n_distinct(pies$label) == 42, n_distinct(pies$gradient_id) == 20) # one name per pie, 20 gradients
+warm_scale <- scale_colour_gradient(low = "#C99A1C", high = "#7B0D1E", limits = range(pies$diff_T_JJA), name = "Warming\n(°C, JJA)")
+p_breaks <- c(150, 200, 300, 400, 600, 800, 1000)
+fig4a <- ggplot(pies) +
+  geom_segment(data = filter(pies, moved), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9) +
+  geom_point(data = distinct(filter(pies, moved), x0, y0), aes(x0, y0), size = 4) + # the true climate of a moved pie
+  scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(pies, r = r), cols = names(cols), colour = "white", linewidth = 0.3) +
+  ggrepel::geom_text_repel(aes(x, y, label = label, colour = diff_T_JJA), size = 7.5, fontface = "bold", bg.colour = "white", bg.r = 0.15,
+                           point.size = 48, box.padding = 0.1, force = 2, force_pull = 2, max.iter = 1e6, min.segment.length = 0.5,
+                           segment.colour = "grey60", max.overlaps = Inf, seed = 1) +
+  scale_fill_manual(values = cols, name = NULL) + warm_scale +
+  scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks) + coord_equal() +
+  labs(x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
+  big + theme(legend.position = "bottom", legend.box = "vertical", legend.key.size = unit(1.4, "cm"), legend.key.width = unit(3, "cm"),
+              legend.title = element_text(face = "bold"), panel.grid.major = element_line(colour = "grey90"))
+key <- mutate(pies, row = row_number(), first = letter %in% c("", "a"), name = ifelse(first, sub("_", " ", gradient_id), ""))
+fig4key <- ggplot(key, aes(y = -row)) +
+  geom_text(aes(x = 0, label = name, colour = diff_T_JJA), hjust = 0, size = 7.5, fontface = "bold") +
+  geom_text(aes(x = 3.1, label = letter, colour = diff_T_JJA), hjust = 0.5, size = 7.5, fontface = "bold") +
+  geom_text(aes(x = 3.4, label = elevations, colour = diff_T_JJA), hjust = 0, size = 7.5) +
+  warm_scale + guides(colour = "none") + scale_x_continuous(limits = c(0, 6), expand = c(0, 0)) +
+  labs(title = "Origin → destination elevation") + theme_void() +
+  theme(plot.title = element_text(face = "bold", size = 26, margin = margin(b = 10)), plot.background = element_rect(fill = "white", colour = NA))
+fig4 <- patchwork::wrap_plots(fig4a, fig4key, ncol = 2, widths = c(2.6, 1))
 
 # ---- Fig S1: data flow ------------------------------------------------------------------
 flow <- read.csv("data/derived/01_relative_cover/flow_counts.csv")
@@ -114,6 +119,10 @@ s07b <- read.csv("data/derived/07b_classification/species_summary.csv")
 h05 <- read.csv("data/derived/05_ladder_fit/heterogeneity.csv") |> filter(rowset == "all", model == "Null")
 lad_col <- readRDS("data/derived/07c_ladder_fit/ladder_rows.rds")
 box <- function(e, s, n) sprintf("%d experiments · %d species · %d effects", e, s, n)
+excl <- filter(readRDS("data/derived/prep/experiments.rds"), !included)
+stopifnot(nrow(excl) == flow$n_experiments[1] - flow$n_experiments[2]) # the experiments removed between the first two boxes
+excl_rule <- paste(sprintf("%s (%s → %s) removed: %s, %d survey years (%d–%d)", sub("_", " ", excl$region), excl$origin_site, excl$destination_site,
+                           excl$exclusion_reason, excl$year_range, excl$first_year, excl$last_year), collapse = "\n")
 nodes <- tibble::tribble(
   ~id, ~x, ~y, ~title, ~counts,
   1, 0, 9, "Community data (P1)", box(flow$n_experiments[1], flow$n_species[1], flow$n_combinations[1]),
@@ -130,7 +139,7 @@ nodes <- tibble::tribble(
   mutate(counts = sub("NA experiments · ", "", counts))
 edges <- tibble::tribble(
   ~from, ~to, ~rule,
-  1, 2, "missing years, too short (legacy exclusions)",
+  1, 2, excl_rule,
   2, 3, "six deep-lineage taxa",
   3, 4, ">= 2 plots in half the years, or half the plots in >= 2 years",
   4, 5, ">= 5 residents per experiment",
@@ -233,7 +242,7 @@ tableS5 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), 
 for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sprintf("tables/table%s.csv", t), row.names = FALSE)
 
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
-ggsave("figures/main/fig4.png", fig4, width = 44, height = 22, dpi = 100, bg = "white")
+ggsave("figures/main/fig4.png", fig4, width = 40, height = 28, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS2.png", figS2, width = 40, height = 14, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")
@@ -280,10 +289,10 @@ report <- c(
          "standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
          "(six main figures, Bills 2 Nov). Pies are drawn to one radius at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
          "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
-         "The dense middle of climate space (", sum(pies$in_zoom), " experiments, ", round(zoom[["xmin"]], 1), " to ", round(zoom[["xmax"]], 1), " °C, 325 to 490 mm) is drawn again enlarged in panel b, where its pies are labelled."),
+         "Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation."),
   "", "## Counts", "", md_table(count_tab),
   "", "## Fig 4 pies", "",
-  md_table(transmute(pies, experiment_id, elevations = label, `T (°C)` = round(destination_T_JJA, 1), `P (mm)` = round(destination_P_JJA),
+  md_table(transmute(pies, experiment_id, name = label, elevations, `T (°C)` = round(destination_T_JJA, 1), `P (mm)` = round(destination_P_JJA),
                      `W (°C)` = round(diff_T_JJA, 1), `Resident losers`, `Resident winners`, Colonizers)),
   "", "## Figures", "", md_table(fig_index), "",
   "![Fig 4](../figures/main/fig4.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S2](../figures/appendix/figS2.png)", "",
