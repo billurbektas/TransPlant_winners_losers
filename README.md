@@ -47,12 +47,12 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 | [07b](#colonizers) | Step C for colonizers | 1 consistent colonizer among 29 species |
 | [07c–07e](#colonizers) | The ladder, its predictions and the forest for colonizers | only destination abundance transfers (median held-out R² 0.22) |
 | [07f](#pathways) | Traits of losers, winners and colonizers | Fig 5 |
-| [10](#the-experiments-in-climate-space) | Synthesis figures, appendix and this page | Figs 4, 7, S1–S18 |
+| [10](#the-experiments-in-climate-space) | Synthesis figures, appendix and this page | Figs 4, 7, S1–S19 |
 | [12](reports/12_final_review.md) | Final review: reruns, code, documentation, open issues, statistical weak points | no result changed; decisions listed |
 
 ![Figure S1](figures/appendix/figS1.png)
 
-**Figure S1.** Data flow from the network database to each analysis. Each box gives the number of experiments, species and species × experiment effects that remain after the rule written on the arrow above it. The shared steps (grey) split into the resident branch (orange, left), which leads to the classification (Figure 2) and the model ladder (Figure 6), and the colonizer branch (purple, right), which leads to the colonizer classification (Figure 3) and the colonizer ladder (Figure S16). The classification boxes count species and their effects.
+**Figure S1.** Data flow from the network database to each analysis. Each box gives the number of experiments, species and species × experiment effects that remain after the rule written on the arrow above it. The shared steps (grey) split into the resident branch (orange, left), which leads to the classification (Figure 2) and the model ladder (Figure 6), and the colonizer branch (purple, right), which leads to the colonizer classification (Figure 3) and the colonizer ladder (Figure S17). The classification boxes count species and their effects.
 
 **What each selection removes.** Each row is one rule, in the order the analysis applies it, with what it removes and what is left. Residents and colonizers split after the pool rule; their later rows count from the row above on their own branch.
 
@@ -70,6 +70,8 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 | 07b | [07b_classification.R](analysis/07b_classification.R) | Colonizers in at least 3 gradients, as for residents | −4 → 24 | −200 → 29 | −262 → 117 |
 | 05 | [05_ladder_fit.R](analysis/05_ladder_fit.R) | Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows | −0 → 39 | −3 → 71 | −11 → 512 |
 | 07c | [07c_ladder_fit.R](analysis/07c_ladder_fit.R) | Colonizers with every property, as for residents | −0 → 24 | −2 → 27 | −7 → 110 |
+
+The same table, with the removed and remaining counts as separate columns, is in [`tables/selection_table.csv`](tables/selection_table.csv).
 
 ## Data and selection
 
@@ -192,6 +194,10 @@ Code: [`10_figures.R`](analysis/10_figures.R) · report [10](reports/10_figures.
 
 ## Q3 and Q4. The ladder
 
+![Figure S11](figures/appendix/figS11.png)
+
+**Figure S11.** Where each variance component of the ladder comes from, on a toy table of three species in two experiments. (1) The six strengths, one bar per species in one experiment. (2) Each strength taken apart as the grand mean plus a species piece (gold, the same for a species in every experiment), an experiment piece (light grey, the same for every species of an experiment) and a leftover (dark grey); the whisker is the sampling error of the strength (blue), known and accounted for before anything counts as leftover. (3) The variance of each kind of piece is one bar of Figure 6a: adding the species and then the experiment random intercept moves their pieces out of the leftover into bars of their own, and the total stays the same; what is left is the species × experiment component τ². (4) Which information can shrink which component: a property's main effect the intercept piece of H<sub>species</sub>, its interactions with climate the slope piece, initial abundance and species-specific climate slopes the species × experiment component, and warming and destination climate, one value per experiment, only the experiment component σ²<sub>experiment</sub>. Toy numbers, with the sampling error set to zero in (3) so that the pieces add up exactly.
+
 **What and why.** The strengths of the ladder species are explained by a fixed sequence of meta-regressions, each read against the one before:
 
 | Model | Fixed part | Random part | Question |
@@ -203,7 +209,7 @@ Code: [`10_figures.R`](analysis/10_figures.R) · report [10](reports/10_figures.
 | Species-dependent | as Climate + start | + species slopes on W and on T, P, TP | Q3c, the ceiling |
 | LDMC, LMA, Height, Graminoid, Woody, Phylogeny, Niche | Climate + start + property × (1, W, T, P, TP) | as Species-dependent | Q3d, the properties |
 
-The heterogeneity of each model is split into the shared site shift σ²<sub>experiment</sub>, the species × site piece τ² and the species variance H<sub>species</sub> (intercept and slope pieces). For Q4 every gradient with at least 5 effects is held out in turn, the model refitted on the others, and its held-out strengths predicted from the fixed effects plus, from Species-dependent on, each species' deviation learned in the other gradients. Each level is scored per gradient by R² against the Null model on that gradient, Spearman's ρ and loser/winner skill, and summarised by medians.
+The heterogeneity of each model is split into the experiment component σ²<sub>experiment</sub>, the species × experiment component τ² and the species variance H<sub>species</sub> (intercept and slope pieces). For Q4 every gradient with at least 5 effects is held out in turn, the model refitted on the others, and its held-out strengths predicted from the fixed effects plus, from Species-dependent on, each species' deviation learned in the other gradients. Each level is scored per gradient by R² against the Null model on that gradient, Spearman's ρ and loser/winner skill, and summarised by medians.
 
 **Decisions.**
 - W, T, P are the warming (destination − origin summer temperature), destination summer temperature and summer precipitation; A0 is log(% cover + 1) in the first survey of the origin and destination controls.
@@ -237,19 +243,19 @@ rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
 
 ![Figure 6](figures/main/fig6.png)
 
-**Figure 6.** How much of the variation in losing-winning strength is explained, and how much is predicted for an unseen gradient. Models from left to right: Null; initial abundances at origin and destination (Q3a); warming and background climate (Climate, Q3b); both (Q3b); species-specific intercepts and climate slopes (Species-dependent, the ceiling, Q3c); and one model per species property added to the climate and initial-abundance model with the species terms kept (Q3d): leaf dry matter content (LDMC), leaf mass per area (LMA), vegetative height, graminoid and woody growth form, phylogenetic position (eigenvectors 1–3) and climatic niche (thermal and precipitation optima). Arcs mark the pairs of models that answer each question. (a) Heterogeneity left after each model (×10⁻⁴): context dependency (grey), stacked as the shift shared by all species of a site (σ²_experiment, light) under the species × site piece (τ², dark), and the variance among species in their fitted response (H_species, gold), stacked as the intercept piece (average differences among species) and the slope piece (differences in climate response). (b) R² against the Null model on the same gradient, (c) Spearman's rank correlation within the gradient and (d) loser/winner skill, loser recall plus winner recall minus one, on the 16 gradients with at least five effects: half violins of the gradient values in sample (grey, model fitted to all gradients) and for the gradient held out of the fit (blue), with medians as large points and numbers. Dashed lines are the Species-dependent values. The Null is zero by construction and not drawn; Climate predicts one value per gradient and has no Spearman or skill.
-
-![Figure S11](figures/appendix/figS11.png)
-
-**Figure S11.** Fixed effects of the resident models. (a) Standardized effects of the climate and initial-abundance model on losing-winning strength: warming (W), destination temperature (T) and precipitation (P), their interactions, and initial abundance at origin (A0_origin) and at destination (A0_dest), each with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes: the property and its interactions with W, T, P and T × P. Phylogenetic eigenvectors 1–3 and the thermal and precipitation optima are fitted together and shown in one panel each. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor.
+**Figure 6.** How much of the variation in losing-winning strength is explained, and how much is predicted for an unseen gradient. Models from left to right: Null; initial abundances at origin and destination (Q3a); warming and background climate (Climate, Q3b); both (Q3b); species-specific intercepts and climate slopes (Species-dependent, the ceiling, Q3c); and one model per species property added to the climate and initial-abundance model with the species terms kept (Q3d): leaf dry matter content (LDMC), leaf mass per area (LMA), vegetative height, graminoid and woody growth form, phylogenetic position (eigenvectors 1–3) and climatic niche (thermal and precipitation optima). Arcs mark the pairs of models that answer each question. (a) Heterogeneity left after each model (×10⁻⁴): context dependency (grey), stacked as the experiment component, the shift common to all species of an experiment (σ²_experiment, light), under the species × experiment component (τ², dark), and the variance among species in their fitted response (H_species, gold), stacked as the intercept piece (average differences among species) and the slope piece (differences in climate response). (b) R² against the Null model on the same gradient, (c) Spearman's rank correlation within the gradient and (d) loser/winner skill, loser recall plus winner recall minus one, on the 16 gradients with at least five effects: half violins of the gradient values in sample (grey, model fitted to all gradients) and for the gradient held out of the fit (blue), with medians as large points and numbers. Dashed lines are the Species-dependent values. The Null is zero by construction and not drawn; Climate predicts one value per gradient and has no Spearman or skill.
 
 ![Figure S12](figures/appendix/figS12.png)
 
-**Figure S12.** Fit and prediction of every resident model, gradient by gradient. Rows are the 16 gradients with at least five effects, ordered by destination temperature (coldest at the top); columns are the models, followed by each property model with species-specific deviations (+ species). (a, b) R² against the Null model on the same gradient, (c, d) Spearman's rank correlation between observed and predicted strength within the gradient, and (e, f) loser/winner skill, loser recall plus winner recall minus one; (a, c, e) in sample and (b, d, f) for the gradient held out of the fit. Blue cells are better and red cells worse than zero; colours are capped at ±1, and grey cells are undefined because the model predicts one value per gradient (Spearman for the Null and Climate, skill for Climate).
+**Figure S12.** Fixed effects of the resident models. (a) Standardized effects of the climate and initial-abundance model on losing-winning strength: warming (W), destination temperature (T) and precipitation (P), their interactions, and initial abundance at origin (A0_origin) and at destination (A0_dest), each with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes: the property and its interactions with W, T, P and T × P. Phylogenetic eigenvectors 1–3 and the thermal and precipitation optima are fitted together and shown in one panel each. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor.
 
 ![Figure S13](figures/appendix/figS13.png)
 
-**Figure S13.** Random forests beside the meta-regressions, residents. For each model of the ladder, (a) R² against the Null meta-regression on the same gradient, (b) Spearman's rank correlation and (c) loser/winner skill on each of the 16 gradients held out of the fit, for the meta-regression (blue, left) and a random forest on the same rows, predictors and folds (orange, right). Half violins show the distribution over gradients, small points the gradients, and large points and numbers the medians. The forests use no case weights and one setting of minimum node size and number of candidate predictors, chosen by out-of-bag R² over all models. The Null is not drawn; Climate has no Spearman or skill because it predicts one value per gradient.
+**Figure S13.** Fit and prediction of every resident model, gradient by gradient. Rows are the 16 gradients with at least five effects, ordered by destination temperature (coldest at the top); columns are the models, followed by each property model with species-specific deviations (+ species). (a, b) R² against the Null model on the same gradient, (c, d) Spearman's rank correlation between observed and predicted strength within the gradient, and (e, f) loser/winner skill, loser recall plus winner recall minus one; (a, c, e) in sample and (b, d, f) for the gradient held out of the fit. Blue cells are better and red cells worse than zero; colours are capped at ±1, and grey cells are undefined because the model predicts one value per gradient (Spearman for the Null and Climate, skill for Climate).
+
+![Figure S14](figures/appendix/figS14.png)
+
+**Figure S14.** Random forests beside the meta-regressions, residents. For each model of the ladder, (a) R² against the Null meta-regression on the same gradient, (b) Spearman's rank correlation and (c) loser/winner skill on each of the 16 gradients held out of the fit, for the meta-regression (blue, left) and a random forest on the same rows, predictors and folds (orange, right). Half violins show the distribution over gradients, small points the gradients, and large points and numbers the medians. The forests use no case weights and one setting of minimum node size and number of candidate predictors, chosen by out-of-bag R² over all models. The Null is not drawn; Climate has no Spearman or skill because it predicts one value per gradient.
 
 In sample the Species-dependent model reaches a median R² of 0.32; held out it drops to 0.12, below initial abundances alone (0.17). No property level beats the Climate + start floor held out by much (0.16; Niche 0.18, LDMC 0.15, Height 0.13), and the forest is higher than the meta-regression only at Climate, Graminoid, LDMC, Niche, Phylogeny (median of the per-gradient differences; at most 0.05): the weak relationships are weak, not misspecified.
 
@@ -257,7 +263,7 @@ Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](a
 
 ## Colonizers
 
-**What and why.** The second way of winning is arriving. A colonizer's strength in an experiment is its relative cover in the warmed turfs, years 3 and later, estimated with the residents' model terms on the warmed plots alone. The colonizers then run through the same steps as the residents: year-specific presence classes (Fig 1b), Step C (Fig 3), the ladder fitted and predicted (Figs S15–S17) and the forest (Fig S18).
+**What and why.** The second way of winning is arriving. A colonizer's strength in an experiment is its relative cover in the warmed turfs, years 3 and later, estimated with the residents' model terms on the warmed plots alone. The colonizers then run through the same steps as the residents: year-specific presence classes (Fig 1b), Step C (Fig 3), the ladder fitted and predicted (Figs S16–S18) and the forest (Fig S19).
 
 **Decisions.**
 - Warmed plots only (2 Nov): a contrast against the destination controls measures the lag, not arrival.
@@ -282,27 +288,27 @@ f_both_col <- ~ W * T * P + A0_dest + A0_dest:W
 
 **Figure 3.** Consistent colonizers, context-dependent colonizers and consistent non-colonizers. (a) Each row is a colonizing species occurring in at least three gradients: the point is its pooled relative cover in warmed turfs from year 3 on, across experiments, and the line its prediction interval for a new experiment. A species whose interval lies entirely above zero arrived in every experiment (consistent colonizer); one whose interval reaches zero arrived in some experiments and not in others (context-dependent). Species never present in warmed turfs from year 3 on are consistent non-colonizers, given as a count. Lines are shaded by the number of gradients, and the numbers give gradients (experiments). (b, c) The colonizers with the highest and the lowest pooled warmed cover among those in the most gradients: one row per experiment, with the species' mean relative cover in destination-control turfs (hollow) joined by a line to its cover in warmed turfs (filled).
 
-![Figure S14](figures/appendix/figS14.png)
-
-**Figure S14.** Colonizer strength, the relative cover of a colonizing species in warmed turfs. (a) Warmed cover from year 3 against warmed cover over all years, one point per colonizer species × experiment; the line is 1:1. (b) Distributions of warmed cover from year 3 and of its standard error. Species never recorded in an experiment's warmed turfs are measured absences, with strength and standard error of zero.
-
 ![Figure S15](figures/appendix/figS15.png)
 
-**Figure S15.** Fixed effects of the colonizer models. (a) Standardized effects of the climate and destination-abundance model on relative cover in warmed turfs: warming (W), destination temperature (T) and precipitation (P), their interactions, and the mean abundance in the destination controls (A0_dest) with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor, on the residents' scale for the climate and property terms.
+**Figure S15.** Colonizer strength, the relative cover of a colonizing species in warmed turfs. (a) Warmed cover from year 3 against warmed cover over all years, one point per colonizer species × experiment; the line is 1:1. (b) Distributions of warmed cover from year 3 and of its standard error. Species never recorded in an experiment's warmed turfs are measured absences, with strength and standard error of zero.
 
 ![Figure S16](figures/appendix/figS16.png)
 
-**Figure S16.** How much of the variation in colonizer strength is explained, and how much is predicted for an unseen gradient. As Figure 6, for the 110 colonizer effects of 27 species: (a) heterogeneity left after each model, (b) R² against the Null model on the same gradient and (c) Spearman's rank correlation, on the 8 gradients with at least five effects, in sample (grey) and held out (blue). The start model holds destination abundance only, since colonizers have no abundance at origin. There is no loser/winner skill, since colonizers have no losers. An R² below −100 (Woody at CH_Lavey) is left out of the R² row.
+**Figure S16.** Fixed effects of the colonizer models. (a) Standardized effects of the climate and destination-abundance model on relative cover in warmed turfs: warming (W), destination temperature (T) and precipitation (P), their interactions, and the mean abundance in the destination controls (A0_dest) with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor, on the residents' scale for the climate and property terms.
 
 ![Figure S17](figures/appendix/figS17.png)
 
-**Figure S17.** Fit and prediction of every colonizer model, gradient by gradient. As Figure S12, for the 8 colonizer gradients with at least five effects: (a, b) R² against the Null model and (c, d) Spearman's rank correlation, (a, c) in sample and (b, d) held out. Values below −10 are printed as "< −10".
+**Figure S17.** How much of the variation in colonizer strength is explained, and how much is predicted for an unseen gradient. As Figure 6, for the 110 colonizer effects of 27 species: (a) heterogeneity left after each model, (b) R² against the Null model on the same gradient and (c) Spearman's rank correlation, on the 8 gradients with at least five effects, in sample (grey) and held out (blue). The start model holds destination abundance only, since colonizers have no abundance at origin. There is no loser/winner skill, since colonizers have no losers. An R² below −100 (Woody at CH_Lavey) is left out of the R² row.
 
 ![Figure S18](figures/appendix/figS18.png)
 
-**Figure S18.** Random forests beside the meta-regressions, colonizers. As Figure S13, for the 8 colonizer gradients held out of the fit: (a) R² against the Null meta-regression and (b) Spearman's rank correlation, meta-regression (blue, left) and random forest (orange, right).
+**Figure S18.** Fit and prediction of every colonizer model, gradient by gradient. As Figure S13, for the 8 colonizer gradients with at least five effects: (a, b) R² against the Null model and (c, d) Spearman's rank correlation, (a, c) in sample and (b, d) held out. Values below −10 are printed as "< −10".
 
-The ladder rows are 110 colonizer effects of 27 species. Only destination abundance transfers to a held-out gradient (median R² 0.22); climate, species identity and every property predict worse than the Null held out (Species-dependent -0.35). The colonizer Null is itself a weak reference: the plain mean of the training effects, the forest's Null, reaches a median R² of 0.19 against it, because the many measured absences (strength and SE 0) pull the meta-regression's weighted intercept towards zero (Figure S18).
+![Figure S19](figures/appendix/figS19.png)
+
+**Figure S19.** Random forests beside the meta-regressions, colonizers. As Figure S14, for the 8 colonizer gradients held out of the fit: (a) R² against the Null meta-regression and (b) Spearman's rank correlation, meta-regression (blue, left) and random forest (orange, right).
+
+The ladder rows are 110 colonizer effects of 27 species. Only destination abundance transfers to a held-out gradient (median R² 0.22); climate, species identity and every property predict worse than the Null held out (Species-dependent -0.35). The colonizer Null is itself a weak reference: the plain mean of the training effects, the forest's Null, reaches a median R² of 0.19 against it, because the many measured absences (strength and SE 0) pull the meta-regression's weighted intercept towards zero (Figure S19).
 
 Code: [`07a_colonizers.R`](analysis/07a_colonizers.R) · [`07b_classification.R`](analysis/07b_classification.R) · [`07c_ladder_fit.R`](analysis/07c_ladder_fit.R) · [`07d_ladder_predict.R`](analysis/07d_ladder_predict.R) · [`07e_forest.R`](analysis/07e_forest.R) · reports [07a](reports/07a_colonizers.md), [07b](reports/07b_classification.md), [07c](reports/07c_ladder_fit.md), [07d](reports/07d_ladder_predict.md), [07e](reports/07e_forest.md)
 
@@ -352,9 +358,9 @@ data/                               raw inputs, read only (SQLite network databa
   derived/NN_<step>/                  each step's outputs: tables, fitted models (.rds), fold caches
 figures/
   main/                               Figs 1 to 7, each written by the step that makes it
-  appendix/                           Figs S1 to S18, in the order of the analysis, each written by
-                                      the step that makes it
-tables/                             Tables S1 to S5
+  appendix/                           Figs S1 to S19, in the order of the analysis, each written by
+                                      the step that makes it (S11, the variance box, drawn by hand)
+tables/                             Tables S1 to S5; the selection table (written by the README)
 reports/                            one review report per step; REPORT.qmd collects them
 plan_figures/                       the mock figures agreed while planning (local, not in git)
 renv.lock                           the locked package environment

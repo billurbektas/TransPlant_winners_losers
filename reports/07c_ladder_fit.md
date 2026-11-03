@@ -90,7 +90,7 @@ Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components
 
 ## Figures
 
-![Fig S15, colonizer coefficients](../figures/appendix/figS15.png)
+![Fig S16, colonizer coefficients](../figures/appendix/figS16.png)
 
 ## Warnings captured
 
@@ -130,4 +130,4 @@ Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components
 
 - The colonizer ladder on the residents' reduction and models (Bills, 2 Nov); properties on the residents' scale.
 - Step 05's tau2 and property checks are reported, not enforced (Bills, 2 Nov: run without stopping).
-- The colonizer coefficients are their own appendix figure (Fig S15), beside the residents' Fig S11.
+- The colonizer coefficients are their own appendix figure (Fig S16), beside the residents' Fig S12.

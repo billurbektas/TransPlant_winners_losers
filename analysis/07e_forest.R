@@ -4,7 +4,7 @@
 # Reads:  data/derived/07c_ladder_fit/ladder_rows.rds; data/derived/07d_ladder_predict/
 #         folds/null_<gradient_id>.rds (the metafor Null held out) and pred_metrics.csv
 # Writes: data/derived/07e_forest/folds/<setting>/<level>_<gradient_id>.rds, tuning.csv,
-#         forest_metrics.csv, forest_vs_metafor.csv; figures/appendix/figS18.png;
+#         forest_metrics.csv, forest_vs_metafor.csv; figures/appendix/figS19.png;
 #         reports/07e_forest.md
 # Checks: 110 colonizer ladder rows (07c); 8 scored gradients, the same as 07d; test rows
 #         of every fold equal 07d's; the held-out gradient absent from training; 8
@@ -159,7 +159,7 @@ med <- vs |> group_by(level, metric) |>
 spread <- filter(folds, level != "null") |>
   summarise(one_sign = all(predicted > 0) | all(predicted < 0), sd_ratio = sd(predicted) / sd(observed), .by = c(level, gradient_id))
 
-# ---- Fig S18: metafor (left) beside forest (right), held out ---------------------
+# ---- Fig S19: metafor (left) beside forest (right), held out ---------------------
 cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 6; Okabe-Ito orange
 fills <- c(metafor = "#8DB8EA", forest = "#F3C766")
 col_levels <- setdiff(all_levels, "null"); n <- length(col_levels) # Null is the R² reference, not drawn (Bills, 2 Nov)
@@ -210,14 +210,14 @@ br <- data.frame(x = c(0.7, 3.75, 4.75, 11.75), xend = c(3.3, 4.25, 11.25, 18.3)
 p_top <- ggplot(br) + geom_segment(aes(x = x, xend = xend, y = y, yend = y), colour = "grey40", linewidth = 0.9) +
   geom_text(aes(x = (x + xend) / 2, y = y + 0.5, label = lab), size = 13.5, colour = "grey25") +
   xs + scale_y_continuous(limits = c(0.5, 2)) + theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA))
-figS11 <- patchwork::wrap_plots(p_top, metric_row("r2", "a)", "R² against Null", c(-0.2, 0.6), FALSE),
+figS12 <- patchwork::wrap_plots(p_top, metric_row("r2", "a)", "R² against Null", c(-0.2, 0.6), FALSE),
                                 metric_row("spearman", "b)", "Spearman ρ", c(-0.2, 0.6), TRUE), ncol = 1, heights = c(0.35, 1, 1)) +
   patchwork::plot_annotation(caption = paste0(
     "Each half violin is the ", length(scored), " scored gradients, held out (leave one gradient out); left (blue) the meta-regression of step 07d, right (orange) the random forest ",
     "on the same rows, predictors and folds, no case weights; points and numbers = medians.\nR² = 1 - error / error of the metafor Null on that gradient, so Null is 0 and not drawn (the forest Null, ",
     "the mean of the training effects, is in the report). Colonizers, no skill (no loser class); Climate has no Spearman. R² below -100 taken out (listed in the report)."),
     theme = theme(plot.caption = element_text(size = 24, colour = "grey40"), plot.background = element_rect(fill = "white", colour = NA)))
-ggsave("figures/appendix/figS18.png", figS11, width = 48, height = 22, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS19.png", figS12, width = 48, height = 22, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
@@ -260,7 +260,7 @@ report <- c(
          " and the largest change in a median ", sprintf("%.3f", max(seed_med$d)), ". Largest change in a median per metric: ",
          paste0(c("R² ", "Spearman ρ "), sprintf("%.3f", sapply(c("r2", "spearman"), function(k) max(seed_med$d[seed_med$metric == k]))), collapse = ", "),
          "."),
-  "", "## Figures", "", "![Fig S18, colonizers: forest beside meta-regression](../figures/appendix/figS18.png)",
+  "", "## Figures", "", "![Fig S19, colonizers: forest beside meta-regression](../figures/appendix/figS19.png)",
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- Step 06b on the colonizer ladder rows (Bills, 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.",

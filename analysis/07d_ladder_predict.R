@@ -1,12 +1,12 @@
 # Step 07d: the colonizer ladder, predicted (Step D route 2, colonizers).
 #
 # PLAN.md: The colonizer story, "The model ladder for arrival"; Step D Route 2 as
-#   step 06; Fig S16 (the colonizer ladder) and Fig S17 (per gradient).
+#   step 06; Fig S17 (the colonizer ladder) and Fig S18 (per gradient).
 # Reads:  data/derived/07c_ladder_fit/ladder_rows.rds, models/<slug>.rds,
 #         heterogeneity.csv
 # Writes: data/derived/07d_ladder_predict/folds/<level>_<gradient_id>.rds,
 #         pred_metrics.csv, fit_metrics.csv, summary_metrics.csv;
-#         figures/appendix/figS16.png, figS17.png; reports/07d_ladder_predict.md
+#         figures/appendix/figS17.png, figS18.png; reports/07d_ladder_predict.md
 # Checks: 110 ladder rows (07c); 8 scored gradients (at least 5 effects), one fold
 #         each per fitted level; the held-out gradient absent from every training
 #         set; species deviations only for species seen in training; Null R²
@@ -122,17 +122,17 @@ summary_metrics <- bind_rows(lapply(c("r2", "spearman"), function(k) {
 })) |> arrange(match(level, all_levels), metric)
 write.csv(summary_metrics, file.path(out_dir, "summary_metrics.csv"), row.names = FALSE)
 
-# ---- Fig S16: the colonizer ladder (as step 06's Fig 6, without the skill row) ----------
+# ---- Fig S17: the colonizer ladder (as step 06's Fig 6, without the skill row) ----------
 het <- read.csv("data/derived/07c_ladder_fit/heterogeneity.csv") |> mutate(column = model)
 stopifnot(setequal(het$column, ladder_columns))
 grads <- bind_rows(mutate(trim(fit_metrics), type = "fit"), mutate(trim(pred_metrics), type = "pred")) |>
   filter(level %in% levels_fit$level, level != "null") |> tidyr::pivot_longer(c(r2, spearman), names_to = "metric") |>
   transmute(column = level_label[level], metric = c(r2 = "R2", spearman = "Spearman")[metric], type, value) |> filter(!is.na(value))
-fig4_ladder(het, "figures/appendix/figS16.png", gradients = grads, skill = FALSE,
+fig4_ladder(het, "figures/appendix/figS17.png", gradients = grads, skill = FALSE,
             labels = c("Null", "Destination\nabundance", "Climate", "Climate +\ndest.\nabundance", "Species-\ndependent",
                        "LDMC", "LMA", "Height", "Graminoid", "Woody", "Phylogeny", "Niche"))
 
-# ---- Fig S17 (colonizers): every metric x level x gradient, as step 06 ----------------------
+# ---- Fig S18 (colonizers): every metric x level x gradient, as step 06 ----------------------
 grad_info <- filter(rows, gradient_id %in% scored) |> summarise(T_dest = mean(T), .by = gradient_id) |> arrange(T_dest)
 s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics, version = "Held out")) |>
   tidyr::pivot_longer(c(r2, spearman), names_to = "metric") |>
@@ -148,7 +148,7 @@ s7_panel <- function(k, title, tags) lapply(1:2, function(j) {
           axis.text = element_text(size = 26), legend.key.height = unit(2, "cm"), legend.key.width = unit(1, "cm"),
           panel.grid = element_blank(), plot.background = element_rect(fill = "white", colour = NA))
 })
-ggsave("figures/appendix/figS17.png", patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")),
+ggsave("figures/appendix/figS18.png", patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")),
                                                                    s7_panel("spearman", "Spearman ρ", c("c)", "d)"))), ncol = 2),
        width = 48, height = 30, dpi = 100, bg = "white")
 
@@ -177,10 +177,10 @@ report <- c(
                                   paste(sprintf("%s, %s at %s (%s)", level_display[outliers$level], outliers$version, outliers$gradient_id, sprintf("%.1f", outliers$r2)), collapse = "; "), ".")
       else "No R² below −100.",
   "", paste0("Every held-out species had training data: ", all(folds$species_known), "."),
-  "", "## Figures", "", "![Fig S16, the colonizer ladder](../figures/appendix/figS16.png)", "",
-  paste0("Fig S16 as Fig 6: row a) step 07c; rows b) c): half violins of the ", length(scored), " scored gradients, explanatory (grey) beside predictive (blue), medians written in; ",
+  "", "## Figures", "", "![Fig S17, the colonizer ladder](../figures/appendix/figS17.png)", "",
+  paste0("Fig S17 as Fig 6: row a) step 07c; rows b) c): half violins of the ", length(scored), " scored gradients, explanatory (grey) beside predictive (blue), medians written in; ",
          "R² against the Null on that gradient. No skill row."), "",
-  "![Fig S17, colonizers](../figures/appendix/figS17.png)",
+  "![Fig S18, colonizers](../figures/appendix/figS18.png)",
   "", "## Warnings captured", "", { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   "- The colonizer ladder predicted on the residents' reduction (Bills, 2 Nov).",
