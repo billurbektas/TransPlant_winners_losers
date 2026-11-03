@@ -6,25 +6,30 @@
 #         data/derived/01_relative_cover/ (flow_counts.csv, cover_long.rds, a0.rds,
 #         pool_sizes.csv); data/derived/03b_strength_y3/strength_df.rds;
 #         data/derived/07a_colonizers/strength_df_y3.rds; the species summaries of steps
-#         04 and 07b; the tables of steps 05 and 07c; the appendix figures written by the steps.
+#         04 and 07b; the tables of steps 05 and 07c (weights.csv and ladder_rows.rds name the
+#         ladder rows); the appendix figures written by the steps.
 # Writes: figures/main/fig4.png, fig7.png (the other main figures are written by their steps);
 #         figures/appendix/figS1.png, figS3.png, figS4.png, figS10.png (the other appendix
 #         figures are written by their steps);
-#         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_pie_cover.csv,
+#         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_balance.csv,
 #         fig4_pie_counts.csv;
 #         reports/10_figures.md
 # Checks: 42 experiments; 1004 resident effects (703 losers, 301 winners); 264
 #         colonizer effects with warmed cover above zero in 28 experiments; every pie's
-#         slices sum to its species; every figure number exists exactly once.
+#         slices sum to its species; Fig 4 on the 512 resident and 110 colonizer ladder
+#         effects (39 experiments with modelled residents, 29 with a net loss, 22 with a
+#         colonizer gain of the 24 with modelled colonizers), no two discs overlapping;
+#         every figure number exists exactly once.
 #
 # Decided 2 Nov (Bills): one script for the whole step, run without stopping. Seven main
 # figures: 1 Sankey, 2 residents' classification, 3 colonizers' classification, 4
 # climate space, 5 traits (pathways), 6 the residents' ladder; the results-dependent
-# Fig 6 and the old Fig S8 are dropped. The climate-space pies (Fig 4 as cover, Fig S10 as counts) use
-# Fig 5's classes per experiment: residents by the sign of their net strength from
-# year 3 on, colonizers with net warmed cover above zero (07a, so the 14 experiments
-# below the colonizer pool-size rule have no purple); one radius, pies sharing a
-# destination climate fanned out around it. Each appendix figure is written by its own step.
+# Fig 6 and the old Fig S8 are dropped. Fig S10's pies count Fig 5's classes per experiment:
+# residents by the sign of their net strength from year 3 on, colonizers with net warmed
+# cover above zero (07a, so the 14 experiments below the colonizer pool-size rule have no
+# purple); one radius, pies sharing a destination climate fanned out around it. Fig 4 (3 Nov)
+# draws the same places as discs for the modelled effects: the residents' net change and
+# the colonizers' gain. Each appendix figure is written by its own step.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/md_table.R")
@@ -62,23 +67,22 @@ pies <- left_join(select(experiments, experiment_id, origin_elevation, destinati
 stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pies$Colonizers) == 264,
           sum(pies$Colonizers > 0) == n_distinct(col$experiment_id[col$strength > 0])) # one denominator: counts, not cover
 write.csv(pies, file.path(out_dir, "fig4_pie_counts.csv"), row.names = FALSE)
-# main Fig 4 shows the same classes as shares of the warmed turf's relative cover, years 3 and
-# later (Bills, 2 Nov); the counts move to Fig S10. Relative cover is over all vascular cover of
-# the plot-year (step 01), so what no class holds is a slice of its own: species outside the
-# pools, unidentified and genus-level records
-cv <- readRDS("data/derived/01_relative_cover/cover_long.rds") |> mutate(year = as.integer(as.character(year))) |>
-  filter(experiment_id %in% res$experiment_id, treatment == "warmed", year >= 3)
-cls <- bind_rows(transmute(res, experiment_id, species, group = ifelse(strength < 0, "Resident losers", "Resident winners")),
-                 transmute(filter(col, strength > 0), experiment_id, species, group = "Colonizers"))
-cover_shares <- cv |> inner_join(cls, by = c("experiment_id", "species")) |>
-  summarise(cover = sum(relative_cover), .by = c(experiment_id, group)) |>
-  left_join(summarise(cv, n_py = n_distinct(paste(plot_id, year)), .by = experiment_id), by = "experiment_id") |>
-  mutate(cover = cover / n_py) |> select(-n_py) |> tidyr::pivot_wider(names_from = group, values_from = cover, values_fill = 0)
-cover_shares <- left_join(select(experiments, experiment_id), cover_shares, by = "experiment_id") |>
-  mutate(across(all_of(names(cols)), ~ coalesce(.x, 0)), `Not analysed` = 1 - `Resident losers` - `Resident winners` - Colonizers)
-stopifnot(nrow(cover_shares) == 42, all(cover_shares$`Not analysed` > -1e-9)) # shares of one turf: the classes never exceed it
-write.csv(cover_shares, file.path(out_dir, "fig4_pie_cover.csv"), row.names = FALSE)
-cols_cover <- c(cols, "Not analysed" = "grey80")
+# main Fig 4 (Bills, 3 Nov) shows, for the effects the ladders model (steps 05 and 07c), one disc
+# per experiment: its fill the residents' net change, the sum of their strengths with the sign
+# kept, so that noise cancels instead of piling up as it does in sums of |strength|; its purple
+# ring the colonizers' total warmed cover, measured cover rather than a magnitude. Both are
+# percentage points of the warmed turf from year 3 on, and the colonizers' strength is also their
+# change from the origin controls, where they were never recorded. The pies of Fig S10 count species
+lad_res <- read.csv("data/derived/05_ladder_fit/weights.csv") |> filter(rowset == "all", model == "Null")
+lad_col <- readRDS("data/derived/07c_ladder_fit/ladder_rows.rds")
+res_lad <- filter(res, effect_id %in% lad_res$effect_id)
+col_lad <- filter(col, effect_id %in% lad_col$effect_id)
+stopifnot(nrow(res_lad) == 512, nrow(col_lad) == 110) # the ladder rows of steps 05 and 07c
+balance <- left_join(select(experiments, experiment_id),
+                     summarise(res_lad, net = 100 * sum(strength), .by = experiment_id), by = "experiment_id") |>
+  left_join(summarise(col_lad, gain = 100 * sum(strength), .by = experiment_id), by = "experiment_id") |>
+  mutate(gain = coalesce(gain, 0))
+write.csv(balance, file.path(out_dir, "fig4_balance.csv"), row.names = FALSE)
 # pies need equal units on both axes: log precipitation rescaled to the temperature range
 k <- diff(range(pies$destination_T_JJA)) / diff(range(log(pies$destination_P_JJA))) * 1.1
 r <- 0.21
@@ -109,23 +113,60 @@ pies <- pies |> left_join(distinct(res, experiment_id, gradient_id), by = "exper
 stopifnot(n_distinct(pies$label) == 42, n_distinct(pies$gradient_id) == 20) # one name per pie, 20 gradients
 warm_scale <- scale_colour_gradient(low = "#C99A1C", high = "#7B0D1E", limits = range(pies$diff_T_JJA), name = "Warming\n(°C, JJA)", guide = guide_colourbar(order = 1)) # order as reviewed
 p_breaks <- c(150, 200, 300, 400, 600, 800, 1000)
-climate_map <- function(slices, fill_values) { # the same layout, slices as counts or as cover shares
-  d <- left_join(select(pies, -any_of(names(cols_cover))), slices, by = "experiment_id")
-  ggplot(d) +
-  geom_segment(data = filter(d, moved), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9) +
-  geom_point(data = distinct(filter(d, moved), x0, y0), aes(x0, y0), size = 4) + # the true climate of a moved pie
-  scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(d, r = r), cols = names(fill_values), colour = "white", linewidth = 0.3) +
+map_under <- function(d) list( # the same layout in Fig 4 and Fig S10: lines and dots under the marks
+  geom_segment(data = filter(d, moved), aes(x0, y0, xend = x, yend = y), colour = "grey25", linewidth = 0.9),
+  geom_point(data = distinct(filter(d, moved), x0, y0), aes(x0, y0), size = 4)) # the true climate of a moved pie
+map_over <- function(d) list( # labels, scales and theme over the marks
   ggrepel::geom_text_repel(aes(x, y, label = label, colour = diff_T_JJA), size = 7.5, fontface = "bold", bg.colour = "white", bg.r = 0.15,
                            point.size = 24, point.padding = 0, box.padding = 0.25,
                            nudge_x = ifelse(d$n_shared > 1, 2.1 * r * cos(d$angle), 0), # fanned pies: label outward, off the shared point
                            nudge_y = ifelse(d$n_shared > 1, 2.1 * r * sin(d$angle), -1.9 * r), force = 5, force_pull = 3, # point.size = the pie's size
                            max.iter = 2e5, max.time = 120, # the iteration count, not the clock, ends the search: same labels on every machine
-                           min.segment.length = 0.15, segment.colour = "grey45", segment.size = 0.6, max.overlaps = Inf, seed = 1) +
-  scale_fill_manual(values = fill_values, breaks = names(fill_values), name = NULL, guide = guide_legend(order = 2)) + warm_scale + # legend order fixed: ggplot2 otherwise orders them differently between runs
-  scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks) + coord_equal() +
-  labs(x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
-  big + theme(legend.position = "bottom", legend.box = "vertical", legend.key.size = unit(1.4, "cm"), legend.key.width = unit(3, "cm"),
-              legend.title = element_text(face = "bold"), panel.grid.major = element_line(colour = "grey90"))
+                           min.segment.length = 0.15, segment.colour = "grey45", segment.size = 0.6, max.overlaps = Inf, seed = 1),
+  warm_scale, scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks), coord_equal(),
+  labs(x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)"),
+  big, theme(legend.position = "bottom", legend.key.size = unit(1.4, "cm"), legend.title = element_text(face = "bold"),
+             panel.grid.major = element_line(colour = "grey90")))
+# Fig S10: pies counting species, all classified effects
+figS10_map <- ggplot(pies) + map_under(pies) +
+  scatterpie::geom_scatterpie(aes(x = x, y = y, r = r), data = mutate(pies, r = r), cols = names(cols), colour = "white", linewidth = 0.3) +
+  map_over(pies) + scale_fill_manual(values = cols, breaks = names(cols), name = NULL, guide = guide_legend(order = 2)) + # legend order fixed: ggplot2 otherwise orders them differently between runs
+  theme(legend.box = "vertical", legend.key.width = unit(3, "cm"))
+# Fig 4: disc fill capped at ±30 points (beyond drawn at full colour), ring width up to w_max for the
+# largest gain; disc and ring stay inside the pie radius, so the pies' spacing holds
+r_in <- 0.16; w_max <- 0.07; net_lim <- 30
+d4 <- left_join(pies, balance, by = "experiment_id") |> mutate(w = w_max * gain / max(gain))
+ro <- r_in + d4$w; ring_d <- as.matrix(dist(cbind(d4$x, d4$y)))
+stopifnot(sum(!is.na(d4$net)) == 39, sum(d4$net < 0, na.rm = TRUE) == 29, sum(d4$gain > 0) == 22, # experiments with modelled residents, net losses, colonizer gains
+          n_distinct(col_lad$experiment_id) == 24, # 24 with modelled colonizers; in 2 every one stays at zero warmed cover
+          !any(ring_d[upper.tri(ring_d)] < outer(ro, ro, "+")[upper.tri(ring_d)])) # no two discs overlap
+ring_key <- tibble::tibble(gain = c(5, 15, 30), w = w_max * gain / max(d4$gain))
+fig4_map <- function(mm_per_degree) { # the ring key is drawn in mm, the rings in °C: matched through the panel's scale
+  ggplot(d4) + map_under(d4) +
+    ggforce::geom_circle(aes(x0 = x, y0 = y, r = r_in + w), data = filter(d4, gain > 0), fill = "#5E3C99", colour = NA) +
+    ggforce::geom_circle(aes(x0 = x, y0 = y, r = r_in, fill = net), colour = "grey30", linewidth = 0.4) +
+    # invisible points carry the ring key: a pch 21 circle is 0.753 mm across per unit of size and its
+    # line 0.5 mm wide per unit of stroke, drawn through the middle of the ring
+    geom_point(aes(x = min(d4$x), y = min(d4$y), size = factor(gain)), data = ring_key, inherit.aes = FALSE, alpha = 0) +
+    scale_size_manual(values = setNames(2 * (r_in + ring_key$w / 2) * mm_per_degree / 0.753, ring_key$gain),
+                      name = "Colonizers'\ngain (% points)",
+                      guide = guide_legend(order = 3, override.aes = list(alpha = 1, shape = 21, fill = "white", colour = "#5E3C99",
+                                                                          stroke = ring_key$w * mm_per_degree / 0.5))) +
+    map_over(d4) +
+    scale_fill_gradient2(low = cols[["Resident losers"]], mid = "white", high = cols[["Resident winners"]], midpoint = 0,
+                         limits = c(-net_lim, net_lim), oob = scales::squish, breaks = c(-30, -15, 0, 15, 30),
+                         labels = c("≤ −30", "−15", "0", "15", "≥ 30"), na.value = "grey85", name = "Residents' net\nchange (% points)",
+                         guide = guide_colourbar(order = 2, barwidth = unit(10, "cm"))) +
+    guides(colour = guide_colourbar(order = 1, barwidth = unit(10, "cm"))) +
+    theme(legend.box = "horizontal", legend.spacing.x = unit(2, "cm"), legend.title.position = "top")
+}
+panel_mm_per_degree <- function(map, fig) { # width of the drawn map panel over its temperature range
+  f <- tempfile(fileext = ".png"); ragg::agg_png(f, width = 38, height = 28, units = "in", res = 100)
+  grid::grid.newpage(); grid::grid.draw(patchwork::patchworkGrob(fig)); grid::grid.force(); grid::seekViewport("panel.1-1-1-1")
+  w <- grid::convertWidth(grid::unit(1, "npc"), "mm", valueOnly = TRUE)
+  x_range <- ggplot_build(map)$layout$panel_params[[1]]$x.range # built while the device is open: no Rplots.pdf
+  invisible(dev.off()); unlink(f)
+  w / diff(x_range)
 }
 key <- arrange(pies, desc(diff_T_JJA)) |> mutate(row = row_number(), name = sub("_", " ", gradient_id)) # strongest warming first (Bills, 2 Nov)
 fig4key <- ggplot(key, aes(y = -row)) +
@@ -135,8 +176,16 @@ fig4key <- ggplot(key, aes(y = -row)) +
   warm_scale + guides(colour = "none") + scale_x_continuous(limits = c(0, 6.6), expand = c(0, 0)) +
   labs(title = "Origin → destination elevation,\nstrongest warming first") + theme_void() +
   theme(plot.title = element_text(face = "bold", size = 34, margin = margin(b = 10)), plot.background = element_rect(fill = "white", colour = NA))
-fig4 <- patchwork::wrap_plots(climate_map(cover_shares, cols_cover), fig4key, ncol = 2, widths = c(2.2, 0.7))
-figS10 <- patchwork::wrap_plots(climate_map(select(pies, experiment_id, all_of(names(cols))), cols), fig4key, ncol = 2, widths = c(2.2, 0.7))
+figS10 <- patchwork::wrap_plots(figS10_map, fig4key, ncol = 2, widths = c(2.2, 0.7))
+# the legend row sets the panel's size and the ring key depends on it: redraw until the scale holds
+mm_per_degree <- 40
+for (pass in 1:5) {
+  fig4 <- patchwork::wrap_plots(fig4_map(mm_per_degree), fig4key, ncol = 2, widths = c(2.2, 0.7))
+  measured <- panel_mm_per_degree(fig4_map(mm_per_degree), fig4)
+  if (abs(measured - mm_per_degree) < 0.01) break
+  mm_per_degree <- measured
+}
+stopifnot(abs(measured - mm_per_degree) < 0.01) # the ring key matches the rings on the page
 
 # ---- Fig 7: what the models find, residents beside colonizers --------------------------
 # Climate + abundance, Height and LDMC models (Bills, 2 Nov). Both responses are relative cover
@@ -190,7 +239,6 @@ stopifnot(nrow(flow) == 7) # step 01's filters
 s04 <- read.csv("data/derived/04_classification/species_summary.csv")
 s07b <- read.csv("data/derived/07b_classification/species_summary.csv")
 h05 <- read.csv("data/derived/05_ladder_fit/heterogeneity.csv") |> filter(rowset == "all", model == "Null")
-lad_col <- readRDS("data/derived/07c_ladder_fit/ladder_rows.rds")
 box <- function(e, s, n) sprintf("%d experiments · %d species · %d effects", e, s, n)
 excl <- filter(readRDS("data/derived/prep/experiments.rds"), !included)
 stopifnot(nrow(excl) == flow$n_experiments[1] - flow$n_experiments[2]) # the experiments removed between the first two boxes
@@ -344,7 +392,7 @@ fig_index <- tibble::tribble(
   "Fig 1", "figures/main/fig1.png", "Sankey of year-specific classes, residents and colonizers", "steps 03, 07a",
   "Fig 2", "figures/main/fig2.png", "Residents' classification (Step C)", "step 04",
   "Fig 3", "figures/main/fig3.png", "Colonizers' classification (Step C)", "step 07b",
-  "Fig 4", "figures/main/fig4.png", "The experiments in climate space, pies of warmed-turf cover", "this step",
+  "Fig 4", "figures/main/fig4.png", "The experiments in climate space: residents' net change and colonizers' gain, modelled effects", "this step",
   "Fig 5", "figures/main/fig5.png", "Traits of losers, winners and colonizers (pathways)", "step 07f",
   "Fig 6", "figures/main/fig6.png", "The residents' ladder", "step 06",
   "Fig 7", "figures/main/fig7.png", "Coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers", "this step",
@@ -357,7 +405,7 @@ fig_index <- tibble::tribble(
   "Fig S7", "figures/appendix/figS7.png", "Losing-winning strength, all years", "step 02",
   "Fig S8", "figures/appendix/figS8.png", "Year-specific classes, residents in at least 3 gradients", "step 03",
   "Fig S9", "figures/appendix/figS9.png", "Strength from year 3 against all years", "step 03b",
-  "Fig S10", "figures/appendix/figS10.png", "Fig 4 with species counts in the pies", "this step",
+  "Fig S10", "figures/appendix/figS10.png", "The experiments in climate space: pies counting losers, winners and colonizers, all effects", "this step",
   "Fig S11", "figures/appendix/figS11.png", "Where each variance component of the ladder comes from (toy table)", "drawn by hand",
   "Fig S12", "figures/appendix/figS12.png", "Coefficients, residents", "step 05",
   "Fig S13", "figures/appendix/figS13.png", "Metrics per gradient, residents", "step 06",
@@ -375,31 +423,32 @@ stopifnot(all(file.exists(fig_index$file)), setequal(app_files, paste0("figS", 1
 # ---- Report --------------------------------------------------------------------------
 count_tab <- tibble::tibble(
   item = c("experiments", "resident effects (03b)", "net strength below zero", "net strength above zero", "colonizer effects (07a)",
-           "net warmed cover above zero", "experiments with colonizers", "experiments without purple", "species analysed (residents or colonizers)"),
+           "net warmed cover above zero", "experiments with colonizers", "experiments without purple", "species analysed (residents or colonizers)",
+           "Fig 4: resident ladder effects", "Fig 4: colonizer ladder effects", "Fig 4: experiments with modelled residents",
+           "Fig 4: experiments with a net resident loss", "Fig 4: experiments with a colonizer gain"),
   n = c(nrow(experiments), nrow(res), sum(res$strength < 0), sum(res$strength > 0), nrow(col), sum(col$strength > 0),
-        sum(pies$Colonizers > 0), sum(pies$Colonizers == 0), length(analysed)))
+        sum(pies$Colonizers > 0), sum(pies$Colonizers == 0), length(analysed), nrow(res_lad), nrow(col_lad), sum(!is.na(balance$net)),
+        sum(balance$net < 0, na.rm = TRUE), sum(balance$gain > 0)))
 report <- c(
   "# Step 10: Figures, appendix and report", "",
-  paste0("Draws what no earlier step produced: Fig 4, the ", nrow(experiments), " experiments in climate space with one pie per experiment ",
-         "splitting the warmed turf's relative cover, years 3 and later, among resident losers and winners (by the sign of their net strength from year 3 on), ",
-         "colonizers (net warmed cover above zero) and what was not analysed (species outside the pools, unidentified and genus-level records) (Bills, 2 Nov); ",
-         "Fig S10 the same map with the pies counting species; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S4 the predictors before ",
+  paste0("Draws what no earlier step produced: Fig 4, the ", nrow(experiments), " experiments in climate space with one disc per experiment for the effects the ladders model ",
+         "(", nrow(res_lad), " resident and ", nrow(col_lad), " colonizer effects, steps 05 and 07c): its fill the residents' net change, the sum of their strengths with the sign kept, ",
+         "its purple ring the colonizers' total warmed cover, both in percentage points of the warmed turf from year 3 on (Bills, 3 Nov); ",
+         "Fig S10 the same map with pies counting resident losers and winners (by the sign of their net strength from year 3 on) and colonizers (net warmed cover above zero), all classified effects; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S4 the predictors before ",
          "standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
-         "(seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies are drawn to one radius at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
-         "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
-         "Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation."),
+         "(seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies and discs sit at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
+         "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies or discs overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
+         "Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation. ",
+         "The ring key is drawn in millimetres and matched to the rings through the drawn panel's scale (", sprintf("%.2f", mm_per_degree), " mm per °C)."),
   "", "## Counts", "", md_table(count_tab),
-  "", "## Fig 4 and Fig S10 pies", "", "Cover shares (Fig 4) in per cent of the warmed turf; species counts (Fig S10) in brackets.", "",
-  md_table(transmute(left_join(pies, rename_with(cover_shares, ~ paste0("cover_", .x), -experiment_id), by = "experiment_id"),
+  "", "## Fig 4 discs and Fig S10 pies", "", "Fig 4: the modelled residents' net change and the colonizers' gain, percentage points of the warmed turf (empty: no modelled residents). Fig S10: species counts.", "",
+  md_table(transmute(left_join(pies, balance, by = "experiment_id"),
                      experiment_id, name = label, elevations, `T (°C)` = round(destination_T_JJA, 1), `P (mm)` = round(destination_P_JJA),
                      `W (°C)` = round(diff_T_JJA, 1),
-                     `Resident losers` = sprintf("%.0f%% (%d)", 100 * `cover_Resident losers`, `Resident losers`),
-                     `Resident winners` = sprintf("%.0f%% (%d)", 100 * `cover_Resident winners`, `Resident winners`),
-                     Colonizers = sprintf("%.0f%% (%d)", 100 * cover_Colonizers, Colonizers),
-                     `Not analysed` = sprintf("%.0f%%", 100 * `cover_Not analysed`))),
-  "", paste0("Mean over experiments, per cent of the warmed turf: resident losers ", round(100 * mean(cover_shares$`Resident losers`)),
-             ", resident winners ", round(100 * mean(cover_shares$`Resident winners`)), ", colonizers ", round(100 * mean(cover_shares$Colonizers)),
-             ", not analysed ", round(100 * mean(cover_shares$`Not analysed`)), "."),
+                     `Net change` = ifelse(is.na(net), "", sprintf("%.1f", net)), `Colonizers' gain` = sprintf("%.1f", gain),
+                     `Resident losers`, `Resident winners`, Colonizers)),
+  "", paste0("Median over the experiments with modelled residents: net change ", sprintf("%.1f", median(balance$net, na.rm = TRUE)),
+             " points; median colonizers' gain where colonizers are modelled ", sprintf("%.1f", median(balance$gain[balance$experiment_id %in% col_lad$experiment_id])), " points."),
   "", "## Figures", "", md_table(fig_index), "",
   "![Fig 4](../figures/main/fig4.png)", "", "![Fig 7](../figures/main/fig7.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S3](../figures/appendix/figS3.png)", "",
   "![Fig S4](../figures/appendix/figS4.png)", "", "![Fig S10](../figures/appendix/figS10.png)",
@@ -413,7 +462,7 @@ report <- c(
   "", "## Deviations from PLAN.md", "",
   "- One script for the whole step (Bills, 2 Nov).",
   "- Seven main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6, the coefficients of three models Fig 7 (abundance terms drawn per pool, not comparable); the results-dependent Fig 6 and the old Fig S8 dropped; appendix S1 to S19 in the order of the analysis (Bills, 2 Nov); the main figures are written by their own steps.",
-  "- Fig 4's pies split the warmed turf's relative cover (years 3 and later) among Fig 5's classes per experiment, not counts of last-year significance classes; the counts are Fig S10; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).",
+  "- Fig 4 shows the modelled effects as discs, the residents' net change and the colonizers' gain (Bills, 3 Nov; the cover pies of 2 Nov replaced); Fig S10's pies count Fig 5's classes per experiment, not last-year significance classes; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).",
   "- Coefficients, per-gradient metrics and the random forest stay as residents (a) and colonizers (b) files.",
   "- `REPORT.html` not rendered: Quarto is not installed.")
 writeLines(report, "reports/10_figures.md")
