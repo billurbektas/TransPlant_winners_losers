@@ -75,7 +75,7 @@ Each matches the expectation checked in the script (1,004 effects, 42 experiment
 
 Quantiles (min / 25% / median / 75% / max). Strength from year 3: -0.2833 / -0.0196 / -0.0049 / 0.0022 / 0.3161; its SE: 0.0004 / 0.0057 / 0.0102 / 0.0182 / 0.1013. Significance uses each experiment's t cut-off (origin-control plots + warmed plots - 2 df), as in step 02.
 
-![Strength from year 3](../figures/diagnostics/03b_strength_y3.png)
+![Strength from year 3](../figures/appendix/figS9.png)
 
 ## Warnings captured
 

@@ -4,7 +4,7 @@
 # Reads:  data/derived/02_strength/models/<experiment_id>.rds (the step 02
 #         fits), strength_df.rds, by_year.rds
 # Writes: data/derived/03b_strength_y3/strength_df.rds, strength_df.csv;
-#         figures/diagnostics/03b_strength_y3.png; reports/03b_strength_y3.md
+#         figures/appendix/figS9.png; reports/03b_strength_y3.md
 # Checks: 1,004 effects, 42 experiments, 20 gradients (2 Nov pool rule); every experiment has a
 #         survey in year 3 or later; every strength_se finite and positive;
 #         strength equals the mean of step 02's yearly contrasts over years >= 3;
@@ -92,7 +92,7 @@ pb <- ggplot(long, aes(value)) +
   labs(title = "b)", x = "Relative cover (proportion), years 3 and later", y = "Species x experiment") +
   theme_classic(base_size = 15) + theme(plot.title = element_text(face = "bold", size = 22),
                                         strip.text = element_text(face = "bold", size = 14), strip.background = element_blank())
-ggsave("figures/diagnostics/03b_strength_y3.png", patchwork::wrap_plots(pa, pb, widths = c(1.1, 1)),
+ggsave("figures/appendix/figS9.png", patchwork::wrap_plots(pa, pb, widths = c(1.1, 1)),
        width = 13, height = 6.5, dpi = 150, bg = "white")
 
 # ---- Report --------------------------------------------------------------
@@ -133,7 +133,7 @@ report <- c(
   "", paste0("Quantiles (min / 25% / median / 75% / max). Strength from year 3: ", q(strength_df$strength),
              "; its SE: ", q(strength_df$strength_se), ". Significance uses each experiment's t cut-off ",
              "(origin-control plots + warmed plots - 2 df), as in step 02."),
-  "", "![Strength from year 3](../figures/diagnostics/03b_strength_y3.png)",
+  "", "![Strength from year 3](../figures/appendix/figS9.png)",
   "", "## Warnings captured", "",
   if (length(warns) + length(notes)) paste("-", unique(c(notes, warns))) else "None.",
   "", "## Deviations from PLAN.md", "", "None."

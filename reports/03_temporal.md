@@ -66,7 +66,7 @@ The same classes and flows, restricted to the 74 resident species found in at le
 | 3 to 4 | 383 | 0.828 | 0.784 |
 | 4 to 6 | 201 | 0.806 | 0.799 |
 
-![Fig 1a, residents in at least 3 gradients (appendix draft)](../figures/diagnostics/03_figS_residents_3gradients_draft.png)
+![Fig 1a, residents in at least 3 gradients (appendix draft)](../figures/appendix/figS8.png)
 
 ## Warnings captured
 
@@ -75,4 +75,4 @@ The same classes and flows, restricted to the 74 resident species found in at le
 
 ## Deviations from PLAN.md
 
-Combinations absent from both groups in an anchor year ( 93  of  3,032  anchor contrasts) are not classified there, where PLAN.md's rule would have put their zero contrast in Loser (ns) (decided 30 Oct). Anchors are years 2, 3, 4 and 6 rather than 2, 4 and 6 (decided 30 Oct: agreement between consecutive years rises from year 3 on; PLAN.md updated), labelled Year 2, 3, 4, 6 rather than the mock's First 2, 4, 6 years. Fig 1a is written to figures/main/fig1.png (anchored 2 Nov, Bills) and the appendix version to figures/diagnostics/, not to data/derived/03_temporal/, so that they are committed with the report.
+Combinations absent from both groups in an anchor year ( 93  of  3,032  anchor contrasts) are not classified there, where PLAN.md's rule would have put their zero contrast in Loser (ns) (decided 30 Oct). Anchors are years 2, 3, 4 and 6 rather than 2, 4 and 6 (decided 30 Oct: agreement between consecutive years rises from year 3 on; PLAN.md updated), labelled Year 2, 3, 4, 6 rather than the mock's First 2, 4, 6 years. Fig 1a is written to figures/main/fig1.png (anchored 2 Nov, Bills) and the appendix version to figures/appendix/, not to data/derived/03_temporal/, so that they are committed with the report.

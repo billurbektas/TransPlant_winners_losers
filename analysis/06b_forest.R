@@ -5,7 +5,7 @@
 #         data/derived/06_ladder_predict/folds/null_<gradient_id>.rds (the metafor
 #         Null held out, the reference of R²); data/derived/06_ladder_predict/pred_metrics.csv
 # Writes: data/derived/06b_forest/folds/<setting>/<level>_<gradient_id>.rds, tuning.csv,
-#         forest_metrics.csv, forest_vs_metafor.csv; figures/diagnostics/06b_figS11.png; reports/06b_forest.md
+#         forest_metrics.csv, forest_vs_metafor.csv; figures/appendix/figS13.png; reports/06b_forest.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients) as in step 05; 16 scored gradients, the same as step 06;
 #         test rows of every fold equal step 06's; the held-out gradient absent
@@ -213,7 +213,7 @@ figS11 <- patchwork::wrap_plots(p_top, metric_row("r2", "a)", "R² against Null"
     "on the same rows, predictors and folds, no case weights; points and numbers = medians.\nR² = 1 - error / error of the metafor Null on that gradient, so Null is 0 and not drawn (the forest Null, ",
     "the mean of the training effects, is in the report). Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."),
     theme = theme(plot.caption = element_text(size = 24, colour = "grey40"), plot.background = element_rect(fill = "white", colour = NA)))
-ggsave("figures/diagnostics/06b_figS11.png", figS11, width = 48, height = 30, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS13.png", figS11, width = 48, height = 30, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
@@ -264,14 +264,14 @@ report <- c(
          " and the largest change in a median ", sprintf("%.3f", max(seed_med$d)), ". Largest change in a median per metric: ",
          paste0(c("R² ", "Spearman ρ ", "skill "), sprintf("%.3f", sapply(c("r2", "spearman", "skill"), function(k) max(seed_med$d[seed_med$metric == k]))), collapse = ", "),
          "; skill moves most because a prediction near zero can change sign between seeds."),
-  "", "## Figures", "", "![Fig S11, forest beside meta-regression](../figures/diagnostics/06b_figS11.png)",
+  "", "## Figures", "", "![Fig S11, forest beside meta-regression](../figures/appendix/figS13.png)",
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- No case weights, instead of 1 / SE² (Bills, 2 Nov; PLAN.md edited).",
   "- Held-out values only, no fit values (Bills, 2 Nov; PLAN.md edited).",
   "- No partial-dependence plots (Bills, 2 Nov; PLAN.md edited).",
   "- Forests also for the seven property + species levels (Bills, 2 Nov).",
-  "- Fig S11 written to `figures/diagnostics/` so that the report can link it, as steps 05 and 06.")
+  "- Fig S11 written to `figures/appendix/` so that the report can link it, as steps 05 and 06.")
 writeLines(report, "reports/06b_forest.md")
 message("Step 06b written: ", length(tasks), " forests (and ", length(tasks), " for the seed check); ",
         sprintf("%.1f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

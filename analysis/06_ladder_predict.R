@@ -7,7 +7,7 @@
 #         data/derived/05_ladder_fit/heterogeneity.csv (Fig 4 row a)
 # Writes: data/derived/06_ladder_predict/folds/<level>_<gradient_id>.rds,
 #         pred_metrics.csv, fit_metrics.csv, summary_metrics.csv,
-#         fold_summary.csv; figures/diagnostics/06_fig4.png,
+#         fold_summary.csv; figures/main/fig6.png (the ladder, main Fig 6),
 #         06_figS7.png; reports/06_ladder_predict.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients) as in step 05, every rowset equal to them; 16 scored
@@ -244,7 +244,7 @@ fig4_grad <- bind_rows(mutate(fit_metrics, type = "fit"), mutate(pred_metrics, t
   tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
   transmute(column = level_label[level], metric = met_name[metric], type, value) |> filter(!is.na(value))
 # no caption on the figure (Bills, 2 Nov): the report says what each row shows
-fig4_ladder(het_fig, "figures/diagnostics/06_fig4.png", gradients = fig4_grad)
+fig4_ladder(het_fig, "figures/main/fig6.png", gradients = fig4_grad) # main Fig 6, anchored (Bills, 2 Nov)
 
 # Fig S7 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
 grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_id) |>
@@ -259,16 +259,17 @@ s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics,
 s7_panel <- function(k, title, tags) lapply(seq_along(levels(s7$version)), function(j) {
   v <- levels(s7$version)[j]; d <- filter(s7, metric == k, version == v)
   ggplot(d, aes(level, gradient_id, fill = pmax(pmin(value, 1), -1))) + geom_tile(colour = "white") +
-    geom_text(aes(label = ifelse(is.na(value), "", sprintf("%.2f", value))), size = 3.6) +
+    geom_text(aes(label = ifelse(is.na(value), "", ifelse(value < -10, "< -10", sprintf("%.2f", value)))), size = 7) + # readable at print size (Bills, 2 Nov)
     scale_fill_gradient2(low = "#B2182B", mid = "white", high = "#2166AC", limits = c(-1, 1), na.value = "grey85", name = title) +
     labs(title = tags[j], subtitle = paste0(title, ", ", tolower(v)), x = NULL, y = NULL) +
-    theme_minimal(base_size = 17) +
-    theme(plot.title = element_text(face = "bold", size = 24), axis.text.x = element_text(angle = 50, hjust = 1),
+    theme_minimal(base_size = 30) +
+    theme(plot.title = element_text(face = "bold", size = 40), plot.subtitle = element_text(size = 32), axis.text.x = element_text(angle = 45, hjust = 1),
+          axis.text = element_text(size = 26), legend.key.height = unit(2, "cm"), legend.key.width = unit(1, "cm"),
           panel.grid = element_blank(), plot.background = element_rect(fill = "white", colour = NA))
 })
 figS7 <- patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")), s7_panel("spearman", "Spearman ρ", c("c)", "d)")),
                                  s7_panel("skill", "Loser/winner skill", c("e)", "f)"))), ncol = 2)
-ggsave("figures/diagnostics/06_figS7.png", figS7, width = 30, height = 33, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS12.png", figS7, width = 46, height = 48, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
@@ -314,13 +315,13 @@ report <- c(
          ". The P and TP BLUPs are about zero because their variances sit at the boundary (step 05): a BLUP is its variance times ",
          "the species' weighted residual, so in practice the deviation is the species' intercept, W slope and T slope."),
   "", paste0("Every held-out species had training data: each ladder species occurs in at least 3 gradients, so at least 2 remain in training (checked)."),
-  "", "## Figures", "", "![Fig 4, the ladder](../figures/diagnostics/06_fig4.png)", "",
+  "", "## Figures", "", "![Fig 6, the ladder](../figures/main/fig6.png)", "",
   paste0("Fig 4. Row a): step 05, every column on the same ", nrow(strength_df), " rows; dashed lines carry Species-dependent across the property columns. ",
          "Rows b) to d): each half violin is the ", length(scored), " scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all ", length(gradients),
          " gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, ",
          "so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. ",
          "Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."), "",
-  "![Fig S7, per-gradient view](../figures/diagnostics/06_figS7.png)",
+  "![Fig S7, per-gradient view](../figures/appendix/figS12.png)",
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
@@ -328,7 +329,7 @@ report <- c(
   "- Climate's Spearman and skill are NA in every gradient (Bills, 2 Nov): with several experiments in a gradient they would rank experiments, not species.",
   "- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (Bills, 2 Nov); PLAN.md names no fallback.",
   "- Spearman is also NA where every prediction in the gradient is the same (MILESTONES), beside PLAN.md's fewer than 5 effects.",
-  "- Figures written to `figures/diagnostics/`; Fig 4's prediction rows widen their y range to the data.")
+  "- The ladder figure is written to `figures/main/fig6.png` (main Fig 6), the per-gradient view to `figures/appendix/`; the ladder's prediction rows widen their y range to the data.")
 writeLines(report, "reports/06_ladder_predict.md")
 message("Step 06 written: ", nrow(fold_summary), " folds, ", nrow(failed), " failed; ",
         sprintf("%.0f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

@@ -5,7 +5,7 @@
 #         data/derived/04_classification/species_summary.csv (Step C spread)
 # Writes: data/derived/05_ladder_fit/models/<rowset>/<model>.rds,
 #         heterogeneity.csv, weights.csv, coefficients.csv, tableS4.csv,
-#         tableS5.csv; figures/diagnostics/05_figS4.png; reports/05_ladder_fit.md
+#         tableS5.csv; figures/appendix/figS11.png; reports/05_ladder_fit.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients): residents in at least 3 gradients that carry every
 #         property; every property rowset identical to all;
@@ -225,13 +225,11 @@ coef_panel <- function(x, tag, ttl) {
                                           strip.text = element_text(face = "bold", size = 15), strip.background = element_blank())
 }
 s4a <- coef_panel(filter(coefs, rowset == "all", model == "Climate + start", term != "intrcpt"), "a)", "Residents, Climate + start (model-based intervals)")
-s4b <- ggplot() + annotate("text", x = 0, y = 0, label = "Colonizers: step 07", size = 7, colour = "grey50") +
-  labs(title = "b)") + theme_void(base_size = 17) + theme(plot.title = element_text(face = "bold", size = 22))
 prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model == prop_label[[p]]) |>
   filter(canon(term) %in% canon(prop_terms(prop_vars[[p]]))) |> mutate(property = prop_label[[p]])))
-s4c <- coef_panel(prop_coefs, "c)", "Property terms, each from its own model (Climate + start + property, species slopes kept)") +
+s4c <- coef_panel(prop_coefs, "b)", "Property terms, each from its own model (Climate + start + property, species slopes kept)") +
   facet_wrap(~ property, scales = "free", ncol = 4)
-ggsave("figures/diagnostics/05_figS4.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, s4b, widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)),
+ggsave("figures/appendix/figS11.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, patchwork::plot_spacer(), widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)), # colonizers: Fig S15
        width = 20, height = 22, dpi = 100, bg = "white")
 
 
@@ -301,14 +299,14 @@ report <- c(
   "", "## Effective weights (all rows)", "", md_table(weights_table),
   "", "The low-A0_origin half is the effects at or below the median A0_origin. Species-dependent weights include the slope variance at each effect's climate.",
   "", "## Figures", "",
-  "![Fig S4, coefficients](../figures/diagnostics/05_figS4.png)", "", "Fig 4 is drawn by step 06; Fig S8 is not drawn (Bills, 2 Nov).",
+  "![Fig S4, coefficients](../figures/appendix/figS11.png)", "", "Fig 4 is drawn by step 06; Fig S8 is not drawn (Bills, 2 Nov).",
   "", "## Warnings captured", "",
   { w <- unique(c(unlist(lapply(fits, function(f) paste0(f$rowset, " / ", f$model, ": ", f$warnings[[1]])[length(f$warnings[[1]]) > 0])), warns))
     if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   paste0("- H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. ",
          "Same quantity."),
-  "- Fig S4 is written to `figures/diagnostics/05_figS4.png`, not to `data/derived/05_ladder_fit/`, so that the report can link it.",
+  "- Fig S4 is written to `figures/appendix/figS11.png`, not to `data/derived/05_ladder_fit/`, so that the report can link it.",
   "- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.")
 writeLines(report, "reports/05_ladder_fit.md")
 message("Step 05 written: ", nrow(fitted), " fits in ", sprintf("%.1f", sum(fitted$minutes)), " fit-minutes")

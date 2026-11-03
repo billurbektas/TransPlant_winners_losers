@@ -6,7 +6,7 @@
 #         heterogeneity.csv
 # Writes: data/derived/07d_ladder_predict/folds/<level>_<gradient_id>.rds,
 #         pred_metrics.csv, fit_metrics.csv, summary_metrics.csv;
-#         figures/diagnostics/07d_figS9.png, 07d_figS7.png; reports/07d_ladder_predict.md
+#         figures/appendix/figS16.png, figS17.png; reports/07d_ladder_predict.md
 # Checks: 110 ladder rows (07c); 8 scored gradients (at least 5 effects), one fold
 #         each per fitted level; the held-out gradient absent from every training
 #         set; species deviations only for species seen in training; Null R²
@@ -126,7 +126,7 @@ stopifnot(setequal(het$column, ladder_columns))
 grads <- bind_rows(mutate(trim(fit_metrics), type = "fit"), mutate(trim(pred_metrics), type = "pred")) |>
   filter(level %in% levels_fit$level, level != "null") |> tidyr::pivot_longer(c(r2, spearman), names_to = "metric") |>
   transmute(column = level_label[level], metric = c(r2 = "R2", spearman = "Spearman")[metric], type, value) |> filter(!is.na(value))
-fig4_ladder(het, "figures/diagnostics/07d_figS9.png", gradients = grads, skill = FALSE,
+fig4_ladder(het, "figures/appendix/figS16.png", gradients = grads, skill = FALSE,
             labels = c("Null", "Destination\nabundance", "Climate", "Climate +\ndest.\nabundance", "Species-\ndependent",
                        "LDMC", "LMA", "Height", "Graminoid", "Woody", "Phylogeny", "Niche"))
 
@@ -139,15 +139,16 @@ s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics,
 s7_panel <- function(k, title, tags) lapply(1:2, function(j) {
   v <- levels(s7$version)[j]; d <- filter(s7, metric == k, version == v)
   ggplot(d, aes(level, gradient_id, fill = pmax(pmin(value, 1), -1))) + geom_tile(colour = "white") +
-    geom_text(aes(label = ifelse(is.na(value), "", sprintf("%.2f", value))), size = 3.6) +
+    geom_text(aes(label = ifelse(is.na(value), "", ifelse(value < -10, "< -10", sprintf("%.2f", value)))), size = 7) + # readable at print size (Bills, 2 Nov)
     scale_fill_gradient2(low = "#B2182B", mid = "white", high = "#2166AC", limits = c(-1, 1), na.value = "grey85", name = title) +
-    labs(title = tags[j], subtitle = paste0(title, ", ", tolower(v)), x = NULL, y = NULL) + theme_minimal(base_size = 17) +
-    theme(plot.title = element_text(face = "bold", size = 24), axis.text.x = element_text(angle = 50, hjust = 1),
+    labs(title = tags[j], subtitle = paste0(title, ", ", tolower(v)), x = NULL, y = NULL) + theme_minimal(base_size = 30) +
+    theme(plot.title = element_text(face = "bold", size = 40), plot.subtitle = element_text(size = 32), axis.text.x = element_text(angle = 45, hjust = 1),
+          axis.text = element_text(size = 26), legend.key.height = unit(2, "cm"), legend.key.width = unit(1, "cm"),
           panel.grid = element_blank(), plot.background = element_rect(fill = "white", colour = NA))
 })
-ggsave("figures/diagnostics/07d_figS7.png", patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")),
+ggsave("figures/appendix/figS17.png", patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")),
                                                                    s7_panel("spearman", "Spearman ρ", c("c)", "d)"))), ncol = 2),
-       width = 30, height = 18, dpi = 100, bg = "white")
+       width = 48, height = 30, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
@@ -171,10 +172,10 @@ report <- c(
                                   paste(sprintf("%s, %s at %s (%s)", level_display[outliers$level], outliers$version, outliers$gradient_id, sprintf("%.1f", outliers$r2)), collapse = "; "), ".")
       else "No R² below −100.",
   "", paste0("Every held-out species had training data: ", all(folds$species_known), "."),
-  "", "## Figures", "", "![Fig S9, the colonizer ladder](../figures/diagnostics/07d_figS9.png)", "",
+  "", "## Figures", "", "![Fig S9, the colonizer ladder](../figures/appendix/figS16.png)", "",
   paste0("Fig S9 as Fig 4: row a) step 07c; rows b) c): half violins of the ", length(scored), " scored gradients, explanatory (grey) beside predictive (blue), medians written in; ",
          "R² against the Null on that gradient. No skill row."), "",
-  "![Fig S7, colonizers](../figures/diagnostics/07d_figS7.png)",
+  "![Fig S7, colonizers](../figures/appendix/figS17.png)",
   "", "## Warnings captured", "", { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   "- The colonizer ladder predicted on the residents' reduction (Bills, 2 Nov).",

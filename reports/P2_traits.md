@@ -90,7 +90,7 @@ Before the medians: the seven real trees (`prep/config/trait_trees.csv`; seedlin
 | tree (trait_trees.csv) | 2423 | 21 |
 | unit signature | 15 | 8 |
 
-![Every TRY record of each trait in its own units, removed records coloured by reason](../figures/diagnostics/P2_trait_screening.png)
+![Every TRY record of each trait in its own units, removed records coloured by reason](../figures/appendix/figS2.png)
 
 Kept records in grey, removed records as coloured bars, each counted from zero; log value axis in natural units, square-root count axis so the few removed records are visible. Outliers are judged against their own species, so they lie across the whole range of a trait, not only in its tails; the trees are the long right tail of height.
 

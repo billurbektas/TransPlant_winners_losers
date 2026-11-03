@@ -1,4 +1,4 @@
-# Step 07f: the pathways (Q4), Fig 4.
+# Step 07f: the pathways (Q4), Fig 5.
 #
 # PLAN.md: The colonizer story, "Q4, the pathways figure", its fallback; the agreed
 #   mock plan_figures/mock_fig7_pathways.png.
@@ -6,7 +6,7 @@
 #         data/derived/07b_classification/species_summary.csv (colonizers, Fig S2);
 #         data/derived/prep/traits.rds, functional_groups.rds, niche_optima.rds
 # Writes: data/derived/07f_pathways/group_properties.csv, group_summary.csv;
-#         figures/main/fig4.png; reports/07f_pathways.md
+#         figures/main/fig5.png; reports/07f_pathways.md
 # Checks: 74 resident species (step 04) split by the sign of their net strength;
 #         28 colonizer species with net warmed cover above zero (07b); every species
 #         has growth form; group sizes in the labels.
@@ -15,7 +15,7 @@
 # consistent: residents grouped by the sign of their pooled net strength mu (Fig 2),
 # losers and winners, against colonizers with pooled net warmed cover above zero
 # (Fig S2), one point per species; Fig 2's loser and winner colours, Fig S2's purple.
-# Placed after Fig 2 and S2 as Fig 4 (Fig 3 is the climate space). Raw property values
+# Main Fig 5 (final numbering, Bills 2 Nov). Raw property values
 # in their units, on log axes except the thermal optimum; niche optima only where
 # n_obs_sub >= 30, as in the models. Descriptive, no model.
 
@@ -87,11 +87,11 @@ bottom <- ggplot(share_long, aes(y = 1)) +
   theme(plot.title = element_text(face = "bold", size = 40), strip.text.y.left = element_text(size = 28, angle = 0, hjust = 1),
         strip.text.x = element_text(face = "bold", size = 25, lineheight = 0.9, margin = margin(b = 10)),
         strip.placement = "outside", plot.background = element_rect(fill = "white", colour = NA))
-ggsave("figures/main/fig4.png", patchwork::wrap_plots(top, bottom, ncol = 1, heights = c(2.2, 1)), width = 32, height = 20, dpi = 100, bg = "white")
+ggsave("figures/main/fig5.png", patchwork::wrap_plots(top, bottom, ncol = 1, heights = c(2.2, 1)), width = 32, height = 20, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------------------
 report <- c(
-  "# Step 07f: The pathways (Q4), Fig 4", "",
+  "# Step 07f: The pathways (Q4), Fig 5", "",
   paste0("PLAN.md's fallback for the pathways figure (Bills, 2 Nov), since Step C found almost nothing consistent: resident species grouped by the sign of ",
          "their pooled net strength from step 04 (Fig 2), losers below zero and winners above, against colonizer species whose pooled net warmed cover ",
          "from 07b (Fig S2) is above zero; one point per species. As the agreed mock: LDMC, LMA, vegetative height, and the thermal and precipitation ",
@@ -107,10 +107,10 @@ report <- c(
                                         names_from = property, values_from = median), by = "group")),
   "", "Medians with the number of species that have the property in brackets.",
   "", paste0("In both pools: ", paste(both, collapse = ", "), "."),
-  "", "## Figure", "", "![Fig 4, pathways](../figures/main/fig4.png)",
+  "", "## Figure", "", "![Fig 5, pathways](../figures/main/fig5.png)",
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- PLAN.md's fallback, with resident losers added beside the winners (Bills, 2 Nov): groups by the sign of the net effect, not Step C classes.",
-  "- The figure is Fig 4, after Fig 2 and Fig S2 (Bills, 2 Nov); written to `figures/main/fig4.png`.")
+  "- The figure is main Fig 5 (final numbering, Bills 2 Nov); written to `figures/main/fig5.png`.")
 writeLines(report, "reports/07f_pathways.md")
 message("Step 07f written: ", paste(sprintf("%s %d", sizes$group, sizes$n), collapse = "; "))

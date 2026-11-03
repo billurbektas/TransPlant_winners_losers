@@ -7,7 +7,7 @@
 #         functional_groups.rds, phylogeny_axes.rds, niche_optima.rds
 # Writes: data/derived/02_strength/models/<experiment_id>.rds (one fit per
 #         experiment, `::` written `__`), by_year.rds, strength_df.rds,
-#         strength_df.csv; figures/diagnostics/02_strength.png;
+#         strength_df.csv; figures/appendix/figS7.png;
 #         reports/02_strength.md
 # Checks: 67,952 resident rows in origin controls and warmed plots, 42
 #         experiments, 1,004 species x experiment combinations, 346 species;
@@ -35,7 +35,7 @@ globalCallingHandlers(warning = function(w) {
 out_dir <- "data/derived/02_strength"
 model_dir <- file.path(out_dir, "models")
 dir.create(model_dir, recursive = TRUE, showWarnings = FALSE)
-dir.create("figures/diagnostics", recursive = TRUE, showWarnings = FALSE)
+dir.create("figures/appendix", recursive = TRUE, showWarnings = FALSE)
 z <- function(x) (x - mean(x, na.rm = TRUE)) / stats::sd(x, na.rm = TRUE)
 
 # ---- Resident rows ---------------------------------------------------------
@@ -134,7 +134,7 @@ p2 <- ggplot(strength_df, aes(strength_se, strength)) +
   geom_point(alpha = 0.4, size = 1) +
   labs(x = "strength_se", y = "strength") +
   theme_classic()
-ggsave("figures/diagnostics/02_strength.png", patchwork::wrap_plots(p1, p2, ncol = 1, heights = c(1, 1.2)),
+ggsave("figures/appendix/figS7.png", patchwork::wrap_plots(p1, p2, ncol = 1, heights = c(1, 1.2)),
        width = 7, height = 7, dpi = 150)
 
 # ---- Report --------------------------------------------------------------
@@ -241,7 +241,7 @@ report <- c(
   paste0("Quantiles (min / 25% / median / 75% / max). strength: ", q(strength_df$strength), "; strength_se: ",
          q(strength_df$strength_se), ". Effects significant at p < 0.05 (|strength| / SE above the experiment's ",
          "t cut-off): ", fmt(n_sig), " of ", fmt(nrow(strength_df)), "."),
-  "", "![strength and strength_se](../figures/diagnostics/02_strength.png)", "",
+  "", "![strength and strength_se](../figures/appendix/figS7.png)", "",
   paste0("With one residual variance per species, the SE follows each species' own scatter: within an experiment ",
          "the largest SE is a median of ", round(stats::median(fit_table$se_max / fit_table$se_min)), " times the smallest ",
          "(range ", round(min(fit_table$se_max / fit_table$se_min)), " to ", round(max(fit_table$se_max / fit_table$se_min)),

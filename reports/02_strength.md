@@ -36,7 +36,7 @@ strength <- contrast(emmeans(m, ~ treatment | species, df = df_plots), method = 
 
 Quantiles (min / 25% / median / 75% / max). strength: -0.2332 / -0.0153 / -0.0040 / 0.0021 / 0.1885; strength_se: 0.0004 / 0.0049 / 0.0090 / 0.0142 / 0.0818. Effects significant at p < 0.05 (|strength| / SE above the experiment's t cut-off): 289 of 1,004.
 
-![strength and strength_se](../figures/diagnostics/02_strength.png)
+![strength and strength_se](../figures/appendix/figS7.png)
 
 With one residual variance per species, the SE follows each species' own scatter: within an experiment the largest SE is a median of 4 times the smallest (range 1 to 103), and the Spearman correlation of SE with the species' mean relative cover in the experiment is 0.80. Rare species therefore get the smallest SEs on the absolute cover scale, and the largest weights in the later `rma.mv` calls.
 

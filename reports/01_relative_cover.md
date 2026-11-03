@@ -26,7 +26,7 @@ Species x experiment combinations in neither pool (before the pool-size rule):
 
 Every species x experiment recorded in a control group, by its plot-year records there and by what the rule did with it (a); totals (b); per experiment, the species recorded in the origin controls (c); kept species by the number of gradients they occur in, with the cut-off applied downstream, at least 3 gradients for the classification (step 04) and the ladder (step 05) (d). The rule is not a cut-off on records: combinations with many records but in few plots or few years are left behind, and some with few records are kept where the plots are few.
 
-![Kept and left behind](../figures/diagnostics/01_pool_rule.png)
+![Kept and left behind](../figures/appendix/figS5.png)
 
 | pool | kept | left behind: fails the pool rule | left behind: experiment under 5 residents | left behind: recorded in origin controls |
 | --- | --- | --- | --- | --- |
@@ -76,7 +76,7 @@ Share of plot-year cover in rows not analysed, by region:
 Pool-size rule: 42 of 43 experiments have at least 5 residents. Left out: US_Arizona::MC::PP, with 4 residents: 9 species were ever recorded in its origin controls, a median of 2.5 per plot-year. Smallest kept pools: DE_Susalps::FE::BT 8; SE_Abisko::High::Low 9; SE_Abisko::High::Mid 9.
 Gradients (`gradient_id` = region) after the rule: 20.
 
-![Resident pool size per experiment](../figures/diagnostics/01_pool_sizes.png)
+![Resident pool size per experiment](../figures/appendix/figS6.png)
 
 | experiment_id | region | resident | destination_pool | kept |
 | --- | --- | --- | --- | --- |

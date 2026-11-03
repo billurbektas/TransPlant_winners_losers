@@ -59,9 +59,9 @@ Every species, by pooled warmed cover:
 | Euphrasia officinalis | Context-dependent | 3 | 3 | 1 | 0.0000 | 0.0000 | 0.0000 | -0.0000 | 0.0000 |
 | Ranunculus acris | Consistent non-colonizer | 3 | 3 | 2 |  |  |  |  |  |
 
-## Fig S2
+## Fig 3
 
-![Fig S2](../figures/diagnostics/07b_figS2.png)
+![Fig 3](../figures/main/fig3.png)
 
 Fig S2 mirrors Fig 2 (Bills, 2 Nov). a): point = pooled warmed cover, filled by class; line = 95% prediction interval for a new experiment, shaded by the number of gradients and labelled gradients (experiments); every modelled species is shown. b) and c): Trifolium repens and Plantago lanceolata, the highest and lowest pooled warmed cover among species in at least 5 gradients; one row per experiment, mean relative cover over years 3 and later in destination controls (hollow) and warmed plots (filled).
 

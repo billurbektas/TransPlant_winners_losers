@@ -12,7 +12,7 @@
 #         data/derived/05_ladder_fit/models/<rowset>/<slug>.rds (the diagonal fits)
 # Writes: data/derived/05_ladder_fit/gen_check/models/<rowset>/<slug>.rds,
 #         gen_check/variance_components.csv, gen_check/fixed_effects.csv;
-#         figures/diagnostics/05_gen_vs_diag.png; reports/05_gen_vs_diag.md
+#         data/derived/05_ladder_fit/gen_check/05_gen_vs_diag.png; reports/05_gen_vs_diag.md
 # Checks: the same rowset counts as step 05; the GEN fits carry the same fixed
 #         part as their diagonal twins.
 
@@ -145,7 +145,7 @@ pc <- if (nrow(fe)) ggplot(filter(fe, term != "intrcpt"), aes(shift_in_SE, paste
   geom_vline(xintercept = 0, colour = "grey60") + geom_point(size = 3, alpha = 0.7) +
   labs(title = "c)", subtitle = "Shift of each fixed effect, GEN minus diagonal, in diagonal CR1 standard errors", x = "Shift (standard errors)", y = NULL) + th else
   ggplot() + theme_void()
-ggsave("figures/diagnostics/05_gen_vs_diag.png", patchwork::wrap_plots(pa, patchwork::wrap_plots(pb, pc, widths = c(1, 1.3)), ncol = 1, heights = c(1.3, 1)),
+ggsave("data/derived/05_ladder_fit/gen_check/05_gen_vs_diag.png", patchwork::wrap_plots(pa, patchwork::wrap_plots(pb, pc, widths = c(1, 1.3)), ncol = 1, heights = c(1.3, 1)),
        width = 26, height = 26, dpi = 100, bg = "white")
 
 # ---- Report -----------------------------------------------------------------------
@@ -194,7 +194,7 @@ report <- c(
   "", "## The ladder's reading under each structure", "",
   "The 5% property check (move against τ² + σ²_experiment of Species-dependent on the same rows) and the Q3d change in the H_species slope piece:", "",
   if (nrow(lad_tab)) md_table(lad_tab) else "No property model converged next to its Species-dependent fit.",
-  "", "## Figure", "", "![GEN against diagonal](../figures/diagnostics/05_gen_vs_diag.png)",
+  "", "## Figure", "", "![GEN against diagonal](../data/derived/05_ladder_fit/gen_check/05_gen_vs_diag.png)",
   "", "## Warnings captured", "",
   { w <- unique(unlist(lapply(gen, function(f) if (is.list(f) && length(f$warnings[[1]])) paste0(f$rowset, " / ", f$model, ": ", f$warnings[[1]]))))
     if (length(w)) paste("-", w) else "None." },

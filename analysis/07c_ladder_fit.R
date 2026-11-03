@@ -6,7 +6,7 @@
 #         scale); data/derived/prep/traits.rds, functional_groups.rds,
 #         phylogeny_axes.rds, niche_optima.rds
 # Writes: data/derived/07c_ladder_fit/ladder_rows.rds, models/<slug>.rds,
-#         heterogeneity.csv, coefficients.csv; figures/diagnostics/07c_figS4b.png;
+#         heterogeneity.csv, coefficients.csv; figures/appendix/figS15.png;
 #         reports/07c_ladder_fit.md
 # Checks: 379 colonizer effects in; ladder rows 110 effects, 27 species, 24
 #         experiments, 18 gradients; no A0_origin in any model; 12 fits; random
@@ -123,7 +123,7 @@ climate_change <- tau2(fits$climate$m) / tau2(fits$null$m) - 1
 prop_check <- bind_rows(lapply(names(prop_vars), function(p) { m4 <- fits[[p]]$m; m3 <- fits$species$m; denom <- tau2(m3) + sigma2_exp(m3)
   tibble::tibble(property = prop_label[[p]], move_tau2 = (tau2(m4) - tau2(m3)) / denom, move_sigma2_experiment = (sigma2_exp(m4) - sigma2_exp(m3)) / denom) }))
 
-# ---- Fixed effects, model-based intervals (Fig S4 b, as step 05's a) ------------------
+# ---- Fixed effects, model-based intervals (Fig S15, as step 05's Fig S11) ---------------
 coefs <- bind_rows(lapply(fits[-1], function(f) { s <- coef(summary(f$m))
   tibble::tibble(model = f$model, term = rownames(s), estimate = s$estimate, se = s$se, ci_lower = s$ci.lb, ci_upper = s$ci.ub, pval = s$pval) }))
 write.csv(coefs, file.path(out_dir, "coefficients.csv"), row.names = FALSE)
@@ -137,11 +137,11 @@ coef_panel <- function(x, tag, ttl) { # as analysis/05_ladder_fit.R
     theme_classic(base_size = 17) + theme(plot.title = element_text(face = "bold", size = 22), legend.position = "bottom",
                                           strip.text = element_text(face = "bold", size = 15), strip.background = element_blank())
 }
-s4b <- coef_panel(filter(coefs, model == "Climate + start", term != "intrcpt"), "b)", "Colonizers, Climate + destination abundance (model-based intervals)")
+s4b <- coef_panel(filter(coefs, model == "Climate + start", term != "intrcpt"), "a)", "Colonizers, Climate + destination abundance (model-based intervals)")
 prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model == prop_label[[p]], canon(term) %in% canon(prop_terms(prop_vars[[p]]))) |>
   mutate(property = prop_label[[p]])))
-s4c <- coef_panel(prop_coefs, "c)", "Colonizers: property terms, each from its own model") + facet_wrap(~ property, scales = "free", ncol = 4)
-ggsave("figures/diagnostics/07c_figS4b.png", patchwork::wrap_plots(s4b, s4c, ncol = 1, heights = c(1, 2)), width = 20, height = 20, dpi = 100, bg = "white")
+s4c <- coef_panel(prop_coefs, "b)", "Colonizers: property terms, each from its own model") + facet_wrap(~ property, scales = "free", ncol = 4)
+ggsave("figures/appendix/figS15.png", patchwork::wrap_plots(s4b, s4c, ncol = 1, heights = c(1, 2)), width = 20, height = 20, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------------------
 e4 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", 1e4 * x))
@@ -170,12 +170,12 @@ report <- c(
              ". On ", nrow(rows), " effects the variance components are not pinned down well enough for that check to hold; they are reported, not enforced (Bills, 2 Nov)."),
   "", "## Coefficients whose 95% interval excludes zero", "",
   if (nrow(excl)) md_table(transmute(excl, model, term, estimate = sprintf("%.4f", estimate), ci = sprintf("%.4f to %.4f", ci_lower, ci_upper))) else "None.",
-  "", "## Figures", "", "![Fig S4 b and c, colonizers](../figures/diagnostics/07c_figS4b.png)",
+  "", "## Figures", "", "![Fig S15, colonizer coefficients](../figures/appendix/figS15.png)",
   "", "## Warnings captured", "", { w <- unique(c(unlist(lapply(fits, function(f) if (length(f$warnings)) paste0(f$model, ": ", f$warnings))), warns))
     if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   "- The colonizer ladder on the residents' reduction and models (Bills, 2 Nov); properties on the residents' scale.",
   "- Step 05's tau2 and property checks are reported, not enforced (Bills, 2 Nov: run without stopping).",
-  "- Fig S4 panels b and c drawn here as their own file; step 10 assembles Fig S4.")
+  "- The colonizer coefficients are their own appendix figure (Fig S15), beside the residents' Fig S11.")
 writeLines(report, "reports/07c_ladder_fit.md")
 message("Step 07c written: ", nrow(rows), " effects, ", length(fits), " fits")
