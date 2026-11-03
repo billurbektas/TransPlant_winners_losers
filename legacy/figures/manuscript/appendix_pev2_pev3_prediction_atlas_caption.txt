@@ -1,9 +1,0 @@
-Predicted winning-losing strength (warmed minus origin-control AUC) across destination summer
-climate for PEV2 and PEV3. Population-level fixed-effect predictions come from the existing current
-joint PEV1--PEV3 full model. Low and High values are the 25th and 75th percentiles across all 526
-unique species: PEV2 -43.884 and 49.455; PEV3 -40.307 and 9.498. The other two standardized PEV
-coordinates are held at zero in each row. Low and High warming are Q25 and Q75 across 42 distinct
-experiments (1.51 and 3.36 degrees C). Points show observed experiment climates; coloured areas are
-restricted to observed three-dimensional temperature--precipitation--warming support. The shared
-zero-centred colour scale is identical to main Figure 7. PEV signs are coordinate orientations and
-are not universal biological directions.
