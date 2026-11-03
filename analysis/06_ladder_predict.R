@@ -246,11 +246,11 @@ fig4_grad <- bind_rows(mutate(fit_metrics, type = "fit"), mutate(pred_metrics, t
 # no caption on the figure (Bills, 2 Nov): the report says what each row shows
 fig4_ladder(het_fig, "figures/main/fig6.png", gradients = fig4_grad) # main Fig 6, anchored (Bills, 2 Nov)
 
-# Fig S12 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
+# Fig S13 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
 grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_id) |>
   summarise(T_dest = mean(T), spread = sd(strength), .groups = "drop") |> arrange(T_dest)
 
-# Fig S12: the complete per-gradient view, every metric x level, in sample and held out
+# Fig S13: the complete per-gradient view, every metric x level, in sample and held out
 s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics, version = "Held out")) |>
   tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
   mutate(gradient_id = factor(gradient_id, levels = rev(grad_info$gradient_id)),
@@ -269,7 +269,7 @@ s7_panel <- function(k, title, tags) lapply(seq_along(levels(s7$version)), funct
 })
 figS7 <- patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")), s7_panel("spearman", "Spearman ρ", c("c)", "d)")),
                                  s7_panel("skill", "Loser/winner skill", c("e)", "f)"))), ncol = 2)
-ggsave("figures/appendix/figS12.png", figS7, width = 46, height = 48, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS13.png", figS7, width = 46, height = 48, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
@@ -324,7 +324,7 @@ report <- c(
          " gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, ",
          "so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. ",
          "Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."), "",
-  "![Fig S12, per-gradient view](../figures/appendix/figS12.png)",
+  "![Fig S13, per-gradient view](../figures/appendix/figS13.png)",
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",

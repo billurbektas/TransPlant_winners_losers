@@ -76,7 +76,7 @@ Residents (step 03), for the year-3 read: 2 to 3 sign agreement 0.75, CCC 0.54; 
 
 All years against years 3 and later, on the 379 effects with both: Pearson r 0.917, concordance correlation 0.861.
 
-![Stability](../figures/appendix/figS14.png)
+![Stability](../figures/appendix/figS15.png)
 
 ## Fig 1
 

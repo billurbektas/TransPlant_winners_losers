@@ -5,7 +5,7 @@
 #         data/derived/04_classification/species_summary.csv (Step C spread)
 # Writes: data/derived/05_ladder_fit/models/<rowset>/<model>.rds,
 #         heterogeneity.csv, weights.csv, coefficients.csv, tableS4.csv,
-#         tableS5.csv; figures/appendix/figS11.png; reports/05_ladder_fit.md
+#         tableS5.csv; figures/appendix/figS12.png; reports/05_ladder_fit.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients): residents in at least 3 gradients that carry every
 #         property; every property rowset identical to all;
@@ -184,7 +184,7 @@ stopifnot(var_mu > 0, all(filter(fitted, model == "Null")$sigma2_species > 1e-8)
 slope_rows <- filter(fitted, struct == "DIAG")
 stopifnot(nrow(slope_rows) == 8, all(vapply(fits, function(f) !f$slopes || identical(f$m$struct, slope_struct), logical(1))))
 
-# ---- Fixed effects, model-based (REML Wald) intervals (Table S5, Fig S11) ------
+# ---- Fixed effects, model-based (REML Wald) intervals (Table S5, Fig S12) ------
 # model-based rather than CR1 clustered on experiment (Bills, 2 Nov)
 coefs <- bind_rows(lapply(fits, function(f) {
   if (f$slug == "null") return(NULL)
@@ -215,7 +215,7 @@ weights_table <- bind_rows(
   bind_rows(lapply(c("Null", "Start", "Climate", "Climate + start", "Species-dependent"), function(mo) {
     x <- filter(w_all, model == mo); weight_summary(x$weight, x$A0_origin, x$experiment_id, mo) })))
 
-# ---- Fig S11: coefficients with model-based intervals -----------------------
+# ---- Fig S12: coefficients with model-based intervals -----------------------
 coef_panel <- function(x, tag, ttl) {
   x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = factor(term, levels = rev(unique(term))))
   ggplot(x, aes(estimate, term)) + geom_vline(xintercept = 0, colour = "grey60") +
@@ -231,7 +231,7 @@ prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model
   filter(canon(term) %in% canon(prop_terms(prop_vars[[p]]))) |> mutate(property = prop_label[[p]])))
 s4c <- coef_panel(prop_coefs, "b)", "Property terms, each from its own model (Climate + start + property, species slopes kept)") +
   facet_wrap(~ property, scales = "free", ncol = 4)
-ggsave("figures/appendix/figS11.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, patchwork::plot_spacer(), widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)), # colonizers: Fig S15
+ggsave("figures/appendix/figS12.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, patchwork::plot_spacer(), widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)), # colonizers: Fig S16
        width = 20, height = 22, dpi = 100, bg = "white")
 
 
@@ -261,7 +261,7 @@ fit_code <- c("```r",
   paste0("# Null ~ 1; Start ", deparse(f_start), "; Climate ", deparse(f_env)),
   paste0("# Climate + start and Species-dependent ", paste(deparse(f_both), collapse = "")),
   "# property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes",
-  "coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S11", "```")
+  "coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S12", "```")
 report <- c(
   "# Step 05: The ladder, fitted (Step D, route 1, residents)", "",
   paste0("The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the ",
@@ -301,14 +301,14 @@ report <- c(
   "", "## Effective weights (all rows)", "", md_table(weights_table),
   "", "The low-A0_origin half is the effects at or below the median A0_origin. Species-dependent weights include the slope variance at each effect's climate.",
   "", "## Figures", "",
-  "![Fig S11, coefficients](../figures/appendix/figS11.png)", "", "Fig 6 (the ladder) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).",
+  "![Fig S12, coefficients](../figures/appendix/figS12.png)", "", "Fig 6 (the ladder) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).",
   "", "## Warnings captured", "",
   { w <- unique(c(unlist(lapply(fits, function(f) paste0(f$rowset, " / ", f$model, ": ", f$warnings[[1]])[length(f$warnings[[1]]) > 0])), warns))
     if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   paste0("- H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. ",
          "Same quantity."),
-  "- The coefficient figure is appendix Fig S11, written to `figures/appendix/figS11.png`.",
+  "- The coefficient figure is appendix Fig S12, written to `figures/appendix/figS12.png`.",
   "- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.")
 writeLines(report, "reports/05_ladder_fit.md")
 message("Step 05 written: ", nrow(fitted), " fits in ", sprintf("%.1f", sum(fitted$minutes)), " fit-minutes")

@@ -17,7 +17,7 @@ rma.mv(yi = strength, V = strength_se^2, mods = <formula>, random = <re_base or 
 # Null ~ 1; Start ~A0_origin + A0_dest + A0_origin:W + A0_dest:W; Climate ~W * T * P
 # Climate + start and Species-dependent ~W * T * P + A0_origin + A0_dest + A0_origin:W + A0_dest:W
 # property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes
-coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S11
+coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S12
 ```
 
 ## Counts per rowset
@@ -138,7 +138,7 @@ The low-A0_origin half is the effects at or below the median A0_origin. Species-
 
 ## Figures
 
-![Fig S11, coefficients](../figures/appendix/figS11.png)
+![Fig S12, coefficients](../figures/appendix/figS12.png)
 
 Fig 6 (the ladder) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
 
@@ -154,5 +154,5 @@ Fig 6 (the ladder) is drawn by step 06; the fitted surfaces are not drawn (Bills
 ## Deviations from PLAN.md
 
 - H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. Same quantity.
-- The coefficient figure is appendix Fig S11, written to `figures/appendix/figS11.png`.
+- The coefficient figure is appendix Fig S12, written to `figures/appendix/figS12.png`.
 - Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.
