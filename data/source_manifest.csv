@@ -1,7 +1,11 @@
-path,role,storage,sha256,tracked
-data/TransPlantNetwork_060824.RData,current network vegetation source,local immutable input,9b7b0cc80537e1267fbb22740ab8fc08855c3cbfe90d1f732e89d3682f0f6a13,FALSE
-data/try_47163.txt,current TRY export,local immutable large input,4871db4c7c593771b92277ba40657c735afdf931d96dbacdcbdd4a5527c955a3,FALSE
-tidyTRY::extdata/koppen_geiger_0p1.tif,TRY coordinate classification raster bundled with tidyTRY revision 3352199fc99f72170a8983c522d63aa9029d0e9f,installed package input,59b749fe6711e72c720ff903044eb0efb4373524ee434740ed7384a0284c155b,FALSE
-data/cache/chelsa_monthly/,resumable CHELSA monthly cache,local external cache,,FALSE
-config/external_sources.csv,Git source provenance,tracked configuration,d80ff87b05a48c0dba79b47c505bcf2a5df5f29ca07f5ba753ebbb518f4a649e,TRUE
-data/transplant_network_clean.sqlite,raw network community source (TransPlantNetwork/transplant_network_data_cleaning; taxonomy columns not used),local immutable input,546d359d1923649bdd2ea5c01a93d17cccbfe83087b56257dffa3de0df9c5bcc,FALSE
+"path","role","storage","sha256","tracked"
+"data/transplant_network_clean.sqlite","network community source (P1; taxonomy columns not used)","local immutable input","546d359d1923649bdd2ea5c01a93d17cccbfe83087b56257dffa3de0df9c5bcc",FALSE
+"data/TransPlantNetwork_060824.RData","local species-code dictionary and P1 reconciliation","local immutable input","9b7b0cc80537e1267fbb22740ab8fc08855c3cbfe90d1f732e89d3682f0f6a13",FALSE
+"data/try_47163.txt","TRY export (P2)","local immutable large input","4871db4c7c593771b92277ba40657c735afdf931d96dbacdcbdd4a5527c955a3",FALSE
+"tidyTRY::extdata/koppen_geiger_0p1.tif","Koppen-Geiger raster bundled with tidyTRY 0.2.1 (revision 0169b2f)","installed package input","59b749fe6711e72c720ff903044eb0efb4373524ee434740ed7384a0284c155b",FALSE
+"data/cache/chelsa_monthly/","monthly CHELSA cache (P4)","local external cache","",FALSE
+"data/cache/chelsa_bioclim/CHELSA_bio10_1981-2010_V.2.1.tif","CHELSA bio10 (P4, P6)","local external cache","b3ddca4842e99994d2f1572fa7a5c28d0f91e7e6e17cb6926b5b96da9a9d634c",FALSE
+"data/cache/chelsa_bioclim/CHELSA_bio18_1981-2010_V.2.1.tif","CHELSA bio18 (P4, P6)","local external cache","27e091df90dcc39a21f80d08730716c0a76d90f11da0d45cf48b5dd7df80451f",FALSE
+"data/derived/prep/gbif_download.csv","GBIF download, records per species (P6; DOI 10.15468/dl.7p28y9)","tracked derived input","1975601299c5cf978c5c2f9efb9876628fe23b55c8b308fd246a973bfc75c3f1",TRUE
+"data/derived/prep/gbif_niche.rds","niche per species, input of the prep pipeline (P6)","tracked derived input","580e5ab802f6d0849f5b5f552fff318bc5be636189213ebf582a7f04a4796e9f",TRUE
+"prep/provenance/external_sources.csv","Git source provenance","tracked configuration","bd546db8b05fc3dca08a3cd7889e03b80179d59a755f6ea8863201858ab111e5",TRUE
