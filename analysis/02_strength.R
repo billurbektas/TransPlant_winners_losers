@@ -1,4 +1,5 @@
 # Step 02: strength per species x experiment (Step A, residents).
+# References of the form legacy/<file>:<lines> point to the earlier pipeline as it stands at commit 7fed5b1 (legacy/ was removed in step 12).
 #
 # PLAN.md: Step A (model, covariates, data rules); Step D (A0, property
 #   variables and their standardisation, niche n_obs_sub >= 30).

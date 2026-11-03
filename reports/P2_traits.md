@@ -1,6 +1,6 @@
 # P2: TRY traits
 
-TRY records were read by TRY species ID (1339 IDs whose contributor or TRY name resolves to a study species in P1) and each record was attached to a species through its own resolved name (the contributor's `SpeciesName` first, TRY's `AccSpeciesName` only as fallback). Observations under experimental or ambiguous treatment values were removed, then duplicates, ErrorRisk >= 4, observations without coordinates and those in arid and tropical climate zones, as in the legacy pipeline. 666 of 903 study species have at least one trait. LDMC in g/g, LMA in mg mm-2 (1 / SLA per observation), height in m.
+TRY records were read by TRY species ID (1339 IDs whose contributor or TRY name resolves to a study species in P1) and each record was attached to a species through its own resolved name (the contributor's `SpeciesName` first, TRY's `AccSpeciesName` only as fallback). Observations under experimental or ambiguous treatment values were removed, then duplicates, records with ErrorRisk >= 3 (ErrorRisk missing is kept), observations without coordinates and those in arid and tropical climate zones. 666 of 903 study species have at least one trait. LDMC in g/g, LMA in mg mm-2 (1 / SLA per observation), height in m.
 
 ## Counts
 

@@ -1,4 +1,5 @@
 # Experiment climate from the cached CHELSA V2.1 monthly files (P4).
+# References of the form legacy/<file>:<lines> point to the earlier pipeline as it stands at commit 7fed5b1 (legacy/ was removed in step 12).
 # Logic follows legacy/R/data/climate.R (lines named below); the cache is
 # read, never downloaded.
 

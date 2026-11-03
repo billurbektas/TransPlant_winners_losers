@@ -1,4 +1,5 @@
 # TRY traits (P2): LDMC, LMA and vegetative height per accepted species.
+# References of the form legacy/<file>:<lines> point to the earlier pipeline as it stands at commit 7fed5b1 (legacy/ was removed in step 12).
 # A TRY record is attached through its own resolved name (the contributor's
 # SpeciesName first, TRY's AccSpeciesName only as fallback), never by
 # trusting AccSpeciesName, which merges species (Festuca pratensis records
@@ -78,7 +79,7 @@ stage_count <- function(d, stage) {
 }
 
 # legacy/R/data/traits.R:114-127, with experiments removed per observation
-clean_try <- function(try_attached, dictionary, natural_values, max_error_risk = 4) {
+clean_try <- function(try_attached, dictionary, natural_values, max_error_risk = 3) {
   warns <- character()
   collect <- function(expr) withCallingHandlers(expr, warning = function(w) {
     warns <<- c(warns, conditionMessage(w))

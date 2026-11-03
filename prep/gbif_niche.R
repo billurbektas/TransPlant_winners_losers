@@ -23,7 +23,7 @@
 # Writes: data/cache/gbif/, data/cache/chelsa_bioclim/, data/cache/naturalearth/;
 #         data/derived/prep/gbif_keys_used.csv, gbif_download.csv, gbif_niche.rds and .csv;
 #         reports/P6_gbif_niche.md, reports/P6_gbif_download_request.json
-# Checks: 904 study species; every non-automatic match decided in the ledger; every
+# Checks: 903 study species; every non-automatic match decided in the ledger; every
 #         key claimed by one species; every species keyed or excluded; GBIF records
 #         in a study country or confirmed; rows read = GBIF's total; every record
 #         assigned to a species; bio10 within -30 to 40 degC; 903 species out

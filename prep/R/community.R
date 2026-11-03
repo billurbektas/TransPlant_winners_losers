@@ -1,4 +1,6 @@
 # Community, sites and experiments from the network SQLite (P1).
+# References of the form legacy/<file>:<lines> point to the earlier pipeline as it stands at commit 7fed5b1 (legacy/ was removed in step 12). The same holds for the legacy_source column of
+# prep/config/community_edits.csv and site_edits.csv and the reasons in unidentified_taxa.csv.
 # Logic follows legacy/R/data/community.R; each block names its source lines.
 
 read_sqlite_table <- function(path, table) {
