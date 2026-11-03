@@ -44,8 +44,8 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 | [06](#q3-and-q4-the-ladder) | Leave one gradient out; R² against the Null, Spearman and loser/winner skill per gradient | median held-out R²: initial abundances 0.17, Species-dependent 0.12 |
 | [06b](#q3-and-q4-the-ladder) | Random forest on the same rows and folds | higher than the meta-regression at 5 of 18 levels, by at most 0.05 |
 | [07a](#colonizers) | Colonizer strength: warmed cover, one `glmmTMB` per experiment; year-specific presence classes | 379 colonizer strengths in 28 experiments |
-| [07b](#colonizers) | Step C for colonizers | 0 consistent colonizers among 29 species |
-| [07c–07e](#colonizers) | The ladder, its predictions and the forest for colonizers | only destination abundance transfers (median held-out R² 0.11) |
+| [07b](#colonizers) | Step C for colonizers | 1 consistent colonizer among 29 species |
+| [07c–07e](#colonizers) | The ladder, its predictions and the forest for colonizers | only destination abundance transfers (median held-out R² 0.22) |
 | [07f](#pathways) | Traits of losers, winners and colonizers | Fig 5 |
 | [10](#the-experiments-in-climate-space) | Synthesis figures, appendix and this page | Figs 4, 7, S1–S18 |
 | [12](reports/12_final_review.md) | Final review: reruns, code, documentation, open issues, statistical weak points | no result changed; decisions listed |
@@ -53,6 +53,23 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 ![Figure S1](figures/appendix/figS1.png)
 
 **Figure S1.** Data flow from the network database to each analysis. Each box gives the number of experiments, species and species × experiment effects that remain after the rule written on the arrow above it. The shared steps (grey) split into the resident branch (orange, left), which leads to the classification (Figure 2) and the model ladder (Figure 6), and the colonizer branch (purple, right), which leads to the colonizer classification (Figure 3) and the colonizer ladder (Figure S16). The classification boxes count species and their effects.
+
+**What each selection removes.** Each row is one rule, in the order the analysis applies it, with what it removes and what is left. Residents and colonizers split after the pool rule; their later rows count from the row above on their own branch.
+
+| Step | Code | Rule and why | Experiments | Species | Species × experiment |
+| --- | --- | --- | --- | --- | --- |
+| P1 | [community.R](prep/R/community.R) | Network data, species identified to species level | 44 | 886 | 3340 |
+| P1 | [community.R](prep/R/community.R) | Experiments with too short a record are left out (IN_Kashmir, two survey years) | −1 → 43 | −17 → 869 | −31 → 3309 |
+| 01 | [01_relative_cover.R](analysis/01_relative_cover.R) | Ferns, horsetails, clubmosses and juniper are left out: lineages far from the flowering plants the questions concern (their cover still counts in the relative-cover denominator) | −0 → 43 | −6 → 863 | −31 → 3278 |
+| 01 | [01_relative_cover.R](analysis/01_relative_cover.R) | A species must be established in the controls: recorded in at least two plots in half of the years, or in half of the plots in at least two years | −0 → 43 | −426 → 437 | −1863 → 1415 |
+| 01 | [01_relative_cover.R](analysis/01_relative_cover.R) | An experiment needs at least 5 residents for a species to be compared within it (US_Arizona has 4) | −1 → 42 | −8 → 429 | −9 → 1406 |
+| 01 | [01_relative_cover.R](analysis/01_relative_cover.R) | Residents: established in the origin controls | 42 | 346 | 1004 |
+| 01 | [01_relative_cover.R](analysis/01_relative_cover.R) | Destination pool: established in the destination controls, never recorded in the origin controls | 39 | 236 | 402 |
+| 07a | [07a_colonizers.R](analysis/07a_colonizers.R) | Colonizers: an experiment needs at least 5 destination-pool species, as for residents | −11 → 28 | −7 → 229 | −23 → 379 |
+| 04 | [04_classification.R](analysis/04_classification.R) | Residents in at least 3 gradients, so that their variation among experiments can be estimated | −3 → 39 | −272 → 74 | −481 → 523 |
+| 07b | [07b_classification.R](analysis/07b_classification.R) | Colonizers in at least 3 gradients, as for residents | −4 → 24 | −200 → 29 | −262 → 117 |
+| 05 | [05_ladder_fit.R](analysis/05_ladder_fit.R) | Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows | −0 → 39 | −3 → 71 | −11 → 512 |
+| 07c | [07c_ladder_fit.R](analysis/07c_ladder_fit.R) | Colonizers with every property, as for residents | −0 → 24 | −2 → 27 | −7 → 110 |
 
 ## Data and selection
 
@@ -169,7 +186,7 @@ Code: [`04_classification.R`](analysis/04_classification.R) · report [04](repor
 
 ![Figure S10](figures/appendix/figS10.png)
 
-**Figure S10.** The experiments in climate space with species counts. As Figure 4, but each pie counts species: resident species with a negative (losers) or positive (winners) losing-winning strength from year 3 on in that experiment, and colonizers with warmed cover above zero (703, 301 and 262 species × experiment in total).
+**Figure S10.** The experiments in climate space with species counts. As Figure 4, but each pie counts species: resident species with a negative (losers) or positive (winners) losing-winning strength from year 3 on in that experiment, and colonizers with warmed cover above zero (703, 301 and 264 species × experiment in total).
 
 Code: [`10_figures.R`](analysis/10_figures.R) · report [10](reports/10_figures.md)
 
@@ -234,7 +251,7 @@ rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
 
 **Figure S13.** Random forests beside the meta-regressions, residents. For each model of the ladder, (a) R² against the Null meta-regression on the same gradient, (b) Spearman's rank correlation and (c) loser/winner skill on each of the 16 gradients held out of the fit, for the meta-regression (blue, left) and a random forest on the same rows, predictors and folds (orange, right). Half violins show the distribution over gradients, small points the gradients, and large points and numbers the medians. The forests use no case weights and one setting of minimum node size and number of candidate predictors, chosen by out-of-bag R² over all models. The Null is not drawn; Climate has no Spearman or skill because it predicts one value per gradient.
 
-In sample the Species-dependent model reaches a median R² of 0.32; held out it drops to 0.12, below initial abundances alone (0.17). No property level beats the Climate + start floor held out by much (0.16; Niche 0.18, LDMC 0.14, Height 0.13), and the forest is higher than the meta-regression only at Climate, Graminoid, LDMC, Niche, Phylogeny (median of the per-gradient differences; at most 0.05): the weak relationships are weak, not misspecified.
+In sample the Species-dependent model reaches a median R² of 0.32; held out it drops to 0.12, below initial abundances alone (0.17). No property level beats the Climate + start floor held out by much (0.16; Niche 0.18, LDMC 0.15, Height 0.13), and the forest is higher than the meta-regression only at Climate, Graminoid, LDMC, Niche, Phylogeny (median of the per-gradient differences; at most 0.05): the weak relationships are weak, not misspecified.
 
 Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](analysis/06_ladder_predict.R) · [`06b_forest.R`](analysis/06b_forest.R) · reports [05](reports/05_ladder_fit.md), [06](reports/06_ladder_predict.md), [06b](reports/06b_forest.md)
 
@@ -244,10 +261,10 @@ Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](a
 
 **Decisions.**
 - Warmed plots only (2 Nov): a contrast against the destination controls measures the lag, not arrival.
-- A species never recorded in an experiment's warmed plots is a measured absence: strength 0, SE 0 (2 Nov); 46 species were never present in any warmed plot.
+- A species never recorded in an experiment's warmed plots is a measured absence: strength 0, SE 0 (2 Nov); 44 species were never present in any warmed plot.
 - Where the per-species residual variance cannot be estimated, the experiment's error is used (2 Nov).
 - At least 5 colonizers per experiment (28 of 42 experiments).
-- The propagule pressure A0 is the species' mean destination-control relative cover over every plot and year (2 Nov); there is no origin abundance.
+- The propagule pressure A0 is the species' mean destination-control relative cover over every plot and year (2 Nov), log(100 × cover + 1) as the residents' A0 (3 Nov), standardised across all 379 colonizer effects; there is no origin abundance.
 - Properties on the residents' scale, so both pools share one standardisation (2 Nov).
 - No loser/winner skill (no loser class); an R² below −100 is taken out and listed (2 Nov).
 
@@ -285,7 +302,7 @@ f_both_col <- ~ W * T * P + A0_dest + A0_dest:W
 
 **Figure S18.** Random forests beside the meta-regressions, colonizers. As Figure S13, for the 8 colonizer gradients held out of the fit: (a) R² against the Null meta-regression and (b) Spearman's rank correlation, meta-regression (blue, left) and random forest (orange, right).
 
-The ladder rows are 110 colonizer effects of 27 species. Only destination abundance transfers to a held-out gradient (median R² 0.11); climate, species identity and every property predict worse than the Null held out (Species-dependent -0.40). The colonizer Null is itself a weak reference: the plain mean of the training effects, the forest's Null, reaches a median R² of 0.19 against it, because the many measured absences (strength and SE 0) pull the meta-regression's weighted intercept towards zero (Figure S18).
+The ladder rows are 110 colonizer effects of 27 species. Only destination abundance transfers to a held-out gradient (median R² 0.22); climate, species identity and every property predict worse than the Null held out (Species-dependent -0.35). The colonizer Null is itself a weak reference: the plain mean of the training effects, the forest's Null, reaches a median R² of 0.19 against it, because the many measured absences (strength and SE 0) pull the meta-regression's weighted intercept towards zero (Figure S18).
 
 Code: [`07a_colonizers.R`](analysis/07a_colonizers.R) · [`07b_classification.R`](analysis/07b_classification.R) · [`07c_ladder_fit.R`](analysis/07c_ladder_fit.R) · [`07d_ladder_predict.R`](analysis/07d_ladder_predict.R) · [`07e_forest.R`](analysis/07e_forest.R) · reports [07a](reports/07a_colonizers.md), [07b](reports/07b_classification.md), [07c](reports/07c_ladder_fit.md), [07d](reports/07d_ladder_predict.md), [07e](reports/07e_forest.md)
 

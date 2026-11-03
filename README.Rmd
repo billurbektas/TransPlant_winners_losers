@@ -4,6 +4,7 @@
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, eval = TRUE, comment = "")
+source("R/md_table.R")
 rd  <- function(p) utils::read.csv(file.path("data/derived", p))
 med <- function(x) stats::median(x, na.rm = TRUE)
 f2  <- function(x) sprintf("%.2f", x)
@@ -85,7 +86,7 @@ Here, we use a network of `r length(unique(res$experiment_id))` whole-community 
 | [06](#q3-and-q4-the-ladder) | Leave one gradient out; R² against the Null, Spearman and loser/winner skill per gradient | median held-out R²: initial abundances `r f2(pm(pred06, "start"))`, Species-dependent `r f2(pm(pred06, "species"))` |
 | [06b](#q3-and-q4-the-ladder) | Random forest on the same rows and folds | higher than the meta-regression at `r length(for_better)` of `r ncol(fl)` levels, by at most `r f2(max(fl["diff", ]))` |
 | [07a](#colonizers) | Colonizer strength: warmed cover, one `glmmTMB` per experiment; year-specific presence classes | `r n(nrow(col))` colonizer strengths in `r length(unique(col$experiment_id))` experiments |
-| [07b](#colonizers) | Step C for colonizers | `r sum(s07b$class == "Consistent colonizer")` consistent colonizers among `r nrow(s07b)` species |
+| [07b](#colonizers) | Step C for colonizers | `r sum(s07b$class == "Consistent colonizer")` consistent colonizer`r if (sum(s07b$class == "Consistent colonizer") != 1) "s"` among `r nrow(s07b)` species |
 | [07c–07e](#colonizers) | The ladder, its predictions and the forest for colonizers | only destination abundance transfers (median held-out R² `r f2(pm(pred07, "start"))`) |
 | [07f](#pathways) | Traits of losers, winners and colonizers | Fig 5 |
 | [10](#the-experiments-in-climate-space) | Synthesis figures, appendix and this page | Figs 4, 7, S1–S18 |
@@ -94,6 +95,40 @@ Here, we use a network of `r length(unique(res$experiment_id))` whole-community 
 ![Figure S1](figures/appendix/figS1.png)
 
 **Figure S1.** Data flow from the network database to each analysis. Each box gives the number of experiments, species and species × experiment effects that remain after the rule written on the arrow above it. The shared steps (grey) split into the resident branch (orange, left), which leads to the classification (Figure 2) and the model ladder (Figure 6), and the colonizer branch (purple, right), which leads to the colonizer classification (Figure 3) and the colonizer ladder (Figure S16). The classification boxes count species and their effects.
+
+**What each selection removes.** Each row is one rule, in the order the analysis applies it, with what it removes and what is left. Residents and colonizers split after the pool rule; their later rows count from the row above on their own branch.
+
+```{r selection, results = "asis"}
+f_ <- function(d) c(n_distinct(d$experiment_id), n_distinct(d$species), nrow(d))
+n_distinct <- function(x) length(unique(x))
+st_res <- res[res$species %in% s04$species, ]; st_col <- col[col$species %in% s07b$species, ]
+sel <- data.frame(
+  step = c("P1", "P1", "01", "01", "01", "01", "01", "07a", "04", "07b", "05", "07c"),
+  code = c("[community.R](prep/R/community.R)", "[community.R](prep/R/community.R)", rep("[01_relative_cover.R](analysis/01_relative_cover.R)", 5),
+           "[07a_colonizers.R](analysis/07a_colonizers.R)", "[04_classification.R](analysis/04_classification.R)",
+           "[07b_classification.R](analysis/07b_classification.R)", "[05_ladder_fit.R](analysis/05_ladder_fit.R)", "[07c_ladder_fit.R](analysis/07c_ladder_fit.R)"),
+  rule = c("Network data, species identified to species level",
+           "Experiments with too short a record are left out (IN_Kashmir, two survey years)",
+           "Ferns, horsetails, clubmosses and juniper are left out: lineages far from the flowering plants the questions concern (their cover still counts in the relative-cover denominator)",
+           "A species must be established in the controls: recorded in at least two plots in half of the years, or in half of the plots in at least two years",
+           "An experiment needs at least 5 residents for a species to be compared within it (US_Arizona has 4)",
+           "Residents: established in the origin controls",
+           "Destination pool: established in the destination controls, never recorded in the origin controls",
+           "Colonizers: an experiment needs at least 5 destination-pool species, as for residents",
+           "Residents in at least 3 gradients, so that their variation among experiments can be estimated",
+           "Colonizers in at least 3 gradients, as for residents",
+           "Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows",
+           "Colonizers with every property, as for residents"),
+  parent = c(NA, 1, 2, 3, 4, 5, 5, 7, 6, 8, 9, 10),
+  split = c(rep(FALSE, 5), TRUE, TRUE, rep(FALSE, 5))) # the pools divide the rows: nothing is removed there
+counts <- rbind(as.matrix(flow[1:7, c("n_experiments", "n_species", "n_combinations")]), f_(col), f_(st_res), f_(st_col),
+                c(ladder_rows$n_experiments, ladder_rows$n_species, ladder_rows$n_effects), f_(lad07))
+lost <- function(k) ifelse(is.na(sel$parent) | sel$split, "", paste0("−", counts[sel$parent, k] - counts[, k], " → "))
+sel_tab <- data.frame(Step = sel$step, Code = sel$code, `Rule and why` = sel$rule,
+                      Experiments = paste0(lost(1), counts[, 1]), Species = paste0(lost(2), counts[, 2]),
+                      `Species × experiment` = paste0(lost(3), counts[, 3]), check.names = FALSE)
+cat(md_table(sel_tab), sep = "\n")
+```
 
 ## Data and selection
 
@@ -288,7 +323,7 @@ Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](a
 - A species never recorded in an experiment's warmed plots is a measured absence: strength 0, SE 0 (2 Nov); `r nrow(never)` species were never present in any warmed plot.
 - Where the per-species residual variance cannot be estimated, the experiment's error is used (2 Nov).
 - At least 5 colonizers per experiment (`r length(unique(col$experiment_id))` of `r length(unique(res$experiment_id))` experiments).
-- The propagule pressure A0 is the species' mean destination-control relative cover over every plot and year (2 Nov); there is no origin abundance.
+- The propagule pressure A0 is the species' mean destination-control relative cover over every plot and year (2 Nov), log(100 × cover + 1) as the residents' A0 (3 Nov), standardised across all `r nrow(col)` colonizer effects; there is no origin abundance.
 - Properties on the residents' scale, so both pools share one standardisation (2 Nov).
 - No loser/winner skill (no loser class); an R² below −100 is taken out and listed (2 Nov).
 
