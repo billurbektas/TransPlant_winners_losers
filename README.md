@@ -42,12 +42,13 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 | [04](#q2-consistency) | Per species pooled strength and among-experiment variance; prediction interval against zero | 2 consistent winners, 6 consistent losers, 66 context-dependent of 74 species |
 | [05](#q3-and-q4-the-ladder) | Twelve meta-regressions, Null to Species-dependent to one property at a time | τ² from 4.8 &times; 10<sup>-4</sup> (Null) to 2.8 &times; 10<sup>-4</sup> (Species-dependent) |
 | [06](#q3-and-q4-the-ladder) | Leave one gradient out; R² against the Null, Spearman and loser/winner skill per gradient | median held-out R²: initial abundances 0.17, Species-dependent 0.12 |
-| [06b](#q3-and-q4-the-ladder) | Random forest on the same rows and folds | better than the meta-regression at 3 of 19 levels, all near zero |
+| [06b](#q3-and-q4-the-ladder) | Random forest on the same rows and folds | higher than the meta-regression at 5 of 18 levels, by at most 0.05 |
 | [07a](#colonizers) | Colonizer strength: warmed cover, one `glmmTMB` per experiment; year-specific presence classes | 379 colonizer strengths in 28 experiments |
 | [07b](#colonizers) | Step C for colonizers | 0 consistent colonizers among 29 species |
 | [07c–07e](#colonizers) | The ladder, its predictions and the forest for colonizers | only destination abundance transfers (median held-out R² 0.11) |
 | [07f](#pathways) | Traits of losers, winners and colonizers | Fig 5 |
 | [10](#the-experiments-in-climate-space) | Synthesis figures, appendix and this page | Figs 4, 7, S1–S18 |
+| [12](reports/12_final_review.md) | Final review: reruns, code, documentation, open issues, statistical weak points | no result changed; decisions listed |
 
 ![Figure S1](figures/appendix/figS1.png)
 
@@ -213,7 +214,8 @@ r2  <- 1 - mean((predicted - observed)^2) / mean((null_predicted - observed)^2)
 
 # random forest, the same rows and folds
 rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
-                     mtry = mtry, min.node.size = node)      # no case weights
+                     mtry = mtry, min.node.size = node, replace = TRUE,
+                     respect.unordered.factors = "order")  # no case weights
 ```
 
 ![Figure 6](figures/main/fig6.png)
@@ -226,13 +228,13 @@ rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
 
 ![Figure S12](figures/appendix/figS12.png)
 
-**Figure S12.** Fit and prediction of every resident model, gradient by gradient. Rows are the 16 gradients with at least five effects, ordered by destination temperature (coldest at the top); columns are the models, followed by each property model with species-specific deviations (+ species). (a, b) R² against the Null model on the same gradient, (c, d) Spearman's rank correlation between observed and predicted strength within the gradient, and (e, f) loser/winner skill, loser recall plus winner recall minus one; (a, c, e) in sample and (b, d, f) for the gradient held out of the fit. Blue cells are better and red cells worse than zero; colours are capped at ±1, and grey cells are undefined because Climate predicts one value per gradient.
+**Figure S12.** Fit and prediction of every resident model, gradient by gradient. Rows are the 16 gradients with at least five effects, ordered by destination temperature (coldest at the top); columns are the models, followed by each property model with species-specific deviations (+ species). (a, b) R² against the Null model on the same gradient, (c, d) Spearman's rank correlation between observed and predicted strength within the gradient, and (e, f) loser/winner skill, loser recall plus winner recall minus one; (a, c, e) in sample and (b, d, f) for the gradient held out of the fit. Blue cells are better and red cells worse than zero; colours are capped at ±1, and grey cells are undefined because the model predicts one value per gradient (Spearman for the Null and Climate, skill for Climate).
 
 ![Figure S13](figures/appendix/figS13.png)
 
 **Figure S13.** Random forests beside the meta-regressions, residents. For each model of the ladder, (a) R² against the Null meta-regression on the same gradient, (b) Spearman's rank correlation and (c) loser/winner skill on each of the 16 gradients held out of the fit, for the meta-regression (blue, left) and a random forest on the same rows, predictors and folds (orange, right). Half violins show the distribution over gradients, small points the gradients, and large points and numbers the medians. The forests use no case weights and one setting of minimum node size and number of candidate predictors, chosen by out-of-bag R² over all models. The Null is not drawn; Climate has no Spearman or skill because it predicts one value per gradient.
 
-In sample the Species-dependent model reaches a median R² of 0.32; held out it drops to 0.12, below initial abundances alone (0.17). No property level beats the Climate + start floor held out by much (0.16; Niche 0.18, LDMC 0.14, Height 0.13), and the forest beats the meta-regression only at Climate, Height, Null (median over levels 0.03 against 0.12): the weak relationships are weak, not misspecified.
+In sample the Species-dependent model reaches a median R² of 0.32; held out it drops to 0.12, below initial abundances alone (0.17). No property level beats the Climate + start floor held out by much (0.16; Niche 0.18, LDMC 0.14, Height 0.13), and the forest is higher than the meta-regression only at Climate, Graminoid, LDMC, Niche, Phylogeny (median of the per-gradient differences; at most 0.05): the weak relationships are weak, not misspecified.
 
 Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](analysis/06_ladder_predict.R) · [`06b_forest.R`](analysis/06b_forest.R) · reports [05](reports/05_ladder_fit.md), [06](reports/06_ladder_predict.md), [06b](reports/06b_forest.md)
 
@@ -283,7 +285,7 @@ f_both_col <- ~ W * T * P + A0_dest + A0_dest:W
 
 **Figure S18.** Random forests beside the meta-regressions, colonizers. As Figure S13, for the 8 colonizer gradients held out of the fit: (a) R² against the Null meta-regression and (b) Spearman's rank correlation, meta-regression (blue, left) and random forest (orange, right).
 
-The ladder rows are 110 colonizer effects of 27 species. Only destination abundance transfers to a held-out gradient (median R² 0.11); climate, species identity and every property predict worse than the Null held out (Species-dependent -0.40).
+The ladder rows are 110 colonizer effects of 27 species. Only destination abundance transfers to a held-out gradient (median R² 0.11); climate, species identity and every property predict worse than the Null held out (Species-dependent -0.40). The colonizer Null is itself a weak reference: the plain mean of the training effects, the forest's Null, reaches a median R² of 0.19 against it, because the many measured absences (strength and SE 0) pull the meta-regression's weighted intercept towards zero (Figure S18).
 
 Code: [`07a_colonizers.R`](analysis/07a_colonizers.R) · [`07b_classification.R`](analysis/07b_classification.R) · [`07c_ladder_fit.R`](analysis/07c_ladder_fit.R) · [`07d_ladder_predict.R`](analysis/07d_ladder_predict.R) · [`07e_forest.R`](analysis/07e_forest.R) · reports [07a](reports/07a_colonizers.md), [07b](reports/07b_classification.md), [07c](reports/07c_ladder_fit.md), [07d](reports/07d_ladder_predict.md), [07e](reports/07e_forest.md)
 
@@ -319,6 +321,10 @@ prep/                               data preparation, a targets pipeline
   config/                             reviewed ledgers: name decisions, renames, trait review, trees,
                                       woodiness, phylogeny placements, GBIF keys
   tnrs/                               TNRS cache, so names resolve the same way offline
+  provenance/                         checksums and receipts of the external inputs and of the backups made
+                                      before the rebuild
+  gbif_niche.R, update_tnrs_cache.R   run by hand outside the pipeline: the GBIF download (P6) and
+                                      the TNRS cache
 analysis/                           one script per step, run in order, each reading only data/derived/
   01_relative_cover.R ... 07f_pathways.R, 10_figures.R
   additional_checks/                  side checks that feed no step (the paused GEN slope check)
@@ -333,8 +339,7 @@ figures/
                                       the step that makes it
 tables/                             Tables S1 to S5
 reports/                            one review report per step; REPORT.qmd collects them
-plan_figures/                       the mock figures agreed while planning
-legacy/                             the earlier targets pipeline, read only, for reference
+plan_figures/                       the mock figures agreed while planning (local, not in git)
 renv.lock                           the locked package environment
 ```
 
@@ -345,7 +350,7 @@ Each step was planned, run and reviewed on its own branch (`step-NN-<name>`), wi
 ```sh
 Rscript -e 'renv::restore()'
 Rscript -e 'targets::tar_make(script = "prep/_targets.R", store = "prep/_targets")'
-LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b, 07a-07f, 10
+LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b, 07a-07f, 10, 12
 ```
 
 Run from the repository root. A UTF-8 locale keeps the figure labels (τ², ×10⁻⁴) intact. `analysis/10_figures.R` writes this README from `README.Rmd` as its last step.
