@@ -1,6 +1,6 @@
 # Step 06: The ladder, predicted (Step D, route 2, residents)
 
-Every level of the ladder was refitted 16 times on the 512 ladder rows of step 05, each time without one of the 16 gradients that have at least 5 effects, and asked to predict the strengths of the gradient left out: Null, Initial abundances, Climate, Climate + initial abundances, Species-dependent and one level per property, 192 fold fits on 7 cores (155 fit-minutes). Predictions are fixed effects only, the experiment term at its expected value zero; Species-dependent adds each species' intercept and slope deviations learnt from the training gradients (zero for a species not seen there), and the seven supplement levels add the same to each property model. Each level is scored per gradient by R² against the Null model on the same gradient (1 − its error / the Null's error, so Null is 0), Spearman ρ within the gradient and loser/winner skill, held out and in sample (step 05 full-data fits, the same rule), then summarised by the median over gradients (Bills, 2 Nov).
+Every level of the ladder was refitted 16 times on the 512 ladder rows of step 05, each time without one of the 16 gradients that have at least 5 effects, and asked to predict the strengths of the gradient left out: Null, Initial abundances, Climate, Climate + initial abundances, Species-dependent and one level per property, 192 fold fits on 7 cores (168 fit-minutes). Predictions are fixed effects only, the experiment term at its expected value zero; Species-dependent adds each species' intercept and slope deviations learnt from the training gradients (zero for a species not seen there), and the seven supplement levels add the same to each property model. Each level is scored per gradient by R² against the Null model on the same gradient (1 − its error / the Null's error, so Null is 0), Spearman ρ within the gradient and loser/winner skill, held out and in sample (step 05 full-data fits, the same rule), then summarised by the median over gradients (Bills, 2 Nov).
 
 ## Counts
 
@@ -37,16 +37,24 @@ Every level of the ladder was refitted 16 times on the 512 ladder rows of step 0
 | Initial abundances | 16 | 16 | 0 | 0.2 | 0.4 |
 | Climate | 16 | 16 | 0 | 0.4 | 0.5 |
 | Climate + initial abundances | 16 | 16 | 0 | 0.4 | 0.4 |
-| Species-dependent | 16 | 16 | 0 | 1.1 | 1.2 |
-| LDMC | 16 | 16 | 0 | 1.1 | 1.7 |
+| Species-dependent | 16 | 16 | 0 | 1.1 | 1.3 |
+| LDMC | 16 | 15 | 1 | 1.2 | 12.1 |
 | LMA | 16 | 16 | 0 | 1.1 | 1.4 |
-| Height | 16 | 16 | 0 | 1.1 | 1.6 |
+| Height | 16 | 16 | 0 | 1.1 | 1.4 |
 | Graminoid | 16 | 16 | 0 | 1.1 | 1.5 |
 | Woody | 16 | 16 | 0 | 1.1 | 1.2 |
 | Phylogeny | 16 | 16 | 0 | 1.0 | 1.8 |
 | Niche | 16 | 16 | 0 | 1.1 | 1.2 |
 
-Every fold fit converged.
+| level | gradient_id | nlminb error | bobyqa error |
+| --- | --- | --- | --- |
+| ldmc | DE_Susalps | Optimizer (nlminb) did not achieve convergence (convergence = 1). | Optimizer (minqa::bobyqa) did not achieve convergence (ierr = 1). |
+
+Folds that needed the bobyqa retry:
+
+| level | gradient_id | nlminb error | status |
+| --- | --- | --- | --- |
+| ldmc | DE_Susalps | Optimizer (nlminb) did not achieve convergence (convergence = 1). | Optimizer (minqa::bobyqa) did not achieve convergence (ierr = 1). |
 
 ## Prediction metrics, median over gradients
 
@@ -67,13 +75,13 @@ Every fold fit converged.
 | Species-dependent | R² against Null | 0.321 | 0.118 | 16 / 16 | 12 of 16 |
 | Species-dependent | Spearman ρ | 0.524 | 0.382 | 16 / 16 |  |
 | Species-dependent | loser/winner skill | 0.367 | 0.239 | 16 / 16 |  |
-| LDMC | R² against Null | 0.229 | 0.140 | 16 / 16 | 12 of 16 |
-| LDMC | Spearman ρ | 0.393 | 0.334 | 16 / 16 |  |
-| LDMC | loser/winner skill | 0.197 | 0.061 | 16 / 16 |  |
+| LDMC | R² against Null | 0.229 | 0.150 | 16 / 15 | 12 of 15 |
+| LDMC | Spearman ρ | 0.393 | 0.365 | 16 / 15 |  |
+| LDMC | loser/winner skill | 0.197 | 0.179 | 16 / 15 |  |
 | LMA | R² against Null | 0.214 | 0.158 | 16 / 16 | 11 of 16 |
 | LMA | Spearman ρ | 0.393 | 0.303 | 16 / 16 |  |
 | LMA | loser/winner skill | 0.158 | 0.093 | 16 / 16 |  |
-| Height | R² against Null | 0.229 | 0.129 | 16 / 16 | 10 of 16 |
+| Height | R² against Null | 0.229 | 0.128 | 16 / 16 | 10 of 16 |
 | Height | Spearman ρ | 0.394 | 0.332 | 16 / 16 |  |
 | Height | loser/winner skill | 0.197 | 0.214 | 16 / 16 |  |
 | Graminoid | R² against Null | 0.218 | 0.138 | 16 / 16 | 11 of 16 |
@@ -88,9 +96,9 @@ Every fold fit converged.
 | Niche | R² against Null | 0.272 | 0.184 | 16 / 16 | 11 of 16 |
 | Niche | Spearman ρ | 0.417 | 0.383 | 16 / 16 |  |
 | Niche | loser/winner skill | 0.217 | 0.235 | 16 / 16 |  |
-| LDMC + species | R² against Null | 0.333 | 0.114 | 16 / 16 | 10 of 16 |
-| LDMC + species | Spearman ρ | 0.553 | 0.345 | 16 / 16 |  |
-| LDMC + species | loser/winner skill | 0.382 | 0.212 | 16 / 16 |  |
+| LDMC + species | R² against Null | 0.333 | 0.133 | 16 / 15 | 10 of 15 |
+| LDMC + species | Spearman ρ | 0.553 | 0.421 | 16 / 15 |  |
+| LDMC + species | loser/winner skill | 0.382 | 0.214 | 16 / 15 |  |
 | LMA + species | R² against Null | 0.319 | 0.138 | 16 / 16 | 11 of 16 |
 | LMA + species | Spearman ρ | 0.548 | 0.359 | 16 / 16 |  |
 | LMA + species | loser/winner skill | 0.303 | 0.149 | 16 / 16 |  |
@@ -117,12 +125,18 @@ Gradients without a value, per level and metric:
 | Null | spearman | one prediction for every effect | CH_Calanda, CH_Calanda2, CH_Lavey, CN_Heibei, DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2, NO_Gudmedalen, NO_Lavisdalen, NO_Skjellingahaugen, NO_Ulvhaugen, SE_Abisko | 16 |
 | Climate | skill | Climate: undefined within a gradient | CH_Calanda, CH_Calanda2, CH_Lavey, CN_Heibei, DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2, NO_Gudmedalen, NO_Lavisdalen, NO_Skjellingahaugen, NO_Ulvhaugen, SE_Abisko | 16 |
 | Climate | spearman | Climate: undefined within a gradient | CH_Calanda, CH_Calanda2, CH_Lavey, CN_Heibei, DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2, NO_Gudmedalen, NO_Lavisdalen, NO_Skjellingahaugen, NO_Ulvhaugen, SE_Abisko | 16 |
+| LDMC | r2 | fold fit failed | DE_Susalps | 1 |
+| LDMC | skill | fold fit failed | DE_Susalps | 1 |
+| LDMC | spearman | fold fit failed | DE_Susalps | 1 |
+| LDMC + species | r2 | fold fit failed | DE_Susalps | 1 |
+| LDMC + species | skill | fold fit failed | DE_Susalps | 1 |
+| LDMC + species | spearman | fold fit failed | DE_Susalps | 1 |
 
 Null's R² is 0 on every scored gradient, in sample and held out (checked): it is the reference of every R².
 
 ## Species deviations
 
-metafor 5.0.1 gives no BLUPs for a GEN or GDIAG slope block, so the species deviations are computed by hand, jointly for every random term, as D Z′ M⁻¹ (y − Xβ) from each fit's variance components, V and β (`R/species_deviation.R`). On the step 05 all-rows Species-dependent fit they equal `ranef()` for the species and experiment intercepts to 1.4e-17 and 1.0e-24 (checked to 1e-8). Standard deviation of the BLUPs across species on that fit: intercept 4.82e-03, W slope 2.94e-03, T slope 1.37e-03, P slope 3.11e-11, TP slope 1.32e-03. The P and TP BLUPs are about zero because their variances sit at the boundary (step 05): a BLUP is its variance times the species' weighted residual, so in practice the deviation is the species' intercept, W slope and T slope.
+metafor 5.0.1 gives no BLUPs for a GEN or GDIAG slope block, so the species deviations are computed by hand, jointly for every random term, as D Z′ M⁻¹ (y − Xβ) from each fit's variance components, V and β (`R/species_deviation.R`). On the step 05 all-rows Species-dependent fit they equal `ranef()` for the species and experiment intercepts to 1.4e-17 and 1.0e-24 (checked to 1e-8). Standard deviation of the BLUPs across species on that fit: intercept 4.82e-03, W slope 2.94e-03, T slope 1.37e-03, P slope 3.11e-11, TP slope 1.32e-03. The P BLUPs are about zero because the P slope variance sits at the boundary (step 05): a BLUP is its variance times the species' weighted residual, so in practice the deviation is the species' intercept and its W, T and TP slopes.
 
 Every held-out species had training data: each ladder species occurs in at least 3 gradients, so at least 2 remain in training (checked).
 
@@ -130,13 +144,13 @@ Every held-out species had training data: each ladder species occurs in at least
 
 ![Fig 6, the ladder](../figures/main/fig6.png)
 
-Fig 4. Row a): step 05, every column on the same 512 rows; dashed lines carry Species-dependent across the property columns. Rows b) to d): each half violin is the 16 scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all 20 gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient.
+Fig 6. Row a): step 05, every column on the same 512 rows; dashed lines carry Species-dependent across the property columns. Rows b) to d): each half violin is the 16 scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all 20 gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient.
 
-![Fig S7, per-gradient view](../figures/appendix/figS12.png)
+![Fig S12, per-gradient view](../figures/appendix/figS12.png)
 
 ## Warnings captured
 
-None.
+- metafor: "'struct' argument is disregaded since no ~ inner | outer term" (64 fold fits without slopes)
 
 ## Deviations from PLAN.md
 

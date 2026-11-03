@@ -1,10 +1,10 @@
 # Step 07b: consistent colonizers (Step C, colonizers).
 #
 # PLAN.md: The colonizer story, "Consistent colonizers and context-dependent
-#   arrival"; Fig S2 (mirrors the anchored Fig 2, Bills 2 Nov).
+#   arrival"; Fig 3 (mirrors the anchored Fig 2, Bills 2 Nov).
 # Reads:  data/derived/07a_colonizers/strength_df_y3.rds (warmed cover, years >= 3);
 #         data/derived/01_relative_cover/cover_long.rds, experiments_kept.csv and
-#         data/derived/prep/sites.rds (non-colonizers; Fig S2 b, c)
+#         data/derived/prep/sites.rds (non-colonizers; Fig 3 b, c)
 # Writes: data/derived/07b_classification/m_C.rds, species_summary.csv;
 #         figures/main/fig3.png (main Fig 3); reports/07b_classification.md
 # Checks: 379 colonizer effects; 29 species in at least 3 gradients (117 effects,
@@ -16,7 +16,7 @@
 # residents' Step C model (one fixed mean and one among-experiment variance per
 # species, fitted per species, bobyqa where nlminb fails); a species with no warmed
 # cover in years >= 3 in any of its experiments is a consistent non-colonizer,
-# read from the raw data and set aside (PLAN.md); Fig S2 mirrors the anchored
+# read from the raw data and set aside (PLAN.md); Fig 3 mirrors the anchored
 # resident Fig 2 (code copied from analysis/04_classification.R), in purple.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
@@ -89,7 +89,7 @@ stopifnot(nrow(species_summary) == 29, sum(table(species_summary$class)) == 29) 
 saveRDS(m_C, file.path(out_dir, "m_C.rds"))
 write.csv(mutate(species_summary, class = as.character(class)), file.path(out_dir, "species_summary.csv"), row.names = FALSE)
 
-# ---- Fig S2: mirrors Fig 2 (analysis/04_classification.R:96-183), colonizers --------
+# ---- Fig 3: mirrors Fig 2 (analysis/04_classification.R:96-183), colonizers --------
 # b) c): highest and lowest pooled strength among species in the most gradients
 # reached by at least two species
 top_g <- sort(unique(modelled$n_gradients), decreasing = TRUE)
@@ -114,7 +114,7 @@ pa <- ggplot(ranges, aes(y = species)) +
   scale_fill_manual(values = cols, name = NULL, drop = FALSE,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Number of gradients", low = "grey85", high = "black") +
-  guides(fill = guide_legend(override.aes = list(size = 18), nrow = 1)) +
+  guides(fill = guide_legend(override.aes = list(size = 18), nrow = 1, order = 1), colour = guide_colourbar(order = 2)) + # fixed legend order (as reviewed): ggplot2 otherwise swaps them between runs
   labs(title = "a)   Colonizing species", x = "Warmed relative cover", y = NULL) +
   theme_classic(base_size = 32) +
   theme(plot.title = element_text(face = "bold", size = 42), legend.position = "bottom", legend.box = "vertical",
@@ -184,7 +184,7 @@ report <- c(
   md_table(arrange(species_summary, desc(mu)) |> transmute(species, class = as.character(class), n_gradients, n_experiments, n_measured_absences,
                                                            mu = f4(mu), se_mu = f4(se_mu), tau = f4(tau), lower = f4(lower), upper = f4(upper))),
   "", "## Fig 3", "", "![Fig 3](../figures/main/fig3.png)", "",
-  paste0("Fig S2 mirrors Fig 2 (Bills, 2 Nov). a): point = pooled warmed cover, filled by class; line = 95% prediction interval for a new ",
+  paste0("Fig 3 mirrors Fig 2 (Bills, 2 Nov). a): point = pooled warmed cover, filled by class; line = 95% prediction interval for a new ",
          "experiment, shaded by the number of gradients and labelled gradients (experiments); every modelled species is shown. b) and c): ",
          panel_species[1], " and ", panel_species[2], ", the highest and lowest pooled warmed cover among species in at least ", top_g,
          " gradients; one row per experiment, mean relative cover over years 3 and later in destination controls (hollow) and warmed plots (filled)."),
@@ -192,7 +192,7 @@ report <- c(
   if (length(fallback)) paste0("- Refitted with the bobyqa optimizer after nlminb did not declare convergence: ", paste(fallback, collapse = ", "), ".") else character(),
   if (length(warns)) paste("-", unique(warns)) else if (!length(fallback)) "None." else character(),
   "", "## Deviations from PLAN.md", "",
-  "- Fig S2 mirrors the anchored Fig 2 (two corner panels by Fig 2's rule, destination control to warmed), not PLAN.md's mock with three panels (Bills, 2 Nov; PLAN.md updated).",
+  "- Fig 3 mirrors the anchored Fig 2 (two corner panels by Fig 2's rule, destination control to warmed), not PLAN.md's mock with three panels (Bills, 2 Nov; PLAN.md updated).",
   "- Consistent non-colonizers are read in the years 3 and later window used for strength (Bills, 2 Nov).",
   "- Fig 2's rule hiding context-dependent species with |pooled strength| below 0.005 is not applied: almost every colonizer would be hidden.")
 writeLines(report, "reports/07b_classification.md")

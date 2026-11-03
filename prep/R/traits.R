@@ -1,4 +1,5 @@
 # TRY traits (P2): LDMC, LMA and vegetative height per accepted species.
+# References of the form legacy/<file>:<lines> point to the earlier pipeline as it stands at commit 7fed5b1 (legacy/ was removed in step 12).
 # A TRY record is attached through its own resolved name (the contributor's
 # SpeciesName first, TRY's AccSpeciesName only as fallback), never by
 # trusting AccSpeciesName, which merges species (Festuca pratensis records
@@ -57,15 +58,22 @@ read_try_ids <- function(try_file, ids) {
 
 # Accepted species per row: the contributor's name first, TRY's accepted name
 # as fallback (as tidyTRY::assign_accepted_names(), with names compared after
-# the same UTF-8 repair and spacing as in P1). The species that trusting
+# the same UTF-8 repair and spacing as in P1). The fallback is taken only when
+# the contributor's name was never resolved, or when our own resolution of it
+# gives the same species: a name we resolved and rejected is not overridden by
+# TRY's merge (Bills, 3 Nov; step 15 finding 3). The species that trusting
 # TRY's AccSpeciesName would give is kept for the report.
 attach_try_names <- function(try_raw, try_name_map) {
   from_species <- lookup_species(try_raw$SpeciesName, try_name_map)
   from_try <- lookup_species(try_raw$AccSpeciesName, try_name_map)
+  own <- try_name_map$accepted_species[match(try_key(try_raw$SpeciesName), try_name_map$name)] # NA: never resolved
+  resolved <- try_key(try_raw$SpeciesName) %in% try_name_map$name
+  fallback_ok <- !resolved | (!is.na(own) & own == from_try)
   study <- unique(try_name_map$accepted_species[try_name_map$used & try_name_map$study])
-  try_raw$species <- dplyr::coalesce(from_species, from_try)
+  try_raw$species <- dplyr::coalesce(from_species, ifelse(fallback_ok, from_try, NA_character_))
   try_raw$name_source <- dplyr::case_when(!is.na(from_species) ~ "SpeciesName",
-                                          !is.na(from_try) ~ "AccSpeciesName")
+                                          !is.na(from_try) & fallback_ok ~ "AccSpeciesName",
+                                          !is.na(from_try) ~ "not attached: own name resolved and rejected")
   try_raw$species_if_trusting_try <- from_try
   out <- try_raw[try_raw$species %in% study | try_raw$species_if_trusting_try %in% study, ]
   attr(out, "rows_read") <- c(rows = nrow(try_raw), observations = dplyr::n_distinct(try_raw$ObservationID))
@@ -78,7 +86,7 @@ stage_count <- function(d, stage) {
 }
 
 # legacy/R/data/traits.R:114-127, with experiments removed per observation
-clean_try <- function(try_attached, dictionary, natural_values, max_error_risk = 4) {
+clean_try <- function(try_attached, dictionary, natural_values, max_error_risk = 3) {
   warns <- character()
   collect <- function(expr) withCallingHandlers(expr, warning = function(w) {
     warns <<- c(warns, conditionMessage(w))

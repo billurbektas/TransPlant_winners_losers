@@ -124,7 +124,7 @@ figS6 <- ggplot(ranges, aes(y = species)) +
   scale_fill_manual(values = cols, name = NULL,
                     labels = paste0(names(cols), " (", as.integer(table(species_summary$class)[names(cols)]), ")")) +
   scale_colour_gradient(name = "Number of gradients", low = "grey85", high = "black", breaks = c(1, 4, 7, 10, 13)) +
-  guides(fill = guide_legend(override.aes = list(size = 18), nrow = 1)) +
+  guides(colour = guide_colourbar(order = 1), fill = guide_legend(override.aes = list(size = 18), nrow = 1, order = 2)) + # fixed legend order: ggplot2 otherwise swaps them between runs
   labs(title = "a)   Resident species", x = "Losing-winning strength", y = NULL) +
   theme_classic(base_size = 32) +
   theme(plot.title = element_text(face = "bold", size = 42), legend.position = "bottom", legend.box = "vertical",

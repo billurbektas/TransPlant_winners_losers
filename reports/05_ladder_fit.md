@@ -1,6 +1,6 @@
 # Step 05: The ladder, fitted (Step D, route 1, residents)
 
-The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the 512 effects of the 71 residents found in at least 3 gradients that carry every property (39 experiments, 20 gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, 12 REML fits, all on the same rows. Each model reports τ² (species × site), σ²_experiment (shared site shift) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry model-based (REML Wald) standard errors (Bills, 2 Nov; CR1 before). Fits ran in parallel on 7 cores, 11.7 fit-minutes in all; this run took 0 min.
+The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the 512 effects of the 71 residents found in at least 3 gradients that carry every property (39 experiments, 20 gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, 12 REML fits, all on the same rows. Each model reports τ² (species × site), σ²_experiment (shared site shift) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry model-based (REML Wald) standard errors (Bills, 2 Nov; CR1 before). Fits ran in parallel on 7 cores, 11.1 fit-minutes in all; this run took 0 min.
 
 ## Slope structure
 
@@ -17,7 +17,7 @@ rma.mv(yi = strength, V = strength_se^2, mods = <formula>, random = <re_base or 
 # Null ~ 1; Start ~A0_origin + A0_dest + A0_origin:W + A0_dest:W; Climate ~W * T * P
 # Climate + start and Species-dependent ~W * T * P + A0_origin + A0_dest + A0_origin:W + A0_dest:W
 # property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes
-coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S4
+coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S11
 ```
 
 ## Counts per rowset
@@ -45,7 +45,7 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | A0_dest | the 512 effects | 0.15 | 1.10 |
 | ldmc_z | the 71 species | 0.13 | 0.84 |
 | lma_z | the 71 species | -0.08 | 0.84 |
-| height_z | the 71 species | -0.15 | 0.86 |
+| height_z | the 71 species | -0.16 | 0.86 |
 | PEV1 | the 71 species | 0.22 | 1.06 |
 | PEV2 | the 71 species | -0.12 | 1.13 |
 | PEV3 | the 71 species | 0.02 | 1.04 |
@@ -66,26 +66,26 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | ldmc | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | ldmc | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | ldmc | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| ldmc | LDMC | ldmc | 512 | 71 | 2.834 | 0.000 | 0.643 | 0.749 | DIAG | 1.4 |
+| ldmc | LDMC | ldmc | 512 | 71 | 2.834 | 0.000 | 0.643 | 0.749 | DIAG | 1.2 |
 | lma | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
 | lma | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
 | lma | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | lma | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | lma | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| lma | LMA | lma | 512 | 71 | 2.804 | 0.000 | 0.499 | 0.730 | DIAG | 1.3 |
+| lma | LMA | lma | 512 | 71 | 2.804 | 0.000 | 0.499 | 0.730 | DIAG | 1.1 |
 | height | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
 | height | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
 | height | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | height | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | height | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| height | Height | height | 512 | 71 | 2.930 | 0.000 | 0.564 | 0.540 | DIAG | 1.0 |
+| height | Height | height | 512 | 71 | 2.930 | 0.000 | 0.564 | 0.541 | DIAG | 0.8 |
 | growth_form | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
 | growth_form | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
 | growth_form | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | growth_form | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | growth_form | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| growth_form | Graminoid | growth_form | 512 | 71 | 2.915 | 0.000 | 0.622 | 0.665 | DIAG | 1.4 |
-| growth_form | Woody | growth_form | 512 | 71 | 2.913 | 0.000 | 0.607 | 0.683 | DIAG | 1.3 |
+| growth_form | Graminoid | growth_form | 512 | 71 | 2.915 | 0.000 | 0.622 | 0.665 | DIAG | 1.5 |
+| growth_form | Woody | growth_form | 512 | 71 | 2.913 | 0.000 | 0.607 | 0.683 | DIAG | 1.4 |
 | phylogeny | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
 | phylogeny | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
 | phylogeny | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
@@ -97,9 +97,9 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | niche | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | niche | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | niche | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| niche | Niche | niche | 512 | 71 | 2.860 | 0.000 | 0.575 | 0.750 | DIAG | 1.2 |
+| niche | Niche | niche | 512 | 71 | 2.860 | 0.000 | 0.575 | 0.750 | DIAG | 1.1 |
 
-All 8 slope fits converged with the diagonal T, P, TP block, each from metafor's default start (Bills, 1 Nov). Across the 8 fits the T slope variance ranges 0.000 to 0.274 ×10⁻⁴; the P and TP slope variances are at most 1.9e-05, at the boundary.
+All 8 slope fits converged with the diagonal T, P, TP block, each from metafor's default start (Bills, 1 Nov). Across the 8 fits the T slope variance ranges 0.001 to 0.274 ×10⁻⁴; the TP slope variance 0.030 to 0.193 ×10⁻⁴; only the P slope variance is at the boundary (at most 1.8e-10).
 
 ## Checks
 
@@ -138,9 +138,9 @@ The low-A0_origin half is the effects at or below the median A0_origin. Species-
 
 ## Figures
 
-![Fig S4, coefficients](../figures/appendix/figS11.png)
+![Fig S11, coefficients](../figures/appendix/figS11.png)
 
-Fig 4 is drawn by step 06; Fig S8 is not drawn (Bills, 2 Nov).
+Fig 6 (the ladder) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
 
 ## Warnings captured
 
@@ -154,5 +154,5 @@ Fig 4 is drawn by step 06; Fig S8 is not drawn (Bills, 2 Nov).
 ## Deviations from PLAN.md
 
 - H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. Same quantity.
-- Fig S4 is written to `figures/appendix/figS11.png`, not to `data/derived/05_ladder_fit/`, so that the report can link it.
+- The coefficient figure is appendix Fig S11, written to `figures/appendix/figS11.png`.
 - Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.

@@ -27,7 +27,7 @@ The comparison with the frozen legacy climate and niche of step 00 (P5, 27 Oct, 
 
 ### The niche's climatology at the destination sites
 
-CHELSA 1981-2010 bio10 (mean temperature of the warmest quarter) and bio18 (precipitation of the warmest quarter) at the 43 destination sites, against the ladder's destination JJA T and JJA P averaged over the experiment years: T against bio10 r = 0.979, mean difference (ours minus climatology) 0.95 degC, range -0.27 to 1.97; log JJA P against log bio18 r = 0.944, median ratio JJA P / bio18 1.03. Table: `data/derived/prep/site_bioclim_check.csv`.
+CHELSA 1981-2010 bio10 (mean temperature of the warmest quarter) and bio18 (precipitation of the warmest quarter) at the destinations of the 43 experiments, against the ladder's destination JJA T and JJA P averaged over the experiment years: T against bio10 r = 0.979, mean difference (ours minus climatology) 0.95 degC, range -0.27 to 1.97; log JJA P against log bio18 r = 0.944, median ratio JJA P / bio18 1.03. Table: `data/derived/prep/site_bioclim_check.csv`.
 
 ## Niche
 

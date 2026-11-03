@@ -48,7 +48,7 @@ Every community name gets one of three origins (`decided_by`) and one identifica
 - **decision**: set by Bills in `prep/config/taxonomy_decisions.csv`, for every community name the rule flagged and for names the rule resolved to a plant from the wrong region (with the reason in the ledger).
 - **unidentified**: an unidentified field morphotaxon (`prep/config/unidentified_taxa.csv`, from the legacy overrides); its records stay as vegetation but never enter the analysis.
 
-Identification level (legacy rule, `legacy/R/data/community.R:252-285`): **species_or_lower** when the recorded and the accepted name both have at least two words; **genus_only** when either has one word or the recorded name ends in sp./spp./spec./indet.; **family_only** when the name ends in -aceae and has one word. Only species_or_lower names enter the analysis; the others keep their records with a `drop_reason`.
+Identification level (rule of the earlier pipeline, `legacy/R/data/community.R:252-285` at commit 7fed5b1): **species_or_lower** when the recorded and the accepted name both have at least two words; **genus_only** when either has one word or the recorded name ends in sp./spp./spec./indet.; **family_only** when the name ends in -aceae and has one word. Only species_or_lower names enter the analysis; the others keep their records with a `drop_reason`.
 
 After the rule and the decisions, these accepted names are replaced in every table (`prep/config/accepted_renames.csv`): Taraxacum sect. Taraxacum -> Taraxacum officinale; Alopecurus gerardii -> Alopecurus gerardi.
 

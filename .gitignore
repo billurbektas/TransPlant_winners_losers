@@ -75,9 +75,6 @@ _targets_refactor_validation/
 # Interrupted atomic writes
 *.tmp
 
-# Local receipts used to distinguish regenerated figures from legacy files
-*.pdf.generated
-*.png.generated
 
 # Legacy whole-session snapshots are not pipeline inputs
 Environment_Save_*.RData
@@ -87,6 +84,9 @@ Environment_Save_*.RData
 data/derived/**
 !data/derived/**/
 !data/derived/**/*.csv
+# the GBIF niche table is a pipeline input written outside the pipeline (P6): tracked so a
+# fresh clone runs the prep pipeline (Bills, 3 Nov)
+!data/derived/prep/gbif_niche.rds
 
 # local working files for Claude Code, never pushed
 CLAUDE.md
@@ -96,9 +96,6 @@ KICKOFF_PROMPT.md
 plan_figures/
 .claude/
 
-# generated figures from the retired targets pipeline, ignored as at their old paths
-legacy/figures/candidates/
-legacy/figures/manuscript/
 
 # prep pipeline store (targets), regenerable
 prep/_targets/

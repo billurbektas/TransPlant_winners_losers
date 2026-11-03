@@ -1,4 +1,5 @@
 # Study species and functional groups (P3)
+# References of the form legacy/<file>:<lines> point to the earlier pipeline as it stands at commit 7fed5b1 (legacy/ was removed in step 12).
 
 # One row per study species (accepted species at species rank). A family
 # missing in P1 (names set by decision) is taken from the backbone's genus.

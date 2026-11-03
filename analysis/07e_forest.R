@@ -17,7 +17,8 @@
 # the medians and listed, as 07d; the half-violin code copied from step 06b.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
-source("R/metrics_gradient.R"); source("R/md_table.R")
+source("R/metrics_gradient.R"); source("R/md_table.R"); source("R/cache.R")
+cache_version <- "07e-v2" # v2 (3 Nov): folds return their warnings
 
 warns <- character()
 globalCallingHandlers(warning = function(w) {
@@ -60,25 +61,35 @@ grid <- tidyr::expand_grid(node = c(5L, 10L, 20L, 40L, 80L), mtry = c("sqrt", "h
 # ---- One fold: train on the other gradients, predict the held-out one ---------
 fit_fold <- function(task, set, seed, cache) {
   path <- file.path(fold_dir, set$setting, paste0(task$level, "_", task$gradient_id, ".rds"))
-  if (cache && file.exists(path)) return(readRDS(path))
   g <- task$gradient_id; vars <- level_vars[[task$level]]
   train <- filter(strength_df, gradient_id != g); test <- filter(strength_df, gradient_id == g)
   null06 <- readRDS(file.path("data/derived/07d_ladder_predict/folds", paste0("null_", g, ".rds")))$pred
   stopifnot(!g %in% train$gradient_id, setequal(test$effect_id, null06$effect_id)) # same fold as 07d
+  key <- cache_key(train[c(vars, "strength")], test[c("effect_id", vars, "strength")], null06[c("effect_id", "fixed")], set, seed, n_trees, cache_version)
+  if (cache) { hit <- read_cache(path, key); if (!is.null(hit)) return(hit) }
+  # warnings are collected here and returned: a forked worker cannot write to the parent's list (3 Nov)
+  w <- character()
+  catch <- function(expr) withCallingHandlers(expr, warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
   mtry <- if (set$mtry == "sqrt") floor(sqrt(length(vars))) else ceiling(length(vars) / 2)
-  rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = n_trees, # no case weights (Bills, 2 Nov)
+  rf <- catch(ranger::ranger(x = train[vars], y = train$strength, num.trees = n_trees, # no case weights (Bills, 2 Nov)
                        mtry = max(1L, mtry), min.node.size = set$node, replace = TRUE,
-                       respect.unordered.factors = "order", seed = seed + match(g, scored), num.threads = 1L)
+                       respect.unordered.factors = "order", seed = seed + match(g, scored), num.threads = 1L))
   pred <- tibble::tibble(level = task$level, gradient_id = g, effect_id = test$effect_id, species = as.character(test$species),
-                         observed = test$strength, predicted = predict(rf, test[vars], num.threads = 1L)$predictions,
+                         observed = test$strength, predicted = catch(predict(rf, test[vars], num.threads = 1L))$predictions,
                          null_metafor = null06$fixed[match(test$effect_id, null06$effect_id)],
                          null_forest = mean(train$strength)) # what a forest without predictors predicts
-  if (cache) { dir.create(dirname(path), showWarnings = FALSE); saveRDS(pred, path) }
-  pred
+  res <- list(pred = pred, warnings = unique(w))
+  if (cache) res <- write_cache(res, path, key)
+  res
 }
 tasks <- tidyr::expand_grid(level = names(level_vars), gradient_id = scored)
 tasks <- lapply(seq_len(nrow(tasks)), function(i) as.list(tasks[i, ]))
-run <- function(set, seed, cache) bind_rows(parallel::mclapply(tasks, fit_fold, set = set, seed = seed, cache = cache, mc.cores = cores))
+run <- function(set, seed, cache) {
+  out <- parallel::mclapply(tasks, fit_fold, set = set, seed = seed, cache = cache, mc.cores = cores)
+  if (any(sapply(out, inherits, "try-error"))) stop("forest worker failed")
+  warns <<- c(warns, unlist(lapply(out, `[[`, "warnings")))
+  bind_rows(lapply(out, `[[`, "pred"))
+}
 
 # ---- Metrics: R² against the metafor Null on the same gradient, as step 06 ------
 score <- function(d) bind_rows(lapply(split(d, list(d$level, d$gradient_id), drop = TRUE), function(x) {
@@ -90,14 +101,18 @@ score <- function(d) bind_rows(lapply(split(d, list(d$level, d$gradient_id), dro
 # ---- Tuning: one setting for every level and fold, the one with the highest median
 # out-of-bag R² over the 18 levels, each forest fitted once on all 110 rows (Bills,
 # 2 Nov). Out-of-bag uses none of the held-out scores, so they stay unbiased.
-oob <- bind_rows(parallel::mclapply(seq_len(nrow(grid)), function(i) bind_rows(lapply(names(level_vars), function(l) {
+oob_out <- parallel::mclapply(seq_len(nrow(grid)), function(i) { w <- character(); tab <- withCallingHandlers(bind_rows(lapply(names(level_vars), function(l) {
   vars <- level_vars[[l]]
   mtry <- if (grid$mtry[i] == "sqrt") floor(sqrt(length(vars))) else ceiling(length(vars) / 2)
   rf <- ranger::ranger(x = strength_df[vars], y = strength_df$strength, num.trees = n_trees, mtry = max(1L, mtry),
                        min.node.size = grid$node[i], replace = TRUE, respect.unordered.factors = "order",
                        seed = seeds[["main"]], num.threads = 1L)
   tibble::tibble(setting = grid$setting[i], level = l, oob_r2 = rf$r.squared)
-})), mc.cores = cores))
+})), warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
+  list(tab = tab, warnings = w) }, mc.cores = cores)
+if (any(sapply(oob_out, inherits, "try-error"))) stop("tuning worker failed")
+warns <- c(warns, unlist(lapply(oob_out, `[[`, "warnings")))
+oob <- bind_rows(lapply(oob_out, `[[`, "tab"))
 tuning <- left_join(grid, summarise(oob, oob_min = min(oob_r2), oob_max = max(oob_r2), oob_r2 = median(oob_r2), .by = setting), by = "setting")
 best <- slice_max(tuning, oob_r2, n = 1, with_ties = FALSE)
 stopifnot(nrow(tuning) == nrow(grid), nrow(oob) == nrow(grid) * 18, nrow(best) == 1)
@@ -126,7 +141,10 @@ long <- function(d, model) tidyr::pivot_longer(d, c(r2, spearman), names_to = "m
 # an R² below -100 is taken out of the R² row and the medians and listed (Bills, 2 Nov; as 07d)
 outliers <- bind_rows(transmute(filter(pred06, r2 < -100), model = "meta-regression", level, gradient_id, r2),
                       transmute(filter(forest_metrics, r2 < -100), model = "forest", level, gradient_id, r2))
-trim <- function(m) mutate(m, r2 = ifelse(r2 < -100, NA_real_, r2))
+# a gradient taken out on either side is taken out of both, so the two medians of a level are
+# over the same gradients (Bills, 3 Nov)
+out_pairs <- paste(outliers$level, outliers$gradient_id)
+trim <- function(m) mutate(m, r2 = ifelse(paste(level, gradient_id) %in% out_pairs, NA_real_, r2))
 vs <- inner_join(long(trim(pred06), "metafor"), long(trim(forest_metrics), "forest"), by = c("level", "gradient_id", "metric")) |>
   mutate(difference = forest - metafor) |> arrange(match(level, all_levels), match(metric, c("r2", "spearman")), gradient_id)
 stopifnot(nrow(vs) == 19 * 8 * 2) # every level, gradient and metric
@@ -141,8 +159,8 @@ med <- vs |> group_by(level, metric) |>
 spread <- filter(folds, level != "null") |>
   summarise(one_sign = all(predicted > 0) | all(predicted < 0), sd_ratio = sd(predicted) / sd(observed), .by = c(level, gradient_id))
 
-# ---- Fig S11: metafor (left) beside forest (right), held out ---------------------
-cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 4; Okabe-Ito orange
+# ---- Fig S18: metafor (left) beside forest (right), held out ---------------------
+cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 6; Okabe-Ito orange
 fills <- c(metafor = "#8DB8EA", forest = "#F3C766")
 col_levels <- setdiff(all_levels, "null"); n <- length(col_levels) # Null is the R² reference, not drawn (Bills, 2 Nov)
 xlabs <- sub(" \\+ species$", "\n+ species", sub("Climate \\+ destination abundance", "Climate +\ndest.\nabundance",
@@ -242,11 +260,11 @@ report <- c(
          " and the largest change in a median ", sprintf("%.3f", max(seed_med$d)), ". Largest change in a median per metric: ",
          paste0(c("R² ", "Spearman ρ "), sprintf("%.3f", sapply(c("r2", "spearman"), function(k) max(seed_med$d[seed_med$metric == k]))), collapse = ", "),
          "."),
-  "", "## Figures", "", "![Fig S11, colonizers: forest beside meta-regression](../figures/appendix/figS18.png)",
+  "", "## Figures", "", "![Fig S18, colonizers: forest beside meta-regression](../figures/appendix/figS18.png)",
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- Step 06b on the colonizer ladder rows (Bills, 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.",
-  "- No loser/winner skill (no loser class); R² below −100 taken out and listed (Bills, 2 Nov).")
+  "- No loser/winner skill (no loser class); R² below −100 taken out and listed (Bills, 2 Nov), from both meta-regression and forest for that level and gradient (3 Nov).")
 writeLines(report, "reports/07e_forest.md")
 message("Step 07e written: ", length(tasks), " forests (and ", length(tasks), " for the seed check); ",
         sprintf("%.1f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

@@ -1,4 +1,5 @@
 # Phylogeny and its PCoA axes (P3), for every study species. The tree is cut
+# References of the form legacy/<file>:<lines> point to the earlier pipeline as it stands at commit 7fed5b1 (legacy/ was removed in step 12).
 # from the V.PhyloMaker2 mega-tree GBOTB.extended.LCVP; each species' place
 # in it is set by the reviewed ledger prep/config/phylogeny_placements.csv.
 # Logic follows legacy/R/models/phylogeny.R (lines named below).

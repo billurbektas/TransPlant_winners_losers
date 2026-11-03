@@ -354,7 +354,7 @@
 "Salix retusa","Salicaceae",FALSE,TRUE,2,NA,NA,NA,TRUE,TRUE,TRUE,TRUE,TRUE
 "Salix serpillifolia","Salicaceae",FALSE,TRUE,1,NA,NA,NA,FALSE,FALSE,FALSE,TRUE,TRUE
 "Salvia pratensis","Lamiaceae",FALSE,FALSE,NA,2,NA,NA,TRUE,TRUE,TRUE,TRUE,TRUE
-"Sanguisorba minor","Rosaceae",FALSE,FALSE,NA,3,NA,"Context-dependent",TRUE,TRUE,TRUE,TRUE,TRUE
+"Sanguisorba minor","Rosaceae",FALSE,FALSE,NA,3,NA,"Consistent colonizer",TRUE,TRUE,TRUE,TRUE,TRUE
 "Saussurea alpina","Asteraceae",FALSE,FALSE,2,NA,NA,NA,TRUE,TRUE,TRUE,TRUE,TRUE
 "Saussurea ceterach","Asteraceae",FALSE,FALSE,2,NA,NA,NA,FALSE,FALSE,FALSE,TRUE,FALSE
 "Saussurea globosa","Asteraceae",FALSE,FALSE,1,NA,NA,NA,FALSE,FALSE,FALSE,TRUE,TRUE

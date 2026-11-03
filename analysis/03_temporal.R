@@ -5,7 +5,8 @@
 # Reads:  data/derived/02_strength/by_year.rds;
 #         data/derived/01_relative_cover/cover_long.rds (absence per year)
 # Writes: data/derived/03_temporal/classes_by_anchor.rds, stability.csv,
-#         flows.rds; figures/main/fig1.png (panel a; anchored 2 Nov), figures/appendix/figS8.png;
+#         flows.rds, stability_3gradients.csv; figures/main/fig1.png (panel a; anchored 2 Nov),
+#         figures/appendix/figS8.png;
 #         reports/03_temporal.md
 # Checks: 4,537 yearly contrasts; 3,032 at the anchors (1,004, 900, 700,
 #         428), of which 93 absent from both groups (40, 21, 12, 20),
@@ -205,8 +206,7 @@ report <- c(
   "## Fig 1 panel a (main figure)", "",
   "![Fig 1a](../figures/main/fig1.png)", "",
   paste0("Strata are drawn to one absolute scale, so columns shrink as experiments end and as species are absent from ",
-         "both groups. The final figure, with panel b (colonizers, ",
-         "step 07), is drawn in step 10. Columns are evenly spaced: the gap from year 4 to year 6 spans two years, ",
+         "both groups. Panel b (colonizers) is added by step 07a, which redraws the whole figure; rerun 07a after this step. Columns are evenly spaced: the gap from year 4 to year 6 spans two years, ",
          "the others one."),
   "",
   paste0("Switches between a significant winner and a significant loser, in either direction: ",

@@ -1,4 +1,5 @@
 # Taxonomy (P1): one resolution run over the community and TRY names,
+# References of the form legacy/<file>:<lines> point to the earlier pipeline as it stands at commit 7fed5b1 (legacy/ was removed in step 12).
 # with tidyTRY >= 0.2.0 (legitimate TNRS names only, WCVP before WFO).
 
 # legacy/R/infrastructure/io.R:39-44

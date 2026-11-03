@@ -4,6 +4,7 @@
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, eval = TRUE, comment = "")
+source("R/md_table.R")
 rd  <- function(p) utils::read.csv(file.path("data/derived", p))
 med <- function(x) stats::median(x, na.rm = TRUE)
 f2  <- function(x) sprintf("%.2f", x)
@@ -32,10 +33,16 @@ cover   <- rd("10_figures/fig4_pie_cover.csv")
 ladder_rows <- het05[het05$model == "Null", ]
 pm  <- function(d, lv, k = "r2") med(d[d$level == lv, k])
 tau <- function(m) het05$tau2[het05$model == m]
-fl <- sapply(split(fvm, fvm$level), function(x) c(metafor = med(x$metafor), forest = med(x$forest)))
-lv_name <- c(null = "Null", start = "Start", climate = "Climate", climate_start = "Climate + start", species = "Species-dependent")
-for_better <- colnames(fl)[fl["forest", ] > fl["metafor", ]]
-for_better_name <- ifelse(for_better %in% names(lv_name), lv_name[for_better], tools::toTitleCase(for_better))
+# forest against meta-regression as in the 06b report: per level, the median over gradients of
+# the per-gradient difference; the Null level is left out (the forest's Null is the training mean)
+fvm_lv  <- fvm[fvm$level != "null", ]
+fl      <- sapply(split(fvm_lv, fvm_lv$level), function(x) c(metafor = med(x$metafor), forest = med(x$forest), diff = med(x$forest - x$metafor)))
+lv_name <- c(start = "Start", climate = "Climate", climate_start = "Climate + start", species = "Species-dependent",
+             ldmc = "LDMC", lma = "LMA", height = "Height", graminoid = "Graminoid", woody = "Woody", phylogeny = "Phylogeny", niche = "Niche")
+for_better <- colnames(fl)[fl["diff", ] > 0]
+for_better_name <- unname(ifelse(for_better %in% names(lv_name), lv_name[for_better], sub("^(.*)\\+species$", "\\1 + species", for_better)))
+fvc     <- rd("07e_forest/forest_vs_metafor.csv"); fvc <- fvc[fvc$metric == "r2", ]
+col_null_forest <- med(fvc$forest[fvc$level == "null"])
 cor_y3 <- with(merge(res_all[c("effect_id", "strength")], res[c("effect_id", "strength")], by = "effect_id"), cor(strength.x, strength.y))
 ```
 
@@ -77,16 +84,51 @@ Here, we use a network of `r length(unique(res$experiment_id))` whole-community 
 | [04](#q2-consistency) | Per species pooled strength and among-experiment variance; prediction interval against zero | `r sum(s04$class == "Consistent winner")` consistent winners, `r sum(s04$class == "Consistent loser")` consistent losers, `r sum(s04$class == "Context-dependent")` context-dependent of `r nrow(s04)` species |
 | [05](#q3-and-q4-the-ladder) | Twelve meta-regressions, Null to Species-dependent to one property at a time | τ² from `r signif(tau("Null"), 2)` (Null) to `r signif(tau("Species-dependent"), 2)` (Species-dependent) |
 | [06](#q3-and-q4-the-ladder) | Leave one gradient out; R² against the Null, Spearman and loser/winner skill per gradient | median held-out R²: initial abundances `r f2(pm(pred06, "start"))`, Species-dependent `r f2(pm(pred06, "species"))` |
-| [06b](#q3-and-q4-the-ladder) | Random forest on the same rows and folds | better than the meta-regression at `r length(for_better)` of `r ncol(fl)` levels, all near zero |
+| [06b](#q3-and-q4-the-ladder) | Random forest on the same rows and folds | higher than the meta-regression at `r length(for_better)` of `r ncol(fl)` levels, by at most `r f2(max(fl["diff", ]))` |
 | [07a](#colonizers) | Colonizer strength: warmed cover, one `glmmTMB` per experiment; year-specific presence classes | `r n(nrow(col))` colonizer strengths in `r length(unique(col$experiment_id))` experiments |
-| [07b](#colonizers) | Step C for colonizers | `r sum(s07b$class == "Consistent colonizer")` consistent colonizers among `r nrow(s07b)` species |
+| [07b](#colonizers) | Step C for colonizers | `r sum(s07b$class == "Consistent colonizer")` consistent colonizer`r if (sum(s07b$class == "Consistent colonizer") != 1) "s"` among `r nrow(s07b)` species |
 | [07c–07e](#colonizers) | The ladder, its predictions and the forest for colonizers | only destination abundance transfers (median held-out R² `r f2(pm(pred07, "start"))`) |
 | [07f](#pathways) | Traits of losers, winners and colonizers | Fig 5 |
 | [10](#the-experiments-in-climate-space) | Synthesis figures, appendix and this page | Figs 4, 7, S1–S18 |
+| [12](reports/12_final_review.md) | Final review: reruns, code, documentation, open issues, statistical weak points | no result changed; decisions listed |
 
 ![Figure S1](figures/appendix/figS1.png)
 
 **Figure S1.** Data flow from the network database to each analysis. Each box gives the number of experiments, species and species × experiment effects that remain after the rule written on the arrow above it. The shared steps (grey) split into the resident branch (orange, left), which leads to the classification (Figure 2) and the model ladder (Figure 6), and the colonizer branch (purple, right), which leads to the colonizer classification (Figure 3) and the colonizer ladder (Figure S16). The classification boxes count species and their effects.
+
+**What each selection removes.** Each row is one rule, in the order the analysis applies it, with what it removes and what is left. Residents and colonizers split after the pool rule; their later rows count from the row above on their own branch.
+
+```{r selection, results = "asis"}
+f_ <- function(d) c(n_distinct(d$experiment_id), n_distinct(d$species), nrow(d))
+n_distinct <- function(x) length(unique(x))
+st_res <- res[res$species %in% s04$species, ]; st_col <- col[col$species %in% s07b$species, ]
+sel <- data.frame(
+  step = c("P1", "P1", "01", "01", "01", "01", "01", "07a", "04", "07b", "05", "07c"),
+  code = c("[community.R](prep/R/community.R)", "[community.R](prep/R/community.R)", rep("[01_relative_cover.R](analysis/01_relative_cover.R)", 5),
+           "[07a_colonizers.R](analysis/07a_colonizers.R)", "[04_classification.R](analysis/04_classification.R)",
+           "[07b_classification.R](analysis/07b_classification.R)", "[05_ladder_fit.R](analysis/05_ladder_fit.R)", "[07c_ladder_fit.R](analysis/07c_ladder_fit.R)"),
+  rule = c("Network data, species identified to species level",
+           "Experiments with too short a record are left out (IN_Kashmir, two survey years)",
+           "Ferns, horsetails, clubmosses and juniper are left out: lineages far from the flowering plants the questions concern (their cover still counts in the relative-cover denominator)",
+           "A species must be established in the controls: recorded in at least two plots in half of the years, or in half of the plots in at least two years",
+           "An experiment needs at least 5 residents for a species to be compared within it (US_Arizona has 4)",
+           "Residents: established in the origin controls",
+           "Destination pool: established in the destination controls, never recorded in the origin controls",
+           "Colonizers: an experiment needs at least 5 destination-pool species, as for residents",
+           "Residents in at least 3 gradients, so that their variation among experiments can be estimated",
+           "Colonizers in at least 3 gradients, as for residents",
+           "Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows",
+           "Colonizers with every property, as for residents"),
+  parent = c(NA, 1, 2, 3, 4, 5, 5, 7, 6, 8, 9, 10),
+  split = c(rep(FALSE, 5), TRUE, TRUE, rep(FALSE, 5))) # the pools divide the rows: nothing is removed there
+counts <- rbind(as.matrix(flow[1:7, c("n_experiments", "n_species", "n_combinations")]), f_(col), f_(st_res), f_(st_col),
+                c(ladder_rows$n_experiments, ladder_rows$n_species, ladder_rows$n_effects), f_(lad07))
+lost <- function(k) ifelse(is.na(sel$parent) | sel$split, "", paste0("−", counts[sel$parent, k] - counts[, k], " → "))
+sel_tab <- data.frame(Step = sel$step, Code = sel$code, `Rule and why` = sel$rule,
+                      Experiments = paste0(lost(1), counts[, 1]), Species = paste0(lost(2), counts[, 2]),
+                      `Species × experiment` = paste0(lost(3), counts[, 3]), check.names = FALSE)
+cat(md_table(sel_tab), sep = "\n")
+```
 
 ## Data and selection
 
@@ -248,7 +290,8 @@ r2  <- 1 - mean((predicted - observed)^2) / mean((null_predicted - observed)^2)
 
 # random forest, the same rows and folds
 rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
-                     mtry = mtry, min.node.size = node)      # no case weights
+                     mtry = mtry, min.node.size = node, replace = TRUE,
+                     respect.unordered.factors = "order")  # no case weights
 ```
 
 ![Figure 6](figures/main/fig6.png)
@@ -261,13 +304,13 @@ rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
 
 ![Figure S12](figures/appendix/figS12.png)
 
-**Figure S12.** Fit and prediction of every resident model, gradient by gradient. Rows are the `r length(unique(pred06$gradient_id))` gradients with at least five effects, ordered by destination temperature (coldest at the top); columns are the models, followed by each property model with species-specific deviations (+ species). (a, b) R² against the Null model on the same gradient, (c, d) Spearman's rank correlation between observed and predicted strength within the gradient, and (e, f) loser/winner skill, loser recall plus winner recall minus one; (a, c, e) in sample and (b, d, f) for the gradient held out of the fit. Blue cells are better and red cells worse than zero; colours are capped at ±1, and grey cells are undefined because Climate predicts one value per gradient.
+**Figure S12.** Fit and prediction of every resident model, gradient by gradient. Rows are the `r length(unique(pred06$gradient_id))` gradients with at least five effects, ordered by destination temperature (coldest at the top); columns are the models, followed by each property model with species-specific deviations (+ species). (a, b) R² against the Null model on the same gradient, (c, d) Spearman's rank correlation between observed and predicted strength within the gradient, and (e, f) loser/winner skill, loser recall plus winner recall minus one; (a, c, e) in sample and (b, d, f) for the gradient held out of the fit. Blue cells are better and red cells worse than zero; colours are capped at ±1, and grey cells are undefined because the model predicts one value per gradient (Spearman for the Null and Climate, skill for Climate).
 
 ![Figure S13](figures/appendix/figS13.png)
 
 **Figure S13.** Random forests beside the meta-regressions, residents. For each model of the ladder, (a) R² against the Null meta-regression on the same gradient, (b) Spearman's rank correlation and (c) loser/winner skill on each of the `r length(unique(pred06$gradient_id))` gradients held out of the fit, for the meta-regression (blue, left) and a random forest on the same rows, predictors and folds (orange, right). Half violins show the distribution over gradients, small points the gradients, and large points and numbers the medians. The forests use no case weights and one setting of minimum node size and number of candidate predictors, chosen by out-of-bag R² over all models. The Null is not drawn; Climate has no Spearman or skill because it predicts one value per gradient.
 
-In sample the Species-dependent model reaches a median R² of `r f2(pm(fit06, "species"))`; held out it drops to `r f2(pm(pred06, "species"))`, below initial abundances alone (`r f2(pm(pred06, "start"))`). No property level beats the Climate + start floor held out by much (`r f2(pm(pred06, "climate_start"))`; Niche `r f2(pm(pred06, "niche"))`, LDMC `r f2(pm(pred06, "ldmc"))`, Height `r f2(pm(pred06, "height"))`), and the forest beats the meta-regression only at `r paste(for_better_name, collapse = ", ")` (median over levels `r f2(med(fl["forest", ]))` against `r f2(med(fl["metafor", ]))`): the weak relationships are weak, not misspecified.
+In sample the Species-dependent model reaches a median R² of `r f2(pm(fit06, "species"))`; held out it drops to `r f2(pm(pred06, "species"))`, below initial abundances alone (`r f2(pm(pred06, "start"))`). No property level beats the Climate + start floor held out by much (`r f2(pm(pred06, "climate_start"))`; Niche `r f2(pm(pred06, "niche"))`, LDMC `r f2(pm(pred06, "ldmc"))`, Height `r f2(pm(pred06, "height"))`), and the forest is higher than the meta-regression only at `r paste(for_better_name, collapse = ", ")` (median of the per-gradient differences; at most `r f2(max(fl["diff", ]))`): the weak relationships are weak, not misspecified.
 
 Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](analysis/06_ladder_predict.R) · [`06b_forest.R`](analysis/06b_forest.R) · reports [05](reports/05_ladder_fit.md), [06](reports/06_ladder_predict.md), [06b](reports/06b_forest.md)
 
@@ -280,7 +323,7 @@ Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](a
 - A species never recorded in an experiment's warmed plots is a measured absence: strength 0, SE 0 (2 Nov); `r nrow(never)` species were never present in any warmed plot.
 - Where the per-species residual variance cannot be estimated, the experiment's error is used (2 Nov).
 - At least 5 colonizers per experiment (`r length(unique(col$experiment_id))` of `r length(unique(res$experiment_id))` experiments).
-- The propagule pressure A0 is the species' mean destination-control relative cover over every plot and year (2 Nov); there is no origin abundance.
+- The propagule pressure A0 is the species' mean destination-control relative cover over every plot and year (2 Nov), log(100 × cover + 1) as the residents' A0 (3 Nov), standardised across all `r nrow(col)` colonizer effects; there is no origin abundance.
 - Properties on the residents' scale, so both pools share one standardisation (2 Nov).
 - No loser/winner skill (no loser class); an R² below −100 is taken out and listed (2 Nov).
 
@@ -318,7 +361,7 @@ f_both_col <- ~ W * T * P + A0_dest + A0_dest:W
 
 **Figure S18.** Random forests beside the meta-regressions, colonizers. As Figure S13, for the `r length(unique(pred07$gradient_id))` colonizer gradients held out of the fit: (a) R² against the Null meta-regression and (b) Spearman's rank correlation, meta-regression (blue, left) and random forest (orange, right).
 
-The ladder rows are `r nrow(lad07)` colonizer effects of `r length(unique(lad07$species))` species. Only destination abundance transfers to a held-out gradient (median R² `r f2(pm(pred07, "start"))`); climate, species identity and every property predict worse than the Null held out (Species-dependent `r f2(pm(pred07, "species"))`).
+The ladder rows are `r nrow(lad07)` colonizer effects of `r length(unique(lad07$species))` species. Only destination abundance transfers to a held-out gradient (median R² `r f2(pm(pred07, "start"))`); climate, species identity and every property predict worse than the Null held out (Species-dependent `r f2(pm(pred07, "species"))`). The colonizer Null is itself a weak reference: the plain mean of the training effects, the forest's Null, reaches a median R² of `r f2(col_null_forest)` against it, because the many measured absences (strength and SE 0) pull the meta-regression's weighted intercept towards zero (Figure S18).
 
 Code: [`07a_colonizers.R`](analysis/07a_colonizers.R) · [`07b_classification.R`](analysis/07b_classification.R) · [`07c_ladder_fit.R`](analysis/07c_ladder_fit.R) · [`07d_ladder_predict.R`](analysis/07d_ladder_predict.R) · [`07e_forest.R`](analysis/07e_forest.R) · reports [07a](reports/07a_colonizers.md), [07b](reports/07b_classification.md), [07c](reports/07c_ladder_fit.md), [07d](reports/07d_ladder_predict.md), [07e](reports/07e_forest.md)
 
@@ -354,6 +397,10 @@ prep/                               data preparation, a targets pipeline
   config/                             reviewed ledgers: name decisions, renames, trait review, trees,
                                       woodiness, phylogeny placements, GBIF keys
   tnrs/                               TNRS cache, so names resolve the same way offline
+  provenance/                         checksums and receipts of the external inputs and of the backups made
+                                      before the rebuild
+  gbif_niche.R, update_tnrs_cache.R   run by hand outside the pipeline: the GBIF download (P6) and
+                                      the TNRS cache
 analysis/                           one script per step, run in order, each reading only data/derived/
   01_relative_cover.R ... 07f_pathways.R, 10_figures.R
   additional_checks/                  side checks that feed no step (the paused GEN slope check)
@@ -368,8 +415,7 @@ figures/
                                       the step that makes it
 tables/                             Tables S1 to S5
 reports/                            one review report per step; REPORT.qmd collects them
-plan_figures/                       the mock figures agreed while planning
-legacy/                             the earlier targets pipeline, read only, for reference
+plan_figures/                       the mock figures agreed while planning (local, not in git)
 renv.lock                           the locked package environment
 ```
 
@@ -380,7 +426,7 @@ Each step was planned, run and reviewed on its own branch (`step-NN-<name>`), wi
 ```sh
 Rscript -e 'renv::restore()'
 Rscript -e 'targets::tar_make(script = "prep/_targets.R", store = "prep/_targets")'
-LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b, 07a-07f, 10
+LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b, 07a-07f, 10, 12
 ```
 
 Run from the repository root. A UTF-8 locale keeps the figure labels (τ², ×10⁻⁴) intact. `analysis/10_figures.R` writes this README from `README.Rmd` as its last step.

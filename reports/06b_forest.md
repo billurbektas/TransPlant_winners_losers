@@ -27,7 +27,7 @@ Each setting was fitted once per level on all 512 rows, and scored by its out-of
 | node10_half | 10 | p / 2 | 0.044 | -0.108 | 0.192 |  |
 | node20_sqrt | 20 | √p | 0.096 | -0.085 | 0.213 | yes |
 | node20_half | 20 | p / 2 | 0.065 | -0.104 | 0.220 |  |
-| node40_sqrt | 40 | √p | 0.095 | -0.074 | 0.211 |  |
+| node40_sqrt | 40 | √p | 0.096 | -0.074 | 0.211 |  |
 | node40_half | 40 | p / 2 | 0.070 | -0.095 | 0.221 |  |
 | node80_sqrt | 80 | √p | 0.089 | -0.052 | 0.192 |  |
 | node80_half | 80 | p / 2 | 0.066 | -0.077 | 0.205 |  |
@@ -57,13 +57,13 @@ Spread of the forest predictions: within a held-out gradient their standard devi
 | Species-dependent | R² against Null | 0.118 | -0.016 | -0.069 | 6 of 16 |
 | Species-dependent | Spearman ρ | 0.382 | 0.387 | 0.012 | 8 of 16 |
 | Species-dependent | loser/winner skill | 0.239 | 0.148 | -0.025 | 5 of 16 |
-| LDMC | R² against Null | 0.140 | 0.039 | 0.020 | 10 of 16 |
-| LDMC | Spearman ρ | 0.334 | 0.289 | 0.001 | 8 of 16 |
-| LDMC | loser/winner skill | 0.061 | 0.172 | 0.107 | 9 of 16 |
+| LDMC | R² against Null | 0.150 | 0.039 | 0.027 | 9 of 15 |
+| LDMC | Spearman ρ | 0.365 | 0.289 | -0.003 | 7 of 15 |
+| LDMC | loser/winner skill | 0.179 | 0.172 | 0.091 | 8 of 15 |
 | LMA | R² against Null | 0.158 | 0.093 | -0.024 | 7 of 16 |
 | LMA | Spearman ρ | 0.303 | 0.267 | -0.033 | 7 of 16 |
 | LMA | loser/winner skill | 0.093 | 0.176 | 0.021 | 8 of 16 |
-| Height | R² against Null | 0.129 | 0.148 | -0.001 | 8 of 16 |
+| Height | R² against Null | 0.128 | 0.147 | -0.001 | 8 of 16 |
 | Height | Spearman ρ | 0.332 | 0.412 | 0.040 | 9 of 16 |
 | Height | loser/winner skill | 0.214 | 0.170 | -0.009 | 8 of 16 |
 | Graminoid | R² against Null | 0.138 | 0.080 | 0.009 | 9 of 16 |
@@ -78,14 +78,14 @@ Spread of the forest predictions: within a held-out gradient their standard devi
 | Niche | R² against Null | 0.184 | 0.121 | 0.011 | 9 of 16 |
 | Niche | Spearman ρ | 0.383 | 0.355 | -0.007 | 7 of 16 |
 | Niche | loser/winner skill | 0.235 | 0.239 | 0.019 | 9 of 16 |
-| LDMC + species | R² against Null | 0.114 | -0.028 | -0.092 | 7 of 16 |
-| LDMC + species | Spearman ρ | 0.345 | 0.347 | 0.067 | 9 of 16 |
-| LDMC + species | loser/winner skill | 0.212 | 0.181 | -0.009 | 6 of 16 |
+| LDMC + species | R² against Null | 0.133 | -0.028 | -0.155 | 6 of 15 |
+| LDMC + species | Spearman ρ | 0.421 | 0.347 | 0.082 | 8 of 15 |
+| LDMC + species | loser/winner skill | 0.214 | 0.181 | -0.012 | 5 of 15 |
 | LMA + species | R² against Null | 0.138 | -0.020 | -0.095 | 6 of 16 |
 | LMA + species | Spearman ρ | 0.359 | 0.343 | 0.015 | 8 of 16 |
 | LMA + species | loser/winner skill | 0.149 | 0.170 | 0.015 | 9 of 16 |
 | Height + species | R² against Null | 0.091 | 0.025 | -0.006 | 8 of 16 |
-| Height + species | Spearman ρ | 0.421 | 0.388 | 0.040 | 9 of 16 |
+| Height + species | Spearman ρ | 0.421 | 0.389 | 0.040 | 9 of 16 |
 | Height + species | loser/winner skill | 0.239 | 0.127 | -0.065 | 7 of 16 |
 | Graminoid + species | R² against Null | 0.104 | 0.006 | -0.045 | 7 of 16 |
 | Graminoid + species | Spearman ρ | 0.378 | 0.367 | 0.044 | 9 of 16 |
@@ -104,11 +104,11 @@ R² against Null, median held out: the forest is above the meta-regression at 5 
 
 ## Seed check
 
-Every forest refitted with a second seed: the largest change in a per-gradient value is 0.400 and the largest change in a median 0.046. Largest change in a median per metric: R² 0.012, Spearman ρ 0.036, skill 0.046; skill moves most because a prediction near zero can change sign between seeds.
+Every forest refitted with a second seed: the largest change in a per-gradient value is 0.400 and the largest change in a median 0.046. Largest change in a median per metric: R² 0.012, Spearman ρ 0.034, skill 0.046; skill moves most because a prediction near zero can change sign between seeds.
 
 ## Figures
 
-![Fig S11, forest beside meta-regression](../figures/appendix/figS13.png)
+![Fig S13, forest beside meta-regression](../figures/appendix/figS13.png)
 
 ## Warnings captured
 
@@ -120,4 +120,4 @@ None.
 - Held-out values only, no fit values (Bills, 2 Nov; PLAN.md edited).
 - No partial-dependence plots (Bills, 2 Nov; PLAN.md edited).
 - Forests also for the seven property + species levels (Bills, 2 Nov).
-- Fig S11 written to `figures/appendix/` so that the report can link it, as steps 05 and 06.
+- The figure is appendix Fig S13, written to `figures/appendix/figS13.png`.

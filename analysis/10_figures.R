@@ -8,11 +8,12 @@
 #         data/derived/07a_colonizers/strength_df_y3.rds; the species summaries of steps
 #         04 and 07b; the tables of steps 05 and 07c; the appendix figures written by the steps.
 # Writes: figures/main/fig4.png, fig7.png (the other main figures are written by their steps);
-#         figures/appendix/figS1.png ... figS18.png;
+#         figures/appendix/figS1.png, figS3.png, figS4.png, figS10.png (the other appendix
+#         figures are written by their steps);
 #         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_pie_cover.csv,
 #         fig4_pie_counts.csv;
 #         reports/10_figures.md
-# Checks: 42 experiments; 1004 resident effects (703 losers, 301 winners); 262
+# Checks: 42 experiments; 1004 resident effects (703 losers, 301 winners); 264
 #         colonizer effects with warmed cover above zero in 28 experiments; every pie's
 #         slices sum to its species; every figure number exists exactly once.
 #
@@ -54,11 +55,11 @@ stopifnot(nrow(experiments) == 42, !anyNA(experiments$origin_elevation), !anyNA(
 # ---- Fig 4: the experiments in climate space ---------------------------------------
 pies <- bind_rows(count(res, experiment_id, group = ifelse(strength < 0, "Resident losers", "Resident winners")),
                   count(filter(col, strength > 0), experiment_id, group = "Colonizers")) # net warmed cover above zero
-stopifnot(sum(res$strength < 0) == 703, sum(res$strength > 0) == 301, sum(col$strength > 0) == 262) # Fig 5's classes per effect
+stopifnot(sum(res$strength < 0) == 703, sum(res$strength > 0) == 301, sum(col$strength > 0) == 264) # Fig 5's classes per effect (262 until CH_Calanda2's year 4 was regained, 3 Nov)
 pies <- tidyr::pivot_wider(pies, names_from = group, values_from = n, values_fill = 0)
 pies <- left_join(select(experiments, experiment_id, origin_elevation, destination_elevation, destination_T_JJA, destination_P_JJA, diff_T_JJA),
                   pies, by = "experiment_id") |> mutate(across(all_of(names(cols)), ~ coalesce(.x, 0L)))
-stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pies$Colonizers) == 262,
+stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pies$Colonizers) == 264,
           sum(pies$Colonizers > 0) == n_distinct(col$experiment_id[col$strength > 0])) # one denominator: counts, not cover
 write.csv(pies, file.path(out_dir, "fig4_pie_counts.csv"), row.names = FALSE)
 # main Fig 4 shows the same classes as shares of the warmed turf's relative cover, years 3 and
@@ -106,7 +107,7 @@ pies <- pies |> left_join(distinct(res, experiment_id, gradient_id), by = "exper
   mutate(label = trimws(paste(sub("_", " ", gradient_id), letter)),
          elevations = paste0(round(origin_elevation), " → ", round(destination_elevation), " m"))
 stopifnot(n_distinct(pies$label) == 42, n_distinct(pies$gradient_id) == 20) # one name per pie, 20 gradients
-warm_scale <- scale_colour_gradient(low = "#C99A1C", high = "#7B0D1E", limits = range(pies$diff_T_JJA), name = "Warming\n(°C, JJA)")
+warm_scale <- scale_colour_gradient(low = "#C99A1C", high = "#7B0D1E", limits = range(pies$diff_T_JJA), name = "Warming\n(°C, JJA)", guide = guide_colourbar(order = 1)) # order as reviewed
 p_breaks <- c(150, 200, 300, 400, 600, 800, 1000)
 climate_map <- function(slices, fill_values) { # the same layout, slices as counts or as cover shares
   d <- left_join(select(pies, -any_of(names(cols_cover))), slices, by = "experiment_id")
@@ -118,8 +119,9 @@ climate_map <- function(slices, fill_values) { # the same layout, slices as coun
                            point.size = 24, point.padding = 0, box.padding = 0.25,
                            nudge_x = ifelse(d$n_shared > 1, 2.1 * r * cos(d$angle), 0), # fanned pies: label outward, off the shared point
                            nudge_y = ifelse(d$n_shared > 1, 2.1 * r * sin(d$angle), -1.9 * r), force = 5, force_pull = 3, # point.size = the pie's size
-                           max.iter = 1e6, min.segment.length = 0.15, segment.colour = "grey45", segment.size = 0.6, max.overlaps = Inf, seed = 1) +
-  scale_fill_manual(values = fill_values, breaks = names(fill_values), name = NULL) + warm_scale +
+                           max.iter = 2e5, max.time = 120, # the iteration count, not the clock, ends the search: same labels on every machine
+                           min.segment.length = 0.15, segment.colour = "grey45", segment.size = 0.6, max.overlaps = Inf, seed = 1) +
+  scale_fill_manual(values = fill_values, breaks = names(fill_values), name = NULL, guide = guide_legend(order = 2)) + warm_scale + # legend order fixed: ggplot2 otherwise orders them differently between runs
   scale_y_continuous(breaks = log(p_breaks) * k, labels = p_breaks) + coord_equal() +
   labs(x = "Destination June–August mean temperature (°C)", y = "Destination June–August\nprecipitation (mm, log scale)") +
   big + theme(legend.position = "bottom", legend.box = "vertical", legend.key.size = unit(1.4, "cm"), legend.key.width = unit(3, "cm"),
@@ -241,7 +243,7 @@ eig <- phy$eigenvalues |> slice(1:10) |> mutate(PEV = factor(PEV, levels = PEV))
 ext <- bind_rows(lapply(c("PEV2", "PEV3"), function(a) bind_rows(slice_min(pev, .data[[a]], n = 2), slice_max(pev, .data[[a]], n = 2), slice_min(pev, PEV1, n = 2), slice_max(pev, PEV1, n = 2)) |> mutate(axis = a))) |> distinct()
 pev_panel <- function(a, tag) {
   ggplot(pev, aes(PEV1, .data[[a]])) + geom_point(aes(colour = graminoid), size = 3, alpha = 0.6) +
-    ggrepel::geom_text_repel(data = filter(ext, axis == a), aes(label = species), size = 6, fontface = "italic", max.overlaps = Inf, seed = 1) +
+    ggrepel::geom_text_repel(data = filter(ext, axis == a), aes(label = species), size = 6, fontface = "italic", max.overlaps = Inf, seed = 1, max.time = 120) +
     scale_colour_manual(values = c(`TRUE` = "#B8860B", `FALSE` = "grey45"), labels = c(`TRUE` = "graminoid", `FALSE` = "other"), name = NULL) +
     labs(title = tag) + big + theme(legend.position = "bottom")
 }
@@ -315,8 +317,14 @@ col_extra <- tibble::tibble(model = sapply(col_fits, `[[`, "model"), n_parameter
 col_het <- read.csv("data/derived/07c_ladder_fit/heterogeneity.csv") |> left_join(col_extra, by = "model") |>
   mutate(rowset = "all", fitted_on = "all", n_species = n_distinct(lad_col$species), n_experiments = n_distinct(lad_col$experiment_id))
 stopifnot(nrow(col_het) == 12, !anyNA(col_het$n_parameters)) # every colonizer model found
-tableS4 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS4.csv"), pool = "residents"),
-                     mutate(col_het, pool = "colonizers")) |> relocate(pool)
+# step 05 lists the five floor and ceiling fits again under each property's row set; since 2 Nov
+# every row set is the ladder rows, so those repeats are dropped here
+res_t4 <- read.csv("data/derived/05_ladder_fit/tableS4.csv")
+res_t4 <- res_t4[res_t4$rowset == "all" | !res_t4$model %in% c("Null", "Start", "Climate", "Climate + start", "Species-dependent"), ]
+stopifnot(nrow(res_t4) == 12, !anyDuplicated(res_t4$model), all(res_t4$n_effects == res_t4$n_effects[1])) # one row per resident model, one row set
+tableS4 <- bind_rows(mutate(res_t4, pool = "residents"),
+                     mutate(col_het, pool = "colonizers")) |> relocate(pool) |>
+  mutate(struct = ifelse(struct == "none (no slopes)", struct, "W: one variance; T, P, TP: diagonal")) # one label for both pools
 tableS5 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), pool = "residents"),
                      mutate(read.csv("data/derived/07c_ladder_fit/coefficients.csv"), pool = "colonizers")) |> relocate(pool)
 for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sprintf("tables/table%s.csv", t), row.names = FALSE)

@@ -20,16 +20,16 @@ Each setting was fitted once per level on all 110 rows, and scored by its out-of
 
 | setting | minimum node size | mtry | out-of-bag R², median over levels | lowest level | highest level | chosen |
 | --- | --- | --- | --- | --- | --- | --- |
-| node5_sqrt | 5 | √p | 0.216 | -0.019 | 0.329 | yes |
-| node5_half | 5 | p / 2 | 0.194 | -0.022 | 0.331 |  |
-| node10_sqrt | 10 | √p | 0.163 | 0.007 | 0.282 |  |
-| node10_half | 10 | p / 2 | 0.124 | 0.004 | 0.290 |  |
-| node20_sqrt | 20 | √p | 0.127 | 0.033 | 0.242 |  |
-| node20_half | 20 | p / 2 | 0.092 | 0.023 | 0.244 |  |
-| node40_sqrt | 40 | √p | 0.100 | 0.048 | 0.181 |  |
-| node40_half | 40 | p / 2 | 0.080 | 0.040 | 0.175 |  |
-| node80_sqrt | 80 | √p | 0.071 | 0.028 | 0.134 |  |
-| node80_half | 80 | p / 2 | 0.053 | 0.015 | 0.131 |  |
+| node5_sqrt | 5 | √p | 0.217 | -0.019 | 0.331 | yes |
+| node5_half | 5 | p / 2 | 0.194 | -0.022 | 0.332 |  |
+| node10_sqrt | 10 | √p | 0.165 | 0.007 | 0.283 |  |
+| node10_half | 10 | p / 2 | 0.124 | 0.004 | 0.291 |  |
+| node20_sqrt | 20 | √p | 0.128 | 0.033 | 0.243 |  |
+| node20_half | 20 | p / 2 | 0.093 | 0.023 | 0.245 |  |
+| node40_sqrt | 40 | √p | 0.102 | 0.048 | 0.182 |  |
+| node40_half | 40 | p / 2 | 0.081 | 0.041 | 0.176 |  |
+| node80_sqrt | 80 | √p | 0.073 | 0.028 | 0.136 |  |
+| node80_half | 80 | p / 2 | 0.054 | 0.015 | 0.131 |  |
 
 Spread of the forest predictions: within a held-out gradient their standard deviation is a median 53% of the observed one, and 144 of 144 forests predict one sign for every effect of the gradient.
 
@@ -39,54 +39,54 @@ Spread of the forest predictions: within a held-out gradient their standard devi
 | --- | --- | --- | --- | --- | --- |
 | Null | R² against Null | 0.000 | 0.193 | 0.193 | 5 of 8 |
 | Null | Spearman ρ |  |  |  |  |
-| Destination abundance | R² against Null | 0.112 | -0.029 | -0.222 | 1 of 8 |
-| Destination abundance | Spearman ρ | 0.243 | 0.225 | 0.000 | 5 of 8 |
-| Climate | R² against Null | -0.242 | 0.092 | 0.170 | 4 of 8 |
+| Destination abundance | R² against Null | 0.217 | -0.025 | -0.207 | 1 of 8 |
+| Destination abundance | Spearman ρ | 0.210 | 0.225 | 0.029 | 5 of 8 |
+| Climate | R² against Null | -0.242 | 0.092 | 0.171 | 4 of 8 |
 | Climate | Spearman ρ |  |  |  |  |
-| Climate + destination abundance | R² against Null | -0.311 | -0.070 | 0.219 | 5 of 8 |
-| Climate + destination abundance | Spearman ρ | 0.243 | 0.372 | 0.029 | 5 of 8 |
-| Species-dependent | R² against Null | -0.397 | 0.012 | 0.142 | 5 of 8 |
-| Species-dependent | Spearman ρ | 0.267 | 0.044 | -0.262 | 3 of 8 |
-| LDMC | R² against Null | -0.804 | -0.024 | 0.318 | 5 of 8 |
-| LDMC | Spearman ρ | 0.237 | 0.116 | -0.021 | 4 of 8 |
-| LMA | R² against Null | -0.462 | -0.014 | 0.775 | 7 of 8 |
-| LMA | Spearman ρ | 0.289 | 0.065 | 0.000 | 5 of 8 |
-| Height | R² against Null | -0.831 | -0.017 | 0.533 | 7 of 8 |
-| Height | Spearman ρ | 0.337 | 0.205 | -0.000 | 4 of 8 |
-| Graminoid | R² against Null | -0.733 | -0.014 | 0.211 | 7 of 8 |
-| Graminoid | Spearman ρ | 0.122 | 0.351 | -0.086 | 4 of 8 |
-| Woody | R² against Null | -0.290 | -0.041 | 0.261 | 6 of 7 |
-| Woody | Spearman ρ | 0.274 | 0.319 | 0.024 | 6 of 8 |
-| Phylogeny | R² against Null | -0.487 | -0.036 | 0.219 | 4 of 8 |
-| Phylogeny | Spearman ρ | -0.046 | 0.176 | -0.058 | 4 of 8 |
-| Niche | R² against Null | -0.898 | 0.020 | 0.749 | 6 of 8 |
-| Niche | Spearman ρ | 0.209 | 0.251 | -0.083 | 3 of 8 |
-| LDMC + species | R² against Null | -0.668 | 0.032 | 0.353 | 5 of 8 |
-| LDMC + species | Spearman ρ | 0.269 | 0.044 | -0.272 | 3 of 8 |
-| LMA + species | R² against Null | -0.378 | 0.058 | 0.353 | 6 of 8 |
-| LMA + species | Spearman ρ | 0.219 | -0.026 | -0.246 | 3 of 8 |
-| Height + species | R² against Null | -0.814 | 0.040 | 0.410 | 5 of 8 |
-| Height + species | Spearman ρ | 0.240 | -0.044 | -0.431 | 2 of 8 |
-| Graminoid + species | R² against Null | -0.664 | 0.024 | 0.191 | 5 of 8 |
-| Graminoid + species | Spearman ρ | 0.157 | 0.044 | -0.251 | 3 of 8 |
-| Woody + species | R² against Null | -0.330 | 0.019 | 0.281 | 5 of 7 |
-| Woody + species | Spearman ρ | 0.300 | 0.044 | -0.259 | 3 of 8 |
-| Phylogeny + species | R² against Null | -0.369 | -0.016 | 0.158 | 4 of 8 |
-| Phylogeny + species | Spearman ρ | -0.081 | 0.022 | -0.133 | 3 of 8 |
-| Niche + species | R² against Null | -0.683 | 0.033 | 0.550 | 6 of 8 |
-| Niche + species | Spearman ρ | 0.250 | 0.030 | -0.258 | 3 of 8 |
+| Climate + destination abundance | R² against Null | -0.278 | -0.068 | 0.135 | 5 of 8 |
+| Climate + destination abundance | Spearman ρ | 0.220 | 0.368 | 0.029 | 5 of 8 |
+| Species-dependent | R² against Null | -0.351 | 0.015 | 0.487 | 6 of 8 |
+| Species-dependent | Spearman ρ | 0.338 | 0.096 | -0.276 | 3 of 8 |
+| LDMC | R² against Null | -0.944 | -0.020 | 0.744 | 6 of 8 |
+| LDMC | Spearman ρ | 0.200 | 0.143 | 0.004 | 5 of 8 |
+| LMA | R² against Null | -0.587 | -0.014 | 0.455 | 7 of 8 |
+| LMA | Spearman ρ | 0.204 | 0.048 | -0.032 | 4 of 8 |
+| Height | R² against Null | -1.160 | -0.014 | 0.783 | 7 of 8 |
+| Height | Spearman ρ | 0.389 | 0.233 | -0.000 | 4 of 8 |
+| Graminoid | R² against Null | -0.555 | -0.010 | 0.529 | 6 of 8 |
+| Graminoid | Spearman ρ | 0.131 | 0.344 | 0.057 | 5 of 8 |
+| Woody | R² against Null | -0.281 | -0.022 | 0.178 | 5 of 7 |
+| Woody | Spearman ρ | 0.299 | 0.333 | 0.012 | 5 of 8 |
+| Phylogeny | R² against Null | -0.792 | -0.031 | 0.419 | 5 of 8 |
+| Phylogeny | Spearman ρ | 0.043 | 0.184 | -0.150 | 2 of 8 |
+| Niche | R² against Null | -0.595 | 0.023 | 0.814 | 6 of 8 |
+| Niche | Spearman ρ | 0.233 | 0.312 | 0.028 | 5 of 8 |
+| LDMC + species | R² against Null | -0.646 | 0.034 | 0.747 | 6 of 8 |
+| LDMC + species | Spearman ρ | 0.310 | 0.071 | -0.195 | 3 of 8 |
+| LMA + species | R² against Null | -0.552 | 0.061 | 0.513 | 6 of 8 |
+| LMA + species | Spearman ρ | 0.320 | 0.035 | -0.306 | 3 of 8 |
+| Height + species | R² against Null | -0.869 | 0.043 | 0.511 | 5 of 8 |
+| Height + species | Spearman ρ | 0.304 | 0.017 | -0.381 | 2 of 8 |
+| Graminoid + species | R² against Null | -0.493 | 0.026 | 0.518 | 6 of 8 |
+| Graminoid + species | Spearman ρ | 0.336 | 0.096 | -0.257 | 3 of 8 |
+| Woody + species | R² against Null | -0.107 | 0.031 | 0.295 | 5 of 7 |
+| Woody + species | Spearman ρ | 0.347 | 0.096 | -0.299 | 3 of 8 |
+| Phylogeny + species | R² against Null | -0.466 | -0.013 | 0.530 | 5 of 8 |
+| Phylogeny + species | Spearman ρ | 0.150 | 0.057 | -0.235 | 3 of 8 |
+| Niche + species | R² against Null | -0.428 | 0.036 | 0.822 | 6 of 8 |
+| Niche + species | Spearman ρ | 0.251 | 0.071 | -0.231 | 3 of 8 |
 
-Taken out of the R² row and the medians (R² below −100): meta-regression, Woody at CH_Lavey (-145.9); meta-regression, Woody + species at CH_Lavey (-146.1).
+Taken out of the R² row and the medians (R² below −100): meta-regression, Woody at CH_Lavey (-529.3); meta-regression, Woody + species at CH_Lavey (-530.0).
 
 R² against Null, median held out: the forest is above the meta-regression at 17 of 18 levels.
 
 ## Seed check
 
-Every forest refitted with a second seed: the largest change in a per-gradient value is 0.312 and the largest change in a median 0.098. Largest change in a median per metric: R² 0.024, Spearman ρ 0.098.
+Every forest refitted with a second seed: the largest change in a per-gradient value is 0.336 and the largest change in a median 0.099. Largest change in a median per metric: R² 0.025, Spearman ρ 0.099.
 
 ## Figures
 
-![Fig S11, colonizers: forest beside meta-regression](../figures/appendix/figS18.png)
+![Fig S18, colonizers: forest beside meta-regression](../figures/appendix/figS18.png)
 
 ## Warnings captured
 
@@ -95,4 +95,4 @@ None.
 ## Deviations from PLAN.md
 
 - Step 06b on the colonizer ladder rows (Bills, 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.
-- No loser/winner skill (no loser class); R² below −100 taken out and listed (Bills, 2 Nov).
+- No loser/winner skill (no loser class); R² below −100 taken out and listed (Bills, 2 Nov), from both meta-regression and forest for that level and gradient (3 Nov).

@@ -46,3 +46,5 @@ Step reports are included below in order. Each is written by its script.
 {{< include 07f_pathways.md >}}
 
 {{< include 10_figures.md >}}
+
+{{< include 12_final_review.md >}}

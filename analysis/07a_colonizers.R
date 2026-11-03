@@ -23,15 +23,16 @@
 #
 # Decided 2 Nov (Bills): step 07 split into 07a, 07b, 07c; colonizer strength from
 # a glmmTMB model of the warmed plots only (one residual variance per species, as
-# the residents' model), A0_dest the raw destination-control cover averaged over
-# years (reopened 2 Nov); strength averaged over all years and over
+# the residents' model), A0_dest the destination-control cover averaged over
+# years, log(100 x cover + 1) as the residents' A0 (reopened 2 Nov; log from 3 Nov); strength averaged over all years and over
 # years 3 and later, both kept until Bills reads the stability; Fig 1 panel b
-# below panel a, three classes (absent, present (ns), present); the 46 species
+# below panel a, three classes (absent, present (ns), present); the 44 species
 # never present in a warmed plot reported as a count; the residents' pool-size rule
 # applied to colonizers too, at least 5 colonizer species per experiment (consistency).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
-source("R/md_table.R")
+source("R/md_table.R"); source("R/cache.R")
+cache_version <- "07a-v1" # raise when fit_warmed() changes
 invisible(loadNamespace("glmmTMB")) # emmeans reads cached glmmTMB fits only with it loaded (as 03b)
 
 warns <- character()
@@ -98,16 +99,21 @@ pick <- function(fit, spec, years = NULL) {
 experiment_ids <- sort(unique(colonizers$experiment_id))
 fits <- lapply(experiment_ids, function(e) {
   f <- file.path(out_dir, "models", paste0(gsub("::", "__", e), ".rds"))
-  if (!file.exists(f)) saveRDS(fit_warmed(filter(colonizers, experiment_id == e, treatment == "warmed")), f)
-  readRDS(f)
+  d <- filter(colonizers, experiment_id == e, treatment == "warmed")
+  key <- cache_key(d, cache_version) # refit when this experiment's warmed rows change
+  x <- read_cache(f, key)
+  if (is.null(x)) x <- write_cache(fit_warmed(d), f, key)
+  x
 })
 names(fits) <- experiment_ids
 
 # propagule pressure, A0_dest: the species' destination-control relative cover
-# averaged over every plot and survey year, from the raw data (Bills, 2 Nov; the
-# residents' A0 are year-1 raw cover from a0.rds)
+# averaged over every plot and survey year, from the raw data (Bills, 2 Nov), on the
+# residents' A0 scale, log(100 x mean cover + 1) (Bills, 3 Nov: the plain mean was
+# skewed, a few dominant species far out on the axis); the residents' A0 are the first
+# control survey (a0.rds)
 a0_dest <- colonizers |> filter(treatment == "destination_control") |>
-  summarise(A0_dest = mean(relative_cover), .by = c(experiment_id, species))
+  summarise(A0_dest = log(100 * mean(relative_cover) + 1), .by = c(experiment_id, species))
 
 # warmed marginal mean = strength; averaged over all years, or over years >= 3 (as 03b)
 means_of <- function(fit, years) {
@@ -132,8 +138,9 @@ strength_df_y3 <- finish(strength_of(3L))
 stopifnot(nrow(strength_df) == 379, !anyDuplicated(strength_df$effect_id), !anyNA(strength_df$W), # every colonizer effect once
           !anyNA(strength_df$A0_dest), all(strength_df$A0_dest > 0), # every colonizer is in its destination controls (pool rule)
           all(is.finite(strength_df$strength_se)), all(strength_df$strength_se >= 0),
-          sum(strength_df$strength_se == 0) == 109, all(strength_df$strength[strength_df$strength_se == 0] == 0), # measured absences
-          sum(strength_df$se_source == "experiment") == 8, # experiment-error SEs, CH_Calanda2::Cal::Nes (Bills, 2 Nov)
+          sum(strength_df$strength_se == 0) == 107, # 109 until 3 Nov: Viola hirta and Echium vulgare first appear in CH_Calanda2's regained year 4
+           all(strength_df$strength[strength_df$strength_se == 0] == 0), # measured absences
+          sum(strength_df$se_source == "experiment") == 0, # experiment-error SEs: 8 at CH_Calanda2 until 3 Nov; with its year 4 regained every SE is estimated (the fallback rule stays)
           all(strength_df_y3$effect_id %in% strength_df$effect_id), !any(grepl("A0_origin", c(names(strength_df), names(strength_df_y3)))))
 n_y3_missing <- nrow(strength_df) - nrow(strength_df_y3)
 
@@ -175,7 +182,7 @@ never <- colonizers |> filter(treatment == "warmed") |>
   summarise(any = any(relative_cover > 0), .by = c(experiment_id, gradient_id, species)) |>
   summarise(never = all(!any), n_gradients = n_distinct(gradient_id), gradients = paste(sort(unique(gradient_id)), collapse = ", "),
             n_experiments = n(), .by = species) |> filter(never) |> select(-never) |> arrange(desc(n_gradients), species)
-stopifnot(nrow(never) == 46, all(never$n_gradients < 3)) # none reaches the Step C rule (Bills, 2 Nov)
+stopifnot(nrow(never) == 44, all(never$n_gradients < 3)) # none reaches the Step C rule (Bills, 2 Nov); 46 until 3 Nov: Viola hirta and Echium vulgare appear in CH_Calanda2's year 4
 
 # ---- Write ----------------------------------------------------------------------
 saveRDS(by_year, file.path(out_dir, "by_year.rds"))
@@ -269,7 +276,7 @@ ggsave("figures/appendix/figS14.png", patchwork::wrap_plots(d1, d2, widths = c(1
 # ---- Report -------------------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
 f3 <- function(x) sprintf("%.3f", x)
-fit_tab <- tibble::tibble(experiment_id = experiment_ids, species = sapply(fits, function(f) nlevels(f$model$frame$species)),
+fit_tab <- tibble::tibble(experiment_id = experiment_ids, species = sapply(fits, function(f) dplyr::n_distinct(f$model$frame$species)),
                           years = sapply(fits, function(f) paste(levels(f$model$frame$year), collapse = ", ")),
                           df_plots = sapply(fits, `[[`, "df_plots"), warnings = sapply(fits, function(f) length(f$warnings)))
 anchor_tab <- count(classes, year, name = "combinations") |> left_join(class_counts, by = "year")
@@ -279,7 +286,7 @@ report <- c(
   paste0("Each of the ", length(experiment_ids), " experiments with destination-pool species got one mixed model of relative cover on its ",
          "warmed plots only (Bills, 2 Nov), with the residents' model terms for one group: glmmTMB, warmed cover by year and species, plot x species random ",
          "intercept, one residual variance per species, degrees of freedom warmed plots - 1. Colonizer strength is the warmed marginal mean, zeros kept, ",
-         "averaged over all years and, separately, over years 3 and later; A0_dest, the propagule pressure, is the species' raw destination-control cover averaged over every plot and year (no model). Both strength windows are kept ",
+         "averaged over all years and, separately, over years 3 and later; A0_dest, the propagule pressure, is the species' destination-control cover averaged over every plot and year (no model), as log(100 x cover + 1) like the residents' A0 (Bills, 3 Nov). Both strength windows are kept ",
          "until the choice is made (Bills, 2 Nov). Each colonizer was classified at years 2, 3, 4 and 6 as absent (no cover ",
          "in any warmed plot that year, from the raw data), present (warmed mean above zero at one-sided p < 0.05) or present (ns), and ",
          "presence agreement and the concordance correlation of warmed cover were computed between adjacent anchors."),
@@ -320,7 +327,7 @@ report <- c(
   "- Strength from a model of the warmed plots only, and A0_dest the raw destination-control cover averaged over years, not the destination-control mean of a joint fit; species never recorded in a warmed plot are measured absences (strength 0, SE 0), and species whose variance the model cannot separate from their plot variance take the experiment's error (Bills, 2 Nov; PLAN.md updated).",
   "- The pool-size rule applied to colonizers too, at least 5 colonizer species per experiment (Bills, 2 Nov; PLAN.md updated).",
   "- Strength kept twice, all years and years 3 and later, until the stability is read (Bills, 2 Nov).",
-  "- Presence is tested one-sided (warmed mean above zero); PLAN.md's `test()` call leaves the side open.",
+  "- Presence is tested one-sided (warmed mean above zero), as PLAN.md's colonizer code now writes it.",
   "- Figures written to `figures/main/` and `figures/appendix/` so that the report can link them.")
 writeLines(report, "reports/07a_colonizers.md")
 message("Step 07a written: ", length(experiment_ids), " fits; ", paste(sprintf("%s CCC %.2f", stability$pair, stability$ccc), collapse = "; "))
