@@ -20,3 +20,8 @@ fit_model <- function(mods, random, data, struct = "GEN", method = "REML", contr
 # taken as unidentified, the fallback of decision 25 Oct. metafor spells a
 # diagonal block of several inner variables "GDIAG"; the W block has one variable.
 slope_struct <- c("GEN", "GDIAG")
+
+# The columns a ladder fit or fold uses, for its cache key (R/cache.R): identifiers,
+# response, the random-slope variables and the variables of its formula
+fit_columns <- function(mods) unique(c("effect_id", "species", "experiment_id", "gradient_id", "strength", "strength_se",
+                                       "W", "T", "P", "TP", all.vars(mods)))

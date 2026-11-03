@@ -1,6 +1,6 @@
 # Step 06: The ladder, predicted (Step D, route 2, residents)
 
-Every level of the ladder was refitted 16 times on the 512 ladder rows of step 05, each time without one of the 16 gradients that have at least 5 effects, and asked to predict the strengths of the gradient left out: Null, Initial abundances, Climate, Climate + initial abundances, Species-dependent and one level per property, 192 fold fits on 7 cores (155 fit-minutes). Predictions are fixed effects only, the experiment term at its expected value zero; Species-dependent adds each species' intercept and slope deviations learnt from the training gradients (zero for a species not seen there), and the seven supplement levels add the same to each property model. Each level is scored per gradient by R² against the Null model on the same gradient (1 − its error / the Null's error, so Null is 0), Spearman ρ within the gradient and loser/winner skill, held out and in sample (step 05 full-data fits, the same rule), then summarised by the median over gradients (Bills, 2 Nov).
+Every level of the ladder was refitted 16 times on the 512 ladder rows of step 05, each time without one of the 16 gradients that have at least 5 effects, and asked to predict the strengths of the gradient left out: Null, Initial abundances, Climate, Climate + initial abundances, Species-dependent and one level per property, 192 fold fits on 7 cores (156 fit-minutes). Predictions are fixed effects only, the experiment term at its expected value zero; Species-dependent adds each species' intercept and slope deviations learnt from the training gradients (zero for a species not seen there), and the seven supplement levels add the same to each property model. Each level is scored per gradient by R² against the Null model on the same gradient (1 − its error / the Null's error, so Null is 0), Spearman ρ within the gradient and loser/winner skill, held out and in sample (step 05 full-data fits, the same rule), then summarised by the median over gradients (Bills, 2 Nov).
 
 ## Counts
 
@@ -37,7 +37,7 @@ Every level of the ladder was refitted 16 times on the 512 ladder rows of step 0
 | Initial abundances | 16 | 16 | 0 | 0.2 | 0.4 |
 | Climate | 16 | 16 | 0 | 0.4 | 0.5 |
 | Climate + initial abundances | 16 | 16 | 0 | 0.4 | 0.4 |
-| Species-dependent | 16 | 16 | 0 | 1.1 | 1.2 |
+| Species-dependent | 16 | 16 | 0 | 1.1 | 1.3 |
 | LDMC | 16 | 16 | 0 | 1.1 | 1.7 |
 | LMA | 16 | 16 | 0 | 1.1 | 1.4 |
 | Height | 16 | 16 | 0 | 1.1 | 1.6 |

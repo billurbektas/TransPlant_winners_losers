@@ -1,6 +1,6 @@
 # Step 05: The ladder, fitted (Step D, route 1, residents)
 
-The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the 512 effects of the 71 residents found in at least 3 gradients that carry every property (39 experiments, 20 gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, 12 REML fits, all on the same rows. Each model reports τ² (species × site), σ²_experiment (shared site shift) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry model-based (REML Wald) standard errors (Bills, 2 Nov; CR1 before). Fits ran in parallel on 7 cores, 11.7 fit-minutes in all; this run took 0 min.
+The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the 512 effects of the 71 residents found in at least 3 gradients that carry every property (39 experiments, 20 gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, 12 REML fits, all on the same rows. Each model reports τ² (species × site), σ²_experiment (shared site shift) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry model-based (REML Wald) standard errors (Bills, 2 Nov; CR1 before). Fits ran in parallel on 7 cores, 11.8 fit-minutes in all; this run took 1 min.
 
 ## Slope structure
 
@@ -66,13 +66,13 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | ldmc | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | ldmc | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | ldmc | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| ldmc | LDMC | ldmc | 512 | 71 | 2.834 | 0.000 | 0.643 | 0.749 | DIAG | 1.4 |
+| ldmc | LDMC | ldmc | 512 | 71 | 2.834 | 0.000 | 0.643 | 0.749 | DIAG | 1.5 |
 | lma | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
 | lma | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
 | lma | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | lma | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | lma | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| lma | LMA | lma | 512 | 71 | 2.804 | 0.000 | 0.499 | 0.730 | DIAG | 1.3 |
+| lma | LMA | lma | 512 | 71 | 2.804 | 0.000 | 0.499 | 0.730 | DIAG | 1.4 |
 | height | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
 | height | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
 | height | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
@@ -84,8 +84,8 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | growth_form | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | growth_form | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | growth_form | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| growth_form | Graminoid | growth_form | 512 | 71 | 2.915 | 0.000 | 0.622 | 0.665 | DIAG | 1.4 |
-| growth_form | Woody | growth_form | 512 | 71 | 2.913 | 0.000 | 0.607 | 0.683 | DIAG | 1.3 |
+| growth_form | Graminoid | growth_form | 512 | 71 | 2.915 | 0.000 | 0.622 | 0.665 | DIAG | 1.5 |
+| growth_form | Woody | growth_form | 512 | 71 | 2.913 | 0.000 | 0.607 | 0.683 | DIAG | 1.4 |
 | phylogeny | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
 | phylogeny | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
 | phylogeny | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
@@ -97,7 +97,7 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | niche | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
 | niche | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
 | niche | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| niche | Niche | niche | 512 | 71 | 2.860 | 0.000 | 0.575 | 0.750 | DIAG | 1.2 |
+| niche | Niche | niche | 512 | 71 | 2.860 | 0.000 | 0.575 | 0.750 | DIAG | 1.1 |
 
 All 8 slope fits converged with the diagonal T, P, TP block, each from metafor's default start (Bills, 1 Nov). Across the 8 fits the T slope variance ranges 0.000 to 0.274 ×10⁻⁴; the TP slope variance 0.030 to 0.193 ×10⁻⁴; only the P slope variance is at the boundary (at most 9.1e-11).
 

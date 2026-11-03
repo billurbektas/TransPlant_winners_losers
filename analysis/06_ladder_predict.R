@@ -35,7 +35,8 @@
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/fit_model.R"); source("R/h_species.R"); source("R/metrics_gradient.R")
-source("R/species_deviation.R"); source("R/fig4_ladder.R"); source("R/md_table.R")
+source("R/species_deviation.R"); source("R/fig4_ladder.R"); source("R/md_table.R"); source("R/cache.R")
+cache_version <- "06-v1" # raise when the fold code changes
 
 warns <- character()
 globalCallingHandlers(warning = function(w) {
@@ -117,8 +118,9 @@ blup_sd <- c(intercept = sd(b05$species), W = sd(b05$W), T = sd(b05$TPTP[, 1]), 
 # ---- One fold, cached: fit on the other gradients, predict the held-out one ----
 fit_fold <- function(task) {
   path <- file.path(fold_dir, paste0(task$level, "_", task$gradient_id, ".rds"))
-  if (file.exists(path)) return(readRDS(path))
   lv <- filter(levels_fit, level == task$level); mods <- level_mods[[task$level]]; g <- task$gradient_id
+  key <- cache_key(rows[[lv$rowset]][fit_columns(mods)], deparse(mods), lv$slopes, g, cache_version)
+  hit <- read_cache(path, key); if (!is.null(hit)) return(hit)
   train <- filter(rows[[lv$rowset]], gradient_id != g); test <- filter(rows[[lv$rowset]], gradient_id == g)
   stopifnot(!g %in% train$gradient_id, nrow(test) > 0) # held-out gradient absent from training
   random <- if (lv$slopes) re_slopes else re_base
@@ -148,9 +150,7 @@ fit_fold <- function(task) {
                             var_T = if (ok && lv$slopes) m$gamma2[1] else NA_real_, var_P = if (ok && lv$slopes) m$gamma2[2] else NA_real_,
                             var_TP = if (ok && lv$slopes) m$gamma2[3] else NA_real_,
                             rho_T_P = NA_real_, rho_T_TP = NA_real_, rho_P_TP = NA_real_) # diagonal: no correlations
-  res <- list(pred = pred, summary = summary, warnings = unique(w))
-  saveRDS(res, path)
-  res
+  write_cache(list(pred = pred, summary = summary, warnings = unique(w)), path, key)
 }
 
 # Species-dependent first, then the four levels without species slopes, then the

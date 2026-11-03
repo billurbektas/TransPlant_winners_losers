@@ -21,6 +21,7 @@
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/fit_model.R"); source("R/metrics_gradient.R"); source("R/species_deviation.R"); source("R/fig4_ladder.R"); source("R/md_table.R")
+source("R/cache.R"); cache_version <- "07d-v1" # raise when the fold code changes
 
 warns <- character()
 globalCallingHandlers(warning = function(w) {
@@ -57,8 +58,9 @@ fixed_part <- function(m, f, d) { X <- model.matrix(f, d); colnames(X)[colnames(
 # ---- One fold, cached ---------------------------------------------------------------
 fit_fold <- function(task) {
   path <- file.path(fold_dir, paste0(task$level, "_", task$gradient_id, ".rds"))
-  if (file.exists(path)) return(readRDS(path))
   lv <- filter(levels_fit, level == task$level); g <- task$gradient_id
+  key <- cache_key(rows[fit_columns(mods[[lv$level]])], deparse(mods[[lv$level]]), lv$slopes, g, cache_version)
+  hit <- read_cache(path, key); if (!is.null(hit)) return(hit)
   train <- filter(rows, gradient_id != g); test <- filter(rows, gradient_id == g)
   stopifnot(!g %in% train$gradient_id, nrow(test) > 0)
   w <- character(); optimizer <- "nlminb"
@@ -75,7 +77,7 @@ fit_fold <- function(task) {
   stopifnot(all(pred$deviation[!pred$species_known] %in% c(0, NA))) # deviations only for species seen in training
   res <- list(pred = pred, summary = tibble::tibble(level = lv$level, gradient_id = g, status = if (ok) "converged" else m, optimizer = optimizer),
               warnings = unique(w))
-  saveRDS(res, path); res
+  write_cache(res, path, key)
 }
 tasks <- tidyr::expand_grid(level = levels_fit$level, gradient_id = scored)
 tasks <- lapply(seq_len(nrow(tasks)), function(i) as.list(tasks[i, ]))

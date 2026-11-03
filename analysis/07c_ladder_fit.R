@@ -23,7 +23,8 @@
 # model-based coefficient intervals as step 05; run 07c to 07f without stopping.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
-source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R")
+source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R"); source("R/cache.R")
+cache_version <- "07c-v1" # raise when the fitting code changes
 
 warns <- character()
 globalCallingHandlers(warning = function(w) {
@@ -79,7 +80,8 @@ mods <- c(list(null = ~ 1, start = f_start, climate = f_env, climate_start = f_b
 
 run_fit <- function(i) {
   lv <- levels_fit[i, ]; path <- file.path(out_dir, "models", paste0(lv$slug, ".rds"))
-  if (file.exists(path)) return(readRDS(path))
+  key <- cache_key(rows[fit_columns(mods[[lv$slug]])], deparse(mods[[lv$slug]]), lv$slopes, cache_version)
+  hit <- read_cache(path, key); if (!is.null(hit)) return(hit)
   w <- character(); t0 <- Sys.time(); optimizer <- "nlminb"
   fit <- function(control) withCallingHandlers(
     tryCatch(fit_model(mods[[lv$slug]], if (lv$slopes) re_slopes else re_base, rows, struct = if (lv$slopes) slope_struct else "GEN",
@@ -89,7 +91,7 @@ run_fit <- function(i) {
   if (is.character(m)) stop(lv$model, ": ", m)
   res <- list(m = m, slug = lv$slug, model = lv$model, slopes = lv$slopes, optimizer = optimizer,
               minutes = as.numeric(difftime(Sys.time(), t0, units = "mins")), warnings = unique(w))
-  saveRDS(res, path); res
+  write_cache(res, path, key)
 }
 fits <- parallel::mclapply(seq_len(nrow(levels_fit)), run_fit, mc.cores = cores, mc.preschedule = FALSE)
 if (any(sapply(fits, inherits, "try-error"))) stop("fits failed: ", paste(unlist(fits[sapply(fits, inherits, "try-error")]), collapse = "\n"))

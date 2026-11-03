@@ -26,7 +26,8 @@
 # first (same lines); graminoid and woody as 0/1, not standardised.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
-source("R/fit_experiment.R")
+source("R/fit_experiment.R"); source("R/cache.R")
+cache_version <- "02-v1" # raise when fit_experiment() changes
 source("R/md_table.R")
 
 warns <- character()
@@ -53,11 +54,13 @@ experiment_ids <- sort(unique(resident$experiment_id))
 fits <- list()
 for (e in experiment_ids) {
   f <- file.path(model_dir, paste0(gsub("::", "__", e), ".rds"))
-  if (!file.exists(f)) {
+  d <- filter(resident, experiment_id == e)
+  key <- cache_key(d, "origin_control", cache_version) # refit when this experiment's rows change
+  fits[[e]] <- read_cache(f, key)
+  if (is.null(fits[[e]])) {
     message("fitting ", e)
-    saveRDS(fit_experiment(filter(resident, experiment_id == e), control_level = "origin_control"), f)
+    fits[[e]] <- write_cache(fit_experiment(d, control_level = "origin_control"), f, key)
   }
-  fits[[e]] <- readRDS(f)
 }
 
 by_year <- bind_rows(lapply(experiment_ids, function(e) mutate(fits[[e]]$by_year, experiment_id = e))) |>

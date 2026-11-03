@@ -31,7 +31,8 @@
 # applied to colonizers too, at least 5 colonizer species per experiment (consistency).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
-source("R/md_table.R")
+source("R/md_table.R"); source("R/cache.R")
+cache_version <- "07a-v1" # raise when fit_warmed() changes
 invisible(loadNamespace("glmmTMB")) # emmeans reads cached glmmTMB fits only with it loaded (as 03b)
 
 warns <- character()
@@ -98,8 +99,11 @@ pick <- function(fit, spec, years = NULL) {
 experiment_ids <- sort(unique(colonizers$experiment_id))
 fits <- lapply(experiment_ids, function(e) {
   f <- file.path(out_dir, "models", paste0(gsub("::", "__", e), ".rds"))
-  if (!file.exists(f)) saveRDS(fit_warmed(filter(colonizers, experiment_id == e, treatment == "warmed")), f)
-  readRDS(f)
+  d <- filter(colonizers, experiment_id == e, treatment == "warmed")
+  key <- cache_key(d, cache_version) # refit when this experiment's warmed rows change
+  x <- read_cache(f, key)
+  if (is.null(x)) x <- write_cache(fit_warmed(d), f, key)
+  x
 })
 names(fits) <- experiment_ids
 

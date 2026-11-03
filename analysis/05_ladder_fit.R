@@ -27,7 +27,8 @@
 # The ladder figure (Fig 6) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
-source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R")
+source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R"); source("R/cache.R")
+cache_version <- "05-v1" # raise when the fitting code changes
 
 warns <- character()
 globalCallingHandlers(warning = function(w) {
@@ -81,10 +82,11 @@ floor_models <- list(null = list("Null", ~ 1), start = list("Start", f_start),
                      climate = list("Climate", f_env), climate_start = list("Climate + start", f_both))
 fit_rowsets <- "all" # every rowset equals the ladder rows (2 Nov)
 
-# ---- One fit, cached: skipped when its file exists ----------------------------
+# ---- One fit, cached: reused while its rows and specification are unchanged ----
 run_fit <- function(task) {
   path <- file.path(out_dir, "models", task$rowset, paste0(task$slug, ".rds"))
-  if (file.exists(path)) return(readRDS(path))
+  key <- cache_key(rows[[task$rowset]][fit_columns(task$mods)], deparse(task$mods), task$kind, task$control, cache_version)
+  hit <- read_cache(path, key); if (!is.null(hit)) return(hit)
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
   w <- character(); t0 <- Sys.time()
   struct <- if (task$kind == "floor") "GEN" else slope_struct
@@ -96,7 +98,7 @@ run_fit <- function(task) {
   res <- c(res, list(rowset = task$rowset, slug = task$slug, model = task$model, slopes = task$kind != "floor",
                      struct = if (task$kind == "floor") "none (no slopes)" else "DIAG",
                      minutes = as.numeric(difftime(Sys.time(), t0, units = "mins")), warnings = list(w)))
-  if (is.null(res$error)) saveRDS(res, path)
+  if (is.null(res$error)) res <- write_cache(res, path, key)
   res
 }
 run_wave <- function(tasks) {
