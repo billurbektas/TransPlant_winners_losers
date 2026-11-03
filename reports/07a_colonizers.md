@@ -26,34 +26,34 @@ Where each colonizer's strength SE comes from (all years): experiment 8, measure
 
 | experiment_id | species | years | df_plots | warnings |
 | --- | --- | --- | --- | --- |
-| CH_Calanda::Cal::Nes | 0 | 1, 2, 3, 4, 5, 6 | 9 | 0 |
-| CH_Calanda::Pea::Cal | 0 | 1, 2, 3, 4, 5, 6 | 9 | 0 |
-| CH_Calanda2::Cal::Nes | 0 | 1, 2, 3 | 9 | 0 |
-| CH_Lavey::RIO::CRE | 0 | 1, 2, 3 | 9 | 0 |
-| CH_Lavey::RIO::MAR | 0 | 1, 2, 3 | 9 | 0 |
-| CH_Lavey::RIO::PRA | 0 | 1, 2, 3 | 9 | 0 |
-| CN_Gongga::A::M | 0 | 1, 2, 3, 4 | 6 | 0 |
-| CN_Gongga::H::A | 0 | 1, 2, 3, 4 | 6 | 0 |
-| CN_Gongga::H::L | 0 | 1, 2, 3, 4 | 6 | 0 |
-| CN_Heibei::3800::3200 | 0 | 1, 2, 3, 6, 7, 8, 9 | 2 | 0 |
-| CN_Heibei::3800::3400 | 0 | 1, 2, 3, 6, 7, 8, 9 | 2 | 0 |
-| DE_Grainau::HIGH::LOW | 0 | 1, 2, 3, 4 | 9 | 0 |
-| DE_Susalps::FE::BT | 0 | 1, 2, 3, 4 | 8 | 0 |
-| DE_TransAlps::FP::BT | 0 | 1, 2, 3, 4 | 8 | 0 |
-| FR_AlpeHuez::HIGH::LOW | 0 | 1, 2, 3, 4, 5, 6, 7, 8, 9 | 9 | 0 |
-| FR_Lautaret::G::L | 0 | 1, 2, 5, 6 | 9 | 0 |
-| IT_MatschMazia1::High::Low | 0 | 1, 2, 3 | 2 | 0 |
-| IT_MatschMazia2::High::Low | 0 | 1, 2, 3 | 8 | 0 |
-| NO_Gudmedalen::Rambera::Arhelleren | 0 | 2, 3, 4, 6, 8 | 4 | 0 |
-| NO_Lavisdalen::Lavisdalen::Hogsete | 0 | 2, 3, 4, 6, 8 | 4 | 0 |
-| NO_Skjellingahaugen::Skjellingahaugen::Veskre | 0 | 2, 3, 4, 6, 8 | 4 | 0 |
-| NO_Ulvhaugen::Alrust::Fauske | 0 | 2, 3, 4, 6, 8 | 4 | 0 |
-| NO_Ulvhaugen::Ulvhaugen::Alrust | 0 | 2, 3, 4, 6, 8 | 4 | 0 |
-| SE_Abisko::High::Low | 0 | 1, 2, 3 | 4 | 0 |
-| SE_Abisko::High::Mid | 0 | 1, 2, 3 | 4 | 0 |
-| US_Colorado::mo::um | 0 | 1, 2, 4, 5, 6 | 7 | 0 |
-| US_Colorado::pf::um | 0 | 1, 2, 4, 5, 6 | 6 | 0 |
-| US_Montana::High::Low | 0 | 1, 2, 5 | 9 | 0 |
+| CH_Calanda::Cal::Nes | 23 | 1, 2, 3, 4, 5, 6 | 9 | 0 |
+| CH_Calanda::Pea::Cal | 30 | 1, 2, 3, 4, 5, 6 | 9 | 0 |
+| CH_Calanda2::Cal::Nes | 8 | 1, 2, 3 | 9 | 0 |
+| CH_Lavey::RIO::CRE | 2 | 1, 2, 3 | 9 | 0 |
+| CH_Lavey::RIO::MAR | 9 | 1, 2, 3 | 9 | 0 |
+| CH_Lavey::RIO::PRA | 13 | 1, 2, 3 | 9 | 0 |
+| CN_Gongga::A::M | 7 | 1, 2, 3, 4 | 6 | 0 |
+| CN_Gongga::H::A | 8 | 1, 2, 3, 4 | 6 | 0 |
+| CN_Gongga::H::L | 7 | 1, 2, 3, 4 | 6 | 0 |
+| CN_Heibei::3800::3200 | 8 | 1, 2, 3, 6, 7, 8, 9 | 2 | 0 |
+| CN_Heibei::3800::3400 | 10 | 1, 2, 3, 6, 7, 8, 9 | 2 | 0 |
+| DE_Grainau::HIGH::LOW | 11 | 1, 2, 3, 4 | 9 | 0 |
+| DE_Susalps::FE::BT | 6 | 1, 2, 3, 4 | 8 | 0 |
+| DE_TransAlps::FP::BT | 8 | 1, 2, 3, 4 | 8 | 0 |
+| FR_AlpeHuez::HIGH::LOW | 13 | 1, 2, 3, 4, 5, 6, 7, 8, 9 | 9 | 0 |
+| FR_Lautaret::G::L | 9 | 1, 2, 5, 6 | 9 | 0 |
+| IT_MatschMazia1::High::Low | 4 | 1, 2, 3 | 2 | 0 |
+| IT_MatschMazia2::High::Low | 15 | 1, 2, 3 | 8 | 0 |
+| NO_Gudmedalen::Rambera::Arhelleren | 8 | 2, 3, 4, 6, 8 | 4 | 0 |
+| NO_Lavisdalen::Lavisdalen::Hogsete | 7 | 2, 3, 4, 6, 8 | 4 | 0 |
+| NO_Skjellingahaugen::Skjellingahaugen::Veskre | 7 | 2, 3, 4, 6, 8 | 4 | 0 |
+| NO_Ulvhaugen::Alrust::Fauske | 6 | 2, 3, 4, 6, 8 | 4 | 0 |
+| NO_Ulvhaugen::Ulvhaugen::Alrust | 12 | 2, 3, 4, 6, 8 | 4 | 0 |
+| SE_Abisko::High::Low | 4 | 1, 2, 3 | 4 | 0 |
+| SE_Abisko::High::Mid | 3 | 1, 2, 3 | 4 | 0 |
+| US_Colorado::mo::um | 10 | 1, 2, 4, 5, 6 | 7 | 0 |
+| US_Colorado::pf::um | 5 | 1, 2, 4, 5, 6 | 6 | 0 |
+| US_Montana::High::Low | 17 | 1, 2, 5 | 9 | 0 |
 
 ## Presence classes per anchor
 
@@ -99,5 +99,5 @@ Panel a is step 03's, redrawn from its saved classes and flows with the same cod
 - Strength from a model of the warmed plots only, and A0_dest the raw destination-control cover averaged over years, not the destination-control mean of a joint fit; species never recorded in a warmed plot are measured absences (strength 0, SE 0), and species whose variance the model cannot separate from their plot variance take the experiment's error (Bills, 2 Nov; PLAN.md updated).
 - The pool-size rule applied to colonizers too, at least 5 colonizer species per experiment (Bills, 2 Nov; PLAN.md updated).
 - Strength kept twice, all years and years 3 and later, until the stability is read (Bills, 2 Nov).
-- Presence is tested one-sided (warmed mean above zero); PLAN.md's `test()` call leaves the side open.
+- Presence is tested one-sided (warmed mean above zero), as PLAN.md's colonizer code now writes it.
 - Figures written to `figures/main/` and `figures/appendix/` so that the report can link them.

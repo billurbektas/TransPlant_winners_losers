@@ -4,7 +4,7 @@
 #          gradient with the experiment term in the model".
 # Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3);
 #         data/derived/05_ladder_fit/models/<rowset>/<model>.rds (fit metrics);
-#         data/derived/05_ladder_fit/heterogeneity.csv (Fig 4 row a)
+#         data/derived/05_ladder_fit/heterogeneity.csv (Fig 6 row a)
 # Writes: data/derived/06_ladder_predict/folds/<level>_<gradient_id>.rds,
 #         pred_metrics.csv, fit_metrics.csv, summary_metrics.csv,
 #         fold_summary.csv; figures/main/fig6.png (the ladder, main Fig 6),
@@ -30,7 +30,7 @@
 # per fold the predictions and a one-row summary, no model objects.
 # Reopened 2 Nov (Bills): R2 per gradient against the Null model on the same
 # gradient, 1 - MSE(level) / MSE(Null), replacing the shared yardstick V; every
-# metric summarised by its median over the scored gradients; Fig 4 rows b) to d)
+# metric summarised by its median over the scored gradients; Fig 6 rows b) to d)
 # as half violins; display labels "Initial abundances", "Loser/winner skill".
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
@@ -94,7 +94,7 @@ levels_fit <- tibble::tibble(
 level_mods <- c(list(null = ~ 1, start = f_start, climate = f_env, climate_start = f_both, species = f_both), f_prop)
 supp <- paste0(names(prop_vars), "+species") # supplement: property model plus species deviations
 level_label <- c(setNames(levels_fit$column, levels_fit$level), setNames(paste(prop_label, "+ species"), supp))
-# what readers see (Bills, 2 Nov); level_label stays the key of Fig 4's columns
+# what readers see (Bills, 2 Nov); level_label stays the key of Fig 6's columns
 level_display <- replace(level_label, c("start", "climate_start"), c("Initial abundances", "Climate + initial abundances"))
 
 fixed_part <- function(m, mods, d) { # experiment term silent at prediction: its expected value, 0
@@ -246,11 +246,11 @@ fig4_grad <- bind_rows(mutate(fit_metrics, type = "fit"), mutate(pred_metrics, t
 # no caption on the figure (Bills, 2 Nov): the report says what each row shows
 fig4_ladder(het_fig, "figures/main/fig6.png", gradients = fig4_grad) # main Fig 6, anchored (Bills, 2 Nov)
 
-# Fig S7 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
+# Fig S12 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
 grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_id) |>
   summarise(T_dest = mean(T), spread = sd(strength), .groups = "drop") |> arrange(T_dest)
 
-# Fig S7: the complete per-gradient view, every metric x level, in sample and held out
+# Fig S12: the complete per-gradient view, every metric x level, in sample and held out
 s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics, version = "Held out")) |>
   tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
   mutate(gradient_id = factor(gradient_id, levels = rev(grad_info$gradient_id)),
@@ -283,7 +283,10 @@ fold_tab <- fold_summary |> group_by(level = level_display[level]) |>
 grad_counts <- n_eff |> transmute(gradient_id, effects = n, species = sapply(gradient_id, function(g) n_distinct(strength_df$species[strength_df$gradient_id == g])),
   held_out = ifelse(gradient_id %in% scored, "yes", "no (fewer than 5 effects; trains only)"))
 fold_warn <- unique(unlist(lapply(out, function(x) if (length(x$warnings)) paste0(x$summary$level, " / ", x$summary$gradient_id, ": ", x$warnings))))
-fold_warn <- fold_warn[!grepl("struct' argument is disregaded", fold_warn)]
+# metafor's "struct disregarded" note is listed once with its count (CLAUDE.md: warnings are reported, never dropped)
+n_struct <- sum(grepl("struct' argument is disregaded", fold_warn))
+fold_warn <- c(fold_warn[!grepl("struct' argument is disregaded", fold_warn)],
+               if (n_struct) paste0("metafor: \"'struct' argument is disregaded since no ~ inner | outer term\" (", n_struct, " fold fits without slopes)"))
 report <- c(
   "# Step 06: The ladder, predicted (Step D, route 2, residents)", "",
   paste0("Every level of the ladder was refitted ", length(scored), " times on the ", nrow(strength_df), " ladder rows of step 05, each time without one of the ", length(scored), " gradients that have at least 5 effects, and asked to predict ",
@@ -312,16 +315,16 @@ report <- c(
          "Standard deviation of the BLUPs across species on that fit: intercept ", sprintf("%.2e", blup_sd[["intercept"]]),
          ", W slope ", sprintf("%.2e", blup_sd[["W"]]), ", T slope ", sprintf("%.2e", blup_sd[["T"]]), ", P slope ",
          sprintf("%.2e", blup_sd[["P"]]), ", TP slope ", sprintf("%.2e", blup_sd[["TP"]]),
-         ". The P and TP BLUPs are about zero because their variances sit at the boundary (step 05): a BLUP is its variance times ",
-         "the species' weighted residual, so in practice the deviation is the species' intercept, W slope and T slope."),
+         ". The P BLUPs are about zero because the P slope variance sits at the boundary (step 05): a BLUP is its variance times ",
+         "the species' weighted residual, so in practice the deviation is the species' intercept and its W, T and TP slopes."),
   "", paste0("Every held-out species had training data: each ladder species occurs in at least 3 gradients, so at least 2 remain in training (checked)."),
   "", "## Figures", "", "![Fig 6, the ladder](../figures/main/fig6.png)", "",
-  paste0("Fig 4. Row a): step 05, every column on the same ", nrow(strength_df), " rows; dashed lines carry Species-dependent across the property columns. ",
+  paste0("Fig 6. Row a): step 05, every column on the same ", nrow(strength_df), " rows; dashed lines carry Species-dependent across the property columns. ",
          "Rows b) to d): each half violin is the ", length(scored), " scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all ", length(gradients),
          " gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, ",
          "so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. ",
          "Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."), "",
-  "![Fig S7, per-gradient view](../figures/appendix/figS12.png)",
+  "![Fig S12, per-gradient view](../figures/appendix/figS12.png)",
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",

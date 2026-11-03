@@ -122,7 +122,7 @@ Null's R² is 0 on every scored gradient, in sample and held out (checked): it i
 
 ## Species deviations
 
-metafor 5.0.1 gives no BLUPs for a GEN or GDIAG slope block, so the species deviations are computed by hand, jointly for every random term, as D Z′ M⁻¹ (y − Xβ) from each fit's variance components, V and β (`R/species_deviation.R`). On the step 05 all-rows Species-dependent fit they equal `ranef()` for the species and experiment intercepts to 1.4e-17 and 1.0e-24 (checked to 1e-8). Standard deviation of the BLUPs across species on that fit: intercept 4.82e-03, W slope 2.94e-03, T slope 1.37e-03, P slope 3.11e-11, TP slope 1.32e-03. The P and TP BLUPs are about zero because their variances sit at the boundary (step 05): a BLUP is its variance times the species' weighted residual, so in practice the deviation is the species' intercept, W slope and T slope.
+metafor 5.0.1 gives no BLUPs for a GEN or GDIAG slope block, so the species deviations are computed by hand, jointly for every random term, as D Z′ M⁻¹ (y − Xβ) from each fit's variance components, V and β (`R/species_deviation.R`). On the step 05 all-rows Species-dependent fit they equal `ranef()` for the species and experiment intercepts to 1.4e-17 and 1.0e-24 (checked to 1e-8). Standard deviation of the BLUPs across species on that fit: intercept 4.82e-03, W slope 2.94e-03, T slope 1.37e-03, P slope 3.11e-11, TP slope 1.32e-03. The P BLUPs are about zero because the P slope variance sits at the boundary (step 05): a BLUP is its variance times the species' weighted residual, so in practice the deviation is the species' intercept and its W, T and TP slopes.
 
 Every held-out species had training data: each ladder species occurs in at least 3 gradients, so at least 2 remain in training (checked).
 
@@ -130,13 +130,13 @@ Every held-out species had training data: each ladder species occurs in at least
 
 ![Fig 6, the ladder](../figures/main/fig6.png)
 
-Fig 4. Row a): step 05, every column on the same 512 rows; dashed lines carry Species-dependent across the property columns. Rows b) to d): each half violin is the 16 scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all 20 gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient.
+Fig 6. Row a): step 05, every column on the same 512 rows; dashed lines carry Species-dependent across the property columns. Rows b) to d): each half violin is the 16 scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all 20 gradients), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, so Null is 0 and not drawn. Dashed lines from the Species-dependent column on: its explanatory (grey) and predictive (blue) medians. Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient.
 
-![Fig S7, per-gradient view](../figures/appendix/figS12.png)
+![Fig S12, per-gradient view](../figures/appendix/figS12.png)
 
 ## Warnings captured
 
-None.
+- metafor: "'struct' argument is disregaded since no ~ inner | outer term" (64 fold fits without slopes)
 
 ## Deviations from PLAN.md
 

@@ -141,8 +141,8 @@ med <- vs |> group_by(level, metric) |>
 spread <- filter(folds, level != "null") |>
   summarise(one_sign = all(predicted > 0) | all(predicted < 0), sd_ratio = sd(predicted) / sd(observed), .by = c(level, gradient_id))
 
-# ---- Fig S11: metafor (left) beside forest (right), held out ---------------------
-cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 4; Okabe-Ito orange
+# ---- Fig S18: metafor (left) beside forest (right), held out ---------------------
+cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 6; Okabe-Ito orange
 fills <- c(metafor = "#8DB8EA", forest = "#F3C766")
 col_levels <- setdiff(all_levels, "null"); n <- length(col_levels) # Null is the R² reference, not drawn (Bills, 2 Nov)
 xlabs <- sub(" \\+ species$", "\n+ species", sub("Climate \\+ destination abundance", "Climate +\ndest.\nabundance",
@@ -242,7 +242,7 @@ report <- c(
          " and the largest change in a median ", sprintf("%.3f", max(seed_med$d)), ". Largest change in a median per metric: ",
          paste0(c("R² ", "Spearman ρ "), sprintf("%.3f", sapply(c("r2", "spearman"), function(k) max(seed_med$d[seed_med$metric == k]))), collapse = ", "),
          "."),
-  "", "## Figures", "", "![Fig S11, colonizers: forest beside meta-regression](../figures/appendix/figS18.png)",
+  "", "## Figures", "", "![Fig S18, colonizers: forest beside meta-regression](../figures/appendix/figS18.png)",
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- Step 06b on the colonizer ladder rows (Bills, 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.",

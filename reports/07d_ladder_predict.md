@@ -74,11 +74,11 @@ Every held-out species had training data: TRUE.
 
 ## Figures
 
-![Fig S9, the colonizer ladder](../figures/appendix/figS16.png)
+![Fig S16, the colonizer ladder](../figures/appendix/figS16.png)
 
-Fig S9 as Fig 4: row a) step 07c; rows b) c): half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No skill row.
+Fig S16 as Fig 6: row a) step 07c; rows b) c): half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No skill row.
 
-![Fig S7, colonizers](../figures/appendix/figS17.png)
+![Fig S17, colonizers](../figures/appendix/figS17.png)
 
 ## Warnings captured
 
@@ -282,9 +282,10 @@ Fig S9 as Fig 4: row a) step 07c; rows b) c): half violins of the 8 scored gradi
 - niche / NO_Ulvhaugen: 'V' appears to be not positive definite.
 - niche / US_Colorado: There are outcomes with non-positive sampling variances.
 - niche / US_Colorado: 'V' appears to be not positive definite.
+- metafor: "'struct' argument is disregaded since no ~ inner | outer term" (32 fold fits without slopes)
 
 ## Deviations from PLAN.md
 
 - The colonizer ladder predicted on the residents' reduction (Bills, 2 Nov).
 - An R² below −100 is taken out of the R² row and the medians and listed (Bills, 2 Nov).
-- `R/fig4_ladder.R` gained two optional arguments (column labels; the skill row), its defaults leave step 06's Fig 4 byte-identical (checked).
+- `R/fig4_ladder.R` gained two optional arguments (column labels; the skill row), its defaults leave step 06's ladder figure (Fig 6) byte-identical (checked).

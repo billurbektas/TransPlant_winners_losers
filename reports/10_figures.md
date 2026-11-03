@@ -116,7 +116,7 @@ Mean over experiments, per cent of the warmed turf: resident losers 23, resident
 | Table S1 | tables/tableS1.csv | Experiments | 42 |
 | Table S2 | tables/tableS2.csv | Species list | 426 |
 | Table S3 | tables/tableS3.csv | Phylogenetic axes | 3 |
-| Table S4 | tables/tableS4.csv | Variance components per model | 54 |
+| Table S4 | tables/tableS4.csv | Variance components per model | 24 |
 | Table S5 | tables/tableS5.csv | Fixed-effect coefficients per model | 321 |
 
 ## Table S3, phylogenetic axes

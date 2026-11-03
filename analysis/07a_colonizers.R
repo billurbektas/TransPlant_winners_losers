@@ -105,7 +105,7 @@ names(fits) <- experiment_ids
 
 # propagule pressure, A0_dest: the species' destination-control relative cover
 # averaged over every plot and survey year, from the raw data (Bills, 2 Nov; the
-# residents' A0 are year-1 raw cover from a0.rds)
+# residents' A0 are log(100 x mean cover + 1) of the first control survey, a0.rds)
 a0_dest <- colonizers |> filter(treatment == "destination_control") |>
   summarise(A0_dest = mean(relative_cover), .by = c(experiment_id, species))
 
@@ -269,7 +269,7 @@ ggsave("figures/appendix/figS14.png", patchwork::wrap_plots(d1, d2, widths = c(1
 # ---- Report -------------------------------------------------------------------------
 fmt <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
 f3 <- function(x) sprintf("%.3f", x)
-fit_tab <- tibble::tibble(experiment_id = experiment_ids, species = sapply(fits, function(f) nlevels(f$model$frame$species)),
+fit_tab <- tibble::tibble(experiment_id = experiment_ids, species = sapply(fits, function(f) dplyr::n_distinct(f$model$frame$species)),
                           years = sapply(fits, function(f) paste(levels(f$model$frame$year), collapse = ", ")),
                           df_plots = sapply(fits, `[[`, "df_plots"), warnings = sapply(fits, function(f) length(f$warnings)))
 anchor_tab <- count(classes, year, name = "combinations") |> left_join(class_counts, by = "year")
@@ -320,7 +320,7 @@ report <- c(
   "- Strength from a model of the warmed plots only, and A0_dest the raw destination-control cover averaged over years, not the destination-control mean of a joint fit; species never recorded in a warmed plot are measured absences (strength 0, SE 0), and species whose variance the model cannot separate from their plot variance take the experiment's error (Bills, 2 Nov; PLAN.md updated).",
   "- The pool-size rule applied to colonizers too, at least 5 colonizer species per experiment (Bills, 2 Nov; PLAN.md updated).",
   "- Strength kept twice, all years and years 3 and later, until the stability is read (Bills, 2 Nov).",
-  "- Presence is tested one-sided (warmed mean above zero); PLAN.md's `test()` call leaves the side open.",
+  "- Presence is tested one-sided (warmed mean above zero), as PLAN.md's colonizer code now writes it.",
   "- Figures written to `figures/main/` and `figures/appendix/` so that the report can link them.")
 writeLines(report, "reports/07a_colonizers.md")
 message("Step 07a written: ", length(experiment_ids), " fits; ", paste(sprintf("%s CCC %.2f", stability$pair, stability$ccc), collapse = "; "))

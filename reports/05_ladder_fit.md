@@ -17,7 +17,7 @@ rma.mv(yi = strength, V = strength_se^2, mods = <formula>, random = <re_base or 
 # Null ~ 1; Start ~A0_origin + A0_dest + A0_origin:W + A0_dest:W; Climate ~W * T * P
 # Climate + start and Species-dependent ~W * T * P + A0_origin + A0_dest + A0_origin:W + A0_dest:W
 # property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes
-coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S4
+coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S11
 ```
 
 ## Counts per rowset
@@ -99,7 +99,7 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | niche | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
 | niche | Niche | niche | 512 | 71 | 2.860 | 0.000 | 0.575 | 0.750 | DIAG | 1.2 |
 
-All 8 slope fits converged with the diagonal T, P, TP block, each from metafor's default start (Bills, 1 Nov). Across the 8 fits the T slope variance ranges 0.000 to 0.274 ×10⁻⁴; the P and TP slope variances are at most 1.9e-05, at the boundary.
+All 8 slope fits converged with the diagonal T, P, TP block, each from metafor's default start (Bills, 1 Nov). Across the 8 fits the T slope variance ranges 0.000 to 0.274 ×10⁻⁴; the TP slope variance 0.030 to 0.193 ×10⁻⁴; only the P slope variance is at the boundary (at most 9.1e-11).
 
 ## Checks
 
@@ -138,9 +138,9 @@ The low-A0_origin half is the effects at or below the median A0_origin. Species-
 
 ## Figures
 
-![Fig S4, coefficients](../figures/appendix/figS11.png)
+![Fig S11, coefficients](../figures/appendix/figS11.png)
 
-Fig 4 is drawn by step 06; Fig S8 is not drawn (Bills, 2 Nov).
+Fig 6 (the ladder) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
 
 ## Warnings captured
 
@@ -154,5 +154,5 @@ Fig 4 is drawn by step 06; Fig S8 is not drawn (Bills, 2 Nov).
 ## Deviations from PLAN.md
 
 - H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. Same quantity.
-- Fig S4 is written to `figures/appendix/figS11.png`, not to `data/derived/05_ladder_fit/`, so that the report can link it.
+- The coefficient figure is appendix Fig S11, written to `figures/appendix/figS11.png`.
 - Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.

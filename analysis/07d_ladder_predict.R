@@ -1,7 +1,7 @@
 # Step 07d: the colonizer ladder, predicted (Step D route 2, colonizers).
 #
 # PLAN.md: The colonizer story, "The model ladder for arrival"; Step D Route 2 as
-#   step 06; Fig S9 (the colonizer ladder).
+#   step 06; Fig S16 (the colonizer ladder) and Fig S17 (per gradient).
 # Reads:  data/derived/07c_ladder_fit/ladder_rows.rds, models/<slug>.rds,
 #         heterogeneity.csv
 # Writes: data/derived/07d_ladder_predict/folds/<level>_<gradient_id>.rds,
@@ -120,7 +120,7 @@ summary_metrics <- bind_rows(lapply(c("r2", "spearman"), function(k) {
 })) |> arrange(match(level, all_levels), metric)
 write.csv(summary_metrics, file.path(out_dir, "summary_metrics.csv"), row.names = FALSE)
 
-# ---- Fig S9: the colonizer Fig 4 (as step 06's, without the skill row) -----------------
+# ---- Fig S16: the colonizer ladder (as step 06's Fig 6, without the skill row) ----------
 het <- read.csv("data/derived/07c_ladder_fit/heterogeneity.csv") |> mutate(column = model)
 stopifnot(setequal(het$column, ladder_columns))
 grads <- bind_rows(mutate(trim(fit_metrics), type = "fit"), mutate(trim(pred_metrics), type = "pred")) |>
@@ -130,7 +130,7 @@ fig4_ladder(het, "figures/appendix/figS16.png", gradients = grads, skill = FALSE
             labels = c("Null", "Destination\nabundance", "Climate", "Climate +\ndest.\nabundance", "Species-\ndependent",
                        "LDMC", "LMA", "Height", "Graminoid", "Woody", "Phylogeny", "Niche"))
 
-# ---- Fig S7 (colonizers): every metric x level x gradient, as step 06 ----------------------
+# ---- Fig S17 (colonizers): every metric x level x gradient, as step 06 ----------------------
 grad_info <- filter(rows, gradient_id %in% scored) |> summarise(T_dest = mean(T), .by = gradient_id) |> arrange(T_dest)
 s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics, version = "Held out")) |>
   tidyr::pivot_longer(c(r2, spearman), names_to = "metric") |>
@@ -157,7 +157,10 @@ sum_tab <- summary_metrics |> transmute(level = level_display[level], metric = c
                                         `held out better than Null` = ifelse(is.na(n_better_than_null), "", paste(n_better_than_null, "of", n_gradients_pred)))
 failed <- filter(fold_summary, status != "converged")
 fold_warn <- unique(unlist(lapply(out, function(x) if (length(x$warnings)) paste0(x$summary$level, " / ", x$summary$gradient_id, ": ", x$warnings))))
-fold_warn <- fold_warn[!grepl("struct' argument is disregaded", fold_warn)]
+# metafor's "struct disregarded" note is listed once with its count (CLAUDE.md: warnings are reported, never dropped)
+n_struct <- sum(grepl("struct' argument is disregaded", fold_warn))
+fold_warn <- c(fold_warn[!grepl("struct' argument is disregaded", fold_warn)],
+               if (n_struct) paste0("metafor: \"'struct' argument is disregaded since no ~ inner | outer term\" (", n_struct, " fold fits without slopes)"))
 report <- c(
   "# Step 07d: The colonizer ladder, predicted (Step D route 2, colonizers)", "",
   paste0("Step 06 on the ", nrow(rows), " colonizer ladder rows of step 07c: every level was refitted ", length(scored), " times, each time without one of the ",
@@ -172,14 +175,14 @@ report <- c(
                                   paste(sprintf("%s, %s at %s (%s)", level_display[outliers$level], outliers$version, outliers$gradient_id, sprintf("%.1f", outliers$r2)), collapse = "; "), ".")
       else "No R² below −100.",
   "", paste0("Every held-out species had training data: ", all(folds$species_known), "."),
-  "", "## Figures", "", "![Fig S9, the colonizer ladder](../figures/appendix/figS16.png)", "",
-  paste0("Fig S9 as Fig 4: row a) step 07c; rows b) c): half violins of the ", length(scored), " scored gradients, explanatory (grey) beside predictive (blue), medians written in; ",
+  "", "## Figures", "", "![Fig S16, the colonizer ladder](../figures/appendix/figS16.png)", "",
+  paste0("Fig S16 as Fig 6: row a) step 07c; rows b) c): half violins of the ", length(scored), " scored gradients, explanatory (grey) beside predictive (blue), medians written in; ",
          "R² against the Null on that gradient. No skill row."), "",
-  "![Fig S7, colonizers](../figures/appendix/figS17.png)",
+  "![Fig S17, colonizers](../figures/appendix/figS17.png)",
   "", "## Warnings captured", "", { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   "- The colonizer ladder predicted on the residents' reduction (Bills, 2 Nov).",
   "- An R² below −100 is taken out of the R² row and the medians and listed (Bills, 2 Nov).",
-  "- `R/fig4_ladder.R` gained two optional arguments (column labels; the skill row), its defaults leave step 06's Fig 4 byte-identical (checked).")
+  "- `R/fig4_ladder.R` gained two optional arguments (column labels; the skill row), its defaults leave step 06's ladder figure (Fig 6) byte-identical (checked).")
 writeLines(report, "reports/07d_ladder_predict.md")
 message("Step 07d written: ", nrow(fold_summary), " folds, ", nrow(failed), " failed")

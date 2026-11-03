@@ -154,8 +154,8 @@ w_read <- c(n_eff = sum(w_all)^2 / sum(w_all^2), top5 = sum(w_share[1:5]), top1 
 spread <- filter(folds, level != "null") |>
   summarise(one_sign = all(predicted > 0) | all(predicted < 0), sd_ratio = sd(predicted) / sd(observed), .by = c(level, gradient_id))
 
-# ---- Fig S11: metafor (left) beside forest (right), held out ---------------------
-cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 4; Okabe-Ito orange
+# ---- Fig S13: metafor (left) beside forest (right), held out ---------------------
+cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 6; Okabe-Ito orange
 fills <- c(metafor = "#8DB8EA", forest = "#F3C766")
 col_levels <- setdiff(all_levels, "null"); n <- length(col_levels) # Null is the R² reference, not drawn (Bills, 2 Nov)
 xlabs <- sub(" \\+ species$", "\n+ species", sub("Climate \\+ initial abundances", "Climate +\ninitial\nabundances",
@@ -264,14 +264,14 @@ report <- c(
          " and the largest change in a median ", sprintf("%.3f", max(seed_med$d)), ". Largest change in a median per metric: ",
          paste0(c("R² ", "Spearman ρ ", "skill "), sprintf("%.3f", sapply(c("r2", "spearman", "skill"), function(k) max(seed_med$d[seed_med$metric == k]))), collapse = ", "),
          "; skill moves most because a prediction near zero can change sign between seeds."),
-  "", "## Figures", "", "![Fig S11, forest beside meta-regression](../figures/appendix/figS13.png)",
+  "", "## Figures", "", "![Fig S13, forest beside meta-regression](../figures/appendix/figS13.png)",
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- No case weights, instead of 1 / SE² (Bills, 2 Nov; PLAN.md edited).",
   "- Held-out values only, no fit values (Bills, 2 Nov; PLAN.md edited).",
   "- No partial-dependence plots (Bills, 2 Nov; PLAN.md edited).",
   "- Forests also for the seven property + species levels (Bills, 2 Nov).",
-  "- Fig S11 written to `figures/appendix/` so that the report can link it, as steps 05 and 06.")
+  "- The figure is appendix Fig S13, written to `figures/appendix/figS13.png`.")
 writeLines(report, "reports/06b_forest.md")
 message("Step 06b written: ", length(tasks), " forests (and ", length(tasks), " for the seed check); ",
         sprintf("%.1f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

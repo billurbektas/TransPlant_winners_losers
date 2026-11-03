@@ -63,7 +63,7 @@ Every species, by pooled warmed cover:
 
 ![Fig 3](../figures/main/fig3.png)
 
-Fig S2 mirrors Fig 2 (Bills, 2 Nov). a): point = pooled warmed cover, filled by class; line = 95% prediction interval for a new experiment, shaded by the number of gradients and labelled gradients (experiments); every modelled species is shown. b) and c): Trifolium repens and Plantago lanceolata, the highest and lowest pooled warmed cover among species in at least 5 gradients; one row per experiment, mean relative cover over years 3 and later in destination controls (hollow) and warmed plots (filled).
+Fig 3 mirrors Fig 2 (Bills, 2 Nov). a): point = pooled warmed cover, filled by class; line = 95% prediction interval for a new experiment, shaded by the number of gradients and labelled gradients (experiments); every modelled species is shown. b) and c): Trifolium repens and Plantago lanceolata, the highest and lowest pooled warmed cover among species in at least 5 gradients; one row per experiment, mean relative cover over years 3 and later in destination controls (hollow) and warmed plots (filled).
 
 ## Warnings captured
 
@@ -75,6 +75,6 @@ Fig S2 mirrors Fig 2 (Bills, 2 Nov). a): point = pooled warmed cover, filled by 
 
 ## Deviations from PLAN.md
 
-- Fig S2 mirrors the anchored Fig 2 (two corner panels by Fig 2's rule, destination control to warmed), not PLAN.md's mock with three panels (Bills, 2 Nov; PLAN.md updated).
+- Fig 3 mirrors the anchored Fig 2 (two corner panels by Fig 2's rule, destination control to warmed), not PLAN.md's mock with three panels (Bills, 2 Nov; PLAN.md updated).
 - Consistent non-colonizers are read in the years 3 and later window used for strength (Bills, 2 Nov).
 - Fig 2's rule hiding context-dependent species with |pooled strength| below 0.005 is not applied: almost every colonizer would be hidden.
