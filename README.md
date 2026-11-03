@@ -71,6 +71,8 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 | 05 | [05_ladder_fit.R](analysis/05_ladder_fit.R) | Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows | −0 → 39 | −3 → 71 | −11 → 512 |
 | 07c | [07c_ladder_fit.R](analysis/07c_ladder_fit.R) | Colonizers with every property, as for residents | −0 → 24 | −2 → 27 | −7 → 110 |
 
+The same table, with the removed and remaining counts as separate columns, is in [`tables/selection_table.csv`](tables/selection_table.csv).
+
 ## Data and selection
 
 The community data are the TransPlant network database (`data/transplant_network_clean.sqlite`). Its taxonomy columns are never used: every name is resolved once with `tidyTRY::resolve_species()` (TNRS, WCVP), and decisions on names that TNRS cannot settle sit in reviewed ledgers under `prep/config/`. The preparation is a `targets` pipeline in [`prep/`](prep/) with one target per preparation step (P1 community and taxonomy, P2 TRY traits, P3 growth form and phylogeny, P4 climate, P6 niche from our own GBIF download, P7 trait checks).
@@ -354,7 +356,7 @@ figures/
   main/                               Figs 1 to 7, each written by the step that makes it
   appendix/                           Figs S1 to S18, in the order of the analysis, each written by
                                       the step that makes it
-tables/                             Tables S1 to S5
+tables/                             Tables S1 to S5; the selection table (written by the README)
 reports/                            one review report per step; REPORT.qmd collects them
 plan_figures/                       the mock figures agreed while planning (local, not in git)
 renv.lock                           the locked package environment

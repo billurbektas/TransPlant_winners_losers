@@ -128,7 +128,15 @@ sel_tab <- data.frame(Step = sel$step, Code = sel$code, `Rule and why` = sel$rul
                       Experiments = paste0(lost(1), counts[, 1]), Species = paste0(lost(2), counts[, 2]),
                       `Species × experiment` = paste0(lost(3), counts[, 3]), check.names = FALSE)
 cat(md_table(sel_tab), sep = "\n")
+removed <- function(k) ifelse(is.na(sel$parent) | sel$split, NA, counts[sel$parent, k] - counts[, k])
+write.csv(data.frame(step = sel$step, code = sub("^\\[(.*)\\]\\(.*\\)$", "\\1", sel$code), rule = sel$rule,
+                     experiments_removed = removed(1), experiments_left = counts[, 1],
+                     species_removed = removed(2), species_left = counts[, 2],
+                     effects_removed = removed(3), effects_left = counts[, 3]),
+          "tables/selection_table.csv", row.names = FALSE, fileEncoding = "UTF-8")
 ```
+
+The same table, with the removed and remaining counts as separate columns, is in [`tables/selection_table.csv`](tables/selection_table.csv).
 
 ## Data and selection
 
@@ -413,7 +421,7 @@ figures/
   main/                               Figs 1 to 7, each written by the step that makes it
   appendix/                           Figs S1 to S18, in the order of the analysis, each written by
                                       the step that makes it
-tables/                             Tables S1 to S5
+tables/                             Tables S1 to S5; the selection table (written by the README)
 reports/                            one review report per step; REPORT.qmd collects them
 plan_figures/                       the mock figures agreed while planning (local, not in git)
 renv.lock                           the locked package environment
