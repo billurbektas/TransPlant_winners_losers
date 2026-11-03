@@ -1,6 +1,6 @@
 # P2: TRY traits
 
-TRY records were read by TRY species ID (1339 IDs whose contributor or TRY name resolves to a study species in P1) and each record was attached to a species through its own resolved name (the contributor's `SpeciesName` first, TRY's `AccSpeciesName` only as fallback). Observations under experimental or ambiguous treatment values were removed, then duplicates, records with ErrorRisk >= 3 (ErrorRisk missing is kept), observations without coordinates and those in arid and tropical climate zones. 666 of 903 study species have at least one trait. LDMC in g/g, LMA in mg mm-2 (1 / SLA per observation), height in m.
+TRY records were read by TRY species ID (1339 IDs whose contributor or TRY name resolves to a study species in P1) and each record was attached to a species through its own resolved name (the contributor's `SpeciesName` first, TRY's `AccSpeciesName` only as fallback, and only when the contributor's name was never resolved or resolves to the same species; 487 records whose own name we resolved and rejected are not attached through TRY's name, Bills 3 Nov). Observations under experimental or ambiguous treatment values were removed, then duplicates, records with ErrorRisk >= 3 (ErrorRisk missing is kept), observations without coordinates and those in arid and tropical climate zones. 666 of 903 study species have at least one trait. LDMC in g/g, LMA in mg mm-2 (1 / SLA per observation), height in m.
 
 ## Counts
 
@@ -84,17 +84,17 @@ Before the medians: the seven real trees (`prep/config/trait_trees.csv`; seedlin
 
 | reason | records | species_x_trait |
 | --- | --- | --- |
-| outlier (robust z > 3.5) | 685 | 326 |
+| outlier (robust z > 3.5) | 684 | 328 |
 | outlier and unit signature | 14 | 9 |
 | reviewed value set to NA (trait_review.csv) | 8 | 3 |
-| tree (trait_trees.csv) | 2423 | 21 |
+| tree (trait_trees.csv) | 2421 | 20 |
 | unit signature | 15 | 8 |
 
 ![Every TRY record of each trait in its own units, removed records coloured by reason](../figures/appendix/figS2.png)
 
 Kept records in grey, removed records as coloured bars, each counted from zero; log value axis in natural units, square-root count axis so the few removed records are visible. Outliers are judged against their own species, so they lie across the whole range of a trait, not only in its tails; the trees are the long right tail of height.
 
-Species x trait values lost: 24 (Acer pseudoplatanus LDMC; Acer pseudoplatanus LMA; Acer pseudoplatanus height; Betula pubescens LDMC; Betula pubescens LMA; Betula pubescens height; Euphrasia officinalis LMA; Euphrasia salisburgensis LMA; Larix decidua LDMC; Larix decidua LMA; Larix decidua height; Picea abies LDMC; Picea abies LMA; Picea abies height; Pilosella piloselloides height; Pinus sylvestris LDMC; Pinus sylvestris LMA; Pinus sylvestris height; Quercus robur LDMC; Quercus robur LMA; Quercus robur height; Sorbus aucuparia LDMC; Sorbus aucuparia LMA; Sorbus aucuparia height).
+Species x trait values lost: 23 (Acer pseudoplatanus LDMC; Acer pseudoplatanus LMA; Acer pseudoplatanus height; Betula pubescens LDMC; Betula pubescens LMA; Betula pubescens height; Euphrasia officinalis LMA; Euphrasia salisburgensis LMA; Larix decidua LDMC; Larix decidua LMA; Larix decidua height; Picea abies LDMC; Picea abies LMA; Pilosella piloselloides height; Pinus sylvestris LDMC; Pinus sylvestris LMA; Pinus sylvestris height; Quercus robur LDMC; Quercus robur LMA; Quercus robur height; Sorbus aucuparia LDMC; Sorbus aucuparia LMA; Sorbus aucuparia height).
 
 Species x trait medians moving by more than 10% (5):
 
@@ -110,7 +110,7 @@ Species x trait medians moving by more than 10% (5):
 
 | trait | species |
 | --- | --- |
-| LDMC | 559 |
+| LDMC | 558 |
 | LMA | 619 |
 | height | 559 |
 | any of the three | 666 |
@@ -119,7 +119,7 @@ Study species without any of the three traits (237): Acer pseudoplatanus, Agasta
 
 ## Trusting TRY's accepted name against attaching by the record's own name
 
-Records of species x trait whose count or median differs between the two (median differing by more than 5%): 151 of 1775 species x trait combinations. Festuca ovina now holds 0 records submitted as Festuca pratensis.
+Records of species x trait whose count or median differs between the two (median differing by more than 5%): 178 of 1775 species x trait combinations. Festuca ovina now holds 0 records submitted as Festuca pratensis.
 
 | species | trait | n_ours | median_ours | n_trusting_try | median_trusting_try | relative_difference |
 | --- | --- | --- | --- | --- | --- | --- |

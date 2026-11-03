@@ -19,7 +19,7 @@ PLAN.md's fallback for the pathways figure (Bills, 2 Nov), since Step C found al
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Resident losers | 59 | 25% | 5% | 260 (57) | 51.1 (59) | 7.7 (57) | 12.9 (59) | 343 (59) |
 | Resident winners | 15 | 60% | 0% | 282 (15) | 56.1 (15) | 16.8 (15) | 15.8 (15) | 262 (15) |
-| Colonizers | 28 | 21% | 4% | 231 (28) | 47.6 (27) | 20.5 (27) | 16.8 (28) | 258 (28) |
+| Colonizers | 28 | 21% | 4% | 231 (28) | 46.7 (27) | 20.5 (27) | 16.8 (28) | 258 (28) |
 
 Medians with the number of species that have the property in brackets.
 

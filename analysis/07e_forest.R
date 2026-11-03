@@ -141,7 +141,10 @@ long <- function(d, model) tidyr::pivot_longer(d, c(r2, spearman), names_to = "m
 # an R² below -100 is taken out of the R² row and the medians and listed (Bills, 2 Nov; as 07d)
 outliers <- bind_rows(transmute(filter(pred06, r2 < -100), model = "meta-regression", level, gradient_id, r2),
                       transmute(filter(forest_metrics, r2 < -100), model = "forest", level, gradient_id, r2))
-trim <- function(m) mutate(m, r2 = ifelse(r2 < -100, NA_real_, r2))
+# a gradient taken out on either side is taken out of both, so the two medians of a level are
+# over the same gradients (Bills, 3 Nov)
+out_pairs <- paste(outliers$level, outliers$gradient_id)
+trim <- function(m) mutate(m, r2 = ifelse(paste(level, gradient_id) %in% out_pairs, NA_real_, r2))
 vs <- inner_join(long(trim(pred06), "metafor"), long(trim(forest_metrics), "forest"), by = c("level", "gradient_id", "metric")) |>
   mutate(difference = forest - metafor) |> arrange(match(level, all_levels), match(metric, c("r2", "spearman")), gradient_id)
 stopifnot(nrow(vs) == 19 * 8 * 2) # every level, gradient and metric
@@ -261,7 +264,7 @@ report <- c(
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- Step 06b on the colonizer ladder rows (Bills, 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.",
-  "- No loser/winner skill (no loser class); R² below −100 taken out and listed (Bills, 2 Nov).")
+  "- No loser/winner skill (no loser class); R² below −100 taken out and listed (Bills, 2 Nov), from both meta-regression and forest for that level and gradient (3 Nov).")
 writeLines(report, "reports/07e_forest.md")
 message("Step 07e written: ", length(tasks), " forests (and ", length(tasks), " for the seed check); ",
         sprintf("%.1f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

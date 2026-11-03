@@ -91,15 +91,22 @@ plots <- inner_join(groups, surveyed, by = c("region", "origin_site", "destinati
 records <- inner_join(plots, select(analysis, plot_year_id, species, relative_cover), by = "plot_year_id",
                       relationship = "many-to-many")
 
-# ---- Both-groups rule: a year enters a pool's table only if both of its groups were surveyed
+# ---- Year rule: a year enters a pool's table only if the groups its model compares were
+# surveyed. Residents: origin controls and warmed plots (their contrast needs both).
+# Destination pool: the warmed plots, since the colonizer model is fitted to the warmed plots
+# only (Bills, 3 Nov; it was both groups until then); destination-control rows exist only
+# where they were surveyed, so the mean destination abundance is unchanged
 years <- distinct(plots, experiment_id, group, year)
 pool_groups <- tibble::tibble(species_pool = c("resident", "resident", "destination_pool", "destination_pool"),
                               group = c("origin_control", "warmed", "destination_control", "warmed"))
 pool_years <- inner_join(pool_groups, years, by = "group", relationship = "many-to-many") |>
-  summarise(n_groups = n_distinct(group), groups = paste(sort(group), collapse = " + "),
+  summarise(n_groups = n_distinct(group), groups = paste(sort(group), collapse = " + "), has_warmed = "warmed" %in% group,
             .by = c(experiment_id, species_pool, year))
-year_fails <- filter(pool_years, n_groups < 2) |> arrange(experiment_id, species_pool, year)
-pool_years <- filter(pool_years, n_groups == 2) |> select(experiment_id, species_pool, year)
+enters <- ifelse(pool_years$species_pool == "resident", pool_years$n_groups == 2, pool_years$has_warmed)
+year_fails <- pool_years[!enters, ] |> select(-has_warmed) |> arrange(experiment_id, species_pool, year)
+year_regained <- pool_years[enters & pool_years$species_pool == "destination_pool" & pool_years$n_groups < 2, ] |>
+  select(experiment_id, species_pool, year, groups) # warmed years the both-groups rule used to drop
+pool_years <- pool_years[enters, ] |> select(experiment_id, species_pool, year)
 
 # ---- Pools: the 2 Nov pool rule, per control group over its survey years ----
 ctrl <- c("origin_control", "destination_control")
@@ -369,9 +376,11 @@ report <- c(
   sprintf("Gradients (`gradient_id` = region) after the rule: %d.", n_distinct(filter(pool_sizes, kept)$region)),
   "", "![Resident pool size per experiment](../figures/appendix/figS6.png)", "",
   md_table(head(pool_sizes, 10)),
-  "", sprintf("## Survey years failing the both-groups rule (%d experiment-years)", nrow(year_fails)), "",
-  "A year enters a pool's table only if both of that pool's groups were surveyed in it.", "",
+  "", sprintf("## Survey years left out by the year rule (%d experiment-years)", nrow(year_fails)), "",
+  "A year enters the residents' table only if both origin controls and warmed plots were surveyed in it, and the destination pool's table if the warmed plots were (Bills, 3 Nov: the colonizer model uses the warmed plots only).", "",
   md_table(year_fails),
+  "", sprintf("Warmed years regained for the destination pool by the 3 Nov rule (%d): %s.", nrow(year_regained),
+              if (nrow(year_regained)) paste(sprintf("%s year %d", year_regained$experiment_id, year_regained$year), collapse = "; ") else "none"),
   "", "## A0 from the first available control survey", "",
   "A0 = log(100 x mean relative cover over the control plots of the group's first surveyed year + 1). Experiments whose first control survey is not year 1:", "",
   md_table(a0_not_year1),

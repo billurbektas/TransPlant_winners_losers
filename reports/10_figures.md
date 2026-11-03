@@ -11,7 +11,7 @@ Draws what no earlier step produced: Fig 4, the 42 experiments in climate space 
 | net strength below zero | 703 |
 | net strength above zero | 301 |
 | colonizer effects (07a) | 379 |
-| net warmed cover above zero | 262 |
+| net warmed cover above zero | 264 |
 | experiments with colonizers | 28 |
 | experiments without purple | 14 |
 | species analysed (residents or colonizers) | 426 |
@@ -24,7 +24,7 @@ Cover shares (Fig 4) in per cent of the warmed turf; species counts (Fig S10) in
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CH_Calanda::Pea::Cal | CH Calanda a | 2600 → 2000 m | 10 | 540 | 3.8 | 29% (20) | 44% (8) | 21% (30) | 6% |
 | CH_Calanda::Cal::Nes | CH Calanda b | 2000 → 1400 m | 13.2 | 456 | 3.2 | 28% (35) | 35% (14) | 27% (23) | 10% |
-| CH_Calanda2::Cal::Nes | CH Calanda2 | 2000 → 1400 m | 13.7 | 423 | 3.2 | 14% (27) | 53% (18) | 0% (7) | 33% |
+| CH_Calanda2::Cal::Nes | CH Calanda2 | 2000 → 1400 m | 13.7 | 423 | 3.2 | 14% (27) | 53% (18) | 0% (9) | 32% |
 | CH_Lavey::RIO::CRE | CH Lavey a | 2200 → 1950 m | 11.9 | 431 | 2.1 | 35% (25) | 56% (17) | 0% (2) | 9% |
 | CH_Lavey::RIO::MAR | CH Lavey b | 2200 → 1750 m | 12.9 | 429 | 3 | 17% (27) | 68% (15) | 2% (9) | 13% |
 | CH_Lavey::RIO::PRA | CH Lavey c | 2200 → 1400 m | 15.9 | 353 | 6 | 23% (34) | 60% (8) | 11% (13) | 7% |

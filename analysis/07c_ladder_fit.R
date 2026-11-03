@@ -18,8 +18,8 @@
 # reduction (species in at least 3 gradients that carry every property) and the
 # same 12 models with A0_origin dropped (PLAN.md); properties on the residents'
 # step 02 scale (means and SDs across the 346 residents, traits logged), so both
-# pools share one scale; A0_dest (raw destination-control cover averaged over
-# years, step 07a) standardised across these effects as the residents' A0;
+# pools share one scale; A0_dest (destination-control cover averaged over years,
+# log(100 x cover + 1), step 07a) standardised across all colonizer effects of 07a;
 # model-based coefficient intervals as step 05; run 07c to 07f without stopping.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
@@ -154,7 +154,7 @@ report <- c(
          nrow(rows), " effects of the ", n_distinct(rows$species), " colonizer species found in at least 3 gradients that carry every property (",
          n_distinct(rows$experiment_id), " experiments, ", n_distinct(rows$gradient_id), " gradients). The same 12 models, with A0_origin dropped ",
          "(a colonizer has none) so that Start is the destination abundance A0_dest and its interaction with W. Properties are on the residents' ",
-         "step 02 scale (checked), A0_dest standardised across these effects. ", sum(rows$strength_se == 0), " effects are measured absences (SE 0)."),
+         "step 02 scale (checked), A0_dest (log(100 x mean destination-control cover + 1)) standardised across all ", nrow(d), " colonizer effects of 07a. ", sum(rows$strength_se == 0), " effects are measured absences (SE 0)."),
   "", "## Counts", "",
   md_table(tibble::tibble(rule = c("colonizer effects (07a, years 3 and later)", "species in >= 3 gradients", "of which lacking a property",
                                    "ladder effects", "species", "experiments", "gradients", "measured absences among them"),

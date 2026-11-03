@@ -31,44 +31,44 @@ Step 06 on the 110 colonizer ladder rows of step 07c: every level was refitted 8
 | --- | --- | --- | --- | --- | --- |
 | Null | R² against Null | 0.000 | 0.000 | 8 / 8 | 0 of 8 |
 | Null | Spearman ρ |  |  | 0 / 0 |  |
-| Destination abundance | R² against Null | 0.111 | 0.112 | 8 / 8 | 5 of 8 |
-| Destination abundance | Spearman ρ | 0.243 | 0.243 | 8 / 8 |  |
+| Destination abundance | R² against Null | 0.268 | 0.217 | 8 / 8 | 7 of 8 |
+| Destination abundance | Spearman ρ | 0.209 | 0.210 | 8 / 8 |  |
 | Climate | R² against Null | -0.162 | -0.242 | 8 / 8 | 3 of 8 |
 | Climate | Spearman ρ |  |  | 0 / 0 |  |
-| Climate + destination abundance | R² against Null | -0.069 | -0.311 | 8 / 8 | 3 of 8 |
-| Climate + destination abundance | Spearman ρ | 0.175 | 0.243 | 8 / 8 |  |
-| Species-dependent | R² against Null | 0.042 | -0.397 | 8 / 8 | 1 of 8 |
-| Species-dependent | Spearman ρ | 0.468 | 0.267 | 8 / 8 |  |
-| LDMC | R² against Null | -0.195 | -0.804 | 8 / 8 | 1 of 8 |
-| LDMC | Spearman ρ | 0.273 | 0.237 | 8 / 8 |  |
-| LMA | R² against Null | -0.088 | -0.462 | 8 / 8 | 1 of 8 |
-| LMA | Spearman ρ | 0.433 | 0.289 | 8 / 8 |  |
-| Height | R² against Null | -0.175 | -0.831 | 8 / 8 | 2 of 8 |
-| Height | Spearman ρ | 0.496 | 0.337 | 8 / 8 |  |
-| Graminoid | R² against Null | -0.157 | -0.733 | 8 / 8 | 2 of 8 |
-| Graminoid | Spearman ρ | 0.244 | 0.122 | 8 / 8 |  |
-| Woody | R² against Null | -0.076 | -0.290 | 8 / 7 | 2 of 7 |
-| Woody | Spearman ρ | 0.213 | 0.274 | 8 / 8 |  |
-| Phylogeny | R² against Null | -0.170 | -0.487 | 8 / 8 | 1 of 8 |
-| Phylogeny | Spearman ρ | 0.178 | -0.046 | 8 / 8 |  |
-| Niche | R² against Null | -0.130 | -0.898 | 8 / 8 | 1 of 8 |
-| Niche | Spearman ρ | 0.393 | 0.209 | 8 / 8 |  |
-| LDMC + species | R² against Null | -0.015 | -0.668 | 8 / 8 | 1 of 8 |
-| LDMC + species | Spearman ρ | 0.589 | 0.269 | 8 / 8 |  |
-| LMA + species | R² against Null | 0.117 | -0.378 | 8 / 8 | 1 of 8 |
-| LMA + species | Spearman ρ | 0.609 | 0.219 | 8 / 8 |  |
-| Height + species | R² against Null | 0.032 | -0.814 | 8 / 8 | 2 of 8 |
-| Height + species | Spearman ρ | 0.618 | 0.240 | 8 / 8 |  |
-| Graminoid + species | R² against Null | 0.072 | -0.664 | 8 / 8 | 2 of 8 |
-| Graminoid + species | Spearman ρ | 0.554 | 0.157 | 8 / 8 |  |
-| Woody + species | R² against Null | 0.056 | -0.330 | 8 / 7 | 2 of 7 |
-| Woody + species | Spearman ρ | 0.348 | 0.300 | 8 / 8 |  |
-| Phylogeny + species | R² against Null | 0.124 | -0.369 | 8 / 8 | 2 of 8 |
-| Phylogeny + species | Spearman ρ | 0.571 | -0.081 | 8 / 8 |  |
-| Niche + species | R² against Null | -0.027 | -0.683 | 8 / 8 | 1 of 8 |
-| Niche + species | Spearman ρ | 0.414 | 0.250 | 8 / 8 |  |
+| Climate + destination abundance | R² against Null | -0.007 | -0.278 | 8 / 8 | 2 of 8 |
+| Climate + destination abundance | Spearman ρ | 0.175 | 0.220 | 8 / 8 |  |
+| Species-dependent | R² against Null | 0.116 | -0.351 | 8 / 8 | 2 of 8 |
+| Species-dependent | Spearman ρ | 0.618 | 0.338 | 8 / 8 |  |
+| LDMC | R² against Null | -0.176 | -0.944 | 8 / 8 | 1 of 8 |
+| LDMC | Spearman ρ | 0.374 | 0.200 | 8 / 8 |  |
+| LMA | R² against Null | -0.027 | -0.587 | 8 / 8 | 1 of 8 |
+| LMA | Spearman ρ | 0.429 | 0.204 | 8 / 8 |  |
+| Height | R² against Null | -0.180 | -1.160 | 8 / 8 | 2 of 8 |
+| Height | Spearman ρ | 0.566 | 0.389 | 8 / 8 |  |
+| Graminoid | R² against Null | -0.024 | -0.555 | 8 / 8 | 2 of 8 |
+| Graminoid | Spearman ρ | 0.425 | 0.131 | 8 / 8 |  |
+| Woody | R² against Null | -0.061 | -0.281 | 8 / 7 | 2 of 7 |
+| Woody | Spearman ρ | 0.189 | 0.299 | 8 / 8 |  |
+| Phylogeny | R² against Null | -0.051 | -0.792 | 8 / 8 | 1 of 8 |
+| Phylogeny | Spearman ρ | 0.350 | 0.043 | 8 / 8 |  |
+| Niche | R² against Null | -0.067 | -0.595 | 8 / 8 | 1 of 8 |
+| Niche | Spearman ρ | 0.306 | 0.233 | 8 / 8 |  |
+| LDMC + species | R² against Null | 0.031 | -0.646 | 8 / 8 | 1 of 8 |
+| LDMC + species | Spearman ρ | 0.671 | 0.310 | 8 / 8 |  |
+| LMA + species | R² against Null | 0.189 | -0.552 | 8 / 8 | 1 of 8 |
+| LMA + species | Spearman ρ | 0.618 | 0.320 | 8 / 8 |  |
+| Height + species | R² against Null | 0.061 | -0.869 | 8 / 8 | 2 of 8 |
+| Height + species | Spearman ρ | 0.650 | 0.304 | 8 / 8 |  |
+| Graminoid + species | R² against Null | 0.136 | -0.493 | 8 / 8 | 3 of 8 |
+| Graminoid + species | Spearman ρ | 0.654 | 0.336 | 8 / 8 |  |
+| Woody + species | R² against Null | 0.146 | -0.107 | 8 / 7 | 3 of 7 |
+| Woody + species | Spearman ρ | 0.618 | 0.347 | 8 / 8 |  |
+| Phylogeny + species | R² against Null | 0.223 | -0.466 | 8 / 8 | 2 of 8 |
+| Phylogeny + species | Spearman ρ | 0.554 | 0.150 | 8 / 8 |  |
+| Niche + species | R² against Null | 0.058 | -0.428 | 8 / 8 | 1 of 8 |
+| Niche + species | Spearman ρ | 0.607 | 0.251 | 8 / 8 |  |
 
-Taken out of the R² row and the medians (R² below −100, Bills, 2 Nov): Woody, held out at CH_Lavey (-145.9); Woody + species, held out at CH_Lavey (-146.1).
+Taken out of the R² row and the medians (R² below −100, Bills, 2 Nov): Woody, held out at CH_Lavey (-529.3); Woody + species, held out at CH_Lavey (-530.0).
 
 Every held-out species had training data: TRUE.
 

@@ -13,7 +13,7 @@
 #         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_pie_cover.csv,
 #         fig4_pie_counts.csv;
 #         reports/10_figures.md
-# Checks: 42 experiments; 1004 resident effects (703 losers, 301 winners); 262
+# Checks: 42 experiments; 1004 resident effects (703 losers, 301 winners); 264
 #         colonizer effects with warmed cover above zero in 28 experiments; every pie's
 #         slices sum to its species; every figure number exists exactly once.
 #
@@ -55,11 +55,11 @@ stopifnot(nrow(experiments) == 42, !anyNA(experiments$origin_elevation), !anyNA(
 # ---- Fig 4: the experiments in climate space ---------------------------------------
 pies <- bind_rows(count(res, experiment_id, group = ifelse(strength < 0, "Resident losers", "Resident winners")),
                   count(filter(col, strength > 0), experiment_id, group = "Colonizers")) # net warmed cover above zero
-stopifnot(sum(res$strength < 0) == 703, sum(res$strength > 0) == 301, sum(col$strength > 0) == 262) # Fig 5's classes per effect
+stopifnot(sum(res$strength < 0) == 703, sum(res$strength > 0) == 301, sum(col$strength > 0) == 264) # Fig 5's classes per effect (262 until CH_Calanda2's year 4 was regained, 3 Nov)
 pies <- tidyr::pivot_wider(pies, names_from = group, values_from = n, values_fill = 0)
 pies <- left_join(select(experiments, experiment_id, origin_elevation, destination_elevation, destination_T_JJA, destination_P_JJA, diff_T_JJA),
                   pies, by = "experiment_id") |> mutate(across(all_of(names(cols)), ~ coalesce(.x, 0L)))
-stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pies$Colonizers) == 262,
+stopifnot(sum(pies$`Resident losers` + pies$`Resident winners`) == 1004, sum(pies$Colonizers) == 264,
           sum(pies$Colonizers > 0) == n_distinct(col$experiment_id[col$strength > 0])) # one denominator: counts, not cover
 write.csv(pies, file.path(out_dir, "fig4_pie_counts.csv"), row.names = FALSE)
 # main Fig 4 shows the same classes as shares of the warmed turf's relative cover, years 3 and

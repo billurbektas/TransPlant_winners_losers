@@ -91,13 +91,14 @@ Gradients (`gradient_id` = region) after the rule: 20.
 | US_Montana::High::Low | US_Montana | 13 | 17 | TRUE |
 | US_Colorado::pf::um | US_Colorado | 14 | 5 | TRUE |
 
-## Survey years failing the both-groups rule (1 experiment-years)
+## Survey years left out by the year rule (0 experiment-years)
 
-A year enters a pool's table only if both of that pool's groups were surveyed in it.
+A year enters the residents' table only if both origin controls and warmed plots were surveyed in it, and the destination pool's table if the warmed plots were (Bills, 3 Nov: the colonizer model uses the warmed plots only).
 
 | experiment_id | species_pool | year | n_groups | groups |
 | --- | --- | --- | --- | --- |
-| CH_Calanda2::Cal::Nes | destination_pool | 4 | 1 | warmed |
+
+Warmed years regained for the destination pool by the 3 Nov rule (1): CH_Calanda2::Cal::Nes year 4.
 
 ## A0 from the first available control survey
 
@@ -116,7 +117,7 @@ A0 = log(100 x mean relative cover over the control plots of the group's first s
 
 ## Table and spot check
 
-`cover_long`: 95,901 rows, 42 experiments, 20 gradients, 1,406 species x experiment combinations (1,004 resident, 402 destination pool); 45,810 rows observed, 50,091 zeros.
+`cover_long`: 96,121 rows, 42 experiments, 20 gradients, 1,406 species x experiment combinations (1,004 resident, 402 destination pool); 45,824 rows observed, 50,297 zeros.
 Spot check, DE_Susalps::FE::BT: pool species x surveyed plot-years of their groups = 1,008, rows written = 1,008 (627 zeros + 381 observed records).
 
 ## Warnings captured
