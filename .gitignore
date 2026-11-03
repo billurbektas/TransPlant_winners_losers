@@ -84,6 +84,9 @@ Environment_Save_*.RData
 data/derived/**
 !data/derived/**/
 !data/derived/**/*.csv
+# the GBIF niche table is a pipeline input written outside the pipeline (P6): tracked so a
+# fresh clone runs the prep pipeline (Bills, 3 Nov)
+!data/derived/prep/gbif_niche.rds
 
 # local working files for Claude Code, never pushed
 CLAUDE.md
