@@ -84,7 +84,7 @@ fig4_ladder <- function(het, file, gradients = NULL, caption = NULL, labels = NU
   na_a <- setdiff(seq_len(n), unique(bars$x))
   ymax <- max(c(totals$value, refs$value)) * 1.15
   fills <- c(tau2 = "#6E7380", sigma2_experiment = "#B9BCC6", H_slope = "#8C6D1F", H_intercept = "#DDB54F")
-  fill_labs <- c(tau2 = "Context dependency:\nspecies x site (τ²)",
+  fill_labs <- c(tau2 = "Context dependency:\nspecies x experiment (τ²)",
                  sigma2_experiment = "Context dependency:\nshared by site (σ² experiment)",
                  H_slope = "H species: slope piece\n(climate response)",
                  H_intercept = "H species: intercept\npiece (average)")

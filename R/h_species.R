@@ -1,7 +1,7 @@
 # Heterogeneity pieces read at every ladder model (PLAN.md Step D, "Route 1");
 # used by steps 05, 06 and 07.
 
-tau2       <- function(m) m$sigma2[m$s.names == "effect_id"]       # species x site piece
+tau2       <- function(m) m$sigma2[m$s.names == "effect_id"]       # species x experiment piece
 sigma2_exp <- function(m) m$sigma2[m$s.names == "experiment_id"]   # shared site shift
 
 # Variance of the species-specific climate response at the observed experiment
