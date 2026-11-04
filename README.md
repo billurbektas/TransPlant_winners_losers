@@ -52,9 +52,9 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 
 ![Figure S1](figures/appendix/figS1.png)
 
-**Figure S1.** Data flow from the network database to each analysis. Each box gives the number of experiments, species and species × experiment effects that remain after the rule written on the arrow above it. The shared steps (grey) split into the resident branch (orange, left), which leads to the classification (Figure 2) and the model ladder (Figure 6), and the colonizer branch (purple, right), which leads to the colonizer classification (Figure 3) and the colonizer ladder (Figure S17). The classification boxes count species and their effects.
+**Figure S1.** Data flow from the network database to each analysis. Each box gives the number of experiments, species and species × experiment combinations that remain after the rule written on the arrow above it. The shared steps (grey) split into the resident branch (orange, left), which leads to the classification (Figure 2) and the model comparison (Figure 6), and the colonizer branch (purple, right), which leads to the colonizer classification (Figure 3) and the colonizer model comparison (Figure S17). The classification boxes count species and their combinations. Table S1 lists what each rule removes.
 
-**What each selection removes.** Each row is one rule, in the order the analysis applies it, with what it removes and what is left. Residents and colonizers split after the pool rule; their later rows count from the row above on their own branch.
+**Table S1.** What each selection removes. Each row is one rule, in the order the analysis applies it, with the experiments, species and species × experiment combinations it removes and those left. Residents and colonizers split after the pool rule; their later rows count from the row above on their own branch. The table is [`tables/tableS1.csv`](tables/tableS1.csv), written by [`10_figures.R`](analysis/10_figures.R).
 
 | Step | Code | Rule and why | Experiments | Species | Species × experiment |
 | --- | --- | --- | --- | --- | --- |
@@ -71,8 +71,6 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 | 05 | [05_ladder_fit.R](analysis/05_ladder_fit.R) | Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows | −0 → 39 | −3 → 71 | −11 → 512 |
 | 07c | [07c_ladder_fit.R](analysis/07c_ladder_fit.R) | Colonizers with every property, as for residents | −0 → 24 | −2 → 27 | −7 → 110 |
 
-The same table, with the removed and remaining counts as separate columns, is in [`tables/selection_table.csv`](tables/selection_table.csv).
-
 ## Data and selection
 
 The community data are the TransPlant network database (`data/transplant_network_clean.sqlite`). Its taxonomy columns are never used: every name is resolved once with `tidyTRY::resolve_species()` (TNRS, WCVP), and decisions on names that TNRS cannot settle sit in reviewed ledgers under `prep/config/`. The preparation is a `targets` pipeline in [`prep/`](prep/) with one target per preparation step (P1 community and taxonomy, P2 TRY traits, P3 growth form and phylogeny, P4 climate, P6 niche from our own GBIF download, P7 trait checks).
@@ -82,7 +80,7 @@ The community data are the TransPlant network database (`data/transplant_network
 - **Species across experiments.** The classification (Q2) and the ladder (Q3, Q4) use species found in at least 3 gradients; the ladder further keeps only species that carry every property, so that all twelve models are fitted to the same rows (512 resident effects of 71 species in 39 experiments).
 - **Relative cover** is computed over all vascular cover of a plot-year, unidentified and genus-level records included (decided 28 Oct).
 
-Properties: LDMC, LMA and vegetative height from TRY, screened for outliers and unit slips (Fig S2); graminoid and woody growth form; the first three phylogenetic eigenvectors (PEV1–3, Fig S3, Table S3); the thermal and precipitation optima from GBIF occurrences and CHELSA (bio10, bio18). Their distributions and the check of the niche climatology against the experiments' own climate are in Fig S4.
+Properties: LDMC, LMA and vegetative height from TRY, screened for outliers and unit slips (Fig S2); graminoid and woody growth form; the first three phylogenetic eigenvectors (PEV1–3, Fig S3, Table S4); the thermal and precipitation optima from GBIF occurrences and CHELSA (bio10, bio18). Their distributions and the check of the niche climatology against the experiments' own climate are in Fig S4.
 
 ![Figure S2](figures/appendix/figS2.png)
 
@@ -90,7 +88,7 @@ Properties: LDMC, LMA and vegetative height from TRY, screened for outliers and 
 
 ![Figure S3](figures/appendix/figS3.png)
 
-**Figure S3.** Phylogenetic axes of the analysed species. Phylogenetic eigenvector 1 (PEV1) against (a) PEV2 and (b) PEV3, one point per species, graminoids in gold and other species in grey; the species at the extremes of each axis are named. (c) Share of the positive variation in phylogenetic distances captured by each of the first ten eigenvectors; the three axes used as the phylogeny property are dark. Table S3 lists the families at each end of each axis.
+**Figure S3.** Phylogenetic axes of the analysed species. Phylogenetic eigenvector 1 (PEV1) against (a) PEV2 and (b) PEV3, one point per species, graminoids in gold and other species in grey; the species at the extremes of each axis are named. (c) Share of the positive variation in phylogenetic distances captured by each of the first ten eigenvectors; the three axes used as the phylogeny property are dark. Table S4 lists the families at each end of each axis.
 
 ![Figure S4](figures/appendix/figS4.png)
 
@@ -203,11 +201,11 @@ Code: [`10_figures.R`](analysis/10_figures.R) · report [10](reports/10_figures.
 | Model | Fixed part | Random part | Question |
 |---|---|---|---|
 | Null | intercept | species, experiment, effect | |
-| Start | initial abundance at origin and destination, each × W | as Null | Q3a, starting condition |
+| Initial abundances | initial abundance at origin and destination, each × W | as Null | Q3a, starting condition |
 | Climate | W × T × P | as Null | Q3b, environment |
-| Climate + start | both | as Null | Q3b |
-| Species-dependent | as Climate + start | + species slopes on W and on T, P, TP | Q3c, the ceiling |
-| LDMC, LMA, Height, Graminoid, Woody, Phylogeny, Niche | Climate + start + property × (1, W, T, P, TP) | as Species-dependent | Q3d, the properties |
+| Climate + initial abundances | both | as Null | Q3b |
+| Species-dependent | as Climate + initial abundances | + species slopes on W and on T, P, TP | Q3c, the ceiling |
+| LDMC, LMA, Height, Graminoid, Woody, Phylogeny, Niche | Climate + initial abundances + property × (1, W, T, P, TP) | as Species-dependent | Q3d, the properties |
 
 The heterogeneity of each model is split into the experiment component σ²<sub>experiment</sub>, the species × experiment component τ² and the species variance H<sub>species</sub> (intercept and slope pieces). For Q4 every gradient with at least 5 effects is held out in turn, the model refitted on the others, and its held-out strengths predicted from the fixed effects plus, from Species-dependent on, each species' deviation learned in the other gradients. Each level is scored per gradient by R² against the Null model on that gradient, Spearman's ρ and loser/winner skill, and summarised by medians.
 
@@ -247,7 +245,7 @@ rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
 
 ![Figure S12](figures/appendix/figS12.png)
 
-**Figure S12.** Fixed effects of the resident models. (a) Standardized effects of the climate and initial-abundance model on losing-winning strength: warming (W), destination temperature (T) and precipitation (P), their interactions, and initial abundance at origin (A0_origin) and at destination (A0_dest), each with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes: the property and its interactions with W, T, P and T × P. Phylogenetic eigenvectors 1–3 and the thermal and precipitation optima are fitted together and shown in one panel each. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor.
+**Figure S12.** Fixed effects of the resident models. (a) Standardized effects of the climate and initial-abundance model on losing-winning strength: warming, destination temperature and precipitation, their interactions, and initial abundance at origin and at destination, each with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes: the property and its interactions with warming, temperature, precipitation and temperature × precipitation. Phylogenetic eigenvectors 1–3 and the thermal and precipitation optima are fitted together and shown in one panel each. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor.
 
 ![Figure S13](figures/appendix/figS13.png)
 
@@ -257,7 +255,7 @@ rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
 
 **Figure S14.** Random forests beside the meta-regressions, residents. For each model of the ladder, (a) R² against the Null meta-regression on the same gradient, (b) Spearman's rank correlation and (c) loser/winner skill on each of the 16 gradients held out of the fit, for the meta-regression (blue, left) and a random forest on the same rows, predictors and folds (orange, right). Half violins show the distribution over gradients, small points the gradients, and large points and numbers the medians. The forests use no case weights and one setting of minimum node size and number of candidate predictors, chosen by out-of-bag R² over all models. The Null is not drawn; Climate has no Spearman or skill because it predicts one value per gradient.
 
-In sample the Species-dependent model reaches a median R² of 0.32; held out it drops to 0.12, below initial abundances alone (0.17). No property level beats the Climate + start floor held out by much (0.16; Niche 0.18, LDMC 0.15, Height 0.13), and the forest is higher than the meta-regression only at Climate, Graminoid, LDMC, Niche, Phylogeny (median of the per-gradient differences; at most 0.05): the weak relationships are weak, not misspecified.
+In sample the Species-dependent model reaches a median R² of 0.32; held out it drops to 0.12, below initial abundances alone (0.17). No property level beats the Climate + initial abundances floor held out by much (0.16; Niche 0.18, LDMC 0.15, Height 0.13), and the forest is higher than the meta-regression only at Climate, Graminoid, LDMC, Niche, Phylogeny (median of the per-gradient differences; at most 0.05): the weak relationships are weak, not misspecified.
 
 Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](analysis/06_ladder_predict.R) · [`06b_forest.R`](analysis/06b_forest.R) · reports [05](reports/05_ladder_fit.md), [06](reports/06_ladder_predict.md), [06b](reports/06b_forest.md)
 
@@ -294,7 +292,7 @@ f_both_col <- ~ W * T * P + A0_dest + A0_dest:W
 
 ![Figure S16](figures/appendix/figS16.png)
 
-**Figure S16.** Fixed effects of the colonizer models. (a) Standardized effects of the climate and destination-abundance model on relative cover in warmed turfs: warming (W), destination temperature (T) and precipitation (P), their interactions, and the mean abundance in the destination controls (A0_dest) with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor, on the residents' scale for the climate and property terms.
+**Figure S16.** Fixed effects of the colonizer models. (a) Standardized effects of the climate and destination-abundance model on relative cover in warmed turfs: warming, destination temperature and precipitation, their interactions, and the mean abundance in the destination controls with its interaction with warming. (b) Property terms, each from its own model fitted on top of the model in (a) with species-specific intercepts and climate slopes. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Effects are per standard deviation of the predictor, on the residents' scale for the climate and property terms.
 
 ![Figure S17](figures/appendix/figS17.png)
 
@@ -330,7 +328,7 @@ The climate + abundance model for each pool, and the trait terms of the Height a
 
 **Figure 7.** Effects of climate, abundance and traits on the response of residents and colonizers. Standardized effects, per standard deviation of the predictor, on losing-winning strength for residents (grey) and on relative cover in warmed turfs for colonizers (purple). (a) Residents and (b) colonizers: the model with warming, destination temperature and precipitation, their interactions, and abundance, for residents the initial abundance at origin and at destination at the first survey, for colonizers the mean abundance in the destination controls, each with its interaction with warming; empty rows are terms absent from that pool's model. (c) Vegetative height and (d) leaf dry matter content (LDMC): the trait and its interactions with warming, temperature, precipitation and temperature × precipitation, each from a model that also includes the terms of (a) or (b) and species-specific intercepts and climate slopes. Points are estimates and lines model-based (REML Wald) 95% intervals; filled points indicate intervals that exclude zero. Climate and trait terms are on one scale across pools; abundance terms are standardized within each pool and are not comparable between (a) and (b).
 
-Code: [`10_figures.R`](analysis/10_figures.R) · tables [`tables/`](tables/) (S1 experiments, S2 species, S3 phylogenetic axes, S4 variance components, S5 coefficients)
+Code: [`10_figures.R`](analysis/10_figures.R) · tables [`tables/`](tables/) (S1 selection, S2 experiments, S3 species, S4 phylogenetic axes, S5 variance components, S6 coefficients)
 
 ## Repository structure
 
@@ -360,7 +358,7 @@ figures/
   main/                               Figs 1 to 7, each written by the step that makes it
   appendix/                           Figs S1 to S19, in the order of the analysis, each written by
                                       the step that makes it (S11, the variance box, drawn by hand)
-tables/                             Tables S1 to S5; the selection table (written by the README)
+tables/                             Tables S1 to S6
 reports/                            one review report per step; REPORT.qmd collects them
 plan_figures/                       the mock figures agreed while planning (local, not in git)
 renv.lock                           the locked package environment

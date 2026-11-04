@@ -223,11 +223,8 @@ p_top <- ggplot(br) + geom_segment(aes(x = x, xend = xend, y = y, yend = y), col
 figS12 <- patchwork::wrap_plots(p_top, metric_row("r2", "a)", "R² against Null", c(-0.2, 0.6), FALSE),
                                 metric_row("spearman", "b)", "Spearman ρ", c(-0.2, 0.6), FALSE),
                                 metric_row("skill", "c)", "Loser/winner skill", c(-0.2, 0.6), TRUE), ncol = 1, heights = c(0.35, 1, 1, 1)) +
-  patchwork::plot_annotation(caption = paste0(
-    "Each half violin is the ", length(scored), " scored gradients, held out (leave one gradient out); left (blue) the meta-regression of step 06, right (orange) the random forest ",
-    "on the same rows, predictors and folds, no case weights; points and numbers = medians.\nR² = 1 - error / error of the metafor Null on that gradient, so Null is 0 and not drawn (the forest Null, ",
-    "the mean of the training effects, is in the report). Climate has no Spearman or skill: one climate per experiment cannot order species within a gradient."),
-    theme = theme(plot.caption = element_text(size = 24, colour = "grey40"), plot.background = element_rect(fill = "white", colour = NA)))
+  patchwork::plot_annotation( # no footnote: the caption says it (Bills, 4 Nov)
+    theme = theme(plot.background = element_rect(fill = "white", colour = NA)))
 ggsave("figures/appendix/figS14.png", figS12, width = 48, height = 30, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
