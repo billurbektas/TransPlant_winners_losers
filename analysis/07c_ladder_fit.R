@@ -23,7 +23,7 @@
 # model-based coefficient intervals as step 05; run 07c to 07f without stopping.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
-source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R"); source("R/cache.R")
+source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R"); source("R/cache.R"); source("R/term_labels.R")
 cache_version <- "07c-v1" # raise when the fitting code changes
 
 warns <- character()
@@ -130,7 +130,7 @@ coefs <- bind_rows(lapply(fits[-1], function(f) { s <- coef(summary(f$m))
   tibble::tibble(model = f$model, term = rownames(s), estimate = s$estimate, se = s$se, ci_lower = s$ci.lb, ci_upper = s$ci.ub, pval = s$pval) }))
 write.csv(coefs, file.path(out_dir, "coefficients.csv"), row.names = FALSE)
 coef_panel <- function(x, tag, ttl) { # as analysis/05_ladder_fit.R
-  x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = factor(term, levels = rev(unique(term))))
+  x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = term_label(term, "colonizers"), term = factor(term, levels = rev(unique(term)))) # words, as Fig 7
   ggplot(x, aes(estimate, term)) + geom_vline(xintercept = 0, colour = "grey60") +
     geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0, linewidth = 0.9) +
     geom_point(aes(fill = excl), shape = 21, size = 4, stroke = 1) +
@@ -142,7 +142,8 @@ coef_panel <- function(x, tag, ttl) { # as analysis/05_ladder_fit.R
 s4b <- coef_panel(filter(coefs, model == "Climate + start", term != "intrcpt"), "a)", "Colonizers, Climate + destination abundance (model-based intervals)")
 prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model == prop_label[[p]], canon(term) %in% canon(prop_terms(prop_vars[[p]]))) |>
   mutate(property = prop_label[[p]])))
-s4c <- coef_panel(prop_coefs, "b)", "Colonizers: property terms, each from its own model") + facet_wrap(~ property, scales = "free", ncol = 4)
+s4c <- coef_panel(prop_coefs, "b)", "Colonizers: property terms, each from its own model (climate + destination abundance + property, species slopes kept)") + facet_wrap(~ property, scales = "free", ncol = 4) +
+  scale_x_continuous(n.breaks = 3, guide = guide_axis(check.overlap = TRUE)) # word labels narrow the facets
 ggsave("figures/appendix/figS16.png", patchwork::wrap_plots(s4b, s4c, ncol = 1, heights = c(1, 2)), width = 20, height = 20, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------------------

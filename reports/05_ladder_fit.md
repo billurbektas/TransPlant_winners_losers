@@ -17,7 +17,7 @@ rma.mv(yi = strength, V = strength_se^2, mods = <formula>, random = <re_base or 
 # Null ~ 1; Start ~A0_origin + A0_dest + A0_origin:W + A0_dest:W; Climate ~W * T * P
 # Climate + start and Species-dependent ~W * T * P + A0_origin + A0_dest + A0_origin:W + A0_dest:W
 # property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes
-coef(summary(m))   # model-based (REML Wald) intervals for Table S5 and Fig S12
+coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S12
 ```
 
 ## Counts per rowset

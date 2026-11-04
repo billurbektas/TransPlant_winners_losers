@@ -1,6 +1,6 @@
 # Step 10: Figures, appendix and report
 
-Draws what no earlier step produced: Fig 4, the 42 experiments in climate space with one disc per experiment for the effects the ladders model (512 resident and 110 colonizer effects, steps 05 and 07c): its fill the residents' net change, the sum of their strengths with the sign kept, its purple ring the colonizers' total warmed cover, both in percentage points of the warmed turf from year 3 on (Bills, 3 Nov); Fig S10 the same map with pies counting resident losers and winners (by the sign of their net strength from year 3 on) and colonizers (net warmed cover above zero), all classified effects; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S4 the predictors before standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers (seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies and discs sit at their destination climate; the 15 experiments that share a destination climate (6 points) fan out around a black dot at that climate on short lines; no two pies or discs overlap (0 pies of different climates had to be pushed apart). Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation. The ring key is drawn in millimetres and matched to the rings through the drawn panel's scale (39.55 mm per °C).
+Draws what no earlier step produced: Fig 4, the 42 experiments in climate space with one disc per experiment for the effects the ladders model (512 resident and 110 colonizer effects, steps 05 and 07c): its fill the residents' net change, the sum of their strengths with the sign kept, its purple ring the colonizers' total warmed cover, both in percentage points of the warmed turf from year 3 on (Bills, 3 Nov); Fig S10 the same map with pies counting resident losers and winners (by the sign of their net strength from year 3 on) and colonizers (net warmed cover above zero), all classified effects; Fig S1 the data flow; Fig S3 and Table S4 the phylogenetic axes; Fig S4 the predictors before standardisation with the niche checks; Tables S1, S2, S3, S5 and S6. Copies the reviewed figures of steps 03 to 07f under their final numbers (seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies and discs sit at their destination climate; the 15 experiments that share a destination climate (6 points) fan out around a black dot at that climate on short lines; no two pies or discs overlap (0 pies of different climates had to be pushed apart). Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation. The ring key is drawn in millimetres and matched to the rings through the drawn panel's scale (39.55 mm per °C).
 
 ## Counts
 
@@ -85,7 +85,7 @@ Median over the experiments with modelled residents: net change -6.1 points; med
 | Fig 7 | figures/main/fig7.png | Coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers | this step |
 | Fig S1 | figures/appendix/figS1.png | Data flow | this step |
 | Fig S2 | figures/appendix/figS2.png | TRY trait screening | prep P2 |
-| Fig S3 | figures/appendix/figS3.png | Phylogenetic axes (with Table S3) | this step (prep P3) |
+| Fig S3 | figures/appendix/figS3.png | Phylogenetic axes (with Table S4) | this step (prep P3) |
 | Fig S4 | figures/appendix/figS4.png | Predictors before standardisation, niche checks | this step (prep P4, P6) |
 | Fig S5 | figures/appendix/figS5.png | The pool rule | step 01 |
 | Fig S6 | figures/appendix/figS6.png | Resident pool sizes | step 01 |
@@ -119,13 +119,14 @@ Median over the experiments with modelled residents: net change -6.1 points; med
 
 | table | file | content | rows |
 | --- | --- | --- | --- |
-| Table S1 | tables/tableS1.csv | Experiments | 42 |
-| Table S2 | tables/tableS2.csv | Species list | 426 |
-| Table S3 | tables/tableS3.csv | Phylogenetic axes | 3 |
-| Table S4 | tables/tableS4.csv | Variance components per model | 24 |
-| Table S5 | tables/tableS5.csv | Fixed-effect coefficients per model | 321 |
+| Table S1 | tables/tableS1.csv | What each selection removes | 12 |
+| Table S2 | tables/tableS2.csv | Experiments | 42 |
+| Table S3 | tables/tableS3.csv | Species list | 426 |
+| Table S4 | tables/tableS4.csv | Phylogenetic axes | 3 |
+| Table S5 | tables/tableS5.csv | Variance components per model | 24 |
+| Table S6 | tables/tableS6.csv | Fixed-effect coefficients per model | 321 |
 
-## Table S3, phylogenetic axes
+## Table S4, phylogenetic axes
 
 | axis | variation (%) | most common families of the 15 most extreme species, negative | most common families of the 15 most extreme species, positive |
 | --- | --- | --- | --- |

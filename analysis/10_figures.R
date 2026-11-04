@@ -1,7 +1,7 @@
 # Step 10: figures, appendix and report.
 #
 # PLAN.md: Figure map, Captions, Appendix.
-# Reads:  data/derived/prep/ (experiments, sites, experiment_climate, site_bioclim_check,
+# Reads:  data/derived/prep/ (experiments, community, sites, experiment_climate, site_bioclim_check,
 #         traits, niche_optima, functional_groups, phylogeny_axes);
 #         data/derived/01_relative_cover/ (flow_counts.csv, cover_long.rds, a0.rds,
 #         pool_sizes.csv); data/derived/03b_strength_y3/strength_df.rds;
@@ -11,7 +11,7 @@
 # Writes: figures/main/fig4.png, fig7.png (the other main figures are written by their steps);
 #         figures/appendix/figS1.png, figS3.png, figS4.png, figS10.png (the other appendix
 #         figures are written by their steps);
-#         tables/tableS1.csv ... tableS5.csv; data/derived/10_figures/fig4_balance.csv,
+#         tables/tableS1.csv ... tableS6.csv; data/derived/10_figures/fig4_balance.csv,
 #         fig4_pie_counts.csv;
 #         reports/10_figures.md
 # Checks: 42 experiments; 1004 resident effects (703 losers, 301 winners); 264
@@ -32,7 +32,7 @@
 # the colonizers' gain. Each appendix figure is written by its own step.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
-source("R/md_table.R")
+source("R/md_table.R"); source("R/term_labels.R")
 warns <- character()
 globalCallingHandlers(warning = function(w) {
   warns <<- c(warns, conditionMessage(w)); invokeRestart("muffleWarning")
@@ -191,7 +191,7 @@ stopifnot(abs(measured - mm_per_degree) < 0.01) # the ring key matches the rings
 # Climate + abundance, Height and LDMC models (Bills, 2 Nov). Both responses are relative cover
 # and W, T, P and the traits share one scale (steps 02, 07c), so those terms sit on one axis;
 # the abundance terms are standardised within each pool and are drawn apart
-coefs <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), pool = "Residents"),
+coefs <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS6.csv"), pool = "Residents"),
                    mutate(read.csv("data/derived/07c_ladder_fit/coefficients.csv"), pool = "Colonizers")) |>
   filter(model %in% c("Climate + start", "Height", "LDMC"), term != "intrcpt") |>
   mutate(pool = factor(pool, levels = c("Residents", "Colonizers")), excludes_zero = ci_lower > 0 | ci_upper < 0)
@@ -239,24 +239,24 @@ stopifnot(nrow(flow) == 7) # step 01's filters
 s04 <- read.csv("data/derived/04_classification/species_summary.csv")
 s07b <- read.csv("data/derived/07b_classification/species_summary.csv")
 h05 <- read.csv("data/derived/05_ladder_fit/heterogeneity.csv") |> filter(rowset == "all", model == "Null")
-box <- function(e, s, n) sprintf("%d experiments · %d species · %d effects", e, s, n)
+box <- function(e, s, n) sprintf("%d experiments · %d species · %d combinations", e, s, n) # species × experiment, as the captions
 excl <- filter(readRDS("data/derived/prep/experiments.rds"), !included)
 stopifnot(nrow(excl) == flow$n_experiments[1] - flow$n_experiments[2]) # the experiments removed between the first two boxes
 excl_rule <- paste(sprintf("%s (%s → %s) removed: %s, %d survey years (%d–%d)", sub("_", " ", excl$region), excl$origin_site, excl$destination_site,
                            excl$exclusion_reason, excl$year_range, excl$first_year, excl$last_year), collapse = "\n")
 nodes <- tibble::tribble(
   ~id, ~x, ~y, ~title, ~counts,
-  1, 0, 9, "Community data (P1)", box(flow$n_experiments[1], flow$n_species[1], flow$n_combinations[1]),
+  1, 0, 9, "Community data", box(flow$n_experiments[1], flow$n_species[1], flow$n_combinations[1]),
   2, 0, 8, "Experiments kept", box(flow$n_experiments[2], flow$n_species[2], flow$n_combinations[2]),
   3, 0, 7, "Deep lineages removed", box(flow$n_experiments[3], flow$n_species[3], flow$n_combinations[3]),
   4, 0, 6, "Pool rule", box(flow$n_experiments[4], flow$n_species[4], flow$n_combinations[4]),
   5, 0, 5, "Pool-size rule", box(flow$n_experiments[5], flow$n_species[5], flow$n_combinations[5]),
   6, -1, 4, "Residents: strength from year 3", box(n_distinct(res$experiment_id), n_distinct(res$species), nrow(res)),
-  7, -1, 3, "Residents: Step C (Fig 2)", box(NA_integer_, nrow(s04), sum(s04$n_experiments)),
-  8, -1, 2, "Residents: the ladder (Fig 6)", box(h05$n_experiments, h05$n_species, h05$n_effects),
+  7, -1, 3, "Residents: classification (Fig 2)", box(NA_integer_, nrow(s04), sum(s04$n_experiments)),
+  8, -1, 2, "Residents: model comparison (Fig 6)", box(h05$n_experiments, h05$n_species, h05$n_effects),
   9, 1, 4, "Colonizers: warmed cover from year 3", box(n_distinct(col$experiment_id), n_distinct(col$species), nrow(col)),
-  10, 1, 3, "Colonizers: Step C (Fig 3)", box(NA_integer_, nrow(s07b), sum(s07b$n_experiments)),
-  11, 1, 2, "Colonizers: the ladder (Fig S17)", box(n_distinct(lad_col$experiment_id), n_distinct(lad_col$species), nrow(lad_col))) |>
+  10, 1, 3, "Colonizers: classification (Fig 3)", box(NA_integer_, nrow(s07b), sum(s07b$n_experiments)),
+  11, 1, 2, "Colonizers: model comparison (Fig S17)", box(n_distinct(lad_col$experiment_id), n_distinct(lad_col$species), nrow(lad_col))) |>
   mutate(counts = sub("NA experiments · ", "", counts))
 edges <- tibble::tribble(
   ~from, ~to, ~rule,
@@ -281,7 +281,7 @@ figS1 <- ggplot() +
   scale_x_continuous(limits = c(-1.9, 2.3)) + scale_y_continuous(limits = c(1.5, 9.5)) +
   theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA))
 
-# ---- Fig S3 and Table S3: phylogenetic axes -------------------------------------------
+# ---- Fig S3 and Table S4: phylogenetic axes -------------------------------------------
 phy <- readRDS("data/derived/prep/phylogeny_axes.rds")
 fg <- readRDS("data/derived/prep/functional_groups.rds")
 analysed <- union(res$species, col$species)
@@ -304,7 +304,7 @@ ends <- bind_rows(lapply(c("PEV1", "PEV2", "PEV3"), function(a) {
     count(end, family, sort = TRUE) |> slice_head(n = 3, by = end) |>
     summarise(families = paste0(family, " (", n, ")", collapse = ", "), .by = end) |> mutate(axis = a)
 }))
-tableS3 <- tidyr::pivot_wider(ends, names_from = end, values_from = families, names_prefix = "most common families of the 15 most extreme species, ") |>
+tableS4 <- tidyr::pivot_wider(ends, names_from = end, values_from = families, names_prefix = "most common families of the 15 most extreme species, ") |>
   left_join(transmute(phy$eigenvalues, axis = PEV, `variation (%)` = round(percent_positive_variation, 1)), by = "axis") |> relocate(axis, `variation (%)`)
 
 # ---- Fig S4: the predictors before standardisation -------------------------------------
@@ -321,42 +321,82 @@ hist_panel <- function(v, xlab, tag, log_x = FALSE) {
     labs(title = tag, x = paste0(xlab, " (n = ", nrow(d), ")"), y = NULL) + big + theme(axis.title.x = element_text(size = 24))
 }
 figS4 <- patchwork::wrap_plots(
-  hist_panel(experiments$destination_T_JJA, "Destination JJA temperature (°C)", "a)"),
-  hist_panel(experiments$diff_T_JJA, "Warming W (°C)", "b)"),
-  hist_panel(experiments$destination_P_JJA, "Destination JJA precipitation (mm)", "c)", TRUE),
+  hist_panel(experiments$destination_T_JJA, "Destination June–August temperature (°C)", "a)"),
+  hist_panel(experiments$diff_T_JJA, "Warming (°C)", "b)"),
+  hist_panel(experiments$destination_P_JJA, "Destination June–August precipitation (mm)", "c)", TRUE),
   hist_panel(a0$A0_origin, "Initial abundance at origin, log(% cover + 1)", "d)"),
   hist_panel(a0$A0_dest, "Initial abundance at destination, log(% cover + 1)", "e)"),
   hist_panel(1000 * traits$LDMC[traits$species %in% res_sp], "LDMC (mg g⁻¹)", "f)", TRUE),
   hist_panel(1000 * traits$LMA[traits$species %in% res_sp], "LMA (g m⁻²)", "g)", TRUE),
   hist_panel(100 * traits$height[traits$species %in% res_sp], "Vegetative height (cm)", "h)", TRUE),
-  hist_panel(niche$T_opt[niche$species %in% res_sp], "T optimum (°C)", "i)"),
-  hist_panel(exp(niche$P_opt[niche$species %in% res_sp]), "P optimum (mm)", "j)", TRUE),
+  hist_panel(niche$T_opt[niche$species %in% res_sp], "Thermal optimum (°C)", "i)"),
+  hist_panel(exp(niche$P_opt[niche$species %in% res_sp]), "Precipitation optimum (mm)", "j)", TRUE),
   ggplot(chk, aes(bio10, T)) + geom_abline(linetype = "dashed", colour = "grey50") + geom_point(size = 4, alpha = 0.7) +
-    labs(title = "k)", x = "CHELSA bio10 (°C)", y = "Ladder JJA T (°C)") + big,
+    labs(title = "k)", x = "CHELSA bio10, warmest quarter (°C)", y = "June–August temperature (°C)") + big,
   ggplot(chk, aes(bio18, destination_P_JJA)) + geom_abline(linetype = "dashed", colour = "grey50") + geom_point(size = 4, alpha = 0.7) +
-    scale_x_log10() + scale_y_log10() + labs(title = "l)", x = "CHELSA bio18 (mm)", y = "Ladder JJA P (mm)") + big,
+    scale_x_log10() + scale_y_log10() + labs(title = "l)", x = "CHELSA bio18, warmest quarter (mm)", y = "June–August precipitation (mm)") + big,
   ncol = 4)
 
-# ---- Tables S1, S2, S4, S5 -----------------------------------------------------------
-cover <- readRDS("data/derived/01_relative_cover/cover_long.rds") |> filter(experiment_id %in% res$experiment_id)
-plots <- distinct(cover, experiment_id, treatment, plot_id) |> count(experiment_id, treatment) |>
-  tidyr::pivot_wider(names_from = treatment, values_from = n, names_prefix = "plots ")
+# ---- Tables S1 to S3, S5 and S6 (S4 is drawn with Fig S3) ---------------------------
+# Table S1 (Bills, 4 Nov): what each selection removes, in the order the analysis applies it.
+# Residents and colonizers split after the pool rule; their later rows count from the row above
+# on their own branch, and nothing is removed at the split itself
+st_res <- filter(res, species %in% s04$species); st_col <- filter(col, species %in% s07b$species)
+left3 <- function(d) c(n_distinct(d$experiment_id), n_distinct(d$species), nrow(d))
+sel <- tibble::tibble(
+  step = c("P1", "P1", "01", "01", "01", "01", "01", "07a", "04", "07b", "05", "07c"),
+  code = c("prep/R/community.R", "prep/R/community.R", rep("analysis/01_relative_cover.R", 5), "analysis/07a_colonizers.R",
+           "analysis/04_classification.R", "analysis/07b_classification.R", "analysis/05_ladder_fit.R", "analysis/07c_ladder_fit.R"),
+  rule = c("Network data, species identified to species level",
+           "Experiments with too short a record are left out (IN_Kashmir, two survey years)",
+           "Ferns, horsetails, clubmosses and juniper are left out: lineages far from the flowering plants the questions concern (their cover still counts in the relative-cover denominator)",
+           "A species must be established in the controls: recorded in at least two plots in half of the years, or in half of the plots in at least two years",
+           "An experiment needs at least 5 residents for a species to be compared within it (US_Arizona has 4)",
+           "Residents: established in the origin controls",
+           "Destination pool: established in the destination controls, never recorded in the origin controls",
+           "Colonizers: an experiment needs at least 5 destination-pool species, as for residents",
+           "Residents in at least 3 gradients, so that their variation among experiments can be estimated",
+           "Colonizers in at least 3 gradients, as for residents",
+           "Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows",
+           "Colonizers with every property, as for residents"),
+  parent = c(NA, 1, 2, 3, 4, 5, 5, 7, 6, 8, 9, 10),
+  split = c(rep(FALSE, 5), TRUE, TRUE, rep(FALSE, 5)))
+sel_n <- rbind(as.matrix(flow[1:7, c("n_experiments", "n_species", "n_combinations")]), left3(col), left3(st_res), left3(st_col),
+               c(h05$n_experiments, h05$n_species, h05$n_effects), left3(lad_col))
+removed <- function(k) ifelse(is.na(sel$parent) | sel$split, NA, sel_n[sel$parent, k] - sel_n[, k])
+tableS1 <- transmute(sel, step, code, rule) |>
+  mutate(experiments_removed = removed(1), experiments_left = sel_n[, 1], species_removed = removed(2), species_left = sel_n[, 2],
+         combinations_removed = removed(3), combinations_left = sel_n[, 3])
+stopifnot(nrow(tableS1) == 12, all(c(tableS1$experiments_removed, tableS1$species_removed, tableS1$combinations_removed) >= 0, na.rm = TRUE),
+          tableS1$combinations_left[11] == 512, tableS1$combinations_left[12] == 110) # a rule only removes; the ladder rows
+# plots per group counted in the community data with step 01's three groups, so experiments whose
+# destination pool is empty keep their destination-control plots (they have no rows in cover_long)
+community <- readRDS("data/derived/prep/community.rds")
+plot_groups <- bind_rows(
+  transmute(experiments, experiment_id, region, origin_site, destination_site, treatment = "Warm", group = "warmed plots"),
+  transmute(experiments, experiment_id, region, origin_site, destination_site = origin_site, treatment = "LocalControl", group = "origin-control plots"),
+  transmute(experiments, experiment_id, region, origin_site = destination_site, destination_site, treatment = "LocalControl", group = "destination-control plots"))
+plots <- inner_join(plot_groups, distinct(community, region, origin_site, destination_site, treatment, plot_id),
+                    by = c("region", "origin_site", "destination_site", "treatment"), relationship = "many-to-many") |>
+  count(experiment_id, group) |> tidyr::pivot_wider(names_from = group, values_from = n)
 pools <- read.csv("data/derived/01_relative_cover/pool_sizes.csv")
-tableS1 <- experiments |>
+tableS2 <- experiments |>
   transmute(experiment_id, country, origin_site, destination_site, origin_elevation, destination_elevation, first_year, last_year,
-            `destination JJA T (°C)` = round(destination_T_JJA, 2), `warming W (°C)` = round(diff_T_JJA, 2), `destination JJA P (mm)` = round(destination_P_JJA)) |>
-  left_join(plots, by = "experiment_id") |> left_join(select(pools, experiment_id, `resident pool` = resident, `destination pool` = destination_pool), by = "experiment_id")
-stopifnot(nrow(tableS1) == 42, !anyNA(tableS1$`resident pool`))
-tableS2 <- tibble::tibble(species = sort(analysed)) |>
+            `destination June–August temperature (°C)` = round(destination_T_JJA, 2), `warming (°C)` = round(diff_T_JJA, 2),
+            `destination June–August precipitation (mm)` = round(destination_P_JJA)) |>
+  left_join(select(plots, experiment_id, `destination-control plots`, `origin-control plots`, `warmed plots`), by = "experiment_id") |>
+  left_join(select(pools, experiment_id, `resident pool` = resident, `destination pool` = destination_pool), by = "experiment_id")
+stopifnot(nrow(tableS2) == 42, !anyNA(tableS2)) # every experiment has its three groups of plots and its pools
+tableS3 <- tibble::tibble(species = sort(analysed)) |>
   left_join(select(fg, species, family, graminoid, woody), by = "species") |>
   left_join(summarise(res, `gradients as resident` = n_distinct(gradient_id), .by = species), by = "species") |>
   left_join(summarise(col, `gradients as colonizer` = n_distinct(gradient_id), .by = species), by = "species") |>
-  left_join(select(s04, species, `Step C class (resident)` = class), by = "species") |>
-  left_join(select(s07b, species, `Step C class (colonizer)` = class), by = "species") |>
+  left_join(select(s04, species, `classification (resident)` = class), by = "species") |>
+  left_join(select(s07b, species, `classification (colonizer)` = class), by = "species") |>
   mutate(LDMC = species %in% traits$species[!is.na(traits$LDMC)], LMA = species %in% traits$species[!is.na(traits$LMA)],
          height = species %in% traits$species[!is.na(traits$height)], PEV = species %in% phy$scores$species, niche = species %in% niche$species)
-stopifnot(nrow(tableS2) == length(analysed), !anyNA(tableS2$graminoid))
-# step 07c's heterogeneity table lacks the counts, parameters and W slope variance of Table S4;
+stopifnot(nrow(tableS3) == length(analysed), !anyNA(tableS3$graminoid))
+# step 07c's heterogeneity table lacks the counts, parameters and W slope variance of Table S5;
 # they are read from its saved fits so both pools carry the same columns
 col_fits <- lapply(list.files("data/derived/07c_ladder_fit/models", full.names = TRUE), readRDS)
 col_extra <- tibble::tibble(model = sapply(col_fits, `[[`, "model"), n_parameters = sapply(col_fits, function(f) f$m$parms),
@@ -367,15 +407,17 @@ col_het <- read.csv("data/derived/07c_ladder_fit/heterogeneity.csv") |> left_joi
 stopifnot(nrow(col_het) == 12, !anyNA(col_het$n_parameters)) # every colonizer model found
 # step 05 lists the five floor and ceiling fits again under each property's row set; since 2 Nov
 # every row set is the ladder rows, so those repeats are dropped here
-res_t4 <- read.csv("data/derived/05_ladder_fit/tableS4.csv")
+res_t4 <- read.csv("data/derived/05_ladder_fit/tableS5.csv")
 res_t4 <- res_t4[res_t4$rowset == "all" | !res_t4$model %in% c("Null", "Start", "Climate", "Climate + start", "Species-dependent"), ]
 stopifnot(nrow(res_t4) == 12, !anyDuplicated(res_t4$model), all(res_t4$n_effects == res_t4$n_effects[1])) # one row per resident model, one row set
-tableS4 <- bind_rows(mutate(res_t4, pool = "residents"),
+tableS5 <- bind_rows(mutate(res_t4, pool = "residents"),
                      mutate(col_het, pool = "colonizers")) |> relocate(pool) |>
-  mutate(struct = ifelse(struct == "none (no slopes)", struct, "W: one variance; T, P, TP: diagonal")) # one label for both pools
-tableS5 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS5.csv"), pool = "residents"),
-                     mutate(read.csv("data/derived/07c_ladder_fit/coefficients.csv"), pool = "colonizers")) |> relocate(pool)
-for (t in c("S1", "S2", "S3", "S4", "S5")) write.csv(get(paste0("table", t)), sprintf("tables/table%s.csv", t), row.names = FALSE)
+  mutate(struct = ifelse(struct == "none (no slopes)", struct, "warming: one variance; temperature, precipitation, their product: diagonal"), # one label for both pools
+         model = model_label(model, pool)) # the names of Figs 6 and S17
+tableS6 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS6.csv"), pool = "residents"),
+                     mutate(read.csv("data/derived/07c_ladder_fit/coefficients.csv"), pool = "colonizers")) |> relocate(pool) |>
+  mutate(model = model_label(model, pool), term = term_label(term, pool)) # words, as Fig 7
+for (t in paste0("S", 1:6)) write.csv(get(paste0("table", t)), sprintf("tables/table%s.csv", t), row.names = FALSE)
 
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
 ggsave("figures/main/fig4.png", fig4, width = 38, height = 28, dpi = 100, bg = "white")
@@ -398,7 +440,7 @@ fig_index <- tibble::tribble(
   "Fig 7", "figures/main/fig7.png", "Coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers", "this step",
   "Fig S1", "figures/appendix/figS1.png", "Data flow", "this step",
   "Fig S2", "figures/appendix/figS2.png", "TRY trait screening", "prep P2",
-  "Fig S3", "figures/appendix/figS3.png", "Phylogenetic axes (with Table S3)", "this step (prep P3)",
+  "Fig S3", "figures/appendix/figS3.png", "Phylogenetic axes (with Table S4)", "this step (prep P3)",
   "Fig S4", "figures/appendix/figS4.png", "Predictors before standardisation, niche checks", "this step (prep P4, P6)",
   "Fig S5", "figures/appendix/figS5.png", "The pool rule", "step 01",
   "Fig S6", "figures/appendix/figS6.png", "Resident pool sizes", "step 01",
@@ -434,8 +476,8 @@ report <- c(
   paste0("Draws what no earlier step produced: Fig 4, the ", nrow(experiments), " experiments in climate space with one disc per experiment for the effects the ladders model ",
          "(", nrow(res_lad), " resident and ", nrow(col_lad), " colonizer effects, steps 05 and 07c): its fill the residents' net change, the sum of their strengths with the sign kept, ",
          "its purple ring the colonizers' total warmed cover, both in percentage points of the warmed turf from year 3 on (Bills, 3 Nov); ",
-         "Fig S10 the same map with pies counting resident losers and winners (by the sign of their net strength from year 3 on) and colonizers (net warmed cover above zero), all classified effects; Fig S1 the data flow; Fig S3 and Table S3 the phylogenetic axes; Fig S4 the predictors before ",
-         "standardisation with the niche checks; Tables S1, S2, S4 and S5. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
+         "Fig S10 the same map with pies counting resident losers and winners (by the sign of their net strength from year 3 on) and colonizers (net warmed cover above zero), all classified effects; Fig S1 the data flow; Fig S3 and Table S4 the phylogenetic axes; Fig S4 the predictors before ",
+         "standardisation with the niche checks; Tables S1, S2, S3, S5 and S6. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
          "(seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies and discs sit at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
          "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies or discs overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
          "Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation. ",
@@ -453,10 +495,10 @@ report <- c(
   "![Fig 4](../figures/main/fig4.png)", "", "![Fig 7](../figures/main/fig7.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S3](../figures/appendix/figS3.png)", "",
   "![Fig S4](../figures/appendix/figS4.png)", "", "![Fig S10](../figures/appendix/figS10.png)",
   "", "## Tables", "",
-  md_table(tibble::tibble(table = paste("Table", c("S1", "S2", "S3", "S4", "S5")), file = sprintf("tables/table%s.csv", c("S1", "S2", "S3", "S4", "S5")),
-                          content = c("Experiments", "Species list", "Phylogenetic axes", "Variance components per model", "Fixed-effect coefficients per model"),
-                          rows = c(nrow(tableS1), nrow(tableS2), nrow(tableS3), nrow(tableS4), nrow(tableS5)))),
-  "", "## Table S3, phylogenetic axes", "", md_table(tableS3),
+  md_table(tibble::tibble(table = paste("Table", paste0("S", 1:6)), file = sprintf("tables/table%s.csv", paste0("S", 1:6)),
+                          content = c("What each selection removes", "Experiments", "Species list", "Phylogenetic axes", "Variance components per model", "Fixed-effect coefficients per model"),
+                          rows = c(nrow(tableS1), nrow(tableS2), nrow(tableS3), nrow(tableS4), nrow(tableS5), nrow(tableS6)))),
+  "", "## Table S4, phylogenetic axes", "", md_table(tableS4),
   "", paste0(length(no_pev), " analysed species have no phylogenetic scores", if (length(no_pev)) paste0(": ", paste(no_pev, collapse = ", ")) else "", "."),
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
@@ -468,4 +510,4 @@ report <- c(
 writeLines(report, "reports/10_figures.md")
 # the repository README is the realized plan; its numbers are read from data/derived/ (Bills, 2 Nov)
 invisible(knitr::knit("README.Rmd", "README.md", quiet = TRUE))
-message("Step 10 written: ", nrow(experiments), " pies, ", nrow(fig_index), " figure entries, 5 tables")
+message("Step 10 written: ", nrow(experiments), " pies, ", nrow(fig_index), " figure entries, 6 tables")
