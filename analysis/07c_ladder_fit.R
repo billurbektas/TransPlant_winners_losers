@@ -6,13 +6,14 @@
 #         scale); data/derived/prep/traits.rds, functional_groups.rds,
 #         phylogeny_axes.rds, niche_optima.rds
 # Writes: data/derived/07c_ladder_fit/ladder_rows.rds, models/<slug>.rds,
-#         heterogeneity.csv, coefficients.csv; figures/appendix/figS16.png;
-#         reports/07c_ladder_fit.md
+#         heterogeneity.csv, coefficients.csv, variance_change.csv;
+#         figures/appendix/figS17.png (coefficients), figS19.png (change in
+#         unexplained variation), figS20.png (raw heterogeneity); reports/07c_ladder_fit.md
 # Checks: 379 colonizer effects in; ladder rows 110 effects, 27 species, 24
-#         experiments, 18 gradients; no A0_origin in any model; 12 fits; random
+#         experiments, 18 gradients; no A0 term in any model; 11 fits; random
 #         structure exactly re_base / re_slopes; property terms exactly X, X:W, X:T,
-#         X:P, X:TP; A0 interactions only A0_dest:W; slope fits with the diagonal
-#         T, P, TP block. Step 05's tau2 and property checks are computed and reported.
+#         X:P, X:TP; slope fits with the diagonal T, P, TP block. Step 05's tau2
+#         and property checks are computed and reported.
 #
 # Decided 2 Nov (Bills): the residents' ladder (step 05) on colonizers, the same
 # reduction (species in at least 3 gradients that carry every property) and the
@@ -21,9 +22,14 @@
 # pools share one scale; A0_dest (destination-control cover averaged over years,
 # log(100 x cover + 1), step 07a) standardised across all colonizer effects of 07a;
 # model-based coefficient intervals as step 05; run 07c to 07f without stopping.
+# Without abundance (Bills, 7 Nov): step 05's new ladder (Null, Experimental warming,
+# Background climate, Species-specific responses, properties); A0_dest is still
+# computed and standardised but enters no model. Property models warm-started from the
+# Species-specific responses fit with optim BFGS, as step 05 (Bills, 7 Nov).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R"); source("R/cache.R"); source("R/term_labels.R")
+source("R/ladder_figures.R")
 cache_version <- "07c-v1" # raise when the fitting code changes
 
 warns <- character()
@@ -32,7 +38,7 @@ globalCallingHandlers(warning = function(w) {
 })
 out_dir <- "data/derived/07c_ladder_fit"
 dir.create(file.path(out_dir, "models"), recursive = TRUE, showWarnings = FALSE)
-cores <- 7L
+cores <- 4L # of 11; 7 choked the machine (Bills, 7 Nov); results do not depend on it
 
 d <- readRDS("data/derived/07a_colonizers/strength_df_y3.rds")
 stopifnot(nrow(d) == 379, !"A0_origin" %in% names(d)) # step 07a
@@ -64,39 +70,52 @@ stopifnot(nrow(g3) == 29, nrow(rows) == 110, n_distinct(rows$species) == 27, n_d
           n_distinct(rows$gradient_id) == 18) # at least 3 gradients, every property
 saveRDS(rows, file.path(out_dir, "ladder_rows.rds"))
 
-# ---- Formulas: step 05's, A0_origin dropped (PLAN.md) -----------------------------
+# ---- Formulas: step 05's, without abundance (Bills, 7 Nov) ------------------------
+f_warm  <- ~ W
 f_env   <- ~ W * T * P
-f_start <- ~ A0_dest + A0_dest:W
-f_both  <- ~ W * T * P + A0_dest + A0_dest:W
 prop_vars <- list(ldmc = "ldmc_z", lma = "lma_z", height = "height_z", graminoid = "graminoid", woody = "woody",
                   phylogeny = c("PEV1", "PEV2", "PEV3"), niche = c("T_opt", "P_opt"))
 prop_label <- c(ldmc = "LDMC", lma = "LMA", height = "Height", graminoid = "Graminoid", woody = "Woody", phylogeny = "Phylogeny", niche = "Niche")
 prop_terms <- function(v) unlist(lapply(v, function(x) paste0(x, c("", ":W", ":T", ":P", ":TP"))))
-f_prop <- lapply(prop_vars, function(v) reformulate(c(attr(terms(f_both), "term.labels"), prop_terms(v))))
-levels_fit <- tibble::tibble(slug = c("null", "start", "climate", "climate_start", "species", names(prop_vars)),
-                             model = c("Null", "Start", "Climate", "Climate + start", "Species-dependent", prop_label),
-                             slopes = c(rep(FALSE, 4), rep(TRUE, 8)))
-mods <- c(list(null = ~ 1, start = f_start, climate = f_env, climate_start = f_both, species = f_both), f_prop)
+f_prop <- lapply(prop_vars, function(v) reformulate(c(attr(terms(f_env), "term.labels"), prop_terms(v))))
+levels_fit <- tibble::tibble(slug = c("null", "warming", "climate", "species", names(prop_vars)),
+                             model = c("Null", "Experimental warming", "Background climate", "Species-specific responses", prop_label),
+                             slopes = c(rep(FALSE, 3), rep(TRUE, 8)))
+stopifnot(identical(unname(levels_fit$model), ladder_columns))
+mods <- c(list(null = ~ 1, warming = f_warm, climate = f_env, species = f_env), f_prop)
 
-run_fit <- function(i) {
+run_fit <- function(i, start = list()) {
   lv <- levels_fit[i, ]; path <- file.path(out_dir, "models", paste0(lv$slug, ".rds"))
-  key <- cache_key(rows[fit_columns(mods[[lv$slug]])], deparse(mods[[lv$slug]]), lv$slopes, cache_version)
+  key <- if (length(start)) cache_key(rows[fit_columns(mods[[lv$slug]])], deparse(mods[[lv$slug]]), lv$slopes, start, cache_version) else
+    cache_key(rows[fit_columns(mods[[lv$slug]])], deparse(mods[[lv$slug]]), lv$slopes, cache_version) # unchanged key: the 7 Nov floor fits stay cached
   hit <- read_cache(path, key); if (!is.null(hit)) return(hit)
-  w <- character(); t0 <- Sys.time(); optimizer <- "nlminb"
+  w <- character(); t0 <- Sys.time()
   fit <- function(control) withCallingHandlers(
     tryCatch(fit_model(mods[[lv$slug]], if (lv$slopes) re_slopes else re_base, rows, struct = if (lv$slopes) slope_struct else "GEN",
                        control = control), error = function(e) conditionMessage(e)),
     warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
-  m <- fit(list()); if (is.character(m)) { optimizer <- "bobyqa"; m <- fit(list(optimizer = "bobyqa")) }
+  if (length(start)) { optimizer <- "optim BFGS, warm start"; m <- fit(start)
+    if (is.character(m)) { optimizer <- "nlminb"; m <- fit(list()) } } else { optimizer <- "nlminb"; m <- fit(list()) }
+  if (is.character(m)) { optimizer <- "bobyqa"; m <- fit(list(optimizer = "bobyqa")) }
   if (is.character(m)) stop(lv$model, ": ", m)
   res <- list(m = m, slug = lv$slug, model = lv$model, slopes = lv$slopes, optimizer = optimizer,
               minutes = as.numeric(difftime(Sys.time(), t0, units = "mins")), warnings = unique(w))
   write_cache(res, path, key)
 }
-fits <- parallel::mclapply(seq_len(nrow(levels_fit)), run_fit, mc.cores = cores, mc.preschedule = FALSE)
+# two waves: the floor and Species-specific responses from metafor's default start, then the
+# property models warm-started from Species-specific responses (Bills, 7 Nov)
+first <- which(!levels_fit$slug %in% names(prop_vars))
+fits <- parallel::mclapply(first, run_fit, mc.cores = cores, mc.preschedule = FALSE)
 if (any(sapply(fits, inherits, "try-error"))) stop("fits failed: ", paste(unlist(fits[sapply(fits, inherits, "try-error")]), collapse = "\n"))
+sp_m <- fits[[match("species", levels_fit$slug[first])]]$m
+warm <- list(optimizer = "optim", optmethod = "BFGS", sigma2.init = pmax(sp_m$sigma2, 1e-8), # boundary values lifted to 1e-8
+             tau2.init = max(sp_m$tau2, 1e-8), gamma2.init = pmax(sp_m$gamma2, 1e-8))
+second <- parallel::mclapply(which(levels_fit$slug %in% names(prop_vars)), run_fit, start = warm, mc.cores = cores, mc.preschedule = FALSE)
+if (any(sapply(second, inherits, "try-error"))) stop("fits failed: ", paste(unlist(second[sapply(second, inherits, "try-error")]), collapse = "\n"))
+fits <- c(fits, second)
 names(fits) <- levels_fit$slug
-stopifnot(length(fits) == 12) # 4 floor, Species-dependent, 7 property models
+for (i in seq_along(fits)) fits[[i]]$model <- levels_fit$model[i] # a cached fit keeps the name it was fitted under (Null and Climate predate 7 Nov)
+stopifnot(length(fits) == 11) # 3 floor, Species-specific responses, 7 property models
 
 # ---- Heterogeneity per model --------------------------------------------------------
 ladder <- bind_rows(lapply(fits, function(f) { m <- f$m; H <- H_species(m, rows)
@@ -112,20 +131,27 @@ for (f in fits) { # random structure exactly re_base / re_slopes
   if (f$slopes) stopifnot(identical(unname(f$m$g.names), c("W", "species")), identical(unname(f$m$h.names), c("T", "P", "TP", "species")),
                           identical(f$m$struct, slope_struct))
   else stopifnot(!isTRUE(f$m$withG), !isTRUE(f$m$withH))
-  stopifnot(!any(grepl("A0_origin", colnames(f$m$X)))) # A0_origin absent (PLAN.md)
+  stopifnot(!any(grepl("A0", colnames(f$m$X)))) # no abundance in any model (Bills, 7 Nov)
 }
 canon <- function(x) vapply(strsplit(x, ":"), function(p) paste(sort(p), collapse = ":"), "")
 # property terms X, X:W, X:T, X:P, X:TP; metafor drops a term that is redundant on these rows (listed)
 dropped <- unlist(lapply(names(prop_vars), function(p) { added <- canon(setdiff(colnames(fits[[p]]$m$X), colnames(fits$species$m$X)))
   stopifnot(all(added %in% canon(prop_terms(prop_vars[[p]])))); setdiff(canon(prop_terms(prop_vars[[p]])), added) }))
 stopifnot(identical(dropped, "TP:woody")) # one woody species among the 27: woody:TP is redundant
-stopifnot(setequal(canon(grep("A0", colnames(fits$climate_start$m$X), value = TRUE)), canon(c("A0_dest", "A0_dest:W"))))
 # step 05 stops on these two; for colonizers they are reported (Bills, 2 Nov: run without stopping)
-climate_change <- tau2(fits$climate$m) / tau2(fits$null$m) - 1
+climate_change <- c(`Experimental warming` = tau2(fits$warming$m) / tau2(fits$null$m) - 1,
+                    `Background climate` = tau2(fits$climate$m) / tau2(fits$null$m) - 1)
 prop_check <- bind_rows(lapply(names(prop_vars), function(p) { m4 <- fits[[p]]$m; m3 <- fits$species$m; denom <- tau2(m3) + sigma2_exp(m3)
   tibble::tibble(property = prop_label[[p]], move_tau2 = (tau2(m4) - tau2(m3)) / denom, move_sigma2_experiment = (sigma2_exp(m4) - sigma2_exp(m3)) / denom) }))
 
-# ---- Fixed effects, model-based intervals (Fig S16, as step 05's Fig S12) ---------------
+# ---- Fig S19 and Fig S20: change in, and raw, unexplained variation (as Fig 7 and Fig S12) --
+het_fig <- mutate(ladder, column = model)
+change <- ladder_change(het_fig, "figures/appendix/figS19.png")
+stopifnot(nrow(change) == 10 * 5) # 10 comparisons x 5 kinds of unexplained variation
+write.csv(change, file.path(out_dir, "variance_change.csv"), row.names = FALSE)
+ladder_heterogeneity(het_fig, "figures/appendix/figS20.png")
+
+# ---- Fixed effects, model-based intervals (Fig S17, as step 05's Fig S13) ---------------
 coefs <- bind_rows(lapply(fits[-1], function(f) { s <- coef(summary(f$m))
   tibble::tibble(model = f$model, term = rownames(s), estimate = s$estimate, se = s$se, ci_lower = s$ci.lb, ci_upper = s$ci.ub, pval = s$pval) }))
 write.csv(coefs, file.path(out_dir, "coefficients.csv"), row.names = FALSE)
@@ -139,12 +165,12 @@ coef_panel <- function(x, tag, ttl) { # as analysis/05_ladder_fit.R
     theme_classic(base_size = 17) + theme(plot.title = element_text(face = "bold", size = 22), legend.position = "bottom",
                                           strip.text = element_text(face = "bold", size = 15), strip.background = element_blank())
 }
-s4b <- coef_panel(filter(coefs, model == "Climate + start", term != "intrcpt"), "a)", "Colonizers, Climate + destination abundance (model-based intervals)")
+s4b <- coef_panel(filter(coefs, model == "Background climate", term != "intrcpt"), "a)", "Colonizers, Background climate (model-based intervals)")
 prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model == prop_label[[p]], canon(term) %in% canon(prop_terms(prop_vars[[p]]))) |>
   mutate(property = prop_label[[p]])))
-s4c <- coef_panel(prop_coefs, "b)", "Colonizers: property terms, each from its own model (climate + destination abundance + property, species slopes kept)") + facet_wrap(~ property, scales = "free", ncol = 4) +
+s4c <- coef_panel(prop_coefs, "b)", "Colonizers: property terms, each from its own model (background climate + property, species slopes kept)") + facet_wrap(~ property, scales = "free", ncol = 4) +
   scale_x_continuous(n.breaks = 3, guide = guide_axis(check.overlap = TRUE)) # word labels narrow the facets
-ggsave("figures/appendix/figS16.png", patchwork::wrap_plots(s4b, s4c, ncol = 1, heights = c(1, 2)), width = 20, height = 20, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS17.png", patchwork::wrap_plots(s4b, s4c, ncol = 1, heights = c(1, 2)), width = 20, height = 20, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------------------
 e4 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", 1e4 * x))
@@ -153,9 +179,10 @@ report <- c(
   "# Step 07c: The colonizer ladder, fitted (Step D route 1, colonizers)", "",
   paste0("The residents' ladder (step 05) was fitted to the colonizers (Bills, 2 Nov): warmed cover from years 3 and later (step 07a) for the ",
          nrow(rows), " effects of the ", n_distinct(rows$species), " colonizer species found in at least 3 gradients that carry every property (",
-         n_distinct(rows$experiment_id), " experiments, ", n_distinct(rows$gradient_id), " gradients). The same 12 models, with A0_origin dropped ",
-         "(a colonizer has none) so that Start is the destination abundance A0_dest and its interaction with W. Properties are on the residents' ",
-         "step 02 scale (checked), A0_dest (log(100 x mean destination-control cover + 1)) standardised across all ", nrow(d), " colonizer effects of 07a. ", sum(rows$strength_se == 0), " effects are measured absences (SE 0)."),
+         n_distinct(rows$experiment_id), " experiments, ", n_distinct(rows$gradient_id), " gradients). The same 11 models, without abundance (Bills, 7 Nov): ",
+         "Null, Experimental warming, Background climate, Species-specific responses and one model per property. Properties are on the residents' ",
+         "step 02 scale (checked); A0_dest (log(100 x mean destination-control cover + 1)) is still standardised across all ", nrow(d),
+         " colonizer effects of 07a but enters no model. ", sum(rows$strength_se == 0), " effects are measured absences (SE 0)."),
   "", "## Counts", "",
   md_table(tibble::tibble(rule = c("colonizer effects (07a, years 3 and later)", "species in >= 3 gradients", "of which lacking a property",
                                    "ladder effects", "species", "experiments", "gradients", "measured absences among them"),
@@ -167,18 +194,26 @@ report <- c(
   md_table(transmute(ladder, model, `τ²` = e4(tau2), `σ²_experiment` = e4(sigma2_experiment), `H intercept` = e4(H_intercept), `H slope` = e4(H_slope),
                      optimizer, minutes = sprintf("%.1f", minutes))),
   "", "## Step 05's checks, reported", "",
-  paste0("τ² at Climate against Null: ", sprintf("%+.1f%%", 100 * climate_change), " (step 05 stops beyond 5%)."), "",
+  paste0("τ² against Null: Experimental warming ", sprintf("%+.1f%%", 100 * climate_change[["Experimental warming"]]),
+         ", Background climate ", sprintf("%+.1f%%", 100 * climate_change[["Background climate"]]), " (step 05 stops beyond 5%)."), "",
+  "Property moves against Species-specific responses, as a share of its τ² + σ²_experiment:", "",
   md_table(transmute(prop_check, property, `τ² move` = sprintf("%+.1f%%", 100 * move_tau2), `σ²_experiment move` = sprintf("%+.1f%%", 100 * move_sigma2_experiment))),
   "", paste0("Moves beyond step 05's 5% limit: ", sum(abs(c(prop_check$move_tau2, prop_check$move_sigma2_experiment)) > 0.05), " of ", 2 * nrow(prop_check),
              ". On ", nrow(rows), " effects the variance components are not pinned down well enough for that check to hold; they are reported, not enforced (Bills, 2 Nov)."),
   "", "## Coefficients whose 95% interval excludes zero", "",
   if (nrow(excl)) md_table(transmute(excl, model, term, estimate = sprintf("%.4f", estimate), ci = sprintf("%.4f to %.4f", ci_lower, ci_upper))) else "None.",
-  "", "## Figures", "", "![Fig S16, colonizer coefficients](../figures/appendix/figS16.png)",
+  "", "## Change in unexplained variation at each comparison (Fig S19)", "",
+  md_table(transmute(change, model = column, `compared with` = compared_with, component,
+                     `change (×10⁻⁴)` = sprintf("%+.3f", 1e4 * change), `%` = ifelse(state == "change", sprintf("%+.1f", percent), state))),
+  "", "## Figures", "", "![Fig S17, colonizer coefficients](../figures/appendix/figS17.png)", "",
+  "![Fig S19, colonizer change in unexplained variation](../figures/appendix/figS19.png)", "",
+  "![Fig S20, colonizer raw heterogeneity](../figures/appendix/figS20.png)",
   "", "## Warnings captured", "", { w <- unique(c(unlist(lapply(fits, function(f) if (length(f$warnings)) paste0(f$model, ": ", f$warnings))), warns))
     if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   "- The colonizer ladder on the residents' reduction and models (Bills, 2 Nov); properties on the residents' scale.",
+  "- Property models warm-started from Species-specific responses with optim BFGS (Bills, 7 Nov, as step 05); the optimizer column above says which fits needed a fallback.",
   "- Step 05's tau2 and property checks are reported, not enforced (Bills, 2 Nov: run without stopping).",
-  "- The colonizer coefficients are their own appendix figure (Fig S16), beside the residents' Fig S12.")
+  "- The colonizer coefficients are their own appendix figure (Fig S17), beside the residents' Fig S13; Figs S19 and S20 mirror Fig 7 and Fig S12 (Bills, 7 Nov).")
 writeLines(report, "reports/07c_ladder_fit.md")
 message("Step 07c written: ", nrow(rows), " effects, ", length(fits), " fits")

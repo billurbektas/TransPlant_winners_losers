@@ -1,18 +1,27 @@
 # Step 05: the ladder, fitted (Step D, route 1, residents).
 #
-# PLAN.md: Step D, "The six models", "The formulas, written out", "Route 1".
+# PLAN.md: Step D, "The models", "The formulas, written out", "Route 1".
+# Without abundance (Bills, 7 Nov): Null, Experimental warming, Background climate,
+# Species-specific responses, then one model per property on Background climate;
+# A0_origin and A0_dest are still computed upstream but enter no model.
+# Warm start (Bills, 7 Nov): every property model starts its variance components at those
+# of the Species-specific responses fit on the same rows and is fitted with optim BFGS; from
+# metafor's default start the LDMC model converged neither with nlminb nor with bobyqa, and
+# the six that did reach the same optimum from the warm start (scratchpad check, 7 Nov).
 # Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3);
 #         data/derived/04_classification/species_summary.csv (Step C spread)
 # Writes: data/derived/05_ladder_fit/models/<rowset>/<model>.rds,
 #         heterogeneity.csv, weights.csv, coefficients.csv, tableS5.csv,
-#         tableS6.csv; figures/appendix/figS12.png; reports/05_ladder_fit.md
+#         tableS6.csv, variance_change.csv; figures/main/fig7.png,
+#         figures/appendix/figS12.png, figS13.png; reports/05_ladder_fit.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients): residents in at least 3 gradients that carry every
 #         property; every property rowset identical to all;
 #         random structure exactly re_base / re_slopes; property terms exactly
-#         X, X:W, X:T, X:P, X:TP; A0 interactions only A0:W; tau2 at Climate
-#         within 5% of Null; tau2 and sigma2_experiment at each property model
-#         within 5% of tau2 + sigma2_experiment of Species-dependent on the same
+#         X, X:W, X:T, X:P, X:TP; no A0 term in any model; tau2 at Experimental
+#         warming and at Background climate within 5% of Null; tau2 and
+#         sigma2_experiment at each property model within 5% of tau2 +
+#         sigma2_experiment of Species-specific responses on the same
 #         rows; sigma2_species at Null off the boundary; all 8 slope fits with
 #         the diagonal T, P, TP block.
 #
@@ -24,10 +33,12 @@
 # lacking a property (Carex norvegica, Veronica serpyllifolia, Bistorta
 # macrophylla) leave the whole ladder, so every model is fitted on the same rows;
 # step 02's standardisation is kept; the GEN timing run is not repeated; 7 cores.
-# The ladder figure (Fig 6) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
+# Fig 6 (performance) is drawn by step 06; Fig 7 (change in unexplained variation) and Fig S12
+# (raw heterogeneity) here (Bills, 7 Nov); the fitted surfaces are not drawn (Bills, 2 Nov).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R"); source("R/cache.R"); source("R/term_labels.R")
+source("R/ladder_figures.R")
 cache_version <- "05-v1" # raise when the fitting code changes
 
 warns <- character()
@@ -36,7 +47,7 @@ globalCallingHandlers(warning = function(w) {
 })
 t_start <- Sys.time()
 out_dir <- "data/derived/05_ladder_fit"
-cores <- 7L
+cores <- 4L # of 11; 7 choked the machine (Bills, 7 Nov); results do not depend on it
 
 strength_df <- readRDS("data/derived/03b_strength_y3/strength_df.rds")
 stopifnot(nrow(strength_df) == 1004) # step 03b
@@ -65,10 +76,9 @@ stopifnot(all(sapply(rows, function(r) identical(r$effect_id, rows$all$effect_id
 stopifnot(!any(grepl("^CH_Lavey", strength_df$experiment_id) &
                strength_df$species %in% c("Solidago virgaurea", "Ranunculus acris")))
 
-# ---- Formulas, verbatim from PLAN.md ---------------------------------------
+# ---- Formulas, verbatim from PLAN.md (without abundance, Bills 7 Nov) ------
+f_warm  <- ~ W
 f_env   <- ~ W * T * P
-f_start <- ~ A0_origin + A0_dest + A0_origin:W + A0_dest:W
-f_both  <- ~ W * T * P + A0_origin + A0_dest + A0_origin:W + A0_dest:W
 prop_vars <- list(ldmc = "ldmc_z", lma = "lma_z", height = "height_z", graminoid = "graminoid", woody = "woody",
                   phylogeny = c("PEV1", "PEV2", "PEV3"), niche = c("T_opt", "P_opt"))
 prop_rowset <- c(ldmc = "ldmc", lma = "lma", height = "height", graminoid = "growth_form", woody = "growth_form",
@@ -77,9 +87,9 @@ prop_label <- c(ldmc = "LDMC", lma = "LMA", height = "Height", graminoid = "Gram
                 phylogeny = "Phylogeny", niche = "Niche")
 # X + X:W + X:T + X:P + X:TP per variable of the property
 prop_terms <- function(v) unlist(lapply(v, function(x) paste0(x, c("", ":W", ":T", ":P", ":TP"))))
-f_prop <- lapply(prop_vars, function(v) reformulate(c(attr(terms(f_both), "term.labels"), prop_terms(v))))
-floor_models <- list(null = list("Null", ~ 1), start = list("Start", f_start),
-                     climate = list("Climate", f_env), climate_start = list("Climate + start", f_both))
+f_prop <- lapply(prop_vars, function(v) reformulate(c(attr(terms(f_env), "term.labels"), prop_terms(v))))
+floor_models <- list(null = list("Null", ~ 1), warming = list("Experimental warming", f_warm),
+                     climate = list("Background climate", f_env))
 fit_rowsets <- "all" # every rowset equals the ladder rows (2 Nov)
 
 # ---- One fit, cached: reused while its rows and specification are unchanged ----
@@ -112,14 +122,20 @@ run_wave <- function(tasks) {
 task <- function(rowset, slug, model, mods, kind, control = list())
   list(rowset = rowset, slug = slug, model = model, mods = mods, kind = kind, control = control)
 
-# ---- All fits in one wave: 4 floor fits and 8 diagonal slope fits, each from
-# metafor's default start --------------------------------------------------------
-wave <- c(lapply(fit_rowsets, function(r) task(r, "species", "Species-dependent", f_both, "slopes")),
-          lapply(names(prop_vars), function(p) task(prop_rowset[[p]], p, prop_label[[p]], f_prop[[p]], "slopes")),
+# ---- Two waves: the 3 floor fits and Species-specific responses from metafor's default
+# start, then the 7 property models warm-started from Species-specific responses ------
+wave <- c(lapply(fit_rowsets, function(r) task(r, "species", "Species-specific responses", f_env, "slopes")),
           unlist(lapply(fit_rowsets, function(r) lapply(names(floor_models), function(s)
             task(r, s, floor_models[[s]][[1]], floor_models[[s]][[2]], "floor"))), recursive = FALSE))
 fits <- run_wave(wave)
-stopifnot(length(fits) == 12) # 4 floor, Species-dependent, 7 property models
+# boundary values lifted to 1e-8 so that the optimiser can leave them
+warm_start <- function(m) list(optimizer = "optim", optmethod = "BFGS", sigma2.init = pmax(m$sigma2, 1e-8),
+                               tau2.init = max(m$tau2, 1e-8), gamma2.init = pmax(m$gamma2, 1e-8))
+sp_all <- fits[[1]]$m # every rowset equals the ladder rows (2 Nov), so one Species-specific responses fit serves all
+prop_wave <- lapply(names(prop_vars), function(p) task(prop_rowset[[p]], p, prop_label[[p]], f_prop[[p]], "slopes", control = warm_start(sp_all)))
+fits <- c(fits, run_wave(prop_wave)); wave <- c(wave, prop_wave)
+stopifnot(length(fits) == 11) # 3 floor, Species-specific responses, 7 property models
+for (i in seq_along(fits)) fits[[i]]$model <- wave[[i]]$model # a cached fit keeps the name it was fitted under (Null and Climate predate 7 Nov)
 names(fits) <- vapply(fits, function(f) paste(f$rowset, f$slug, sep = "/"), "")
 fit_of <- function(rowset, slug) fits[[paste(if (!slug %in% names(prop_vars)) "all" else rowset, slug, sep = "/")]]
 
@@ -142,7 +158,7 @@ ladder <- bind_rows(lapply(names(rows), function(r) {
                    minutes = f$minutes)
   }))
 }))
-stopifnot(nrow(ladder) == 7 * 5 + 7) # five ladder models per rowset plus the seven property models
+stopifnot(nrow(ladder) == 7 * 4 + 7) # four ladder models per rowset plus the seven property models
 write.csv(select(ladder, rowset, model, fitted_on, n_effects, n_species, n_experiments, tau2, sigma2_experiment, sigma2_species,
                  H_intercept, H_slope, convergence, struct, minutes),
           file.path(out_dir, "heterogeneity.csv"), row.names = FALSE)
@@ -163,13 +179,12 @@ for (p in names(prop_vars)) { # property terms exactly X, X:W, X:T, X:P, X:TP; n
   added <- setdiff(colnames(fit_of(prop_rowset[[p]], p)$m$X), colnames(fit_of(prop_rowset[[p]], "species")$m$X))
   stopifnot(setequal(canon(added), canon(prop_terms(prop_vars[[p]]))))
 }
-a0 <- grep("A0", colnames(fit_of("all", "climate_start")$m$X), value = TRUE) # A0 interactions limited to A0:W
-stopifnot(setequal(canon(a0), canon(c("A0_origin", "A0_dest", "A0_origin:W", "A0_dest:W"))))
-climate_check <- fitted |> filter(model %in% c("Null", "Climate")) |>
-  select(rowset, model, tau2) |> tidyr::pivot_wider(names_from = model, values_from = tau2) |>
-  mutate(change = Climate / Null - 1)
+stopifnot(!any(vapply(fits, function(f) any(grepl("A0", colnames(f$m$X))), logical(1)))) # no abundance in any model (Bills, 7 Nov)
+null_tau2 <- filter(fitted, model == "Null")$tau2
+climate_check <- filter(fitted, model %in% c("Experimental warming", "Background climate")) |>
+  transmute(rowset, model, Null = null_tau2, tau2, change = tau2 / null_tau2 - 1)
 print(climate_check)
-stopifnot(all(abs(climate_check$change) <= 0.05)) # climate's main effects cannot reach tau2
+stopifnot(nrow(climate_check) == 2, all(abs(climate_check$change) <= 0.05)) # experiment-level terms cannot reach tau2
 prop_check <- bind_rows(lapply(names(prop_vars), function(p) {
   r <- prop_rowset[[p]]; m4 <- fit_of(r, p)$m; m3 <- fit_of(r, "species")$m
   denom <- tau2(m3) + sigma2_exp(m3)
@@ -212,10 +227,22 @@ weight_summary <- function(w, a0, exp_id, label) {
 w_all <- filter(weights, rowset == "all")
 weights_table <- bind_rows(
   weight_summary(1 / rows$all$strength_se^2, rows$all$A0_origin, rows$all$experiment_id, "raw 1/V"),
-  bind_rows(lapply(c("Null", "Start", "Climate", "Climate + start", "Species-dependent"), function(mo) {
+  bind_rows(lapply(c("Null", "Experimental warming", "Background climate", "Species-specific responses"), function(mo) {
     x <- filter(w_all, model == mo); weight_summary(x$weight, x$A0_origin, x$experiment_id, mo) })))
 
-# ---- Fig S12: coefficients with model-based intervals -----------------------
+# ---- Fig 7 and Fig S12: change in, and raw, unexplained variation (Bills, 7 Nov) --
+# every rowset holds the same rows, so the ladder models come from `all` and each
+# property model from its own rowset
+het_fig <- bind_rows(filter(ladder, rowset == "all", slug %in% c(names(floor_models), "species")),
+                     filter(ladder, fitted_on == rowset, slug %in% names(prop_vars))) |>
+  mutate(column = model)
+stopifnot(nrow(het_fig) == 11, setequal(het_fig$column, ladder_columns))
+change <- ladder_change(het_fig, "figures/main/fig7.png")
+stopifnot(nrow(change) == 10 * 5) # 10 comparisons x 5 kinds of unexplained variation
+write.csv(change, file.path(out_dir, "variance_change.csv"), row.names = FALSE)
+ladder_heterogeneity(het_fig, "figures/appendix/figS12.png")
+
+# ---- Fig S13: coefficients with model-based intervals -----------------------
 coef_panel <- function(x, tag, ttl) {
   x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = term_label(term, "residents"), term = factor(term, levels = rev(unique(term)))) # words, as Fig 7
   ggplot(x, aes(estimate, term)) + geom_vline(xintercept = 0, colour = "grey60") +
@@ -226,13 +253,13 @@ coef_panel <- function(x, tag, ttl) {
     theme_classic(base_size = 17) + theme(plot.title = element_text(face = "bold", size = 22), legend.position = "bottom",
                                           strip.text = element_text(face = "bold", size = 15), strip.background = element_blank())
 }
-s4a <- coef_panel(filter(coefs, rowset == "all", model == "Climate + start", term != "intrcpt"), "a)", "Residents, Climate + initial abundances (model-based intervals)")
+s4a <- coef_panel(filter(coefs, rowset == "all", model == "Background climate", term != "intrcpt"), "a)", "Residents, Background climate (model-based intervals)")
 prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model == prop_label[[p]]) |>
   filter(canon(term) %in% canon(prop_terms(prop_vars[[p]]))) |> mutate(property = prop_label[[p]])))
-s4c <- coef_panel(prop_coefs, "b)", "Property terms, each from its own model (climate + initial abundances + property, species slopes kept)") +
+s4c <- coef_panel(prop_coefs, "b)", "Property terms, each from its own model (background climate + property, species slopes kept)") +
   facet_wrap(~ property, scales = "free", ncol = 4) +
   scale_x_continuous(n.breaks = 3, guide = guide_axis(check.overlap = TRUE)) # word labels narrow the facets
-ggsave("figures/appendix/figS12.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, patchwork::plot_spacer(), widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)), # colonizers: Fig S16
+ggsave("figures/appendix/figS13.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, patchwork::plot_spacer(), widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)), # colonizers: Fig S17
        width = 20, height = 22, dpi = 100, bg = "white")
 
 
@@ -259,16 +286,21 @@ fit_code <- c("```r",
   "rma.mv(yi = strength, V = strength_se^2, mods = <formula>, random = <re_base or re_slopes>,",
   "       struct = c(\"GEN\", \"GDIAG\"), data = <rowset>, method = \"REML\", sparse = TRUE)",
   "# struct only acts on re_slopes: W slope; T, P, TP slopes diagonal. No starting values: metafor's default for every fit",
-  paste0("# Null ~ 1; Start ", deparse(f_start), "; Climate ", deparse(f_env)),
-  paste0("# Climate + start and Species-dependent ", paste(deparse(f_both), collapse = "")),
-  "# property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes",
-  "coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S12", "```")
+  paste0("# Null ~ 1; Experimental warming ", deparse(f_warm), "; Background climate ", deparse(f_env)),
+  paste0("# Species-specific responses ", deparse(f_env), ", with re_slopes"),
+  "# property models: Background climate + X + X:W + X:T + X:P + X:TP per variable, with re_slopes",
+  "coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S13", "```")
+change_tab <- change |> mutate(component = c(total = "total", sigma2_experiment = "σ²_experiment", tau2 = "τ²",
+                                             H_intercept = "H intercept", H_slope = "H slope")[component]) |>
+  transmute(model = column, `compared with` = compared_with, component, `change (×10⁻⁴)` = sprintf("%+.3f", 1e4 * change),
+            `%` = ifelse(state == "change", sprintf("%+.1f", percent), state))
 report <- c(
   "# Step 05: The ladder, fitted (Step D, route 1, residents)", "",
   paste0("The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the ",
          fmt(nrow(strength_df)), " effects of the ", n_distinct(strength_df$species), " residents found in at least 3 gradients ",
          "that carry every property (", n_distinct(strength_df$experiment_id), " experiments, ", n_distinct(strength_df$gradient_id),
-         " gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, ",
+         " gradients). Without abundance (Bills, 7 Nov): Null, Experimental warming, Background climate, Species-specific responses ",
+         "and one property model per property on Background climate (LDMC, LMA, ",
          "height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, ",
          nrow(fitted), " REML fits, all on the same rows. Each model reports τ² (species × experiment), σ²_experiment (experiment ",
          "component) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). ",
@@ -276,13 +308,13 @@ report <- c(
          sprintf("%.1f", sum(fitted$minutes)), " fit-minutes in all; this run took ",
          sprintf("%.0f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min."),
   "", "## Slope structure", "",
-  paste0("The 1 Nov GEN timing run (Species-dependent on the 1,655 rows of the 28 Oct pools, started from the gate fit's own ",
+  paste0("The 1 Nov GEN timing run (Species-dependent, as Species-specific responses was then called, on the 1,655 rows of the 28 Oct pools, started from the gate fit's own ",
          "optimum) did not converge, so the T, P, TP slope block is diagonal in every slope fit; the case is in MILESTONES step 05 ",
          "notes. It is not repeated on the new rows (Bills, 2 Nov). The experiments' T and P are correlated at r = ",
          sprintf("%.2f", cor(exp_cov$T, exp_cov$P)), " on the ladder rows."),
   "", "## Model as fitted (for reviewers)", "", fit_code,
   "", "## Counts per rowset", "", md_table(mutate(counts, across(-rowset, fmt))),
-  "", "Each matches the expectation checked in the script. Every property rowset equals the ladder rows, so Null to Species-dependent are fitted once, on `all` (marked `reused` elsewhere).",
+  "", "Each matches the expectation checked in the script. Every property rowset equals the ladder rows, so Null to Species-specific responses are fitted once, on `all` (marked `reused` elsewhere).",
   "", "Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:", "", md_table(drift),
   "", "## Heterogeneity per model (×10⁻⁴)", "", md_table(het_tab),
   "", paste0("All ", nrow(slope_rows), " slope fits converged with the diagonal T, P, TP block, each from metafor's default start ",
@@ -290,26 +322,31 @@ report <- c(
              e4(min(slope_rows$var_T)), " to ", e4(max(slope_rows$var_T)), " ×10⁻⁴; the TP slope variance ", e4(min(slope_rows$var_TP)), " to ", e4(max(slope_rows$var_TP)),
              " ×10⁻⁴; only the P slope variance is at the boundary (at most ", sprintf("%.1e", max(slope_rows$var_P)), ")."),
   "", "## Checks", "",
-  "τ² at Climate against Null (climate's main effects cannot reach the species × experiment piece; stop beyond 5%):", "",
-  md_table(transmute(climate_check, rowset, `τ² Null` = e4(Null), `τ² Climate` = e4(Climate), change = sprintf("%+.1f%%", 100 * change))),
-  "", "Each property model against Species-dependent on the same rows, as a share of that model's τ² + σ²_experiment (a property reaches only H_species; stop beyond 5%, Bills 1 Nov):", "",
+  "τ² at Experimental warming and Background climate against Null (terms with one value per experiment cannot reach the species × experiment piece; stop beyond 5%):", "",
+  md_table(transmute(climate_check, model, `τ² Null` = e4(Null), `τ²` = e4(tau2), change = sprintf("%+.1f%%", 100 * change))),
+  "", "Each property model against Species-specific responses on the same rows, as a share of that model's τ² + σ²_experiment (a property reaches only H_species; stop beyond 5%, Bills 1 Nov):", "",
   md_table(transmute(prop_check, property, rowset, `τ² + σ²_experiment (×10⁻⁴)` = e4(base),
                      `τ² move` = sprintf("%+.2f%%", 100 * move_tau2), `σ²_experiment move` = sprintf("%+.2f%%", 100 * move_sigma2_experiment))),
   "", paste0("σ²_species at Null on all rows is ", e4(filter(fitted, rowset == "all", model == "Null")$sigma2_species),
              " ×10⁻⁴, off the boundary; the Step C spread of μ_s (step 04, ", nrow(species_summary), " species) is ", e4(var_mu),
-             " ×10⁻⁴. Random structure, property terms (X, X:W, X:T, X:P, X:TP) and A0 interactions (A0:W only) are as PLAN.md writes them. ",
+             " ×10⁻⁴. Random structure and property terms (X, X:W, X:T, X:P, X:TP) are as PLAN.md writes them; no model carries an A0 term (Bills, 7 Nov). ",
              "Subspecies niche check (26 Oct): neither Solidago virgaurea nor Ranunculus acris is a resident at CH_Lavey under the original pools, so there is nothing to refit."),
   "", "## Effective weights (all rows)", "", md_table(weights_table),
-  "", "The low-A0_origin half is the effects at or below the median A0_origin. Species-dependent weights include the slope variance at each effect's climate.",
+  "", "The low-A0_origin half is the effects at or below the median A0_origin (abundance is still computed, though no model uses it). Species-specific responses weights include the slope variance at each effect's climate.",
+  "", "## Change in unexplained variation at each comparison (Fig 7)", "",
+  "Each model against the one it adds to (Table 2). `new`: the compared model has no such component; `zero`: below 1e-10 in both.", "",
+  md_table(change_tab),
   "", "## Figures", "",
-  "![Fig S12, coefficients](../figures/appendix/figS12.png)", "", "Fig 6 (the ladder) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).",
+  "![Fig 7, change in unexplained variation](../figures/main/fig7.png)", "",
+  "![Fig S12, raw heterogeneity](../figures/appendix/figS12.png)", "",
+  "![Fig S13, coefficients](../figures/appendix/figS13.png)", "", "Fig 6 (performance) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).",
   "", "## Warnings captured", "",
   { w <- unique(c(unlist(lapply(fits, function(f) paste0(f$rowset, " / ", f$model, ": ", f$warnings[[1]])[length(f$warnings[[1]]) > 0])), warns))
     if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   paste0("- H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. ",
          "Same quantity."),
-  "- The coefficient figure is appendix Fig S12, written to `figures/appendix/figS12.png`.",
-  "- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.")
+  "- Property models warm-started (Bills, 7 Nov): their variance components start at those of Species-specific responses on the same rows, fitted with optim BFGS, instead of metafor's default start with nlminb (the 1 Nov rule, kept for the other four models). From the default start the LDMC model converged with neither nlminb nor bobyqa; the six other property models reach the same optimum from either start (REML log-likelihood equal to 0.001; scratchpad check, 7 Nov).",
+  "- Decided 1, 2 and 7 Nov (Bills) and in PLAN.md, not deviations: the ladder without abundance (7 Nov); the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.")
 writeLines(report, "reports/05_ladder_fit.md")
 message("Step 05 written: ", nrow(fitted), " fits in ", sprintf("%.1f", sum(fitted$minutes)), " fit-minutes")

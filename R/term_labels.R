@@ -1,11 +1,9 @@
 # Display names for the ladder's models and fixed-effect terms, shared by the coefficient figures
-# (steps 05 and 07c) and Tables S5 and S6 (step 10), in the words Fig 7 uses. The fitted keys ("Start", "A0_origin",
-# "W:height_z") stay as they are in data/derived/; only what a reader sees is renamed (Bills, 4 Nov).
+# (steps 05 and 07c) and Tables S5 and S6 (step 10), in the words Fig 8 uses. The fitted term keys
+# ("W:height_z") stay as they are in data/derived/; only what a reader sees is renamed (Bills, 4 Nov).
+# Since the ladder without abundance (Bills, 7 Nov) the model names are their display names.
 
-model_label <- function(model, pool) {
-  start <- ifelse(pool == "colonizers", "Destination abundance", "Initial abundances") # as Figs 6 and S17
-  ifelse(model == "Start", start, ifelse(model == "Climate + start", paste("Climate +", tolower(start)), model))
-}
+model_label <- function(model, pool) model
 
 term_label <- function(term, pool) {
   word <- c(intrcpt = "intercept", W = "warming", T = "temperature", P = "precipitation", TP = "temperature × precipitation",

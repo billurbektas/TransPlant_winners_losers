@@ -1,6 +1,8 @@
 # Step 07d: The colonizer ladder, predicted (Step D route 2, colonizers)
 
-Step 06 on the 110 colonizer ladder rows of step 07c: every level was refitted 8 times, each time without one of the 8 gradients with at least 5 effects, and asked to predict its warmed cover; fixed effects with the experiment term at zero, Species-dependent and the supplement levels adding the species' deviations learnt in training. Scored per gradient by R² against the Null on the same gradient and Spearman ρ, in sample and held out, summarised by medians; no loser/winner skill, since colonizers have no loser class. 96 fold fits, 0 needing the bobyqa retry, 0 failed.
+Step 06 on the 110 colonizer ladder rows of step 07c: every level was refitted 8 times, each time without one of the 8 gradients with at least 5 effects, and asked to predict its warmed cover; fixed effects with the experiment term at zero, Species-specific responses and the supplement levels adding the species' deviations learnt in training. Scored per gradient by R² against the Null on the same gradient and Spearman ρ, in sample and held out, summarised by medians; no loser/winner skill, since colonizers have no loser class. 88 fold fits (56 property folds warm-started), 0 needing the bobyqa retry, 0 failed.
+
+Every fold fit converged.
 
 ## Counts
 
@@ -31,54 +33,52 @@ Step 06 on the 110 colonizer ladder rows of step 07c: every level was refitted 8
 | --- | --- | --- | --- | --- | --- |
 | Null | R² against Null | 0.000 | 0.000 | 8 / 8 | 0 of 8 |
 | Null | Spearman ρ |  |  | 0 / 0 |  |
-| Destination abundance | R² against Null | 0.268 | 0.217 | 8 / 8 | 7 of 8 |
-| Destination abundance | Spearman ρ | 0.209 | 0.210 | 8 / 8 |  |
-| Climate | R² against Null | -0.162 | -0.242 | 8 / 8 | 3 of 8 |
-| Climate | Spearman ρ |  |  | 0 / 0 |  |
-| Climate + destination abundance | R² against Null | -0.007 | -0.278 | 8 / 8 | 2 of 8 |
-| Climate + destination abundance | Spearman ρ | 0.175 | 0.220 | 8 / 8 |  |
-| Species-dependent | R² against Null | 0.116 | -0.351 | 8 / 8 | 2 of 8 |
-| Species-dependent | Spearman ρ | 0.618 | 0.338 | 8 / 8 |  |
-| LDMC | R² against Null | -0.176 | -0.944 | 8 / 8 | 1 of 8 |
-| LDMC | Spearman ρ | 0.374 | 0.200 | 8 / 8 |  |
-| LMA | R² against Null | -0.027 | -0.587 | 8 / 8 | 1 of 8 |
-| LMA | Spearman ρ | 0.429 | 0.204 | 8 / 8 |  |
-| Height | R² against Null | -0.180 | -1.160 | 8 / 8 | 2 of 8 |
-| Height | Spearman ρ | 0.566 | 0.389 | 8 / 8 |  |
-| Graminoid | R² against Null | -0.024 | -0.555 | 8 / 8 | 2 of 8 |
-| Graminoid | Spearman ρ | 0.425 | 0.131 | 8 / 8 |  |
-| Woody | R² against Null | -0.061 | -0.281 | 8 / 7 | 2 of 7 |
-| Woody | Spearman ρ | 0.189 | 0.299 | 8 / 8 |  |
-| Phylogeny | R² against Null | -0.051 | -0.792 | 8 / 8 | 1 of 8 |
-| Phylogeny | Spearman ρ | 0.350 | 0.043 | 8 / 8 |  |
-| Niche | R² against Null | -0.067 | -0.595 | 8 / 8 | 1 of 8 |
-| Niche | Spearman ρ | 0.306 | 0.233 | 8 / 8 |  |
-| LDMC + species | R² against Null | 0.031 | -0.646 | 8 / 8 | 1 of 8 |
-| LDMC + species | Spearman ρ | 0.671 | 0.310 | 8 / 8 |  |
-| LMA + species | R² against Null | 0.189 | -0.552 | 8 / 8 | 1 of 8 |
-| LMA + species | Spearman ρ | 0.618 | 0.320 | 8 / 8 |  |
-| Height + species | R² against Null | 0.061 | -0.869 | 8 / 8 | 2 of 8 |
-| Height + species | Spearman ρ | 0.650 | 0.304 | 8 / 8 |  |
-| Graminoid + species | R² against Null | 0.136 | -0.493 | 8 / 8 | 3 of 8 |
-| Graminoid + species | Spearman ρ | 0.654 | 0.336 | 8 / 8 |  |
-| Woody + species | R² against Null | 0.146 | -0.107 | 8 / 7 | 3 of 7 |
-| Woody + species | Spearman ρ | 0.618 | 0.347 | 8 / 8 |  |
-| Phylogeny + species | R² against Null | 0.223 | -0.466 | 8 / 8 | 2 of 8 |
-| Phylogeny + species | Spearman ρ | 0.554 | 0.150 | 8 / 8 |  |
-| Niche + species | R² against Null | 0.058 | -0.428 | 8 / 8 | 1 of 8 |
-| Niche + species | Spearman ρ | 0.607 | 0.251 | 8 / 8 |  |
+| Experimental warming | R² against Null | 0.010 | 0.001 | 8 / 8 | 4 of 8 |
+| Experimental warming | Spearman ρ |  |  | 0 / 0 |  |
+| Background climate | R² against Null | -0.162 | -0.242 | 8 / 8 | 3 of 8 |
+| Background climate | Spearman ρ |  |  | 0 / 0 |  |
+| Species-specific responses | R² against Null | 0.028 | -0.359 | 8 / 8 | 2 of 8 |
+| Species-specific responses | Spearman ρ | 0.429 | -0.213 | 8 / 8 |  |
+| LDMC | R² against Null | -0.263 | -0.615 | 8 / 8 | 2 of 8 |
+| LDMC | Spearman ρ | -0.021 | -0.181 | 8 / 8 |  |
+| LMA | R² against Null | -0.157 | -0.849 | 8 / 8 | 1 of 8 |
+| LMA | Spearman ρ | -0.246 | -0.389 | 8 / 8 |  |
+| Height | R² against Null | -0.404 | -1.121 | 8 / 8 | 1 of 8 |
+| Height | Spearman ρ | 0.183 | 0.183 | 8 / 8 |  |
+| Graminoid | R² against Null | -0.164 | -0.444 | 8 / 8 | 2 of 8 |
+| Graminoid | Spearman ρ | -0.058 | -0.204 | 7 / 7 |  |
+| Woody | R² against Null | -0.194 | -0.214 | 8 / 7 | 2 of 7 |
+| Woody | Spearman ρ | -0.201 | -0.172 | 4 / 4 |  |
+| Phylogeny | R² against Null | -0.156 | -1.038 | 8 / 8 | 1 of 8 |
+| Phylogeny | Spearman ρ | 0.086 | -0.218 | 8 / 8 |  |
+| Niche | R² against Null | -0.273 | -1.666 | 8 / 8 | 1 of 8 |
+| Niche | Spearman ρ | 0.091 | -0.005 | 8 / 8 |  |
+| LDMC + species | R² against Null | -0.033 | -0.518 | 8 / 8 | 2 of 8 |
+| LDMC + species | Spearman ρ | 0.433 | -0.180 | 8 / 8 |  |
+| LMA + species | R² against Null | 0.084 | -0.578 | 8 / 8 | 1 of 8 |
+| LMA + species | Spearman ρ | 0.517 | -0.215 | 8 / 8 |  |
+| Height + species | R² against Null | -0.075 | -0.874 | 8 / 8 | 1 of 8 |
+| Height + species | Spearman ρ | 0.558 | 0.143 | 8 / 8 |  |
+| Graminoid + species | R² against Null | 0.062 | -0.358 | 8 / 8 | 2 of 8 |
+| Graminoid + species | Spearman ρ | 0.354 | -0.178 | 8 / 8 |  |
+| Woody + species | R² against Null | 0.054 | -0.218 | 8 / 7 | 2 of 7 |
+| Woody + species | Spearman ρ | 0.434 | -0.138 | 8 / 8 |  |
+| Phylogeny + species | R² against Null | 0.077 | -1.542 | 8 / 8 | 1 of 8 |
+| Phylogeny + species | Spearman ρ | 0.423 | -0.212 | 8 / 8 |  |
+| Niche + species | R² against Null | -0.021 | -1.581 | 8 / 8 | 1 of 8 |
+| Niche + species | Spearman ρ | 0.461 | -0.161 | 8 / 8 |  |
 
-Taken out of the R² row and the medians (R² below −100, Bills, 2 Nov): Woody, held out at CH_Lavey (-529.3); Woody + species, held out at CH_Lavey (-530.0).
+Taken out of the R² row and the medians (R² below −100, Bills, 2 Nov): Woody, held out at CH_Lavey (-140.8); Woody + species, held out at CH_Lavey (-141.3).
 
 Every held-out species had training data: TRUE.
 
 ## Figures
 
-![Fig S17, the colonizer ladder](../figures/appendix/figS17.png)
+![Fig S18, colonizer performance](../figures/appendix/figS18.png)
 
-Fig S17 as Fig 6: row a) step 07c; rows b) c): half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No skill row.
+Fig S18 as Fig 6: half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No skill row. Experimental warming and Background climate have no Spearman (one prediction per experiment).
 
-![Fig S18, colonizers](../figures/appendix/figS18.png)
+![Fig S21, colonizers per gradient](../figures/appendix/figS21.png)
 
 ## Warnings captured
 
@@ -98,22 +98,22 @@ Fig S17 as Fig 6: row a) step 07c; rows b) c): half violins of the 8 scored grad
 - null / NO_Ulvhaugen: 'V' appears to be not positive definite.
 - null / US_Colorado: There are outcomes with non-positive sampling variances.
 - null / US_Colorado: 'V' appears to be not positive definite.
-- start / CH_Calanda: There are outcomes with non-positive sampling variances.
-- start / CH_Calanda: 'V' appears to be not positive definite.
-- start / CH_Calanda2: There are outcomes with non-positive sampling variances.
-- start / CH_Calanda2: 'V' appears to be not positive definite.
-- start / CH_Lavey: There are outcomes with non-positive sampling variances.
-- start / CH_Lavey: 'V' appears to be not positive definite.
-- start / DE_TransAlps: There are outcomes with non-positive sampling variances.
-- start / DE_TransAlps: 'V' appears to be not positive definite.
-- start / FR_AlpeHuez: There are outcomes with non-positive sampling variances.
-- start / FR_AlpeHuez: 'V' appears to be not positive definite.
-- start / IT_MatschMazia2: There are outcomes with non-positive sampling variances.
-- start / IT_MatschMazia2: 'V' appears to be not positive definite.
-- start / NO_Ulvhaugen: There are outcomes with non-positive sampling variances.
-- start / NO_Ulvhaugen: 'V' appears to be not positive definite.
-- start / US_Colorado: There are outcomes with non-positive sampling variances.
-- start / US_Colorado: 'V' appears to be not positive definite.
+- warming / CH_Calanda: There are outcomes with non-positive sampling variances.
+- warming / CH_Calanda: 'V' appears to be not positive definite.
+- warming / CH_Calanda2: There are outcomes with non-positive sampling variances.
+- warming / CH_Calanda2: 'V' appears to be not positive definite.
+- warming / CH_Lavey: There are outcomes with non-positive sampling variances.
+- warming / CH_Lavey: 'V' appears to be not positive definite.
+- warming / DE_TransAlps: There are outcomes with non-positive sampling variances.
+- warming / DE_TransAlps: 'V' appears to be not positive definite.
+- warming / FR_AlpeHuez: There are outcomes with non-positive sampling variances.
+- warming / FR_AlpeHuez: 'V' appears to be not positive definite.
+- warming / IT_MatschMazia2: There are outcomes with non-positive sampling variances.
+- warming / IT_MatschMazia2: 'V' appears to be not positive definite.
+- warming / NO_Ulvhaugen: There are outcomes with non-positive sampling variances.
+- warming / NO_Ulvhaugen: 'V' appears to be not positive definite.
+- warming / US_Colorado: There are outcomes with non-positive sampling variances.
+- warming / US_Colorado: 'V' appears to be not positive definite.
 - climate / CH_Calanda: There are outcomes with non-positive sampling variances.
 - climate / CH_Calanda: 'V' appears to be not positive definite.
 - climate / CH_Calanda2: There are outcomes with non-positive sampling variances.
@@ -130,22 +130,6 @@ Fig S17 as Fig 6: row a) step 07c; rows b) c): half violins of the 8 scored grad
 - climate / NO_Ulvhaugen: 'V' appears to be not positive definite.
 - climate / US_Colorado: There are outcomes with non-positive sampling variances.
 - climate / US_Colorado: 'V' appears to be not positive definite.
-- climate_start / CH_Calanda: There are outcomes with non-positive sampling variances.
-- climate_start / CH_Calanda: 'V' appears to be not positive definite.
-- climate_start / CH_Calanda2: There are outcomes with non-positive sampling variances.
-- climate_start / CH_Calanda2: 'V' appears to be not positive definite.
-- climate_start / CH_Lavey: There are outcomes with non-positive sampling variances.
-- climate_start / CH_Lavey: 'V' appears to be not positive definite.
-- climate_start / DE_TransAlps: There are outcomes with non-positive sampling variances.
-- climate_start / DE_TransAlps: 'V' appears to be not positive definite.
-- climate_start / FR_AlpeHuez: There are outcomes with non-positive sampling variances.
-- climate_start / FR_AlpeHuez: 'V' appears to be not positive definite.
-- climate_start / IT_MatschMazia2: There are outcomes with non-positive sampling variances.
-- climate_start / IT_MatschMazia2: 'V' appears to be not positive definite.
-- climate_start / NO_Ulvhaugen: There are outcomes with non-positive sampling variances.
-- climate_start / NO_Ulvhaugen: 'V' appears to be not positive definite.
-- climate_start / US_Colorado: There are outcomes with non-positive sampling variances.
-- climate_start / US_Colorado: 'V' appears to be not positive definite.
 - species / CH_Calanda: There are outcomes with non-positive sampling variances.
 - species / CH_Calanda: 'V' appears to be not positive definite.
 - species / CH_Calanda2: There are outcomes with non-positive sampling variances.
@@ -282,10 +266,11 @@ Fig S17 as Fig 6: row a) step 07c; rows b) c): half violins of the 8 scored grad
 - niche / NO_Ulvhaugen: 'V' appears to be not positive definite.
 - niche / US_Colorado: There are outcomes with non-positive sampling variances.
 - niche / US_Colorado: 'V' appears to be not positive definite.
-- metafor: "'struct' argument is disregaded since no ~ inner | outer term" (32 fold fits without slopes)
+- metafor: "'struct' argument is disregaded since no ~ inner | outer term" (24 fold fits without slopes)
 
 ## Deviations from PLAN.md
 
 - The colonizer ladder predicted on the residents' reduction (Bills, 2 Nov).
+- Property folds warm-started from the same fold's Species-specific responses fit with optim BFGS (Bills, 7 Nov, as steps 05 and 06).
 - An R² below −100 is taken out of the R² row and the medians and listed (Bills, 2 Nov).
-- `R/fig4_ladder.R` gained two optional arguments (column labels; the skill row), its defaults leave step 06's ladder figure (Fig 6) byte-identical (checked).
+- Without abundance (Bills, 7 Nov): Fig S18 shows the performance rows only; the colonizer variance components are Figs S19 and S20 (step 07c).

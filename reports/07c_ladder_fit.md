@@ -1,6 +1,6 @@
 # Step 07c: The colonizer ladder, fitted (Step D route 1, colonizers)
 
-The residents' ladder (step 05) was fitted to the colonizers (Bills, 2 Nov): warmed cover from years 3 and later (step 07a) for the 110 effects of the 27 colonizer species found in at least 3 gradients that carry every property (24 experiments, 18 gradients). The same 12 models, with A0_origin dropped (a colonizer has none) so that Start is the destination abundance A0_dest and its interaction with W. Properties are on the residents' step 02 scale (checked), A0_dest (log(100 x mean destination-control cover + 1)) standardised across all 379 colonizer effects of 07a. 24 effects are measured absences (SE 0).
+The residents' ladder (step 05) was fitted to the colonizers (Bills, 2 Nov): warmed cover from years 3 and later (step 07a) for the 110 effects of the 27 colonizer species found in at least 3 gradients that carry every property (24 experiments, 18 gradients). The same 11 models, without abundance (Bills, 7 Nov): Null, Experimental warming, Background climate, Species-specific responses and one model per property. Properties are on the residents' step 02 scale (checked); A0_dest (log(100 x mean destination-control cover + 1)) is still standardised across all 379 colonizer effects of 07a but enters no model. 24 effects are measured absences (SE 0).
 
 ## Counts
 
@@ -24,31 +24,32 @@ Growth form on these rows: 1 woody and 6 graminoid species of 27; with one woody
 | model | τ² | σ²_experiment | H intercept | H slope | optimizer | minutes |
 | --- | --- | --- | --- | --- | --- | --- |
 | Null | 0.207 | 0.380 | 0.040 | 0.000 | nlminb | 0.0 |
-| Start | 0.205 | 0.307 | 0.028 | 0.000 | nlminb | 0.0 |
-| Climate | 0.211 | 0.842 | 0.014 | 0.000 | nlminb | 0.0 |
-| Climate + start | 0.213 | 0.594 | 0.004 | 0.000 | nlminb | 0.0 |
-| Species-dependent | 0.121 | 0.616 | 0.003 | 0.303 | nlminb | 0.1 |
-| LDMC | 0.109 | 0.759 | 0.000 | 0.244 | nlminb | 0.1 |
-| LMA | 0.121 | 0.613 | 0.000 | 0.378 | nlminb | 0.1 |
-| Height | 0.059 | 0.948 | 0.000 | 0.255 | nlminb | 0.1 |
-| Graminoid | 0.114 | 0.709 | 0.002 | 0.339 | nlminb | 0.1 |
-| Woody | 0.138 | 0.625 | 0.000 | 0.316 | nlminb | 0.1 |
-| Phylogeny | 0.129 | 0.688 | 0.000 | 0.448 | nlminb | 0.1 |
-| Niche | 0.116 | 0.738 | 0.017 | 0.345 | nlminb | 0.0 |
+| Experimental warming | 0.209 | 0.417 | 0.038 | 0.000 | nlminb | 0.0 |
+| Background climate | 0.211 | 0.842 | 0.014 | 0.000 | nlminb | 0.0 |
+| Species-specific responses | 0.111 | 0.775 | 0.017 | 0.396 | nlminb | 0.1 |
+| LDMC | 0.122 | 0.878 | 0.008 | 0.420 | optim BFGS, warm start | 0.0 |
+| LMA | 0.098 | 0.778 | 0.026 | 0.471 | optim BFGS, warm start | 0.0 |
+| Height | 0.061 | 1.258 | 0.000 | 0.199 | optim BFGS, warm start | 0.0 |
+| Graminoid | 0.091 | 0.894 | 0.012 | 0.446 | optim BFGS, warm start | 0.0 |
+| Woody | 0.129 | 0.773 | 0.018 | 0.441 | optim BFGS, warm start | 0.0 |
+| Phylogeny | 0.107 | 0.841 | 0.016 | 0.581 | optim BFGS, warm start | 0.0 |
+| Niche | 0.096 | 0.947 | 0.024 | 0.567 | optim BFGS, warm start | 0.0 |
 
 ## Step 05's checks, reported
 
-τ² at Climate against Null: +2.2% (step 05 stops beyond 5%).
+τ² against Null: Experimental warming +1.1%, Background climate +2.2% (step 05 stops beyond 5%).
+
+Property moves against Species-specific responses, as a share of its τ² + σ²_experiment:
 
 | property | τ² move | σ²_experiment move |
 | --- | --- | --- |
-| LDMC | -1.5% | +19.5% |
-| LMA | +0.0% | -0.3% |
-| Height | -8.4% | +45.1% |
-| Graminoid | -0.9% | +12.6% |
-| Woody | +2.3% | +1.2% |
-| Phylogeny | +1.1% | +9.8% |
-| Niche | -0.6% | +16.6% |
+| LDMC | +1.2% | +11.6% |
+| LMA | -1.5% | +0.3% |
+| Height | -5.6% | +54.5% |
+| Graminoid | -2.3% | +13.4% |
+| Woody | +2.0% | -0.2% |
+| Phylogeny | -0.5% | +7.5% |
+| Niche | -1.7% | +19.4% |
 
 Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components are not pinned down well enough for that check to hold; they are reported, not enforced (Bills, 2 Nov).
 
@@ -56,58 +57,90 @@ Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components
 
 | model | term | estimate | ci |
 | --- | --- | --- | --- |
-| Start | A0_dest | 0.0039 | 0.0023 to 0.0055 |
-| Start | A0_dest:W | -0.0009 | -0.0018 to -0.0000 |
-| Climate | P | 0.0068 | 0.0001 to 0.0136 |
-| Climate + start | P | 0.0083 | 0.0023 to 0.0143 |
-| Climate + start | A0_dest | 0.0044 | 0.0027 to 0.0061 |
-| Climate + start | W:A0_dest | -0.0011 | -0.0020 to -0.0002 |
-| Species-dependent | P | 0.0082 | 0.0016 to 0.0148 |
-| Species-dependent | A0_dest | 0.0043 | 0.0027 to 0.0059 |
-| Species-dependent | W:A0_dest | -0.0013 | -0.0024 to -0.0002 |
-| LDMC | T | 0.0115 | 0.0014 to 0.0217 |
-| LDMC | P | 0.0098 | 0.0027 to 0.0169 |
-| LDMC | A0_dest | 0.0044 | 0.0028 to 0.0059 |
-| LDMC | W:A0_dest | -0.0014 | -0.0024 to -0.0004 |
-| LDMC | W:ldmc_z | -0.0015 | -0.0029 to -0.0001 |
-| LMA | A0_dest | 0.0045 | 0.0029 to 0.0062 |
-| LMA | W:A0_dest | -0.0016 | -0.0030 to -0.0002 |
-| Height | A0_dest | 0.0029 | 0.0016 to 0.0041 |
-| Height | W:height_z | -0.0036 | -0.0058 to -0.0013 |
-| Height | T:height_z | 0.0080 | 0.0044 to 0.0116 |
-| Height | P:height_z | 0.0051 | 0.0004 to 0.0097 |
-| Height | height_z:TP | -0.0062 | -0.0113 to -0.0010 |
-| Graminoid | P | 0.0074 | 0.0000 to 0.0148 |
-| Graminoid | A0_dest | 0.0040 | 0.0024 to 0.0056 |
-| Woody | P | 0.0087 | 0.0020 to 0.0155 |
-| Woody | A0_dest | 0.0050 | 0.0032 to 0.0068 |
-| Woody | W:A0_dest | -0.0015 | -0.0027 to -0.0003 |
-| Phylogeny | A0_dest | 0.0056 | 0.0036 to 0.0076 |
-| Phylogeny | W:A0_dest | -0.0026 | -0.0044 to -0.0008 |
-| Phylogeny | W:PEV1 | -0.0061 | -0.0105 to -0.0018 |
-| Phylogeny | T:PEV1 | 0.0103 | 0.0016 to 0.0190 |
-| Niche | A0_dest | 0.0046 | 0.0029 to 0.0064 |
+| Background climate | P | 0.0068 | 0.0001 to 0.0136 |
+| Height | W:height_z | -0.0032 | -0.0054 to -0.0010 |
+| Height | T:height_z | 0.0087 | 0.0051 to 0.0122 |
+| Height | P:height_z | 0.0065 | 0.0021 to 0.0109 |
+| Height | height_z:TP | -0.0083 | -0.0131 to -0.0034 |
+| Graminoid | W:graminoid | -0.0050 | -0.0096 to -0.0003 |
+| Graminoid | T:graminoid | 0.0108 | 0.0009 to 0.0207 |
+
+## Change in unexplained variation at each comparison (Fig S19)
+
+| model | compared with | component | change (×10⁻⁴) | % |
+| --- | --- | --- | --- | --- |
+| Experimental warming | Null | total | +0.037 | +6.0 |
+| Experimental warming | Null | sigma2_experiment | +0.037 | +9.8 |
+| Experimental warming | Null | tau2 | +0.002 | +1.1 |
+| Experimental warming | Null | H_intercept | -0.002 | -5.3 |
+| Experimental warming | Null | H_slope | +0.000 | zero |
+| Background climate | Experimental warming | total | +0.403 | +60.7 |
+| Background climate | Experimental warming | sigma2_experiment | +0.425 | +101.9 |
+| Background climate | Experimental warming | tau2 | +0.002 | +1.1 |
+| Background climate | Experimental warming | H_intercept | -0.024 | -64.0 |
+| Background climate | Experimental warming | H_slope | +0.000 | zero |
+| Species-specific responses | Background climate | total | +0.233 | +21.8 |
+| Species-specific responses | Background climate | sigma2_experiment | -0.067 | -8.0 |
+| Species-specific responses | Background climate | tau2 | -0.100 | -47.3 |
+| Species-specific responses | Background climate | H_intercept | +0.004 | +26.4 |
+| Species-specific responses | Background climate | H_slope | +0.396 | new |
+| LDMC | Species-specific responses | total | +0.127 | +9.8 |
+| LDMC | Species-specific responses | sigma2_experiment | +0.103 | +13.2 |
+| LDMC | Species-specific responses | tau2 | +0.010 | +9.3 |
+| LDMC | Species-specific responses | H_intercept | -0.009 | -54.0 |
+| LDMC | Species-specific responses | H_slope | +0.024 | +6.0 |
+| LMA | Species-specific responses | total | +0.073 | +5.6 |
+| LMA | Species-specific responses | sigma2_experiment | +0.003 | +0.3 |
+| LMA | Species-specific responses | tau2 | -0.014 | -12.3 |
+| LMA | Species-specific responses | H_intercept | +0.009 | +53.6 |
+| LMA | Species-specific responses | H_slope | +0.075 | +19.0 |
+| Height | Species-specific responses | total | +0.218 | +16.8 |
+| Height | Species-specific responses | sigma2_experiment | +0.483 | +62.3 |
+| Height | Species-specific responses | tau2 | -0.050 | -44.9 |
+| Height | Species-specific responses | H_intercept | -0.017 | -99.4 |
+| Height | Species-specific responses | H_slope | -0.198 | -49.9 |
+| Graminoid | Species-specific responses | total | +0.144 | +11.1 |
+| Graminoid | Species-specific responses | sigma2_experiment | +0.119 | +15.4 |
+| Graminoid | Species-specific responses | tau2 | -0.021 | -18.5 |
+| Graminoid | Species-specific responses | H_intercept | -0.005 | -27.9 |
+| Graminoid | Species-specific responses | H_slope | +0.050 | +12.6 |
+| Woody | Species-specific responses | total | +0.061 | +4.7 |
+| Woody | Species-specific responses | sigma2_experiment | -0.002 | -0.2 |
+| Woody | Species-specific responses | tau2 | +0.018 | +15.9 |
+| Woody | Species-specific responses | H_intercept | +0.001 | +5.5 |
+| Woody | Species-specific responses | H_slope | +0.045 | +11.2 |
+| Phylogeny | Species-specific responses | total | +0.245 | +18.9 |
+| Phylogeny | Species-specific responses | sigma2_experiment | +0.066 | +8.6 |
+| Phylogeny | Species-specific responses | tau2 | -0.004 | -4.0 |
+| Phylogeny | Species-specific responses | H_intercept | -0.001 | -6.5 |
+| Phylogeny | Species-specific responses | H_slope | +0.184 | +46.5 |
+| Niche | Species-specific responses | total | +0.334 | +25.7 |
+| Niche | Species-specific responses | sigma2_experiment | +0.172 | +22.2 |
+| Niche | Species-specific responses | tau2 | -0.015 | -13.8 |
+| Niche | Species-specific responses | H_intercept | +0.007 | +41.4 |
+| Niche | Species-specific responses | H_slope | +0.170 | +43.0 |
 
 ## Figures
 
-![Fig S16, colonizer coefficients](../figures/appendix/figS16.png)
+![Fig S17, colonizer coefficients](../figures/appendix/figS17.png)
+
+![Fig S19, colonizer change in unexplained variation](../figures/appendix/figS19.png)
+
+![Fig S20, colonizer raw heterogeneity](../figures/appendix/figS20.png)
 
 ## Warnings captured
 
 - Null: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
 - Null: There are outcomes with non-positive sampling variances.
 - Null: 'V' appears to be not positive definite.
-- Start: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
-- Start: There are outcomes with non-positive sampling variances.
-- Start: 'V' appears to be not positive definite.
-- Climate: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
-- Climate: There are outcomes with non-positive sampling variances.
-- Climate: 'V' appears to be not positive definite.
-- Climate + start: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
-- Climate + start: There are outcomes with non-positive sampling variances.
-- Climate + start: 'V' appears to be not positive definite.
-- Species-dependent: There are outcomes with non-positive sampling variances.
-- Species-dependent: 'V' appears to be not positive definite.
+- Experimental warming: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
+- Experimental warming: There are outcomes with non-positive sampling variances.
+- Experimental warming: 'V' appears to be not positive definite.
+- Background climate: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
+- Background climate: There are outcomes with non-positive sampling variances.
+- Background climate: 'V' appears to be not positive definite.
+- Species-specific responses: There are outcomes with non-positive sampling variances.
+- Species-specific responses: 'V' appears to be not positive definite.
 - LDMC: There are outcomes with non-positive sampling variances.
 - LDMC: 'V' appears to be not positive definite.
 - LMA: There are outcomes with non-positive sampling variances.
@@ -129,5 +162,6 @@ Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components
 ## Deviations from PLAN.md
 
 - The colonizer ladder on the residents' reduction and models (Bills, 2 Nov); properties on the residents' scale.
+- Property models warm-started from Species-specific responses with optim BFGS (Bills, 7 Nov, as step 05); the optimizer column above says which fits needed a fallback.
 - Step 05's tau2 and property checks are reported, not enforced (Bills, 2 Nov: run without stopping).
-- The colonizer coefficients are their own appendix figure (Fig S16), beside the residents' Fig S12.
+- The colonizer coefficients are their own appendix figure (Fig S17), beside the residents' Fig S13; Figs S19 and S20 mirror Fig 7 and Fig S12 (Bills, 7 Nov).

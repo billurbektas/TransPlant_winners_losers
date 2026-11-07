@@ -1,10 +1,10 @@
 # Step 05: The ladder, fitted (Step D, route 1, residents)
 
-The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the 512 effects of the 71 residents found in at least 3 gradients that carry every property (39 experiments, 20 gradients). Null, Start, Climate, Climate + start, Species-dependent and one property model per property (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, 12 REML fits, all on the same rows. Each model reports τ² (species × experiment), σ²_experiment (experiment component) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry model-based (REML Wald) standard errors (Bills, 2 Nov; CR1 before). Fits ran in parallel on 7 cores, 11.1 fit-minutes in all; this run took 0 min.
+The model ladder was fitted on the strength from year 3 (step 03b), on one set of rows (2 Nov): the 512 effects of the 71 residents found in at least 3 gradients that carry every property (39 experiments, 20 gradients). Without abundance (Bills, 7 Nov): Null, Experimental warming, Background climate, Species-specific responses and one property model per property on Background climate (LDMC, LMA, height, graminoid, woody, phylogeny as PEV1 to PEV3, niche as T_opt and P_opt) with the species slopes kept, 11 REML fits, all on the same rows. Each model reports τ² (species × experiment), σ²_experiment (experiment component) and the two H_species pieces as raw values. The T, P, TP slope block is diagonal in every slope fit (Bills, 1 Nov). Fixed effects carry model-based (REML Wald) standard errors (Bills, 2 Nov; CR1 before). Fits ran in parallel on 4 cores, 5.7 fit-minutes in all; this run took 0 min.
 
 ## Slope structure
 
-The 1 Nov GEN timing run (Species-dependent on the 1,655 rows of the 28 Oct pools, started from the gate fit's own optimum) did not converge, so the T, P, TP slope block is diagonal in every slope fit; the case is in MILESTONES step 05 notes. It is not repeated on the new rows (Bills, 2 Nov). The experiments' T and P are correlated at r = -0.49 on the ladder rows.
+The 1 Nov GEN timing run (Species-dependent, as Species-specific responses was then called, on the 1,655 rows of the 28 Oct pools, started from the gate fit's own optimum) did not converge, so the T, P, TP slope block is diagonal in every slope fit; the case is in MILESTONES step 05 notes. It is not repeated on the new rows (Bills, 2 Nov). The experiments' T and P are correlated at r = -0.49 on the ladder rows.
 
 ## Model as fitted (for reviewers)
 
@@ -14,10 +14,10 @@ re_slopes <- c(re_base, list(~ 0 + W | species, ~ 0 + T + P + TP | species))
 rma.mv(yi = strength, V = strength_se^2, mods = <formula>, random = <re_base or re_slopes>,
        struct = c("GEN", "GDIAG"), data = <rowset>, method = "REML", sparse = TRUE)
 # struct only acts on re_slopes: W slope; T, P, TP slopes diagonal. No starting values: metafor's default for every fit
-# Null ~ 1; Start ~A0_origin + A0_dest + A0_origin:W + A0_dest:W; Climate ~W * T * P
-# Climate + start and Species-dependent ~W * T * P + A0_origin + A0_dest + A0_origin:W + A0_dest:W
-# property models: Climate + start + X + X:W + X:T + X:P + X:TP per variable, with re_slopes
-coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S12
+# Null ~ 1; Experimental warming ~W; Background climate ~W * T * P
+# Species-specific responses ~W * T * P, with re_slopes
+# property models: Background climate + X + X:W + X:T + X:P + X:TP per variable, with re_slopes
+coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S13
 ```
 
 ## Counts per rowset
@@ -32,7 +32,7 @@ coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S12
 | phylogeny | 512 | 71 | 39 |
 | niche | 512 | 71 | 39 |
 
-Each matches the expectation checked in the script. Every property rowset equals the ladder rows, so Null to Species-dependent are fitted once, on `all` (marked `reused` elsewhere).
+Each matches the expectation checked in the script. Every property rowset equals the ladder rows, so Null to Species-specific responses are fitted once, on `all` (marked `reused` elsewhere).
 
 Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 
@@ -57,71 +57,65 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | rowset | model | fitted_on | effects | species | τ² | σ²_experiment | H intercept | H slope | struct | minutes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | all | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | 0.2 |
-| all | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | 0.2 |
-| all | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | 0.4 |
-| all | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | 0.4 |
-| all | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | 1.3 |
+| all | Experimental warming | all | 512 | 71 | 4.935 | 0.038 | 1.058 | 0.000 | none (no slopes) | 0.2 |
+| all | Background climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | 0.4 |
+| all | Species-specific responses | all | 512 | 71 | 4.227 | 0.000 | 0.827 | 1.279 | DIAG | 1.3 |
 | ldmc | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
-| ldmc | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
-| ldmc | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
-| ldmc | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
-| ldmc | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| ldmc | LDMC | ldmc | 512 | 71 | 2.834 | 0.000 | 0.643 | 0.749 | DIAG | 1.2 |
+| ldmc | Experimental warming | all | 512 | 71 | 4.935 | 0.038 | 1.058 | 0.000 | none (no slopes) | reused |
+| ldmc | Background climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
+| ldmc | Species-specific responses | all | 512 | 71 | 4.227 | 0.000 | 0.827 | 1.279 | DIAG | reused |
+| ldmc | LDMC | ldmc | 512 | 71 | 4.085 | 0.000 | 1.016 | 1.418 | DIAG | 0.8 |
 | lma | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
-| lma | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
-| lma | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
-| lma | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
-| lma | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| lma | LMA | lma | 512 | 71 | 2.804 | 0.000 | 0.499 | 0.730 | DIAG | 1.1 |
+| lma | Experimental warming | all | 512 | 71 | 4.935 | 0.038 | 1.058 | 0.000 | none (no slopes) | reused |
+| lma | Background climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
+| lma | Species-specific responses | all | 512 | 71 | 4.227 | 0.000 | 0.827 | 1.279 | DIAG | reused |
+| lma | LMA | lma | 512 | 71 | 4.189 | 0.000 | 0.922 | 1.381 | DIAG | 0.4 |
 | height | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
-| height | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
-| height | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
-| height | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
-| height | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| height | Height | height | 512 | 71 | 2.930 | 0.000 | 0.564 | 0.541 | DIAG | 0.8 |
+| height | Experimental warming | all | 512 | 71 | 4.935 | 0.038 | 1.058 | 0.000 | none (no slopes) | reused |
+| height | Background climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
+| height | Species-specific responses | all | 512 | 71 | 4.227 | 0.000 | 0.827 | 1.279 | DIAG | reused |
+| height | Height | height | 512 | 71 | 4.298 | 0.000 | 0.696 | 0.982 | DIAG | 0.8 |
 | growth_form | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
-| growth_form | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
-| growth_form | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
-| growth_form | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
-| growth_form | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| growth_form | Graminoid | growth_form | 512 | 71 | 2.915 | 0.000 | 0.622 | 0.665 | DIAG | 1.5 |
-| growth_form | Woody | growth_form | 512 | 71 | 2.913 | 0.000 | 0.607 | 0.683 | DIAG | 1.4 |
+| growth_form | Experimental warming | all | 512 | 71 | 4.935 | 0.038 | 1.058 | 0.000 | none (no slopes) | reused |
+| growth_form | Background climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
+| growth_form | Species-specific responses | all | 512 | 71 | 4.227 | 0.000 | 0.827 | 1.279 | DIAG | reused |
+| growth_form | Graminoid | growth_form | 512 | 71 | 4.301 | 0.000 | 0.859 | 1.194 | DIAG | 0.7 |
+| growth_form | Woody | growth_form | 512 | 71 | 4.322 | 0.000 | 0.818 | 1.287 | DIAG | 0.3 |
 | phylogeny | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
-| phylogeny | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
-| phylogeny | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
-| phylogeny | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
-| phylogeny | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| phylogeny | Phylogeny | phylogeny | 512 | 71 | 2.925 | 0.000 | 0.616 | 0.756 | DIAG | 1.5 |
+| phylogeny | Experimental warming | all | 512 | 71 | 4.935 | 0.038 | 1.058 | 0.000 | none (no slopes) | reused |
+| phylogeny | Background climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
+| phylogeny | Species-specific responses | all | 512 | 71 | 4.227 | 0.000 | 0.827 | 1.279 | DIAG | reused |
+| phylogeny | Phylogeny | phylogeny | 512 | 71 | 4.410 | 0.000 | 0.818 | 1.192 | DIAG | 0.3 |
 | niche | Null | all | 512 | 71 | 4.802 | 0.201 | 1.165 | 0.000 | none (no slopes) | reused |
-| niche | Start | all | 512 | 71 | 3.360 | 0.107 | 0.728 | 0.000 | none (no slopes) | reused |
-| niche | Climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
-| niche | Climate + start | all | 512 | 71 | 3.296 | 0.000 | 0.742 | 0.000 | none (no slopes) | reused |
-| niche | Species-dependent | all | 512 | 71 | 2.842 | 0.000 | 0.584 | 0.692 | DIAG | reused |
-| niche | Niche | niche | 512 | 71 | 2.860 | 0.000 | 0.575 | 0.750 | DIAG | 1.1 |
+| niche | Experimental warming | all | 512 | 71 | 4.935 | 0.038 | 1.058 | 0.000 | none (no slopes) | reused |
+| niche | Background climate | all | 512 | 71 | 4.902 | 0.000 | 1.154 | 0.000 | none (no slopes) | reused |
+| niche | Species-specific responses | all | 512 | 71 | 4.227 | 0.000 | 0.827 | 1.279 | DIAG | reused |
+| niche | Niche | niche | 512 | 71 | 4.250 | 0.000 | 0.579 | 1.270 | DIAG | 0.4 |
 
-All 8 slope fits converged with the diagonal T, P, TP block, each from metafor's default start (Bills, 1 Nov). Across the 8 fits the T slope variance ranges 0.001 to 0.274 ×10⁻⁴; the TP slope variance 0.030 to 0.193 ×10⁻⁴; only the P slope variance is at the boundary (at most 1.8e-10).
+All 8 slope fits converged with the diagonal T, P, TP block, each from metafor's default start (Bills, 1 Nov). Across the 8 fits the T slope variance ranges 0.529 to 1.059 ×10⁻⁴; the TP slope variance 0.000 to 0.266 ×10⁻⁴; only the P slope variance is at the boundary (at most 1.0e-08).
 
 ## Checks
 
-τ² at Climate against Null (climate's main effects cannot reach the species × experiment piece; stop beyond 5%):
+τ² at Experimental warming and Background climate against Null (terms with one value per experiment cannot reach the species × experiment piece; stop beyond 5%):
 
-| rowset | τ² Null | τ² Climate | change |
+| model | τ² Null | τ² | change |
 | --- | --- | --- | --- |
-| all | 4.802 | 4.902 | +2.1% |
+| Experimental warming | 4.802 | 4.935 | +2.8% |
+| Background climate | 4.802 | 4.902 | +2.1% |
 
-Each property model against Species-dependent on the same rows, as a share of that model's τ² + σ²_experiment (a property reaches only H_species; stop beyond 5%, Bills 1 Nov):
+Each property model against Species-specific responses on the same rows, as a share of that model's τ² + σ²_experiment (a property reaches only H_species; stop beyond 5%, Bills 1 Nov):
 
 | property | rowset | τ² + σ²_experiment (×10⁻⁴) | τ² move | σ²_experiment move |
 | --- | --- | --- | --- | --- |
-| LDMC | ldmc | 2.842 | -0.27% | -0.00% |
-| LMA | lma | 2.842 | -1.34% | -0.00% |
-| Height | height | 2.842 | +3.11% | +0.00% |
-| Graminoid | growth_form | 2.842 | +2.57% | -0.00% |
-| Woody | growth_form | 2.842 | +2.48% | -0.00% |
-| Phylogeny | phylogeny | 2.842 | +2.94% | -0.00% |
-| Niche | niche | 2.842 | +0.64% | -0.00% |
+| LDMC | ldmc | 4.227 | -3.34% | +0.00% |
+| LMA | lma | 4.227 | -0.89% | +0.00% |
+| Height | height | 4.227 | +1.69% | +0.00% |
+| Graminoid | growth_form | 4.227 | +1.76% | +0.00% |
+| Woody | growth_form | 4.227 | +2.26% | +0.00% |
+| Phylogeny | phylogeny | 4.227 | +4.33% | +0.00% |
+| Niche | niche | 4.227 | +0.56% | +0.00% |
 
-σ²_species at Null on all rows is 1.165 ×10⁻⁴, off the boundary; the Step C spread of μ_s (step 04, 74 species) is 5.452 ×10⁻⁴. Random structure, property terms (X, X:W, X:T, X:P, X:TP) and A0 interactions (A0:W only) are as PLAN.md writes them. Subspecies niche check (26 Oct): neither Solidago virgaurea nor Ranunculus acris is a resident at CH_Lavey under the original pools, so there is nothing to refit.
+σ²_species at Null on all rows is 1.165 ×10⁻⁴, off the boundary; the Step C spread of μ_s (step 04, 74 species) is 5.452 ×10⁻⁴. Random structure and property terms (X, X:W, X:T, X:P, X:TP) are as PLAN.md writes them; no model carries an A0 term (Bills, 7 Nov). Subspecies niche check (26 Oct): neither Solidago virgaurea nor Ranunculus acris is a resident at CH_Lavey under the original pools, so there is nothing to refit.
 
 ## Effective weights (all rows)
 
@@ -129,30 +123,89 @@ Each property model against Species-dependent on the same rows, as a share of th
 | --- | --- | --- | --- |
 | raw 1/V | 9.9 | 0.95 | 0.84 |
 | Null | 2.3 | 0.58 | 0.13 |
-| Start | 2.8 | 0.59 | 0.14 |
-| Climate | 2.4 | 0.58 | 0.13 |
-| Climate + start | 2.8 | 0.60 | 0.14 |
-| Species-dependent | 2.9 | 0.60 | 0.16 |
+| Experimental warming | 2.4 | 0.58 | 0.13 |
+| Background climate | 2.4 | 0.58 | 0.13 |
+| Species-specific responses | 2.4 | 0.58 | 0.15 |
 
-The low-A0_origin half is the effects at or below the median A0_origin. Species-dependent weights include the slope variance at each effect's climate.
+The low-A0_origin half is the effects at or below the median A0_origin (abundance is still computed, though no model uses it). Species-specific responses weights include the slope variance at each effect's climate.
+
+## Change in unexplained variation at each comparison (Fig 7)
+
+Each model against the one it adds to (Table 2). `new`: the compared model has no such component; `zero`: below 1e-10 in both.
+
+| model | compared with | component | change (×10⁻⁴) | % |
+| --- | --- | --- | --- | --- |
+| Experimental warming | Null | total | -0.137 | -2.2 |
+| Experimental warming | Null | σ²_experiment | -0.162 | -80.8 |
+| Experimental warming | Null | τ² | +0.132 | +2.8 |
+| Experimental warming | Null | H intercept | -0.107 | -9.2 |
+| Experimental warming | Null | H slope | +0.000 | zero |
+| Background climate | Experimental warming | total | +0.026 | +0.4 |
+| Background climate | Experimental warming | σ²_experiment | -0.038 | -100.0 |
+| Background climate | Experimental warming | τ² | -0.032 | -0.7 |
+| Background climate | Experimental warming | H intercept | +0.096 | +9.1 |
+| Background climate | Experimental warming | H slope | +0.000 | zero |
+| Species-specific responses | Background climate | total | +0.276 | +4.6 |
+| Species-specific responses | Background climate | σ²_experiment | -0.000 | zero |
+| Species-specific responses | Background climate | τ² | -0.676 | -13.8 |
+| Species-specific responses | Background climate | H intercept | -0.327 | -28.3 |
+| Species-specific responses | Background climate | H slope | +1.279 | new |
+| LDMC | Species-specific responses | total | +0.186 | +2.9 |
+| LDMC | Species-specific responses | σ²_experiment | +0.000 | new |
+| LDMC | Species-specific responses | τ² | -0.141 | -3.3 |
+| LDMC | Species-specific responses | H intercept | +0.188 | +22.8 |
+| LDMC | Species-specific responses | H slope | +0.139 | +10.9 |
+| LMA | Species-specific responses | total | +0.159 | +2.5 |
+| LMA | Species-specific responses | σ²_experiment | +0.000 | new |
+| LMA | Species-specific responses | τ² | -0.037 | -0.9 |
+| LMA | Species-specific responses | H intercept | +0.095 | +11.5 |
+| LMA | Species-specific responses | H slope | +0.101 | +7.9 |
+| Height | Species-specific responses | total | -0.356 | -5.6 |
+| Height | Species-specific responses | σ²_experiment | +0.000 | new |
+| Height | Species-specific responses | τ² | +0.071 | +1.7 |
+| Height | Species-specific responses | H intercept | -0.131 | -15.8 |
+| Height | Species-specific responses | H slope | -0.297 | -23.2 |
+| Graminoid | Species-specific responses | total | +0.021 | +0.3 |
+| Graminoid | Species-specific responses | σ²_experiment | +0.000 | new |
+| Graminoid | Species-specific responses | τ² | +0.074 | +1.8 |
+| Graminoid | Species-specific responses | H intercept | +0.031 | +3.8 |
+| Graminoid | Species-specific responses | H slope | -0.085 | -6.7 |
+| Woody | Species-specific responses | total | +0.095 | +1.5 |
+| Woody | Species-specific responses | σ²_experiment | +0.000 | new |
+| Woody | Species-specific responses | τ² | +0.095 | +2.3 |
+| Woody | Species-specific responses | H intercept | -0.009 | -1.1 |
+| Woody | Species-specific responses | H slope | +0.008 | +0.6 |
+| Phylogeny | Species-specific responses | total | +0.086 | +1.4 |
+| Phylogeny | Species-specific responses | σ²_experiment | +0.000 | new |
+| Phylogeny | Species-specific responses | τ² | +0.183 | +4.3 |
+| Phylogeny | Species-specific responses | H intercept | -0.010 | -1.2 |
+| Phylogeny | Species-specific responses | H slope | -0.087 | -6.8 |
+| Niche | Species-specific responses | total | -0.234 | -3.7 |
+| Niche | Species-specific responses | σ²_experiment | +0.000 | new |
+| Niche | Species-specific responses | τ² | +0.024 | +0.6 |
+| Niche | Species-specific responses | H intercept | -0.249 | -30.0 |
+| Niche | Species-specific responses | H slope | -0.009 | -0.7 |
 
 ## Figures
 
-![Fig S12, coefficients](../figures/appendix/figS12.png)
+![Fig 7, change in unexplained variation](../figures/main/fig7.png)
 
-Fig 6 (the ladder) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
+![Fig S12, raw heterogeneity](../figures/appendix/figS12.png)
+
+![Fig S13, coefficients](../figures/appendix/figS13.png)
+
+Fig 6 (performance) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
 
 ## Warnings captured
 
 - all / Null: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
-- all / Start: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
-- all / Climate: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
-- all / Climate + start: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
+- all / Experimental warming: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
+- all / Background climate: Model does not contain an '~ inner | outer' term, so 'struct' argument is disregaded.
 - `geom_errorbarh()` was deprecated in ggplot2 4.0.0.
 ℹ Please use the `orientation` argument of `geom_errorbar()` instead.
 
 ## Deviations from PLAN.md
 
 - H_species tests `m$withG` where PLAN.md tests `is.null(m$tau2)`: rma.mv returns tau2 = 0, not NULL, for a model without slopes. Same quantity.
-- The coefficient figure is appendix Fig S12, written to `figures/appendix/figS12.png`.
-- Decided 1 and 2 Nov (Bills) and in PLAN.md, not deviations: the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; Fig 4 with twelve columns, drawn by step 06; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.
+- Property models warm-started (Bills, 7 Nov): their variance components start at those of Species-specific responses on the same rows, fitted with optim BFGS, instead of metafor's default start with nlminb (the 1 Nov rule, kept for the other four models). From the default start the LDMC model converged with neither nlminb nor bobyqa; the six other property models reach the same optimum from either start (REML log-likelihood equal to 0.001; scratchpad check, 7 Nov).
+- Decided 1, 2 and 7 Nov (Bills) and in PLAN.md, not deviations: the ladder without abundance (7 Nov); the T, P, TP slope block diagonal; no ML refits and no AICc column; no profile CIs; the 5% property check measured against τ² + σ²_experiment; the ladder on residents in at least 3 gradients that carry every property, one set of rows for every model; step 02's standardisation kept.
