@@ -5,11 +5,12 @@
 # Reads:  data/derived/04_classification/species_summary.csv (residents, Fig 2);
 #         data/derived/07b_classification/species_summary.csv (colonizers, Fig S2);
 #         data/derived/prep/traits.rds, functional_groups.rds, niche_optima.rds
-# Writes: data/derived/07f_pathways/group_properties.csv, group_summary.csv;
-#         figures/main/fig5.png; reports/07f_pathways.md
-# Checks: 74 resident species (step 04) split by the sign of their net strength;
-#         28 colonizer species with net warmed cover above zero (07b); every species
-#         has growth form; group sizes in the labels.
+# Writes: data/derived/07f_pathways/group_properties.csv, group_summary.csv,
+#         group_tests.csv; figures/main/fig5.png; reports/07f_pathways.md
+# Checks: 74 resident species (step 04) split by the sign of their net strength
+#         (59 losers, 15 winners); 28 colonizer species with net warmed cover above
+#         zero (07b); every species has growth form; group sizes in the labels;
+#         3 pairwise tests for each of the 7 properties (21).
 #
 # Decided 2 Nov (Bills): PLAN.md's fallback, since Step C found almost nothing
 # consistent: residents grouped by the sign of their pooled net strength mu (Fig 2),
@@ -18,6 +19,9 @@
 # Main Fig 5 (final numbering, Bills 2 Nov). Raw property values
 # in their units, on log axes except the thermal optimum; niche optima only where
 # n_obs_sub >= 30, as in the models. Descriptive, no model.
+# Group comparisons (Bills, 7 Nov): each pair of groups, Wilcoxon rank-sum for the five
+# continuous properties and Fisher's exact test for the graminoid and woody shares,
+# Holm-corrected over the three pairs of each property; panel b smaller.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/md_table.R")
@@ -32,6 +36,7 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 res <- read.csv("data/derived/04_classification/species_summary.csv")
 stopifnot(nrow(res) == 74, all(res$mu != 0)) # step 04's resident species, every one with a sign
 res <- transmute(res, species, mu, group = ifelse(mu < 0, "Resident losers", "Resident winners"))
+stopifnot(sum(res$group == "Resident losers") == 59, sum(res$group == "Resident winners") == 15) # sign of the pooled net strength
 col <- read.csv("data/derived/07b_classification/species_summary.csv") |> filter(!is.na(mu), mu > 0) # net warmed cover above zero
 stopifnot(nrow(col) == 28) # 07b's colonizers less Ranunculus acris, which never arrived
 col <- transmute(col, species, mu, group = "Colonizers")
@@ -59,12 +64,43 @@ shares <- summarise(props, `graminoid share` = mean(graminoid), `woody share` = 
 write.csv(left_join(shares, tidyr::pivot_wider(select(meds, -n), names_from = property, values_from = median), by = "group"),
           file.path(out_dir, "group_summary.csv"), row.names = FALSE)
 
+# ---- Group comparisons: every pair, Holm over the three pairs of a property (Bills, 7 Nov) --
+# 15 species sit in a resident group and among the colonizers, so those pairs are not
+# independent sets; phylogeny is not accounted for (both stated in the report)
+pairs <- list(c("Resident losers", "Resident winners"), c("Resident winners", "Colonizers"), c("Resident losers", "Colonizers"))
+cont_tests <- bind_rows(lapply(prop_names, function(p) bind_rows(lapply(pairs, function(pr) {
+  x <- filter(long, property == p, group == pr[1])$value; y <- filter(long, property == p, group == pr[2])$value
+  tibble::tibble(property = p, group_1 = pr[1], group_2 = pr[2], n_1 = length(x), n_2 = length(y),
+                 test = "Wilcoxon rank-sum", estimate = median(y) / median(x), p = wilcox.test(x, y)$p.value)
+}))))
+share_tests <- bind_rows(lapply(c("graminoid", "woody"), function(v) bind_rows(lapply(pairs, function(pr) {
+  x <- props[[v]][props$group == pr[1]]; y <- props[[v]][props$group == pr[2]]
+  tab <- matrix(c(sum(x), sum(!x), sum(y), sum(!y)), 2)
+  tibble::tibble(property = paste(v, "share"), group_1 = pr[1], group_2 = pr[2], n_1 = length(x), n_2 = length(y),
+                 test = "Fisher's exact", estimate = mean(y) - mean(x), p = fisher.test(tab)$p.value)
+}))))
+tests <- bind_rows(cont_tests, share_tests) |> mutate(p_holm = p.adjust(p, "holm"), .by = property)
+stopifnot(nrow(tests) == 7 * 3) # 3 pairs x 7 properties
+write.csv(tests, file.path(out_dir, "group_tests.csv"), row.names = FALSE)
+# the figure shows stars (Bills, 7 Nov); the exact p-values are in group_tests.csv and the report
+fmt_p <- function(p) ifelse(p < 0.001, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "ns")))
+
 # ---- Figure: dot strips with group medians, growth-form shares below ------------------
 glab <- setNames(paste0(groups_def, "\n(n = ", sizes$n[match(groups_def, sizes$group)], ")"), groups_def)
 # one panel per property, so that each axis carries its own units; log axes for the skewed properties
 set.seed(1)
 panels <- lapply(prop_names, function(p) {
-  ggplot(filter(long, property == p), aes(group, value, colour = group)) +
+  d <- filter(long, property == p); logy <- p != "T optimum (°C)"
+  # brackets above the points: losers-winners, winners-colonizers, then losers-colonizers on top
+  up <- function(k) if (logy) max(d$value) * exp(k * 0.11 * diff(log(range(d$value)))) else max(d$value) + k * 0.11 * diff(range(d$value))
+  br <- filter(tests, property == !!p) |> # !!: the loop's property, not the tests' p column
+    mutate(x1 = match(group_1, groups_def), x2 = match(group_2, groups_def), y = up(c(1, 2, 3.2)), yl = up(c(1.4, 2.4, 3.6)),
+           lab = fmt_p(p_holm), sig = p_holm < 0.05)
+  ggplot(d, aes(group, value, colour = group)) +
+    geom_segment(data = br, aes(x = x1 + 0.05, xend = x2 - 0.05, y = y, yend = y), inherit.aes = FALSE, linewidth = 0.8,
+                 colour = ifelse(br$sig, "black", "grey60")) +
+    geom_text(data = br, aes(x = (x1 + x2) / 2, y = yl, label = lab), inherit.aes = FALSE, size = ifelse(br$sig, 11, 7.5),
+              colour = ifelse(br$sig, "black", "grey50"), fontface = ifelse(br$sig, "bold", "plain")) +
     geom_jitter(width = 0.2, height = 0, size = 4, alpha = 0.6) +
     geom_crossbar(data = filter(meds, property == p), aes(group, median, ymin = median, ymax = median), width = 0.6, linewidth = 1.6, middle.linewidth = 1.6) +
     (if (p == "T optimum (°C)") scale_y_continuous() else scale_y_log10(breaks = scales::breaks_log(6), labels = scales::label_number(big.mark = ""))) +
@@ -76,18 +112,24 @@ panels <- lapply(prop_names, function(p) {
 })
 top <- patchwork::wrap_elements(full = patchwork::wrap_plots(panels, nrow = 1)) # not aligned with b, whose row labels would push the y titles out
 share_long <- tidyr::pivot_longer(shares, c(`graminoid share`, `woody share`), names_to = "share")
+short <- c("Resident losers" = "losers", "Resident winners" = "winners", "Colonizers" = "colonizers")
+share_p <- filter(tests, test == "Fisher's exact") |>
+  summarise(line = paste0(sub(" share", "", property[1]), " share: ",
+                          paste0(short[group_1], " vs ", short[group_2], " ", fmt_p(p_holm), collapse = "; ")), .by = property)
 bottom <- ggplot(share_long, aes(y = 1)) +
   geom_col(data = mutate(share_long, full = 1), aes(x = full), fill = "grey92", width = 0.7, orientation = "y") + # 100% background
   geom_col(aes(x = value, fill = group), width = 0.7, orientation = "y") +
   geom_text(aes(x = value + 0.03, label = sprintf("%.0f%%", 100 * value)), hjust = 0, size = 9, colour = "grey25") +
   facet_grid(share ~ group, switch = "y", labeller = labeller(group = glab)) +
   scale_fill_manual(values = cols, guide = "none") + scale_x_continuous(limits = c(0, 1.35), expand = c(0, 0)) +
-  labs(title = "b)", x = NULL, y = NULL) +
+  labs(title = "b)", x = NULL, y = NULL, caption = paste(c(share_p$line, "* p < 0.05, ** p < 0.01, *** p < 0.001, ns not significant; Wilcoxon rank-sum (a) and Fisher's exact (b), Holm-corrected within each property"), collapse = "\n")) +
   theme_void(base_size = 30) +
   theme(plot.title = element_text(face = "bold", size = 40), strip.text.y.left = element_text(size = 28, angle = 0, hjust = 1),
+        plot.caption = element_text(size = 22, colour = "grey25", hjust = 0, lineheight = 1.1, margin = margin(t = 12)),
         strip.text.x = element_text(face = "bold", size = 25, lineheight = 0.9, margin = margin(b = 10)),
         strip.placement = "outside", plot.background = element_rect(fill = "white", colour = NA))
-ggsave("figures/main/fig5.png", patchwork::wrap_plots(top, bottom, ncol = 1, heights = c(2.2, 1)), width = 32, height = 20, dpi = 100, bg = "white")
+# panel b given less room (Bills, 7 Nov: the bars were too big)
+ggsave("figures/main/fig5.png", patchwork::wrap_plots(top, bottom, ncol = 1, heights = c(3.6, 1)), width = 32, height = 18, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------------------
 report <- c(
@@ -106,11 +148,22 @@ report <- c(
                      tidyr::pivot_wider(transmute(meds, group = as.character(group), property, median = paste0(signif(median, 3), " (", n, ")")),
                                         names_from = property, values_from = median), by = "group")),
   "", "Medians with the number of species that have the property in brackets.",
+  "", "## Group comparisons (Bills, 7 Nov)", "",
+  paste0("Each pair of groups, for each property: Wilcoxon rank-sum test (`wilcox.test`, R's defaults) for the five continuous properties and ",
+         "Fisher's exact test for the graminoid and woody shares; p-values Holm-corrected over the three pairs of each property. ",
+         "Estimate: ratio of the second group's median to the first's (continuous) or difference in share (second minus first). ",
+         "Read with two cautions: the ", length(both), " species in both pools are counted in a resident group and among the colonizers, ",
+         "so the resident-colonizer comparisons are not between independent sets; and related species are counted as independent (no phylogenetic correction)."), "",
+  md_table(transmute(tests, property, pair = paste(group_1, "vs", group_2), n = paste(n_1, "/", n_2), test,
+                     estimate = ifelse(test == "Fisher's exact", sprintf("%+.0f%%", 100 * estimate), sprintf("%.2f", estimate)),
+                     p = sprintf("%.4f", p), `p (Holm)` = sprintf("%.4f", p_holm))),
+  "", paste0("Below 0.05 after correction: ", sum(tests$p_holm < 0.05), " of ", nrow(tests), " comparisons."),
   "", paste0("In both pools: ", paste(both, collapse = ", "), "."),
   "", "## Figure", "", "![Fig 5, pathways](../figures/main/fig5.png)",
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- PLAN.md's fallback, with resident losers added beside the winners (Bills, 2 Nov): groups by the sign of the net effect, not Step C classes.",
-  "- The figure is main Fig 5 (final numbering, Bills 2 Nov); written to `figures/main/fig5.png`.")
+  "- The figure is main Fig 5 (final numbering, Bills 2 Nov); written to `figures/main/fig5.png`.",
+  "- Group comparisons added to the descriptive figure (Bills, 7 Nov): pairwise Wilcoxon and Fisher tests, Holm within each property.")
 writeLines(report, "reports/07f_pathways.md")
 message("Step 07f written: ", paste(sprintf("%s %d", sizes$group, sizes$n), collapse = "; "))

@@ -1,0 +1,22 @@
+"property","group_1","group_2","n_1","n_2","test","estimate","p","p_holm"
+"LDMC (mg g⁻¹)","Resident losers","Resident winners",57,15,"Wilcoxon rank-sum",1.0871774745795,0.324882249058268,0.459059860100751
+"LDMC (mg g⁻¹)","Resident winners","Colonizers",15,28,"Wilcoxon rank-sum",0.81817498516593,0.0774290347033137,0.232287104109941
+"LDMC (mg g⁻¹)","Resident losers","Colonizers",57,28,"Wilcoxon rank-sum",0.889501414136812,0.229529930050375,0.459059860100751
+"LMA (g m⁻²)","Resident losers","Resident winners",59,15,"Wilcoxon rank-sum",1.09612121186692,0.443430233729691,0.554844317817539
+"LMA (g m⁻²)","Resident winners","Colonizers",15,27,"Wilcoxon rank-sum",0.833372261409819,0.18494810593918,0.554844317817539
+"LMA (g m⁻²)","Resident losers","Colonizers",59,27,"Wilcoxon rank-sum",0.913477013112804,0.237281469672605,0.554844317817539
+"Vegetative height (cm)","Resident losers","Resident winners",57,15,"Wilcoxon rank-sum",2.18181818181818,0.00212753314536287,0.00425506629072573
+"Vegetative height (cm)","Resident winners","Colonizers",15,27,"Wilcoxon rank-sum",1.2202380952381,0.922512433546733,0.922512433546733
+"Vegetative height (cm)","Resident losers","Colonizers",57,27,"Wilcoxon rank-sum",2.66233766233766,0.000173160050747349,0.000519480152242048
+"T optimum (°C)","Resident losers","Resident winners",59,15,"Wilcoxon rank-sum",1.22642387553842,0.00189641832137446,0.00379283664274892
+"T optimum (°C)","Resident winners","Colonizers",15,28,"Wilcoxon rank-sum",1.06382146987606,0.0139553631151761,0.0139553631151761
+"T optimum (°C)","Resident losers","Colonizers",59,28,"Wilcoxon rank-sum",1.30469604996638,1.01257761607093e-08,3.03773284821279e-08
+"P optimum (mm)","Resident losers","Resident winners",59,15,"Wilcoxon rank-sum",0.762950055833118,0.00283597472142905,0.00567194944285809
+"P optimum (mm)","Resident winners","Colonizers",15,28,"Wilcoxon rank-sum",0.986654409733307,0.609732803730609,0.609732803730609
+"P optimum (mm)","Resident losers","Colonizers",59,28,"Wilcoxon rank-sum",0.752768036994019,1.97050465589044e-06,5.91151396767131e-06
+"graminoid share","Resident losers","Resident winners",59,15,"Fisher's exact",0.345762711864407,0.0152490569899226,0.0457471709697677
+"graminoid share","Resident winners","Colonizers",15,28,"Fisher's exact",-0.385714285714286,0.0188037933744958,0.0457471709697677
+"graminoid share","Resident losers","Colonizers",59,28,"Fisher's exact",-0.0399515738498789,0.792237453631733,0.792237453631733
+"woody share","Resident losers","Resident winners",59,15,"Fisher's exact",-0.0508474576271186,1,1
+"woody share","Resident winners","Colonizers",15,28,"Fisher's exact",0.0357142857142857,1,1
+"woody share","Resident losers","Colonizers",59,28,"Fisher's exact",-0.0151331719128329,1,1

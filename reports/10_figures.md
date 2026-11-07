@@ -1,6 +1,6 @@
 # Step 10: Figures, appendix and report
 
-Draws what no earlier step produced: Fig 4, the 42 experiments in climate space with one disc per experiment for the effects the ladders model (512 resident and 110 colonizer effects, steps 05 and 07c): its fill the residents' net change, the sum of their strengths with the sign kept, its purple ring the colonizers' total warmed cover, both in percentage points of the warmed turf from year 3 on (Bills, 3 Nov); Fig S10 the same map with pies counting resident losers and winners (by the sign of their net strength from year 3 on) and colonizers (net warmed cover above zero), all classified effects; Fig S1 the data flow; Fig S3 and Table S4 the phylogenetic axes; Fig S4 the predictors before standardisation with the niche checks; Tables S1, S2, S3, S5 and S6. Copies the reviewed figures of steps 03 to 07f under their final numbers (seven main figures, Bills 2 Nov; Fig 7 the coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers). Pies and discs sit at their destination climate; the 15 experiments that share a destination climate (6 points) fan out around a black dot at that climate on short lines; no two pies or discs overlap (0 pies of different climates had to be pushed apart). Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation. The ring key is drawn in millimetres and matched to the rings through the drawn panel's scale (39.55 mm per °C).
+Draws what no earlier step produced: Fig 4, the 42 experiments in climate space with one disc per experiment for the effects the ladders model (512 resident and 110 colonizer effects, steps 05 and 07c): its fill the residents' net change, the sum of their strengths with the sign kept, its purple ring the colonizers' total warmed cover, both in percentage points of the warmed turf from year 3 on (Bills, 3 Nov); Fig S10 the same map with pies counting resident losers and winners (by the sign of their net strength from year 3 on) and colonizers (net warmed cover above zero), all classified effects; Fig S1 the data flow; Fig S3 and Table S4 the phylogenetic axes; Fig S4 the predictors before standardisation with the niche checks; Tables S1, S2, S3, S5 and S6. Copies the reviewed figures of steps 03 to 07f under their final numbers (eight main figures, Bills 7 Nov; Fig 8 the coefficients of the background climate, Height and LDMC models, residents beside colonizers). Pies and discs sit at their destination climate; the 15 experiments that share a destination climate (6 points) fan out around a black dot at that climate on short lines; no two pies or discs overlap (0 pies of different climates had to be pushed apart). Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation. The ring key is drawn in millimetres and matched to the rings through the drawn panel's scale (39.55 mm per °C).
 
 ## Counts
 
@@ -81,8 +81,9 @@ Median over the experiments with modelled residents: net change -6.1 points; med
 | Fig 3 | figures/main/fig3.png | Colonizers' classification (Step C) | step 07b |
 | Fig 4 | figures/main/fig4.png | The experiments in climate space: residents' net change and colonizers' gain, modelled effects | this step |
 | Fig 5 | figures/main/fig5.png | Traits of losers, winners and colonizers (pathways) | step 07f |
-| Fig 6 | figures/main/fig6.png | The residents' ladder | step 06 |
-| Fig 7 | figures/main/fig7.png | Coefficients of the climate + abundance, Height and LDMC models, residents beside colonizers | this step |
+| Fig 6 | figures/main/fig6.png | Performance of the residents' models against the Null, explanatory and predictive | step 06 |
+| Fig 7 | figures/main/fig7.png | Change in unexplained variation at each model comparison, residents | step 05 |
+| Fig 8 | figures/main/fig8.png | Coefficients of the background climate, Height and LDMC models, residents beside colonizers | this step |
 | Fig S1 | figures/appendix/figS1.png | Data flow | this step |
 | Fig S2 | figures/appendix/figS2.png | TRY trait screening | prep P2 |
 | Fig S3 | figures/appendix/figS3.png | Phylogenetic axes (with Table S4) | this step (prep P3) |
@@ -94,18 +95,21 @@ Median over the experiments with modelled residents: net change -6.1 points; med
 | Fig S9 | figures/appendix/figS9.png | Strength from year 3 against all years | step 03b |
 | Fig S10 | figures/appendix/figS10.png | The experiments in climate space: pies counting losers, winners and colonizers, all effects | this step |
 | Fig S11 | figures/appendix/figS11.png | Where each variance component of the ladder comes from (toy table) | drawn by hand |
-| Fig S12 | figures/appendix/figS12.png | Coefficients, residents | step 05 |
-| Fig S13 | figures/appendix/figS13.png | Metrics per gradient, residents | step 06 |
-| Fig S14 | figures/appendix/figS14.png | Random forest beside metafor, residents | step 06b |
-| Fig S15 | figures/appendix/figS15.png | Colonizer strength from year 3 against all years | step 07a |
-| Fig S16 | figures/appendix/figS16.png | Coefficients, colonizers | step 07c |
-| Fig S17 | figures/appendix/figS17.png | The colonizers' ladder | step 07d |
-| Fig S18 | figures/appendix/figS18.png | Metrics per gradient, colonizers | step 07d |
-| Fig S19 | figures/appendix/figS19.png | Random forest beside metafor, colonizers | step 07e |
+| Fig S12 | figures/appendix/figS12.png | Raw heterogeneity per model, residents | step 05 |
+| Fig S13 | figures/appendix/figS13.png | Coefficients, residents | step 05 |
+| Fig S14 | figures/appendix/figS14.png | Metrics per gradient, residents | step 06 |
+| Fig S15 | figures/appendix/figS15.png | Random forest beside metafor, residents | step 06b |
+| Fig S16 | figures/appendix/figS16.png | Colonizer strength from year 3 against all years | step 07a |
+| Fig S17 | figures/appendix/figS17.png | Coefficients, colonizers | step 07c |
+| Fig S18 | figures/appendix/figS18.png | Performance of the colonizers' models against the Null | step 07d |
+| Fig S19 | figures/appendix/figS19.png | Change in unexplained variation at each model comparison, colonizers | step 07c |
+| Fig S20 | figures/appendix/figS20.png | Raw heterogeneity per model, colonizers | step 07c |
+| Fig S21 | figures/appendix/figS21.png | Metrics per gradient, colonizers | step 07d |
+| Fig S22 | figures/appendix/figS22.png | Random forest beside metafor, colonizers | step 07e |
 
 ![Fig 4](../figures/main/fig4.png)
 
-![Fig 7](../figures/main/fig7.png)
+![Fig 8](../figures/main/fig8.png)
 
 ![Fig S1](../figures/appendix/figS1.png)
 
@@ -123,8 +127,8 @@ Median over the experiments with modelled residents: net change -6.1 points; med
 | Table S2 | tables/tableS2.csv | Experiments | 42 |
 | Table S3 | tables/tableS3.csv | Species list | 426 |
 | Table S4 | tables/tableS4.csv | Phylogenetic axes | 3 |
-| Table S5 | tables/tableS5.csv | Variance components per model | 24 |
-| Table S6 | tables/tableS6.csv | Fixed-effect coefficients per model | 321 |
+| Table S5 | tables/tableS5.csv | Variance components per model | 22 |
+| Table S6 | tables/tableS6.csv | Fixed-effect coefficients per model | 247 |
 
 ## Table S4, phylogenetic axes
 
@@ -143,7 +147,8 @@ None.
 ## Deviations from PLAN.md
 
 - One script for the whole step (Bills, 2 Nov).
-- Seven main figures (Bills, 2 Nov): the colonizers' classification becomes Fig 3, the climate space Fig 4, the pathways Fig 5, the ladder Fig 6, the coefficients of three models Fig 7 (abundance terms drawn per pool, not comparable); the results-dependent Fig 6 and the old Fig S8 dropped; appendix S1 to S19 in the order of the analysis (Bills, 2 Nov); the main figures are written by their own steps.
+- Eight main figures (Bills, 2 and 7 Nov): the colonizers' classification Fig 3, the climate space Fig 4, the pathways Fig 5, the models' performance Fig 6, the change in unexplained variation Fig 7, the coefficients of three models Fig 8; the results-dependent Fig 6 and the old Fig S8 dropped; appendix S1 to S22 in the order of the analysis; the main figures are written by their own steps.
+- Without abundance (Bills, 7 Nov): no model carries an initial-abundance term; Fig S4 still shows the abundances, which are computed but not modelled.
 - Fig 4 shows the modelled effects as discs, the residents' net change and the colonizers' gain (Bills, 3 Nov; the cover pies of 2 Nov replaced); Fig S10's pies count Fig 5's classes per experiment, not last-year significance classes; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).
 - Coefficients, per-gradient metrics and the random forest stay as residents (a) and colonizers (b) files.
 - `REPORT.html` not rendered: Quarto is not installed.
