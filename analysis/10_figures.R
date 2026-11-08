@@ -188,9 +188,10 @@ for (pass in 1:5) {
 stopifnot(abs(measured - mm_per_degree) < 0.01) # the ring key matches the rings on the page
 
 # ---- Fig 7: what the models find, residents beside colonizers (Fig 8 until 8 Nov) --------------------------
-# Background climate, Height and LDMC models (Bills, 2 Nov; without abundance, 7 Nov). Both
-# responses are relative cover and W, T, P and the traits share one scale (steps 02, 07c), so
-# every term sits on one axis
+# Background climate, Height and LDMC models (Bills, 2 Nov; without abundance, 7 Nov). The
+# residents' response is losing-winning strength (warmed minus origin-control cover), the
+# colonizers' their warmed cover; both are in relative cover and W, T, P and the traits share one
+# scale (steps 02, 07c), so every term sits on one axis; each axis names its response (Bills, 8 Nov)
 coefs <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS6.csv"), pool = "Residents"),
                    mutate(read.csv("data/derived/07c_ladder_fit/coefficients.csv"), pool = "Colonizers")) |>
   filter(model %in% c("Background climate", "Height", "LDMC"), term != "intrcpt") |>
@@ -206,24 +207,25 @@ stopifnot(nrow(f7_clim) == 14, nrow(f7_prop) == 20, !any(grepl("A0", coefs$term)
 pool_cols <- c(Residents = "#3D3D3D", Colonizers = "#5E3C99")
 x_shared <- range(c(f7_clim$ci_lower, f7_clim$ci_upper, f7_prop$ci_lower, f7_prop$ci_upper)) # every panel on one axis
 f7_model <- f7_clim # a) and b): the Background climate model, one graph per pool, the same rows in both
-coef_panel <- function(d, tag, xlim = NULL) {
+coef_panel <- function(d, tag, xlab, xlim = NULL) {
   ggplot(d, aes(estimate, name, colour = pool, group = pool)) + geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
     geom_linerange(aes(xmin = ci_lower, xmax = ci_upper), linewidth = 1.6, position = position_dodge(width = 0.6)) +
     geom_point(aes(fill = ifelse(excludes_zero, as.character(pool), "none")), shape = 21, size = 9.5, stroke = 2.2, position = position_dodge(width = 0.6)) +
     scale_colour_manual(values = pool_cols, name = NULL, breaks = names(pool_cols)) +
     scale_fill_manual(values = c(pool_cols, none = "white"), guide = "none") +
     (if (!is.null(xlim)) scale_x_continuous(limits = xlim)) +
-    labs(title = tag, x = "Effect on relative cover\nper SD of the predictor", y = NULL) + big + # two lines: fits the larger text
-    theme(legend.position = "bottom", legend.text = element_text(size = 48), legend.key.size = unit(2.4, "cm"), # text enlarged twice (Bills, 8 Nov)
-          axis.text = element_text(size = 44), axis.title.x = element_text(size = 46, face = "bold"),
+    labs(title = tag, x = xlab, y = NULL) + big + # no "per SD" on the axis (Bills, 8 Nov): the caption says it
+    theme(legend.position = "bottom", legend.text = element_text(size = 52), legend.key.size = unit(2.4, "cm"), # text enlarged three times (Bills, 8 Nov)
+          axis.text = element_text(size = 48), axis.title.x = element_text(size = 50, face = "bold"),
           panel.grid.major.y = element_line(colour = "grey45", linewidth = 1.4, linetype = "dotted")) # row guides from name to estimate (Bills)
 }
+both_lab <- "Effect on strength\n(residents: losing-winning,\ncolonizers: warmed cover)"
 fig7 <- patchwork::wrap_plots(
-  coef_panel(filter(f7_model, pool == "Residents"), "a) Residents: background climate", x_shared) + guides(colour = "none"), # the title names the pool
-  coef_panel(filter(f7_model, pool == "Colonizers"), "b) Colonizers: background climate", x_shared) + guides(colour = "none"),
-  coef_panel(filter(f7_prop, model == "Height"), "c) Height model", x_shared),
-  coef_panel(filter(f7_prop, model == "LDMC"), "d) LDMC model", x_shared),
-  ncol = 2, guides = "collect") & theme(legend.position = "bottom", plot.title = element_text(size = 54))
+  coef_panel(filter(f7_model, pool == "Residents"), "a) Residents: background climate", "Effect on losing-winning strength", x_shared) + guides(colour = "none"), # the title names the pool
+  coef_panel(filter(f7_model, pool == "Colonizers"), "b) Colonizers: background climate", "Effect on colonizer strength\n(warmed cover)", x_shared) + guides(colour = "none"),
+  coef_panel(filter(f7_prop, model == "Height"), "c) Height model", both_lab, x_shared),
+  coef_panel(filter(f7_prop, model == "LDMC"), "d) LDMC model", both_lab, x_shared),
+  ncol = 2, guides = "collect") & theme(legend.position = "bottom", plot.title = element_text(size = 58), plot.title.position = "plot") # titles from the left edge, so they fit
 
 # ---- Fig S1: data flow ------------------------------------------------------------------
 flow <- read.csv("data/derived/01_relative_cover/flow_counts.csv")
@@ -416,7 +418,7 @@ for (t in paste0("S", 1:6)) write.csv(get(paste0("table", t)), sprintf("tables/t
 
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
 ggsave("figures/main/fig4.png", fig4, width = 38, height = 28, dpi = 100, bg = "white")
-ggsave("figures/main/fig7.png", fig7, width = 49, height = 31, dpi = 100, bg = "white")
+ggsave("figures/main/fig7.png", fig7, width = 49, height = 36, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS3.png", figS3, width = 40, height = 14, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")

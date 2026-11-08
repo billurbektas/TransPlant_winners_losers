@@ -248,9 +248,9 @@ coef_panel <- function(x, tag, ttl) {
     geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0, linewidth = 0.9) +
     geom_point(aes(fill = excl), shape = 21, size = 4, stroke = 1) +
     scale_fill_manual(values = c(`TRUE` = "black", `FALSE` = "white"), labels = c(`TRUE` = "95% interval excludes zero", `FALSE` = "includes zero"), name = NULL) +
-    labs(title = tag, subtitle = ttl, x = "Effect on losing-winning strength (per SD)", y = NULL) +
-    theme_classic(base_size = 17) + theme(plot.title = element_text(face = "bold", size = 22), legend.position = "bottom",
-                                          strip.text = element_text(face = "bold", size = 15), strip.background = element_blank())
+    labs(title = tag, subtitle = ttl, x = "Effect on losing-winning strength", y = NULL) +
+    theme_classic(base_size = 19) + theme(plot.title = element_text(face = "bold", size = 24), legend.position = "bottom", # larger text (Bills, 8 Nov)
+                                          strip.text = element_text(face = "bold", size = 17), strip.background = element_blank())
 }
 s4a <- coef_panel(filter(coefs, rowset == "all", model == "Background climate", term != "intrcpt"), "a)", "Residents, Background climate (model-based intervals)")
 prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model == prop_label[[p]]) |>

@@ -22,8 +22,8 @@ ladder_compared_with <- c(`Experimental warming` = "Null", `Background climate` 
 ladder_fills <- c(total = "#2B2E35", sigma2_experiment = "#B9BCC6", tau2 = "#6E7380", H_intercept = "#DDB54F", H_slope = "#8C6D1F")
 
 ladder_base <- function() ggplot2::theme_classic(base_size = 38) +
-  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = 64), # text enlarged twice (Bills, 8 Nov)
-                 axis.title.y = ggplot2::element_text(face = "bold", size = 56), axis.text = ggplot2::element_text(size = 48),
+  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = 68), # text enlarged three times (Bills, 8 Nov)
+                 axis.title.y = ggplot2::element_text(face = "bold", size = 60), axis.text = ggplot2::element_text(size = 52),
                  panel.grid.major.y = ggplot2::element_line(colour = "grey90"),
                  plot.background = ggplot2::element_rect(fill = "white", colour = NA))
 ladder_no_x <- function() ggplot2::theme(axis.text.x = ggplot2::element_blank(), axis.ticks.x = ggplot2::element_blank(),
@@ -66,7 +66,7 @@ ladder_metric_panel <- function(gradients, key, tag, ylab, lims, last, legend) {
     geom_point(data = g, aes(xj, value, colour = type), size = 2.4, alpha = 0.25, show.legend = FALSE) +
     geom_segment(data = sw, aes(x = x - 0.06, xend = x + 0.06, y = fit, yend = pred), colour = "grey40", linewidth = 1.2) +
     geom_point(data = dplyr::filter(s, type == "fit"), aes(xm, med), colour = "#7D8894", size = 6) +
-    geom_text(data = lab_xy, aes(xl, yl, label = sprintf("%.2f", round(med, 2) + 0), colour = type), size = 16.5, fontface = "bold", show.legend = FALSE) +
+    geom_text(data = lab_xy, aes(xl, yl, label = sprintf("%.2f", round(med, 2) + 0), colour = type), size = 17.5, fontface = "bold", show.legend = FALSE) +
     scale_colour_manual(values = c(fit = "#7D8894", pred = "#2F80D8"), guide = "none") +
     geom_point(data = dplyr::filter(s, type == "pred"), aes(xm, med), colour = "#2F80D8", size = 6) +
     scale_fill_manual(values = c(fit = "#C9D3DE", pred = "#8DB8EA"),
@@ -74,14 +74,14 @@ ladder_metric_panel <- function(gradients, key, tag, ylab, lims, last, legend) {
                       guide = if (legend) "legend" else "none") # one key per figure, also when the keys are collected
   p + ladder_x() + scale_y_continuous(limits = lims) + labs(title = tag, x = NULL, y = ylab) + ladder_base() +
     # the legend goes with the first violin panel: inside Spearman, top left, where the floor has no
-    # values; under R² it is collected at the bottom of the figure (Bills, 8 Nov)
+    # values; under R² it sits right below that panel (Bills, 8 Nov)
     theme(legend.position = if (!legend) "none" else if (key == "Spearman") "inside" else "bottom",
           legend.position.inside = c(0.005, 0.99), legend.justification = if (key == "Spearman") c(0, 1) else "left",
           legend.direction = if (key == "Spearman") "vertical" else "horizontal",
           legend.key.spacing.y = unit(0.4, "cm"), legend.key.spacing.x = unit(1.2, "cm"),
-          legend.text = element_text(size = 46), legend.key.size = unit(2.4, "cm"),
+          legend.text = element_text(size = 50), legend.key.size = unit(2.4, "cm"), legend.margin = margin(10, 0, 0, 0),
           legend.background = element_rect(fill = alpha("white", 0.9), colour = NA)) +
-    if (last) theme(axis.text.x = element_text(size = 42, face = "bold", colour = "black")) else ladder_no_x()
+    if (last) theme(axis.text.x = element_text(size = 44, face = "bold", colour = "black")) else ladder_no_x()
 }
 
 # ---- the raw heterogeneity panel (the old Fig 6a) ------------------------------------
@@ -116,16 +116,16 @@ ladder_het_panel <- function(het, tag, last) {
     geom_rect(data = bars, aes(xmin = xb - 0.15, xmax = xb + 0.15, ymin = ymin, ymax = ymax, fill = piece)) +
     geom_segment(data = refs, aes(x = xb + 0.15, xend = xend, y = value, yend = value, linetype = mark),
                  colour = ref_cols[refs$piece], linewidth = 1) +
-    geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 14, fontface = "bold") +
+    geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 15, fontface = "bold") +
     scale_fill_manual(values = ladder_fills[names(fill_labs)], labels = fill_labs, name = NULL,
                       guide = guide_legend(order = 1, nrow = 1)) +
     scale_linetype_manual(values = "dashed", guide = "none") + ladder_x() + # the dashed lines are named in the caption (Bills, 8 Nov)
     scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
     labs(title = tag, x = NULL, y = "Heterogeneity\n(unexplained variance, ×10⁻⁴)") +
     ladder_base() + theme(legend.position = "bottom", legend.justification = "center",
-                          legend.key.spacing.x = unit(1, "cm"), legend.text = element_text(size = 40),
+                          legend.key.spacing.x = unit(1, "cm"), legend.text = element_text(size = 44),
                           legend.key.size = unit(2.2, "cm"), legend.spacing.y = unit(0.2, "cm"), legend.margin = margin(30, 0, 0, 0)) +
-    if (last) theme(axis.text.x = element_text(size = 42, face = "bold", colour = "black")) else ladder_no_x()
+    if (last) theme(axis.text.x = element_text(size = 44, face = "bold", colour = "black")) else ladder_no_x()
 }
 
 # ---- Fig 6 / S12 / S19: the panels in the order given ---------------------------------
@@ -143,10 +143,6 @@ ladder_performance <- function(gradients, file, panels, het = NULL, height) {
     else ladder_metric_panel(gradients, k, tag, spec[[k]][[1]], spec[[k]][[2]], last, legend = k == first_violin)
   })
   fig <- patchwork::wrap_plots(rows, ncol = 1, heights = ifelse(panels == "het", 1.35, 1))
-  # every key at the bottom, one row each, when the first violin panel is R² (Bills, 8 Nov)
-  if (first_violin != "Spearman")
-    fig <- fig + patchwork::plot_layout(guides = "collect") &
-      theme(legend.position = "bottom", legend.box = "vertical", legend.text = element_text(size = 42))
   ggsave(file, fig, width = 48, height = height, dpi = 100, bg = "white")
   invisible(fig)
 }
