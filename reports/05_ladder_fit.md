@@ -92,7 +92,7 @@ Step 02's standardisation, kept (Bills, 2 Nov), read on the ladder rows:
 | niche | Species-specific responses | all | 512 | 71 | 4.227 | 0.000 | 0.827 | 1.279 | DIAG | reused |
 | niche | Niche | niche | 512 | 71 | 4.250 | 0.000 | 0.579 | 1.270 | DIAG | 0.4 |
 
-All 8 slope fits converged with the diagonal T, P, TP block, each from metafor's default start (Bills, 1 Nov). Across the 8 fits the T slope variance ranges 0.529 to 1.059 ×10⁻⁴; the TP slope variance 0.000 to 0.266 ×10⁻⁴; only the P slope variance is at the boundary (at most 1.0e-08).
+All 8 slope fits converged with the diagonal T, P, TP block: Species-specific responses from metafor's default start (Bills, 1 Nov), the seven property models warm-started from it with optim BFGS (Bills, 7 Nov). Across the 8 fits the T slope variance ranges 0.529 to 1.059 ×10⁻⁴; the TP slope variance 0.000 to 0.266 ×10⁻⁴; only the P slope variance is at the boundary (at most 1.0e-08).
 
 ## Checks
 

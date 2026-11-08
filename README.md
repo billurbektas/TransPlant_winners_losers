@@ -48,7 +48,8 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 | [07c–07e](#colonizers) | The ladder, its predictions and the forest for colonizers | median held-out R²: Background climate -0.24, Species-specific responses -0.36 |
 | [07f](#pathways) | Traits of losers, winners and colonizers, compared pairwise | Fig 5; 9 of 21 comparisons below 0.05 |
 | [10](#the-experiments-in-climate-space) | Synthesis figures, appendix and this page | Figs 4, 8, S1–S22 |
-| [12](reports/12_final_review.md) | Final review: reruns, code, documentation, open issues, statistical weak points | no result changed; decisions listed |
+| [12](reports/12_final_review.md) | Final review: reruns, code, documentation, open issues, statistical weak points | no result changed; decisions listed (3 Nov, on the ladder with abundance) |
+| 16 | The ladder without abundance (7 Nov): steps 05 to 10 redone, Figs 6 to 8 and S12 to S22 renumbered | median held-out R² of every resident model between -0.04 and 0.04 |
 
 ![Figure S1](figures/appendix/figS1.png)
 
@@ -68,7 +69,7 @@ Here, we use a network of 42 whole-community downslope transplant experiments al
 | 07a | [07a_colonizers.R](analysis/07a_colonizers.R) | Colonizers: an experiment needs at least 5 destination-pool species, as for residents | −11 → 28 | −7 → 229 | −23 → 379 |
 | 04 | [04_classification.R](analysis/04_classification.R) | Residents in at least 3 gradients, so that their variation among experiments can be estimated | −3 → 39 | −272 → 74 | −481 → 523 |
 | 07b | [07b_classification.R](analysis/07b_classification.R) | Colonizers in at least 3 gradients, as for residents | −4 → 24 | −200 → 29 | −262 → 117 |
-| 05 | [05_ladder_fit.R](analysis/05_ladder_fit.R) | Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows | −0 → 39 | −3 → 71 | −11 → 512 |
+| 05 | [05_ladder_fit.R](analysis/05_ladder_fit.R) | Residents with every property (traits, growth form, phylogeny, niche), so all eleven models use the same rows | −0 → 39 | −3 → 71 | −11 → 512 |
 | 07c | [07c_ladder_fit.R](analysis/07c_ladder_fit.R) | Colonizers with every property, as for residents | −0 → 24 | −2 → 27 | −7 → 110 |
 
 ## Data and selection
@@ -240,8 +241,14 @@ f_warm    <- ~ W                                     # Experimental warming
 f_env     <- ~ W * T * P                             # Background climate; with re_slopes, Species-specific responses
 f_height  <- update(f_env, ~ . + height_z + height_z:W + height_z:T + height_z:P + height_z:TP)
 
+sp <- metafor::rma.mv(yi = strength, V = strength_se^2, mods = f_env, random = re_slopes,
+                      struct = c("GEN", "GDIAG"), data = rows, method = "REML", sparse = TRUE)
+# property models start from the Species-specific responses variance components (7 Nov;
+# in the scripts, values at the boundary are first lifted to 1e-8 so that the optimiser can leave them)
 m <- metafor::rma.mv(yi = strength, V = strength_se^2, mods = f_height, random = re_slopes,
-                     struct = c("GEN", "GDIAG"), data = rows, method = "REML", sparse = TRUE)
+                     struct = c("GEN", "GDIAG"), data = rows, method = "REML", sparse = TRUE,
+                     control = list(optimizer = "optim", optmethod = "BFGS", sigma2.init = sp$sigma2,
+                                    tau2.init = sp$tau2, gamma2.init = sp$gamma2))
 
 # held out: fixed part + the species' deviation learned in the other gradients
 b   <- D %*% t(Z) %*% solve(M, y - X %*% beta)            # BLUPs, by hand (blup())
@@ -255,11 +262,11 @@ rf <- ranger::ranger(x = train[vars], y = train$strength, num.trees = 3000,
 
 ![Figure 6](figures/main/fig6.png)
 
-**Figure 6.** How well each model explains the losing-winning strength, and how well it predicts it for an unseen gradient. Models from left to right (Table 1): Null; Experimental warming; Background climate, warming with destination temperature and precipitation; Species-specific responses, the same with species-specific intercepts and climate slopes (the ceiling); and one model per species property added to Background climate with the species terms kept: leaf dry matter content (LDMC), leaf mass per area (LMA), vegetative height, graminoid and woody growth form, phylogenetic position (eigenvectors 1–3) and climatic niche (thermal and precipitation optima). (a) R² against the Null model on the same gradient, (b) Spearman's rank correlation within the gradient and (c) loser/winner skill, loser recall plus winner recall minus one, on the 16 gradients with at least five effects: half violins of the gradient values in sample (grey, model fitted to all gradients) and for the gradient held out of the fit (blue), with medians as large points and numbers. Dashed lines are the Species-specific responses values. The Null is zero by construction and not drawn; Experimental warming and Background climate predict one value per experiment and have no Spearman or skill.
+**Figure 6.** How well each model explains the losing-winning strength, and how well it predicts it for an unseen gradient. Models from left to right (Table 1): Null; Experimental warming; Background climate, warming with destination temperature and precipitation; Species-specific responses, the same with species-specific intercepts and climate slopes; and one model per species property added to Background climate with the species terms kept (species-specific + property, one property at a time): leaf dry matter content (LDMC), leaf mass per area (LMA), vegetative height, graminoid and woody growth form, phylogenetic position (eigenvectors 1–3) and climatic niche (thermal and precipitation optima). (a) R² against the Null model on the same gradient, (b) Spearman's rank correlation within the gradient and (c) loser/winner skill, loser recall plus winner recall minus one, on the 16 gradients with at least five effects: half violins of the gradient values in sample (grey, model fitted to all gradients) and for the gradient held out of the fit (blue), with medians as large points and numbers. Dashed lines are the Species-specific responses values. The Null is zero by construction and not drawn; Experimental warming and Background climate predict one value per experiment and have no Spearman or skill. The property models' fixed-effect predictions often call every species of a gradient a loser, which gives a skill of exactly zero there.
 
 ![Figure 7](figures/main/fig7.png)
 
-**Figure 7.** Change in each kind of unexplained variation at each comparison of Table 2, residents. Each column is a model compared with the one it adds to: Experimental warming with Null, Background climate with Experimental warming, Species-specific responses with Background climate, and each property model with Species-specific responses. Rows: (a) the total unexplained variation, the sum of the four components below; (b) the experiment component σ²<sub>experiment</sub>, the shift shared by all species of an experiment; (c) the species × experiment component τ²; (d) the among-species component, intercept piece (species differ in average response); (e) its slope piece (species differ in response to climate). Bars are the change (×10⁻⁴) against the compared model, with the percentage of that model's value; green labels mark a reduction, rust an increase; "new" marks a component the compared model does not have, and a flat tick a component that is zero in both. The purple arrows mark the one comparison where variation is moved by design: giving each species its own climate response moves variation from τ² into the slope piece (1.28 × 10⁻⁴). Elsewhere, small changes in components a comparison cannot reach are re-estimation, not transfer. Each row has its own scale.
+**Figure 7.** Change in each kind of unexplained variation at each comparison of Table 2, residents. Each column is a model compared with the one it adds to: Experimental warming with Null, Background climate with Experimental warming, Species-specific responses with Background climate, and each property model with Species-specific responses. Rows: (a) the total unexplained variation, the sum of the four components below; (b) the experiment component σ²<sub>experiment</sub>, the shift shared by all species of an experiment; (c) the species × experiment component τ²; (d) the among-species component, intercept piece (species differ in average response); (e) its slope piece (species differ in response to climate). Bars are the change (×10⁻⁴) against the compared model, with the percentage of that model's value; green labels mark a reduction, rust an increase; "new" marks a component the compared model does not have, and a flat tick a component that is zero in both. The purple arrows mark the one comparison where variation is moved by design: giving each species its own climate response moves variation from τ² and the intercept piece into the slope piece (1.28 × 10⁻⁴). Elsewhere, small changes in components a comparison cannot reach are re-estimation, not transfer. Each row has its own scale.
 
 ![Figure S12](figures/appendix/figS12.png)
 
@@ -292,7 +299,8 @@ Code: [`05_ladder_fit.R`](analysis/05_ladder_fit.R) · [`06_ladder_predict.R`](a
 - At least 5 colonizers per experiment (28 of 42 experiments).
 - The propagule pressure A0 is the species' mean destination-control relative cover over every plot and year (2 Nov), log(100 × cover + 1) as the residents' A0 (3 Nov), standardised across all 379 colonizer effects; it is computed but, as for residents, enters no model (7 Nov).
 - Properties on the residents' scale, so both pools share one standardisation (2 Nov).
-- No loser/winner skill (no loser class); an R² below −100 is taken out and listed (2 Nov); a fold that converges neither with nlminb nor with bobyqa is left out and named in the report (2 Nov).
+- No loser/winner skill (no loser class); an R² below −100 is taken out and listed (2 Nov).
+- Folds and property models as for residents: property models and folds warm-started from Species-specific responses (7 Nov); a fit that converges with no optimizer is left out and named in the report (2 Nov).
 
 **Model code** ([`07a_colonizers.R`](analysis/07a_colonizers.R)):
 
@@ -317,7 +325,7 @@ strength <- emmeans::emmeans(m, ~ species, at = list(year = years_3_on), df = df
 
 ![Figure S18](figures/appendix/figS18.png)
 
-**Figure S18.** How well each colonizer model explains colonizer strength, and how well it predicts it for an unseen gradient. As Figure 6, for the 110 colonizer effects of 27 species: (a) R² against the Null model on the same gradient and (b) Spearman's rank correlation, on the 8 gradients with at least five effects, in sample (grey) and held out (blue). There is no loser/winner skill, since colonizers have no losers. An R² below −100 (Woody at CH_Lavey) is left out of the R² row, and folds that did not converge are missing (listed in the 07d report).
+**Figure S18.** How well each colonizer model explains colonizer strength, and how well it predicts it for an unseen gradient. As Figure 6, for the 110 colonizer effects of 27 species: (a) R² against the Null model on the same gradient and (b) Spearman's rank correlation, on the 8 gradients with at least five effects, in sample (grey) and held out (blue). There is no loser/winner skill, since colonizers have no losers. An R² below −100 (Woody at CH_Lavey) is left out of the R² row; any fold that did not converge would be missing and is listed in the 07d report.
 
 ![Figure S19](figures/appendix/figS19.png)
 
@@ -394,14 +402,15 @@ plan_figures/                       the mock figures agreed while planning (loca
 renv.lock                           the locked package environment
 ```
 
-Each step was planned, run and reviewed on its own branch (`step-NN-<name>`), with a report under `reports/` that lists its counts, its key table, its figures, the warnings captured and its deviations from the plan. Fitted models are cached under `data/derived/`, so a rerun skips what exists.
+Each step was planned, run and reviewed on its own branch (`step-NN-<name>`; step 16 on `without-abundance`), with a report under `reports/` that lists its counts, its key table, its figures, the warnings captured and its deviations from the plan. Fitted models are cached under `data/derived/`, so a rerun skips what exists.
 
 ## Running the analysis
 
 ```sh
 Rscript -e 'renv::restore()'
 Rscript -e 'targets::tar_make(script = "prep/_targets.R", store = "prep/_targets")'
-LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b, 07a-07f, 10, 12
+LANG=en_US.UTF-8 Rscript analysis/01_relative_cover.R   # then 02, 03, 03b, 04, 05, 06, 06b, 07a-07f, 10
+# (12 is the record of the 3 Nov review, on the ladder with abundance, and is not rerun)
 ```
 
 Run from the repository root. A UTF-8 locale keeps the figure labels (τ², ×10⁻⁴) intact. `analysis/10_figures.R` writes this README from `README.Rmd` as its last step.

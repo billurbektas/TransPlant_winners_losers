@@ -209,12 +209,13 @@ f8_model <- f8_clim # a) and b): the Background climate model, one graph per poo
 coef_panel <- function(d, tag, xlim = NULL) {
   ggplot(d, aes(estimate, name, colour = pool, group = pool)) + geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
     geom_linerange(aes(xmin = ci_lower, xmax = ci_upper), linewidth = 1.6, position = position_dodge(width = 0.6)) +
-    geom_point(aes(fill = ifelse(excludes_zero, as.character(pool), "none")), shape = 21, size = 6, stroke = 1.6, position = position_dodge(width = 0.6)) +
+    geom_point(aes(fill = ifelse(excludes_zero, as.character(pool), "none")), shape = 21, size = 8, stroke = 2, position = position_dodge(width = 0.6)) +
     scale_colour_manual(values = pool_cols, name = NULL, breaks = names(pool_cols)) +
     scale_fill_manual(values = c(pool_cols, none = "white"), guide = "none") +
     (if (!is.null(xlim)) scale_x_continuous(limits = xlim)) +
     labs(title = tag, x = "Effect on relative cover per SD of the predictor", y = NULL) + big +
-    theme(legend.position = "bottom", legend.text = element_text(size = 30), legend.key.size = unit(1.6, "cm"),
+    theme(legend.position = "bottom", legend.text = element_text(size = 40), legend.key.size = unit(2, "cm"), # text enlarged (Bills, 8 Nov)
+          axis.text = element_text(size = 36), axis.title.x = element_text(size = 38, face = "bold"),
           panel.grid.major.y = element_line(colour = "grey45", linewidth = 1.4, linetype = "dotted")) # row guides from name to estimate (Bills)
 }
 fig8 <- patchwork::wrap_plots(
@@ -222,7 +223,7 @@ fig8 <- patchwork::wrap_plots(
   coef_panel(filter(f8_model, pool == "Colonizers"), "b) Colonizers: background climate model", x_shared) + guides(colour = "none"),
   coef_panel(filter(f8_prop, model == "Height"), "c) Height model", x_shared),
   coef_panel(filter(f8_prop, model == "LDMC"), "d) LDMC model", x_shared),
-  ncol = 2, guides = "collect") & theme(legend.position = "bottom", plot.title = element_text(size = 34))
+  ncol = 2, guides = "collect") & theme(legend.position = "bottom", plot.title = element_text(size = 44))
 
 # ---- Fig S1: data flow ------------------------------------------------------------------
 flow <- read.csv("data/derived/01_relative_cover/flow_counts.csv")
@@ -348,7 +349,7 @@ sel <- tibble::tibble(
            "Colonizers: an experiment needs at least 5 destination-pool species, as for residents",
            "Residents in at least 3 gradients, so that their variation among experiments can be estimated",
            "Colonizers in at least 3 gradients, as for residents",
-           "Residents with every property (traits, growth form, phylogeny, niche), so all twelve models use the same rows",
+           "Residents with every property (traits, growth form, phylogeny, niche), so all eleven models use the same rows",
            "Colonizers with every property, as for residents"),
   parent = c(NA, 1, 2, 3, 4, 5, 5, 7, 6, 8, 9, 10),
   split = c(rep(FALSE, 5), TRUE, TRUE, rep(FALSE, 5)))
@@ -415,7 +416,7 @@ for (t in paste0("S", 1:6)) write.csv(get(paste0("table", t)), sprintf("tables/t
 
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
 ggsave("figures/main/fig4.png", fig4, width = 38, height = 28, dpi = 100, bg = "white")
-ggsave("figures/main/fig8.png", fig8, width = 40, height = 22, dpi = 100, bg = "white")
+ggsave("figures/main/fig8.png", fig8, width = 46, height = 26, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS3.png", figS3, width = 40, height = 14, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")
