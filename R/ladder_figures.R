@@ -162,9 +162,6 @@ ladder_change <- function(het, file) {
                   colour = ifelse(v < 0, green, rust), up = v >= 0,
                   yl = ifelse(up, y1 + 0.04, y1 - 0.04))
   x_left <- 0.45; x_right <- max(xpos) + 0.8; x_tag <- -0.9
-  # the narrow figure (Bills, 8 Nov) has no room for "Experimental" and "Background" side by side
-  col_labs <- ladder_labels[-1]
-  col_labs[1:2] <- c("Experi-\nmental\nwarming", "Back-\nground\nclimate")
   p <- ggplot() +
     geom_segment(data = ticks, aes(x = x_left, xend = x_right, y = y, yend = y), colour = "grey92", linewidth = 0.5) +
     geom_segment(data = bands, aes(x = x_left, xend = x_right, y = ymap(0, r), yend = ymap(0, r)), colour = "grey50", linewidth = 0.7) +
@@ -173,14 +170,14 @@ ladder_change <- function(het, file) {
     geom_text(data = ticks, aes(x = x_left - 0.1, y = y, label = format(t, trim = TRUE)), hjust = 1, size = 14, colour = "grey30") +
     geom_segment(aes(x = 3.75 * 1.8, xend = 3.75 * 1.8, y = 0, yend = max(bands$base) + band_h), colour = "grey80", linewidth = 0.8) +
     geom_rect(data = dplyr::filter(d, state != "zero"),
-              aes(xmin = x - 0.32, xmax = x + 0.32, ymin = pmin(y0, y1), ymax = pmax(y0, y1), fill = component)) +
-    geom_segment(data = dplyr::filter(d, state == "zero"), aes(x = x - 0.32, xend = x + 0.32, y = y0, yend = y0, colour = component),
+              aes(xmin = x - 0.5, xmax = x + 0.5, ymin = pmin(y0, y1), ymax = pmax(y0, y1), fill = component)) +
+    geom_segment(data = dplyr::filter(d, state == "zero"), aes(x = x - 0.5, xend = x + 0.5, y = y0, yend = y0, colour = component),
                  linewidth = 2.2, show.legend = FALSE) +
     geom_text(data = dplyr::filter(labs_d, up), aes(x, yl, label = lab), colour = dplyr::filter(labs_d, up)$colour,
               vjust = 0, size = 13.5, fontface = "bold", lineheight = 0.85) +
     geom_text(data = dplyr::filter(labs_d, !up), aes(x, yl, label = lab), colour = dplyr::filter(labs_d, !up)$colour,
               vjust = 1, size = 13.5, fontface = "bold", lineheight = 0.85) +
-    geom_text(data = data.frame(x = xpos, lab = col_labs), aes(x, -0.3, label = lab),
+    geom_text(data = data.frame(x = xpos, lab = ladder_labels[-1]), aes(x, -0.3, label = lab),
               vjust = 1, size = 15.5, fontface = "bold", lineheight = 0.9)
   # the reassignment by design: τ² and the intercept piece fall, the slope piece is new
   sx <- xpos[["Species-specific responses"]]
@@ -189,7 +186,7 @@ ladder_change <- function(het, file) {
   if (nrow(slope) && slope$v > 0) {
     arrows <- dplyr::bind_rows(lapply(c("tau2", "H_intercept"), function(cmp) {
       a <- at(cmp); if (!nrow(a) || a$v >= 0) return(NULL)
-      data.frame(x = sx + 0.36, y = a$y1, xend = sx + 0.36, yend = slope$y1, w = if (cmp == "tau2") 2.4 else 1.3)
+      data.frame(x = sx + 0.54, y = a$y1, xend = sx + 0.54, yend = slope$y1, w = if (cmp == "tau2") 2.4 else 1.3)
     }))
     if (!is.null(arrows) && nrow(arrows))
       p <- p + geom_curve(data = arrows, aes(x = x, y = y, xend = xend, yend = yend, linewidth = I(w)), colour = purple,
@@ -205,7 +202,7 @@ ladder_change <- function(het, file) {
              label = "change against the model compared with (×10⁻⁴); green: reduced, rust: increased") +
     coord_cartesian(xlim = c(x_tag - 0.05, x_right + 0.05), ylim = c(-1.45, max(bands$base) + band_h + 1.05), expand = FALSE, clip = "off") +
     theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA), plot.margin = margin(20, 30, 20, 20))
-  ggsave(file, p, width = 34, height = 48, dpi = 100, bg = "white")
+  ggsave(file, p, width = 48, height = 49, dpi = 100, bg = "white")
   invisible(ch)
 }
 
