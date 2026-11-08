@@ -128,11 +128,13 @@ Every held-out species had training data: each ladder species occurs in at least
 
 ## Figures
 
-![Fig 6, performance against the Null](../figures/main/fig6.png)
+![Fig 6, R² against the Null and raw heterogeneity](../figures/main/fig6.png)
 
-Fig 6. Each half violin is the 16 scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all 20 gradients, the same 512 rows for every model), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, so Null is 0 and not drawn. Dashed lines from the Species-specific responses column on: its explanatory (grey) and predictive (blue) medians. Experimental warming and Background climate have no Spearman or skill: one prediction per experiment cannot order species within a gradient. The variance components are Fig 7 and Fig S12 (step 05).
+Fig 6 a) and Fig S12. Each half violin is the 16 scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all 20 gradients, the same 512 rows for every model), blue = predictive (the fold that left the gradient out); points and numbers = medians. R² = 1 − error(level) / error(Null) on that gradient, so Null is 0 and not drawn. Dashed lines from the Species-specific responses column on: its explanatory (grey) and predictive (blue) medians. Experimental warming and Background climate have no Spearman or skill: one prediction per experiment cannot order species within a gradient. Fig 6 b) is the raw heterogeneity of each model fitted in step 05 (×10⁻⁴); its change at each comparison is Fig S13 (step 05).
 
-![Fig S14, per-gradient view](../figures/appendix/figS14.png)
+![Fig S12, Spearman and loser/winner skill](../figures/appendix/figS12.png)
+
+![Fig S15, per-gradient view](../figures/appendix/figS15.png)
 
 ## Warnings captured
 
@@ -145,4 +147,4 @@ Fig 6. Each half violin is the 16 scored gradients (at least 5 effects); grey = 
 - A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (Bills, 2 Nov); PLAN.md names no fallback.
 - Property folds warm-started from the same fold's Species-specific responses fit and fitted with optim BFGS (Bills, 7 Nov, as step 05); a failing one falls back to the 2 Nov rule.
 - Spearman is also NA where every prediction in the gradient is the same (MILESTONES), beside PLAN.md's fewer than 5 effects.
-- Fig 6 is written to `figures/main/fig6.png`, the per-gradient view to `figures/appendix/figS14.png`; the prediction rows widen their y range to the data.
+- Fig 6 (R², raw heterogeneity) is written to `figures/main/fig6.png`, Spearman and skill to `figures/appendix/figS12.png`, the per-gradient view to `figures/appendix/figS15.png`; the prediction rows widen their y range to the data.

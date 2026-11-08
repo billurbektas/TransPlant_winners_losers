@@ -1,11 +1,11 @@
 # Step 07d: the colonizer ladder, predicted (Step D route 2, colonizers).
 #
 # PLAN.md: The colonizer story, "The model ladder for arrival"; Step D Route 2 as
-#   step 06; Fig S18 (colonizer performance) and Fig S21 (per gradient).
-# Reads:  data/derived/07c_ladder_fit/ladder_rows.rds, models/<slug>.rds
+#   step 06; Fig S19 (colonizer R², raw heterogeneity, Spearman) and Fig S21 (per gradient).
+# Reads:  data/derived/07c_ladder_fit/ladder_rows.rds, models/<slug>.rds, heterogeneity.csv
 # Writes: data/derived/07d_ladder_predict/folds/<level>_<gradient_id>.rds,
 #         pred_metrics.csv, fit_metrics.csv, summary_metrics.csv;
-#         figures/appendix/figS18.png, figS21.png; reports/07d_ladder_predict.md
+#         figures/appendix/figS19.png, figS21.png; reports/07d_ladder_predict.md
 # Checks: 110 ladder rows (07c); 8 scored gradients (at least 5 effects), one fold
 #         each per fitted level; the held-out gradient absent from every training
 #         set; species deviations only for species seen in training; Null R²
@@ -145,11 +145,13 @@ summary_metrics <- bind_rows(lapply(c("r2", "spearman"), function(k) {
 })) |> arrange(match(level, all_levels), metric)
 write.csv(summary_metrics, file.path(out_dir, "summary_metrics.csv"), row.names = FALSE)
 
-# ---- Fig S18: colonizer performance (as step 06's Fig 6, without the skill row) ----------
+# ---- Fig S19: a) R², b) raw heterogeneity of the 07c fits, c) Spearman (Bills, 8 Nov: as Fig 6, no skill row) --
 grads <- bind_rows(mutate(trim(fit_metrics), type = "fit"), mutate(trim(pred_metrics), type = "pred")) |>
   filter(level %in% levels_fit$level, level != "null") |> tidyr::pivot_longer(c(r2, spearman), names_to = "metric") |>
   transmute(column = level_label[level], metric = c(r2 = "R2", spearman = "Spearman")[metric], type, value) |> filter(!is.na(value))
-ladder_performance(grads, "figures/appendix/figS18.png", skill = FALSE)
+het07c <- read.csv("data/derived/07c_ladder_fit/heterogeneity.csv") |> mutate(column = model)
+stopifnot(nrow(het07c) == 11, setequal(het07c$column, ladder_columns))
+ladder_performance(grads, "figures/appendix/figS19.png", c("R2", "het", "Spearman"), het = het07c, height = 40)
 
 # ---- Fig S21 (colonizers): every metric x level x gradient, as step 06 ----------------------
 grad_info <- filter(rows, gradient_id %in% scored) |> summarise(T_dest = mean(T), .by = gradient_id) |> arrange(T_dest)
@@ -198,15 +200,16 @@ report <- c(
                                   paste(sprintf("%s, %s at %s (%s)", level_display[outliers$level], outliers$version, outliers$gradient_id, sprintf("%.1f", outliers$r2)), collapse = "; "), ".")
       else "No R² below −100.",
   "", paste0("Every held-out species had training data: ", all(folds$species_known), "."),
-  "", "## Figures", "", "![Fig S18, colonizer performance](../figures/appendix/figS18.png)", "",
-  paste0("Fig S18 as Fig 6: half violins of the ", length(scored), " scored gradients, explanatory (grey) beside predictive (blue), medians written in; ",
-         "R² against the Null on that gradient. No skill row. Experimental warming and Background climate have no Spearman (one prediction per experiment)."), "",
+  "", "## Figures", "", "![Fig S19, colonizer performance and raw heterogeneity](../figures/appendix/figS19.png)", "",
+  paste0("Fig S19 a) and c) as Fig 6 a) and Fig S12 a): half violins of the ", length(scored), " scored gradients, explanatory (grey) beside predictive (blue), medians written in; ",
+         "R² against the Null on that gradient. No skill row. Experimental warming and Background climate have no Spearman (one prediction per experiment). ",
+         "Fig S19 b) is the raw heterogeneity of each model fitted in step 07c (×10⁻⁴), as Fig 6 b)."), "",
   "![Fig S21, colonizers per gradient](../figures/appendix/figS21.png)",
   "", "## Warnings captured", "", { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   "- The colonizer ladder predicted on the residents' reduction (Bills, 2 Nov).",
   "- Property folds warm-started from the same fold's Species-specific responses fit with optim BFGS (Bills, 7 Nov, as steps 05 and 06).",
   "- An R² below −100 is taken out of the R² row and the medians and listed (Bills, 2 Nov).",
-  "- Without abundance (Bills, 7 Nov): Fig S18 shows the performance rows only; the colonizer variance components are Figs S19 and S20 (step 07c).")
+  "- Without abundance (Bills, 7 and 8 Nov): Fig S19 shows R², the raw heterogeneity of step 07c and Spearman; the change in unexplained variation is Fig S20 (step 07c).")
 writeLines(report, "reports/07d_ladder_predict.md")
 message("Step 07d written: ", nrow(fold_summary), " folds, ", nrow(failed), " failed")

@@ -12,8 +12,8 @@
 #         data/derived/04_classification/species_summary.csv (Step C spread)
 # Writes: data/derived/05_ladder_fit/models/<rowset>/<model>.rds,
 #         heterogeneity.csv, weights.csv, coefficients.csv, tableS5.csv,
-#         tableS6.csv, variance_change.csv; figures/main/fig7.png,
-#         figures/appendix/figS12.png, figS13.png; reports/05_ladder_fit.md
+#         tableS6.csv, variance_change.csv; figures/appendix/figS13.png,
+#         figS14.png; reports/05_ladder_fit.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients): residents in at least 3 gradients that carry every
 #         property; every property rowset identical to all;
@@ -33,8 +33,8 @@
 # lacking a property (Carex norvegica, Veronica serpyllifolia, Bistorta
 # macrophylla) leave the whole ladder, so every model is fitted on the same rows;
 # step 02's standardisation is kept; the GEN timing run is not repeated; 7 cores.
-# Fig 6 (performance) is drawn by step 06; Fig 7 (change in unexplained variation) and Fig S12
-# (raw heterogeneity) here (Bills, 7 Nov); the fitted surfaces are not drawn (Bills, 2 Nov).
+# Fig 6 (R² and raw heterogeneity) is drawn by step 06 from heterogeneity.csv; Fig S13 (change
+# in unexplained variation) here (Bills, 7 and 8 Nov); the fitted surfaces are not drawn (Bills, 2 Nov).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R"); source("R/cache.R"); source("R/term_labels.R")
@@ -199,7 +199,7 @@ stopifnot(var_mu > 0, all(filter(fitted, model == "Null")$sigma2_species > 1e-8)
 slope_rows <- filter(fitted, struct == "DIAG")
 stopifnot(nrow(slope_rows) == 8, all(vapply(fits, function(f) !f$slopes || identical(f$m$struct, slope_struct), logical(1))))
 
-# ---- Fixed effects, model-based (REML Wald) intervals (Table S6, Fig S12) ------
+# ---- Fixed effects, model-based (REML Wald) intervals (Table S6, Fig S14) ------
 # model-based rather than CR1 clustered on experiment (Bills, 2 Nov)
 coefs <- bind_rows(lapply(fits, function(f) {
   if (f$slug == "null") return(NULL)
@@ -230,21 +230,20 @@ weights_table <- bind_rows(
   bind_rows(lapply(c("Null", "Experimental warming", "Background climate", "Species-specific responses"), function(mo) {
     x <- filter(w_all, model == mo); weight_summary(x$weight, x$A0_origin, x$experiment_id, mo) })))
 
-# ---- Fig 7 and Fig S12: change in, and raw, unexplained variation (Bills, 7 Nov) --
+# ---- Fig S13: change in unexplained variation (Bills, 7 Nov; appendix since 8 Nov) --
 # every rowset holds the same rows, so the ladder models come from `all` and each
 # property model from its own rowset
 het_fig <- bind_rows(filter(ladder, rowset == "all", slug %in% c(names(floor_models), "species")),
                      filter(ladder, fitted_on == rowset, slug %in% names(prop_vars))) |>
   mutate(column = model)
 stopifnot(nrow(het_fig) == 11, setequal(het_fig$column, ladder_columns))
-change <- ladder_change(het_fig, "figures/main/fig7.png")
+change <- ladder_change(het_fig, "figures/appendix/figS13.png")
 stopifnot(nrow(change) == 10 * 5) # 10 comparisons x 5 kinds of unexplained variation
 write.csv(change, file.path(out_dir, "variance_change.csv"), row.names = FALSE)
-ladder_heterogeneity(het_fig, "figures/appendix/figS12.png")
 
-# ---- Fig S13: coefficients with model-based intervals -----------------------
+# ---- Fig S14: coefficients with model-based intervals -----------------------
 coef_panel <- function(x, tag, ttl) {
-  x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = term_label(term, "residents"), term = factor(term, levels = rev(unique(term)))) # words, as Fig 7
+  x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = term_label(term, "residents"), term = factor(term, levels = rev(unique(term)))) # words, as Fig 7 (step 10)
   ggplot(x, aes(estimate, term)) + geom_vline(xintercept = 0, colour = "grey60") +
     geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0, linewidth = 0.9) +
     geom_point(aes(fill = excl), shape = 21, size = 4, stroke = 1) +
@@ -259,7 +258,7 @@ prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model
 s4c <- coef_panel(prop_coefs, "b)", "Property terms, each from its own model (background climate + property, species slopes kept)") +
   facet_wrap(~ property, scales = "free", ncol = 4) +
   scale_x_continuous(n.breaks = 3, guide = guide_axis(check.overlap = TRUE)) # word labels narrow the facets
-ggsave("figures/appendix/figS13.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, patchwork::plot_spacer(), widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)), # colonizers: Fig S17
+ggsave("figures/appendix/figS14.png", patchwork::wrap_plots(patchwork::wrap_plots(s4a, patchwork::plot_spacer(), widths = c(1.4, 1)), s4c, ncol = 1, heights = c(1, 2)), # colonizers: Fig S18
        width = 20, height = 22, dpi = 100, bg = "white")
 
 
@@ -289,7 +288,7 @@ fit_code <- c("```r",
   paste0("# Null ~ 1; Experimental warming ", deparse(f_warm), "; Background climate ", deparse(f_env)),
   paste0("# Species-specific responses ", deparse(f_env), ", with re_slopes"),
   "# property models: Background climate + X + X:W + X:T + X:P + X:TP per variable, with re_slopes",
-  "coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S13", "```")
+  "coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S14", "```")
 change_tab <- change |> mutate(component = c(total = "total", sigma2_experiment = "σ²_experiment", tau2 = "τ²",
                                              H_intercept = "H intercept", H_slope = "H slope")[component]) |>
   transmute(model = column, `compared with` = compared_with, component, `change (×10⁻⁴)` = sprintf("%+.3f", 1e4 * change),
@@ -333,13 +332,12 @@ report <- c(
              "Subspecies niche check (26 Oct): neither Solidago virgaurea nor Ranunculus acris is a resident at CH_Lavey under the original pools, so there is nothing to refit."),
   "", "## Effective weights (all rows)", "", md_table(weights_table),
   "", "The low-A0_origin half is the effects at or below the median A0_origin (abundance is still computed, though no model uses it). Species-specific responses weights include the slope variance at each effect's climate.",
-  "", "## Change in unexplained variation at each comparison (Fig 7)", "",
+  "", "## Change in unexplained variation at each comparison (Fig S13)", "",
   "Each model against the one it adds to (Table 2). `new`: the compared model has no such component; `zero`: below 1e-10 in both.", "",
   md_table(change_tab),
   "", "## Figures", "",
-  "![Fig 7, change in unexplained variation](../figures/main/fig7.png)", "",
-  "![Fig S12, raw heterogeneity](../figures/appendix/figS12.png)", "",
-  "![Fig S13, coefficients](../figures/appendix/figS13.png)", "", "Fig 6 (performance) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).",
+  "![Fig S13, change in unexplained variation](../figures/appendix/figS13.png)", "",
+  "![Fig S14, coefficients](../figures/appendix/figS14.png)", "", "Fig 6 (R² and the raw heterogeneity of this step) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).",
   "", "## Warnings captured", "",
   { w <- unique(c(unlist(lapply(fits, function(f) paste0(f$rowset, " / ", f$model, ": ", f$warnings[[1]])[length(f$warnings[[1]]) > 0])), warns))
     if (length(w)) paste("-", w) else "None." },

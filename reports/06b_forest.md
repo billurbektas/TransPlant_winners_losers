@@ -105,7 +105,7 @@ Every forest refitted with a second seed: the largest change in a per-gradient v
 
 ## Figures
 
-![Fig S15, forest beside meta-regression](../figures/appendix/figS15.png)
+![Fig S16, forest beside meta-regression](../figures/appendix/figS16.png)
 
 ## Warnings captured
 
@@ -117,4 +117,4 @@ None.
 - Held-out values only, no fit values (Bills, 2 Nov; PLAN.md edited).
 - No partial-dependence plots (Bills, 2 Nov; PLAN.md edited).
 - Forests also for the seven property + species levels (Bills, 2 Nov).
-- The figure is appendix Fig S15, written to `figures/appendix/figS15.png`.
+- The figure is appendix Fig S16 (8 Nov numbering), written to `figures/appendix/figS16.png`.

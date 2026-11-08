@@ -1,5 +1,5 @@
 # Display names for the ladder's models and fixed-effect terms, shared by the coefficient figures
-# (steps 05 and 07c) and Tables S5 and S6 (step 10), in the words Fig 8 uses. The fitted term keys
+# (steps 05 and 07c) and Tables S5 and S6 (step 10), in the words Fig 7 uses. The fitted term keys
 # ("W:height_z") stay as they are in data/derived/; only what a reader sees is renamed (Bills, 4 Nov).
 # Since the ladder without abundance (Bills, 7 Nov) the model names are their display names.
 

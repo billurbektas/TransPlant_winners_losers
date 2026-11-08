@@ -4,10 +4,11 @@
 #          gradient with the experiment term in the model".
 # Reads:  data/derived/03b_strength_y3/strength_df.rds (strength from year 3);
 #         data/derived/05_ladder_fit/models/<rowset>/<model>.rds (fit metrics);
+#         data/derived/05_ladder_fit/heterogeneity.csv (Fig 6 b);
 # Writes: data/derived/06_ladder_predict/folds/<level>_<gradient_id>.rds,
 #         pred_metrics.csv, fit_metrics.csv, summary_metrics.csv,
-#         fold_summary.csv; figures/main/fig6.png (performance, main Fig 6),
-#         figures/appendix/figS14.png; reports/06_ladder_predict.md
+#         fold_summary.csv; figures/main/fig6.png (R² and raw heterogeneity),
+#         figures/appendix/figS12.png (Spearman and skill), figS15.png; reports/06_ladder_predict.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients) as in step 05, every rowset equal to them; 16 scored
 #         gradients (at least 5 effects), one fold each per fitted level; every
@@ -35,6 +36,8 @@
 # Without abundance (Bills, 7 Nov): levels Null, Experimental warming, Background
 # climate, Species-specific responses and one per property on Background climate;
 # Fig 6 shows only the performance rows (the variance rows are Fig 7, step 05).
+# 8 Nov (Bills): Fig 6 is a) R² and b) the raw heterogeneity of step 05; Spearman and
+# skill are appendix Fig S12; the change in unexplained variation is Fig S13 (step 05).
 # Warm start (Bills, 7 Nov), as step 05: every property fold starts its variance
 # components at those of the same fold's Species-specific responses fit and is fitted
 # with optim BFGS; a property fold that fails then falls back to the 2 Nov rule
@@ -258,13 +261,20 @@ fig6_grad <- bind_rows(mutate(fit_metrics, type = "fit"), mutate(pred_metrics, t
   tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
   transmute(column = level_label[level], metric = met_name[metric], type, value) |> filter(!is.na(value))
 # no caption on the figure (Bills, 2 Nov): the report says what each row shows
-ladder_performance(fig6_grad, "figures/main/fig6.png") # main Fig 6 (Bills, 7 Nov: performance only)
+# Fig 6 b: the step 05 variance components, the ladder models from `all` and each property
+# model from its own rowset (every rowset holds the same rows), as step 05 draws Fig S13
+het05 <- read.csv("data/derived/05_ladder_fit/heterogeneity.csv")
+het_fig <- bind_rows(filter(het05, rowset == "all", model %in% ladder_columns[1:4]),
+                     filter(het05, fitted_on == rowset, model %in% ladder_columns[5:11])) |> mutate(column = model)
+stopifnot(nrow(het_fig) == 11, setequal(het_fig$column, ladder_columns))
+ladder_performance(fig6_grad, "figures/main/fig6.png", c("R2", "het"), het = het_fig, height = 38) # main Fig 6 (Bills, 8 Nov)
+ladder_performance(fig6_grad, "figures/appendix/figS12.png", c("Spearman", "Skill"), height = 24) # Fig S12 (Bills, 8 Nov)
 
-# Fig S14 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
+# Fig S15 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
 grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_id) |>
   summarise(T_dest = mean(T), spread = sd(strength), .groups = "drop") |> arrange(T_dest)
 
-# Fig S14: the complete per-gradient view, every metric x level, in sample and held out
+# Fig S15: the complete per-gradient view, every metric x level, in sample and held out
 s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics, version = "Held out")) |>
   tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
   mutate(gradient_id = factor(gradient_id, levels = rev(grad_info$gradient_id)),
@@ -283,7 +293,7 @@ s7_panel <- function(k, title, tags) lapply(seq_along(levels(s7$version)), funct
 })
 figS7 <- patchwork::wrap_plots(c(s7_panel("r2", "R² against Null", c("a)", "b)")), s7_panel("spearman", "Spearman ρ", c("c)", "d)")),
                                  s7_panel("skill", "Loser/winner skill", c("e)", "f)"))), ncol = 2)
-ggsave("figures/appendix/figS14.png", figS7, width = 46, height = 48, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS15.png", figS7, width = 46, height = 48, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
@@ -333,13 +343,15 @@ report <- c(
          ". The P BLUPs are about zero because the P slope variance sits at the boundary (step 05): a BLUP is its variance times ",
          "the species' weighted residual, so in practice the deviation is the species' intercept and its W, T and TP slopes."),
   "", paste0("Every held-out species had training data: each ladder species occurs in at least 3 gradients, so at least 2 remain in training (checked)."),
-  "", "## Figures", "", "![Fig 6, performance against the Null](../figures/main/fig6.png)", "",
-  paste0("Fig 6. Each half violin is the ", length(scored), " scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all ", length(gradients),
+  "", "## Figures", "", "![Fig 6, R² against the Null and raw heterogeneity](../figures/main/fig6.png)", "",
+  paste0("Fig 6 a) and Fig S12. Each half violin is the ", length(scored), " scored gradients (at least 5 effects); grey = explanatory (step 05 fit on all ", length(gradients),
          " gradients, the same ", nrow(strength_df), " rows for every model), blue = predictive (the fold that left the gradient out); points and numbers = medians. ",
          "R² = 1 − error(level) / error(Null) on that gradient, so Null is 0 and not drawn. Dashed lines from the Species-specific responses column on: ",
          "its explanatory (grey) and predictive (blue) medians. Experimental warming and Background climate have no Spearman or skill: one prediction ",
-         "per experiment cannot order species within a gradient. The variance components are Fig 7 and Fig S12 (step 05)."), "",
-  "![Fig S14, per-gradient view](../figures/appendix/figS14.png)",
+         "per experiment cannot order species within a gradient. Fig 6 b) is the raw heterogeneity of each model fitted in step 05 (×10⁻⁴); ",
+         "its change at each comparison is Fig S13 (step 05)."), "",
+  "![Fig S12, Spearman and loser/winner skill](../figures/appendix/figS12.png)", "",
+  "![Fig S15, per-gradient view](../figures/appendix/figS15.png)",
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
@@ -348,7 +360,7 @@ report <- c(
   "- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (Bills, 2 Nov); PLAN.md names no fallback.",
   "- Property folds warm-started from the same fold's Species-specific responses fit and fitted with optim BFGS (Bills, 7 Nov, as step 05); a failing one falls back to the 2 Nov rule.",
   "- Spearman is also NA where every prediction in the gradient is the same (MILESTONES), beside PLAN.md's fewer than 5 effects.",
-  "- Fig 6 is written to `figures/main/fig6.png`, the per-gradient view to `figures/appendix/figS14.png`; the prediction rows widen their y range to the data.")
+  "- Fig 6 (R², raw heterogeneity) is written to `figures/main/fig6.png`, Spearman and skill to `figures/appendix/figS12.png`, the per-gradient view to `figures/appendix/figS15.png`; the prediction rows widen their y range to the data.")
 writeLines(report, "reports/06_ladder_predict.md")
 message("Step 06 written: ", nrow(fold_summary), " folds, ", nrow(failed), " failed; ",
         sprintf("%.0f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

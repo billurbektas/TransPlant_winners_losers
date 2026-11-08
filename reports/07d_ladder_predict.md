@@ -74,9 +74,9 @@ Every held-out species had training data: TRUE.
 
 ## Figures
 
-![Fig S18, colonizer performance](../figures/appendix/figS18.png)
+![Fig S19, colonizer performance and raw heterogeneity](../figures/appendix/figS19.png)
 
-Fig S18 as Fig 6: half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No skill row. Experimental warming and Background climate have no Spearman (one prediction per experiment).
+Fig S19 a) and c) as Fig 6 a) and Fig S12 a): half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No skill row. Experimental warming and Background climate have no Spearman (one prediction per experiment). Fig S19 b) is the raw heterogeneity of each model fitted in step 07c (×10⁻⁴), as Fig 6 b).
 
 ![Fig S21, colonizers per gradient](../figures/appendix/figS21.png)
 
@@ -273,4 +273,4 @@ Fig S18 as Fig 6: half violins of the 8 scored gradients, explanatory (grey) bes
 - The colonizer ladder predicted on the residents' reduction (Bills, 2 Nov).
 - Property folds warm-started from the same fold's Species-specific responses fit with optim BFGS (Bills, 7 Nov, as steps 05 and 06).
 - An R² below −100 is taken out of the R² row and the medians and listed (Bills, 2 Nov).
-- Without abundance (Bills, 7 Nov): Fig S18 shows the performance rows only; the colonizer variance components are Figs S19 and S20 (step 07c).
+- Without abundance (Bills, 7 and 8 Nov): Fig S19 shows R², the raw heterogeneity of step 07c and Spearman; the change in unexplained variation is Fig S20 (step 07c).

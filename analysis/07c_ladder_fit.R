@@ -7,8 +7,8 @@
 #         phylogeny_axes.rds, niche_optima.rds
 # Writes: data/derived/07c_ladder_fit/ladder_rows.rds, models/<slug>.rds,
 #         heterogeneity.csv, coefficients.csv, variance_change.csv;
-#         figures/appendix/figS17.png (coefficients), figS19.png (change in
-#         unexplained variation), figS20.png (raw heterogeneity); reports/07c_ladder_fit.md
+#         figures/appendix/figS18.png (coefficients), figS20.png (change in
+#         unexplained variation); reports/07c_ladder_fit.md
 # Checks: 379 colonizer effects in; ladder rows 110 effects, 27 species, 24
 #         experiments, 18 gradients; no A0 term in any model; 11 fits; random
 #         structure exactly re_base / re_slopes; property terms exactly X, X:W, X:T,
@@ -144,19 +144,18 @@ climate_change <- c(`Experimental warming` = tau2(fits$warming$m) / tau2(fits$nu
 prop_check <- bind_rows(lapply(names(prop_vars), function(p) { m4 <- fits[[p]]$m; m3 <- fits$species$m; denom <- tau2(m3) + sigma2_exp(m3)
   tibble::tibble(property = prop_label[[p]], move_tau2 = (tau2(m4) - tau2(m3)) / denom, move_sigma2_experiment = (sigma2_exp(m4) - sigma2_exp(m3)) / denom) }))
 
-# ---- Fig S19 and Fig S20: change in, and raw, unexplained variation (as Fig 7 and Fig S12) --
+# ---- Fig S20: change in unexplained variation (as Fig S13); the raw heterogeneity is Fig S19 b (step 07d) --
 het_fig <- mutate(ladder, column = model)
-change <- ladder_change(het_fig, "figures/appendix/figS19.png")
+change <- ladder_change(het_fig, "figures/appendix/figS20.png")
 stopifnot(nrow(change) == 10 * 5) # 10 comparisons x 5 kinds of unexplained variation
 write.csv(change, file.path(out_dir, "variance_change.csv"), row.names = FALSE)
-ladder_heterogeneity(het_fig, "figures/appendix/figS20.png")
 
-# ---- Fixed effects, model-based intervals (Fig S17, as step 05's Fig S13) ---------------
+# ---- Fixed effects, model-based intervals (Fig S18, as step 05's Fig S14) ---------------
 coefs <- bind_rows(lapply(fits[-1], function(f) { s <- coef(summary(f$m))
   tibble::tibble(model = f$model, term = rownames(s), estimate = s$estimate, se = s$se, ci_lower = s$ci.lb, ci_upper = s$ci.ub, pval = s$pval) }))
 write.csv(coefs, file.path(out_dir, "coefficients.csv"), row.names = FALSE)
 coef_panel <- function(x, tag, ttl) { # as analysis/05_ladder_fit.R
-  x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = term_label(term, "colonizers"), term = factor(term, levels = rev(unique(term)))) # words, as Fig 7
+  x <- mutate(x, excl = ci_lower > 0 | ci_upper < 0, term = term_label(term, "colonizers"), term = factor(term, levels = rev(unique(term)))) # words, as Fig 7 (step 10)
   ggplot(x, aes(estimate, term)) + geom_vline(xintercept = 0, colour = "grey60") +
     geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0, linewidth = 0.9) +
     geom_point(aes(fill = excl), shape = 21, size = 4, stroke = 1) +
@@ -170,7 +169,7 @@ prop_coefs <- bind_rows(lapply(names(prop_vars), function(p) filter(coefs, model
   mutate(property = prop_label[[p]])))
 s4c <- coef_panel(prop_coefs, "b)", "Colonizers: property terms, each from its own model (background climate + property, species slopes kept)") + facet_wrap(~ property, scales = "free", ncol = 4) +
   scale_x_continuous(n.breaks = 3, guide = guide_axis(check.overlap = TRUE)) # word labels narrow the facets
-ggsave("figures/appendix/figS17.png", patchwork::wrap_plots(s4b, s4c, ncol = 1, heights = c(1, 2)), width = 20, height = 20, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS18.png", patchwork::wrap_plots(s4b, s4c, ncol = 1, heights = c(1, 2)), width = 20, height = 20, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------------------
 e4 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", 1e4 * x))
@@ -202,18 +201,18 @@ report <- c(
              ". On ", nrow(rows), " effects the variance components are not pinned down well enough for that check to hold; they are reported, not enforced (Bills, 2 Nov)."),
   "", "## Coefficients whose 95% interval excludes zero", "",
   if (nrow(excl)) md_table(transmute(excl, model, term, estimate = sprintf("%.4f", estimate), ci = sprintf("%.4f to %.4f", ci_lower, ci_upper))) else "None.",
-  "", "## Change in unexplained variation at each comparison (Fig S19)", "",
+  "", "## Change in unexplained variation at each comparison (Fig S20)", "",
   md_table(transmute(change, model = column, `compared with` = compared_with, component,
                      `change (×10⁻⁴)` = sprintf("%+.3f", 1e4 * change), `%` = ifelse(state == "change", sprintf("%+.1f", percent), state))),
-  "", "## Figures", "", "![Fig S17, colonizer coefficients](../figures/appendix/figS17.png)", "",
-  "![Fig S19, colonizer change in unexplained variation](../figures/appendix/figS19.png)", "",
-  "![Fig S20, colonizer raw heterogeneity](../figures/appendix/figS20.png)",
+  "", "## Figures", "", "![Fig S18, colonizer coefficients](../figures/appendix/figS18.png)", "",
+  "![Fig S20, colonizer change in unexplained variation](../figures/appendix/figS20.png)", "",
+  "The raw heterogeneity of these fits is Fig S19 b) (step 07d).",
   "", "## Warnings captured", "", { w <- unique(c(unlist(lapply(fits, function(f) if (length(f$warnings)) paste0(f$model, ": ", f$warnings))), warns))
     if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
   "- The colonizer ladder on the residents' reduction and models (Bills, 2 Nov); properties on the residents' scale.",
   "- Property models warm-started from Species-specific responses with optim BFGS (Bills, 7 Nov, as step 05); the optimizer column above says which fits needed a fallback.",
   "- Step 05's tau2 and property checks are reported, not enforced (Bills, 2 Nov: run without stopping).",
-  "- The colonizer coefficients are their own appendix figure (Fig S17), beside the residents' Fig S13; Figs S19 and S20 mirror Fig 7 and Fig S12 (Bills, 7 Nov).")
+  "- The colonizer coefficients are their own appendix figure (Fig S18), beside the residents' Fig S14; Fig S20 mirrors Fig S13 (Bills, 7 Nov; 8 Nov numbering).")
 writeLines(report, "reports/07c_ladder_fit.md")
 message("Step 07c written: ", nrow(rows), " effects, ", length(fits), " fits")

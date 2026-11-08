@@ -17,7 +17,7 @@ rma.mv(yi = strength, V = strength_se^2, mods = <formula>, random = <re_base or 
 # Null ~ 1; Experimental warming ~W; Background climate ~W * T * P
 # Species-specific responses ~W * T * P, with re_slopes
 # property models: Background climate + X + X:W + X:T + X:P + X:TP per variable, with re_slopes
-coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S13
+coef(summary(m))   # model-based (REML Wald) intervals for Table S6 and Fig S14
 ```
 
 ## Counts per rowset
@@ -129,7 +129,7 @@ Each property model against Species-specific responses on the same rows, as a sh
 
 The low-A0_origin half is the effects at or below the median A0_origin (abundance is still computed, though no model uses it). Species-specific responses weights include the slope variance at each effect's climate.
 
-## Change in unexplained variation at each comparison (Fig 7)
+## Change in unexplained variation at each comparison (Fig S13)
 
 Each model against the one it adds to (Table 2). `new`: the compared model has no such component; `zero`: below 1e-10 in both.
 
@@ -188,13 +188,11 @@ Each model against the one it adds to (Table 2). `new`: the compared model has n
 
 ## Figures
 
-![Fig 7, change in unexplained variation](../figures/main/fig7.png)
+![Fig S13, change in unexplained variation](../figures/appendix/figS13.png)
 
-![Fig S12, raw heterogeneity](../figures/appendix/figS12.png)
+![Fig S14, coefficients](../figures/appendix/figS14.png)
 
-![Fig S13, coefficients](../figures/appendix/figS13.png)
-
-Fig 6 (performance) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
+Fig 6 (R² and the raw heterogeneity of this step) is drawn by step 06; the fitted surfaces are not drawn (Bills, 2 Nov).
 
 ## Warnings captured
 

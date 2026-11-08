@@ -65,7 +65,7 @@ Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components
 | Graminoid | W:graminoid | -0.0050 | -0.0096 to -0.0003 |
 | Graminoid | T:graminoid | 0.0108 | 0.0009 to 0.0207 |
 
-## Change in unexplained variation at each comparison (Fig S19)
+## Change in unexplained variation at each comparison (Fig S20)
 
 | model | compared with | component | change (×10⁻⁴) | % |
 | --- | --- | --- | --- | --- |
@@ -122,11 +122,11 @@ Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components
 
 ## Figures
 
-![Fig S17, colonizer coefficients](../figures/appendix/figS17.png)
+![Fig S18, colonizer coefficients](../figures/appendix/figS18.png)
 
-![Fig S19, colonizer change in unexplained variation](../figures/appendix/figS19.png)
+![Fig S20, colonizer change in unexplained variation](../figures/appendix/figS20.png)
 
-![Fig S20, colonizer raw heterogeneity](../figures/appendix/figS20.png)
+The raw heterogeneity of these fits is Fig S19 b) (step 07d).
 
 ## Warnings captured
 
@@ -164,4 +164,4 @@ Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components
 - The colonizer ladder on the residents' reduction and models (Bills, 2 Nov); properties on the residents' scale.
 - Property models warm-started from Species-specific responses with optim BFGS (Bills, 7 Nov, as step 05); the optimizer column above says which fits needed a fallback.
 - Step 05's tau2 and property checks are reported, not enforced (Bills, 2 Nov: run without stopping).
-- The colonizer coefficients are their own appendix figure (Fig S17), beside the residents' Fig S13; Figs S19 and S20 mirror Fig 7 and Fig S12 (Bills, 7 Nov).
+- The colonizer coefficients are their own appendix figure (Fig S18), beside the residents' Fig S14; Fig S20 mirrors Fig S13 (Bills, 7 Nov; 8 Nov numbering).

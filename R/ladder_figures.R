@@ -1,10 +1,10 @@
-# The ladder figures (Bills, 7 Nov: the ladder without abundance, the old Fig 6 split in two).
-#   ladder_performance()   Fig 6 (residents, step 06) and Fig S18 (colonizers, step 07d):
-#                          R², Spearman and loser/winner skill, explanatory beside predictive
-#   ladder_change()        Fig 7 (step 05) and Fig S19 (step 07c): the change in each
+# The ladder figures (Bills, 7 Nov: the ladder without abundance; 8 Nov: Fig 6 is R² beside
+# the raw heterogeneity, Spearman and skill and the change in unexplained variation go to the appendix).
+#   ladder_performance()   Fig 6 (residents, step 06: a) R², b) raw heterogeneity), Fig S12
+#                          (residents, step 06: a) Spearman, b) loser/winner skill) and Fig S19
+#                          (colonizers, step 07d: a) R², b) raw heterogeneity, c) Spearman)
+#   ladder_change()        Fig S13 (step 05) and Fig S20 (step 07c): the change in each
 #                          kind of unexplained variation at each comparison of Table 2
-#   ladder_heterogeneity() Fig S12 (step 05) and Fig S20 (step 07c): the raw variance
-#                          components per model (the old Fig 6a)
 #
 # het: one row per model, `column` (one of ladder_columns), tau2, sigma2_experiment,
 #   H_intercept, H_slope (raw variances). gradients: one row per column x metric x
@@ -31,83 +31,127 @@ ladder_no_x <- function() ggplot2::theme(axis.text.x = ggplot2::element_blank(),
 ladder_x <- function() ggplot2::scale_x_continuous(limits = c(0.4, length(ladder_columns) + 0.6), breaks = seq_along(ladder_columns),
                                                    labels = ladder_labels, expand = c(0, 0))
 
-# floor (without the species), then the property models, each Species-specific responses plus
-# one property (Bills, 8 Nov: no "ceiling" bracket)
-ladder_brackets <- function() {
-  library(ggplot2)
-  n <- length(ladder_columns)
-  top_br <- data.frame(x = c(0.7, 4.7), xend = c(3.3, n + 0.3), y = 1.4,
-                       lab = c("floor: without the species", "species-specific + property (one property at a time)"))
-  sub_br <- data.frame(x = c(4.75, 7.75, 9.75, 10.75), xend = c(7.25, 9.25, 10.25, 11.25), y = 0.5,
-                       lab = c("Trait", "Growth form", "Phylogeny", "Niche"))
-  ggplot() +
-    geom_segment(data = top_br, aes(x = x, xend = xend, y = y, yend = y), colour = "grey40", linewidth = 0.9) +
-    geom_text(data = top_br, aes(x = (x + xend) / 2, y = y + 0.42, label = lab), size = 21, colour = "grey25") +
-    geom_segment(data = sub_br, aes(x = x, xend = xend, y = y, yend = y), colour = "grey60", linewidth = 0.7) +
-    geom_text(data = sub_br, aes(x = (x + xend) / 2, y = y + 0.32, label = lab), size = 18, colour = "grey35") +
-    ladder_x() + scale_y_continuous(limits = c(0.2, 2.1)) +
-    theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA))
-}
-
-# ---- Fig 6 / S18: performance against the Null ----------------------------------
+# ---- the violin panel: one metric against the Null --------------------------------
 # half violins per column, left = explanatory (in sample), right = predictive (held
 # out), medians drawn and written; R² is against the Null, so Null is not drawn;
 # the Species-specific medians run as dashed lines to the right (Bills, 2 Nov)
-ladder_performance <- function(gradients, file, skill = TRUE) {
+ladder_metric_panel <- function(gradients, key, tag, ylab, lims, last, legend) {
   `%>%` <- dplyr::`%>%`
   library(ggplot2)
-  stopifnot(all(gradients$column %in% ladder_columns))
   n <- length(ladder_columns); sp <- "Species-specific responses"; sp_x <- match(sp, ladder_columns)
-  metric_row <- function(key, tag, ylab, lims, last) {
-    g <- dplyr::filter(gradients, metric == key, !is.na(value)) %>% dplyr::mutate(x = match(column, ladder_columns))
-    s <- dplyr::summarise(g, med = median(value), .by = c(column, x, type))
-    lims <- range(c(lims, g$value), na.rm = TRUE); lims[2] <- lims[2] + 0.14 * diff(lims)
-    half <- function(v, x0, side) {
-      if (length(unique(v)) < 3) return(NULL)
-      d <- density(v, from = min(v), to = max(v), n = 128)
-      w <- 0.4 * d$y / max(d$y)
-      data.frame(x = x0 + side * c(0, w, 0), y = c(d$x[1], d$x, d$x[128]))
-    }
-    vio <- dplyr::bind_rows(lapply(split(g, list(g$x, g$type), drop = TRUE), function(z) {
-      side <- if (z$type[1] == "fit") -1 else 1
-      h <- half(z$value, z$x[1], side); if (is.null(h)) NULL else cbind(h, type = z$type[1], id = paste(z$x[1], z$type[1]))
-    }))
-    set.seed(1)
-    g$xj <- g$x + ifelse(g$type == "fit", -1, 1) * runif(nrow(g), 0.03, 0.13)
-    s$xm <- s$x + ifelse(s$type == "fit", -0.06, 0.06)
-    sw <- tidyr::pivot_wider(s, id_cols = c(column, x), names_from = type, values_from = med)
-    top <- dplyr::summarise(g, top = max(value), .by = x)
-    lab_xy <- dplyr::left_join(s, top, by = "x") %>% dplyr::mutate(xl = x + ifelse(type == "fit", -0.24, 0.24), yl = top + 0.08 * diff(lims))
-    p <- ggplot() + geom_hline(yintercept = 0, colour = "grey60")
-    ceil <- dplyr::filter(s, column == sp)
-    if (nrow(ceil)) p <- p + geom_segment(data = ceil, aes(x = sp_x - 0.45, xend = n + 0.45, y = med, yend = med, colour = type),
-                                          linetype = "dashed", linewidth = 1, show.legend = FALSE)
-    p <- p + geom_polygon(data = vio, aes(x, y, group = id, fill = type), colour = NA, alpha = 0.4) +
-      geom_point(data = g, aes(xj, value, colour = type), size = 2.4, alpha = 0.25, show.legend = FALSE) +
-      geom_segment(data = sw, aes(x = x - 0.06, xend = x + 0.06, y = fit, yend = pred), colour = "grey40", linewidth = 1.2) +
-      geom_point(data = dplyr::filter(s, type == "fit"), aes(xm, med), colour = "#7D8894", size = 6) +
-      geom_text(data = lab_xy, aes(xl, yl, label = sprintf("%.2f", round(med, 2) + 0), colour = type), size = 16.5, fontface = "bold", show.legend = FALSE) +
-      scale_colour_manual(values = c(fit = "#7D8894", pred = "#2F80D8"), guide = "none") +
-      geom_point(data = dplyr::filter(s, type == "pred"), aes(xm, med), colour = "#2F80D8", size = 6) +
-      scale_fill_manual(values = c(fit = "#C9D3DE", pred = "#8DB8EA"),
-                        labels = c(fit = "Explanatory\n(in sample)", pred = "Predictive\n(held-out gradient)"), name = NULL)
-    p + ladder_x() + scale_y_continuous(limits = lims) + labs(title = tag, x = NULL, y = ylab) + ladder_base() +
-      # the legend sits inside the Spearman panel, top left, where the first three columns have no values, so the
-      # columns get the full width (Bills, 8 Nov: larger text)
-      theme(legend.position = if (key == "Spearman") "inside" else "none", legend.position.inside = c(0.005, 0.99), legend.justification = c(0, 1),
-            legend.key.spacing.y = unit(0.4, "cm"), legend.text = element_text(size = 46), legend.key.size = unit(2.4, "cm"),
-            legend.background = element_rect(fill = alpha("white", 0.9), colour = NA)) +
-      if (last) theme(axis.text.x = element_text(size = 42, face = "bold", colour = "black")) else ladder_no_x()
+  g <- dplyr::filter(gradients, metric == key, !is.na(value)) %>% dplyr::mutate(x = match(column, ladder_columns))
+  s <- dplyr::summarise(g, med = median(value), .by = c(column, x, type))
+  lims <- range(c(lims, g$value), na.rm = TRUE); lims[2] <- lims[2] + 0.14 * diff(lims)
+  half <- function(v, x0, side) {
+    if (length(unique(v)) < 3) return(NULL)
+    d <- density(v, from = min(v), to = max(v), n = 128)
+    w <- 0.4 * d$y / max(d$y)
+    data.frame(x = x0 + side * c(0, w, 0), y = c(d$x[1], d$x, d$x[128]))
   }
-  rows <- list(ladder_brackets(), metric_row("R2", "a)", "R²", c(-0.2, 0.8), FALSE),
-               metric_row("Spearman", "b)", "Spearman ρ", c(-0.2, 0.6), !skill))
-  if (skill) rows <- c(rows, list(metric_row("Skill", "c)", "Loser/winner skill", c(-0.2, 0.6), TRUE)))
-  fig <- patchwork::wrap_plots(rows, ncol = 1, heights = c(0.55, rep(1, length(rows) - 1)))
-  ggsave(file, fig, width = 48, height = if (skill) 38 else 28, dpi = 100, bg = "white")
+  vio <- dplyr::bind_rows(lapply(split(g, list(g$x, g$type), drop = TRUE), function(z) {
+    side <- if (z$type[1] == "fit") -1 else 1
+    h <- half(z$value, z$x[1], side); if (is.null(h)) NULL else cbind(h, type = z$type[1], id = paste(z$x[1], z$type[1]))
+  }))
+  set.seed(1)
+  g$xj <- g$x + ifelse(g$type == "fit", -1, 1) * runif(nrow(g), 0.03, 0.13)
+  s$xm <- s$x + ifelse(s$type == "fit", -0.06, 0.06)
+  sw <- tidyr::pivot_wider(s, id_cols = c(column, x), names_from = type, values_from = med)
+  top <- dplyr::summarise(g, top = max(value), .by = x)
+  lab_xy <- dplyr::left_join(s, top, by = "x") %>% dplyr::mutate(xl = x + ifelse(type == "fit", -0.24, 0.24), yl = top + 0.08 * diff(lims))
+  p <- ggplot() + geom_hline(yintercept = 0, colour = "grey60")
+  ceil <- dplyr::filter(s, column == sp)
+  if (nrow(ceil)) p <- p + geom_segment(data = ceil, aes(x = sp_x - 0.45, xend = n + 0.45, y = med, yend = med, colour = type),
+                                        linetype = "dashed", linewidth = 1, show.legend = FALSE)
+  p <- p + geom_polygon(data = vio, aes(x, y, group = id, fill = type), colour = NA, alpha = 0.4) +
+    geom_point(data = g, aes(xj, value, colour = type), size = 2.4, alpha = 0.25, show.legend = FALSE) +
+    geom_segment(data = sw, aes(x = x - 0.06, xend = x + 0.06, y = fit, yend = pred), colour = "grey40", linewidth = 1.2) +
+    geom_point(data = dplyr::filter(s, type == "fit"), aes(xm, med), colour = "#7D8894", size = 6) +
+    geom_text(data = lab_xy, aes(xl, yl, label = sprintf("%.2f", round(med, 2) + 0), colour = type), size = 16.5, fontface = "bold", show.legend = FALSE) +
+    scale_colour_manual(values = c(fit = "#7D8894", pred = "#2F80D8"), guide = "none") +
+    geom_point(data = dplyr::filter(s, type == "pred"), aes(xm, med), colour = "#2F80D8", size = 6) +
+    scale_fill_manual(values = c(fit = "#C9D3DE", pred = "#8DB8EA"),
+                      labels = c(fit = "Explanatory\n(in sample)", pred = "Predictive\n(held-out gradient)"), name = NULL,
+                      guide = if (legend) "legend" else "none") # one key per figure, also when the keys are collected
+  p + ladder_x() + scale_y_continuous(limits = lims) + labs(title = tag, x = NULL, y = ylab) + ladder_base() +
+    # the legend goes with the first violin panel: inside Spearman, top left, where the floor has no
+    # values; under R² it is collected at the bottom of the figure (Bills, 8 Nov)
+    theme(legend.position = if (!legend) "none" else if (key == "Spearman") "inside" else "bottom",
+          legend.position.inside = c(0.005, 0.99), legend.justification = if (key == "Spearman") c(0, 1) else "left",
+          legend.direction = if (key == "Spearman") "vertical" else "horizontal",
+          legend.key.spacing.y = unit(0.4, "cm"), legend.key.spacing.x = unit(1.2, "cm"),
+          legend.text = element_text(size = 46), legend.key.size = unit(2.4, "cm"),
+          legend.background = element_rect(fill = alpha("white", 0.9), colour = NA)) +
+    if (last) theme(axis.text.x = element_text(size = 42, face = "bold", colour = "black")) else ladder_no_x()
+}
+
+# ---- the raw heterogeneity panel (the old Fig 6a) ------------------------------------
+# context dependency (σ² experiment under τ², two greys) beside H species (intercept
+# under slope piece, two golds); the Species-specific values run as dashed lines across
+# the property columns, since every model is fitted on the same rows. The legend sits
+# below the panel so the panel keeps the width of the violin panels above it.
+ladder_het_panel <- function(het, tag, last) {
+  `%>%` <- dplyr::`%>%`
+  library(ggplot2)
+  stopifnot(setequal(het$column, ladder_columns))
+  n <- length(ladder_columns); sc <- 1e4
+  bars <- het %>%
+    dplyr::mutate(x = match(column, ladder_columns)) %>%
+    tidyr::pivot_longer(c(sigma2_experiment, tau2, H_intercept, H_slope), names_to = "piece", values_to = "value") %>%
+    dplyr::mutate(value = sc * value, bar = ifelse(piece %in% c("sigma2_experiment", "tau2"), "cd", "H"),
+                  xb = x + ifelse(bar == "cd", -0.17, 0.17),
+                  order = match(piece, c("sigma2_experiment", "tau2", "H_intercept", "H_slope"))) %>%
+    dplyr::arrange(x, bar, order) %>%
+    dplyr::mutate(ymax = cumsum(value), ymin = ymax - value, .by = c(x, bar)) %>%
+    dplyr::mutate(piece = factor(piece, levels = c("tau2", "sigma2_experiment", "H_slope", "H_intercept")))
+  totals <- dplyr::summarise(bars, value = max(ymax), .by = c(x, bar, xb))
+  sp_x <- match("Species-specific responses", ladder_columns)
+  refs <- dplyr::filter(bars, x == sp_x, piece %in% c("tau2", "H_intercept", "H_slope")) %>%
+    dplyr::transmute(xb, value = ymax, piece = as.character(piece), xend = n + 0.4, mark = "Species-specific responses")
+  ref_cols <- c(tau2 = "grey15", H_intercept = "#B08A1E", H_slope = "#5C4510")
+  ymax <- max(c(totals$value, refs$value)) * 1.15
+  fill_labs <- c(tau2 = "Context dependency:\nspecies × experiment (τ²)",
+                 sigma2_experiment = "Context dependency:\nexperiment component (σ² experiment)",
+                 H_slope = "H species: slope piece\n(climate response)", H_intercept = "H species: intercept\npiece (average)")
+  ggplot() +
+    geom_rect(data = bars, aes(xmin = xb - 0.15, xmax = xb + 0.15, ymin = ymin, ymax = ymax, fill = piece)) +
+    geom_segment(data = refs, aes(x = xb + 0.15, xend = xend, y = value, yend = value, linetype = mark),
+                 colour = ref_cols[refs$piece], linewidth = 1) +
+    geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 14, fontface = "bold") +
+    scale_fill_manual(values = ladder_fills[names(fill_labs)], labels = fill_labs, name = NULL,
+                      guide = guide_legend(order = 1, nrow = 1)) +
+    scale_linetype_manual(values = "dashed", guide = "none") + ladder_x() + # the dashed lines are named in the caption (Bills, 8 Nov)
+    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
+    labs(title = tag, x = NULL, y = "Heterogeneity\n(unexplained variance, ×10⁻⁴)") +
+    ladder_base() + theme(legend.position = "bottom", legend.justification = "center",
+                          legend.key.spacing.x = unit(1, "cm"), legend.text = element_text(size = 40),
+                          legend.key.size = unit(2.2, "cm"), legend.spacing.y = unit(0.2, "cm"), legend.margin = margin(30, 0, 0, 0)) +
+    if (last) theme(axis.text.x = element_text(size = 42, face = "bold", colour = "black")) else ladder_no_x()
+}
+
+# ---- Fig 6 / S12 / S19: the panels in the order given ---------------------------------
+# panels: from "R2", "het", "Spearman", "Skill"; tagged a), b), ... in that order, the
+# column names under the last panel only; no brackets on top (Bills, 8 Nov)
+ladder_performance <- function(gradients, file, panels, het = NULL, height) {
+  library(ggplot2)
+  stopifnot(all(gradients$column %in% ladder_columns), all(panels %in% c("R2", "het", "Spearman", "Skill")),
+            !("het" %in% panels) || !is.null(het))
+  spec <- list(R2 = list("R²", c(-0.2, 0.8)), Spearman = list("Spearman ρ", c(-0.2, 0.6)), Skill = list("Loser/winner skill", c(-0.2, 0.6)))
+  first_violin <- panels[panels != "het"][1]
+  rows <- lapply(seq_along(panels), function(i) {
+    k <- panels[i]; tag <- paste0(letters[i], ")"); last <- i == length(panels)
+    if (k == "het") ladder_het_panel(het, tag, last)
+    else ladder_metric_panel(gradients, k, tag, spec[[k]][[1]], spec[[k]][[2]], last, legend = k == first_violin)
+  })
+  fig <- patchwork::wrap_plots(rows, ncol = 1, heights = ifelse(panels == "het", 1.35, 1))
+  # every key at the bottom, one row each, when the first violin panel is R² (Bills, 8 Nov)
+  if (first_violin != "Spearman")
+    fig <- fig + patchwork::plot_layout(guides = "collect") &
+      theme(legend.position = "bottom", legend.box = "vertical", legend.text = element_text(size = 42))
+  ggsave(file, fig, width = 48, height = height, dpi = 100, bg = "white")
   invisible(fig)
 }
 
-# ---- Fig 7 / S19: change in unexplained variation at each comparison -------------
+# ---- Fig S13 / S20: change in unexplained variation at each comparison -----------
 # One row per kind of unexplained variation, each on its own scale; every bar is the
 # change against the model the column is compared with (Table 2): green label when
 # it falls, rust when it rises, with the percentage of the compared model's value;
@@ -204,49 +248,4 @@ ladder_change <- function(het, file) {
     theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA), plot.margin = margin(20, 30, 20, 20))
   ggsave(file, p, width = 48, height = 49, dpi = 100, bg = "white")
   invisible(ch)
-}
-
-# ---- Fig S12 / S20: raw heterogeneity per model (the old Fig 6a) ------------------
-# context dependency (σ² experiment under τ², two greys) beside H species (intercept
-# under slope piece, two golds); the Species-specific values run as dashed lines across
-# the property columns, since every model is fitted on the same rows
-ladder_heterogeneity <- function(het, file) {
-  `%>%` <- dplyr::`%>%`
-  library(ggplot2)
-  stopifnot(setequal(het$column, ladder_columns))
-  n <- length(ladder_columns); sc <- 1e4
-  bars <- het %>%
-    dplyr::mutate(x = match(column, ladder_columns)) %>%
-    tidyr::pivot_longer(c(sigma2_experiment, tau2, H_intercept, H_slope), names_to = "piece", values_to = "value") %>%
-    dplyr::mutate(value = sc * value, bar = ifelse(piece %in% c("sigma2_experiment", "tau2"), "cd", "H"),
-                  xb = x + ifelse(bar == "cd", -0.17, 0.17),
-                  order = match(piece, c("sigma2_experiment", "tau2", "H_intercept", "H_slope"))) %>%
-    dplyr::arrange(x, bar, order) %>%
-    dplyr::mutate(ymax = cumsum(value), ymin = ymax - value, .by = c(x, bar)) %>%
-    dplyr::mutate(piece = factor(piece, levels = c("tau2", "sigma2_experiment", "H_slope", "H_intercept")))
-  totals <- dplyr::summarise(bars, value = max(ymax), .by = c(x, bar, xb))
-  sp_x <- match("Species-specific responses", ladder_columns)
-  refs <- dplyr::filter(bars, x == sp_x, piece %in% c("tau2", "H_intercept", "H_slope")) %>%
-    dplyr::transmute(xb, value = ymax, piece = as.character(piece), xend = n + 0.4, mark = "Species-specific responses")
-  ref_cols <- c(tau2 = "grey15", H_intercept = "#B08A1E", H_slope = "#5C4510")
-  ymax <- max(c(totals$value, refs$value)) * 1.15
-  fill_labs <- c(tau2 = "Context dependency:\nspecies × experiment (τ²)",
-                 sigma2_experiment = "Context dependency:\nexperiment component (σ² experiment)",
-                 H_slope = "H species: slope piece\n(climate response)", H_intercept = "H species: intercept\npiece (average)")
-  pa <- ggplot() +
-    geom_rect(data = bars, aes(xmin = xb - 0.15, xmax = xb + 0.15, ymin = ymin, ymax = ymax, fill = piece)) +
-    geom_segment(data = refs, aes(x = xb + 0.15, xend = xend, y = value, yend = value, linetype = mark),
-                 colour = ref_cols[refs$piece], linewidth = 1) +
-    geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 14, fontface = "bold") +
-    scale_fill_manual(values = ladder_fills[names(fill_labs)], labels = fill_labs, name = NULL, guide = guide_legend(order = 1)) +
-    scale_linetype_manual(values = "dashed", name = NULL, guide = guide_legend(order = 2)) + ladder_x() +
-    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
-    labs(x = NULL, y = "Heterogeneity (×10⁻⁴)") +
-    ladder_base() + theme(axis.text.x = element_text(size = 40, face = "bold", colour = "black"),
-                          legend.position = "right", legend.justification = c(0, 0.5), legend.key.spacing.y = unit(0.4, "cm"),
-                          legend.text = element_text(size = 44), legend.key.size = unit(2.4, "cm"), legend.spacing.y = unit(0, "cm"),
-                          legend.background = element_rect(fill = alpha("white", 0.85), colour = NA))
-  fig <- patchwork::wrap_plots(ladder_brackets(), pa, ncol = 1, heights = c(0.35, 1))
-  ggsave(file, fig, width = 48, height = 22, dpi = 100, bg = "white")
-  invisible(fig)
 }

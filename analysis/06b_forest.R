@@ -5,7 +5,7 @@
 #         data/derived/06_ladder_predict/folds/null_<gradient_id>.rds (the metafor
 #         Null held out, the reference of R²); data/derived/06_ladder_predict/pred_metrics.csv
 # Writes: data/derived/06b_forest/folds/<setting>/<level>_<gradient_id>.rds, tuning.csv,
-#         forest_metrics.csv, forest_vs_metafor.csv; figures/appendix/figS15.png; reports/06b_forest.md
+#         forest_metrics.csv, forest_vs_metafor.csv; figures/appendix/figS16.png; reports/06b_forest.md
 # Checks: 1,004 effects in, 512 ladder rows (71 species, 39 experiments, 20
 #         gradients) as in step 05; 16 scored gradients, the same as step 06;
 #         test rows of every fold equal step 06's; the held-out gradient absent
@@ -174,7 +174,7 @@ w_read <- c(n_eff = sum(w_all)^2 / sum(w_all^2), top5 = sum(w_share[1:5]), top1 
 spread <- filter(folds, level != "null") |>
   summarise(one_sign = all(predicted > 0) | all(predicted < 0), sd_ratio = sd(predicted) / sd(observed), .by = c(level, gradient_id))
 
-# ---- Fig S15: metafor (left) beside forest (right), held out ---------------------
+# ---- Fig S16: metafor (left) beside forest (right), held out ---------------------
 cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 6; Okabe-Ito orange
 fills <- c(metafor = "#8DB8EA", forest = "#F3C766")
 col_levels <- setdiff(all_levels, "null"); n <- length(col_levels) # Null is the R² reference, not drawn (Bills, 2 Nov)
@@ -230,7 +230,7 @@ figS15 <- patchwork::wrap_plots(p_top, metric_row("r2", "a)", "R² against Null"
                                 metric_row("skill", "c)", "Loser/winner skill", c(-0.2, 0.6), TRUE), ncol = 1, heights = c(0.35, 1, 1, 1)) +
   patchwork::plot_annotation( # no footnote: the caption says it (Bills, 4 Nov)
     theme = theme(plot.background = element_rect(fill = "white", colour = NA)))
-ggsave("figures/appendix/figS15.png", figS15, width = 48, height = 30, dpi = 100, bg = "white")
+ggsave("figures/appendix/figS16.png", figS15, width = 48, height = 30, dpi = 100, bg = "white")
 
 # ---- Report ---------------------------------------------------------------------------
 f3 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
@@ -281,14 +281,14 @@ report <- c(
          " and the largest change in a median ", sprintf("%.3f", max(seed_med$d)), ". Largest change in a median per metric: ",
          paste0(c("R² ", "Spearman ρ ", "skill "), sprintf("%.3f", sapply(c("r2", "spearman", "skill"), function(k) max(seed_med$d[seed_med$metric == k]))), collapse = ", "),
          "; skill moves most because a prediction near zero can change sign between seeds."),
-  "", "## Figures", "", "![Fig S15, forest beside meta-regression](../figures/appendix/figS15.png)",
+  "", "## Figures", "", "![Fig S16, forest beside meta-regression](../figures/appendix/figS16.png)",
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- No case weights, instead of 1 / SE² (Bills, 2 Nov; PLAN.md edited).",
   "- Held-out values only, no fit values (Bills, 2 Nov; PLAN.md edited).",
   "- No partial-dependence plots (Bills, 2 Nov; PLAN.md edited).",
   "- Forests also for the seven property + species levels (Bills, 2 Nov).",
-  "- The figure is appendix Fig S15, written to `figures/appendix/figS15.png`.")
+  "- The figure is appendix Fig S16 (8 Nov numbering), written to `figures/appendix/figS16.png`.")
 writeLines(report, "reports/06b_forest.md")
 message("Step 06b written: ", length(tasks), " forests (and ", length(tasks), " for the seed check); ",
         sprintf("%.1f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

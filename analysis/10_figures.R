@@ -8,7 +8,7 @@
 #         data/derived/07a_colonizers/strength_df_y3.rds; the species summaries of steps
 #         04 and 07b; the tables of steps 05 and 07c (weights.csv and ladder_rows.rds name the
 #         ladder rows); the appendix figures written by the steps.
-# Writes: figures/main/fig4.png, fig8.png (the other main figures are written by their steps);
+# Writes: figures/main/fig4.png, fig7.png (the other main figures are written by their steps);
 #         figures/appendix/figS1.png, figS3.png, figS4.png, figS10.png (the other appendix
 #         figures are written by their steps);
 #         tables/tableS1.csv ... tableS6.csv; data/derived/10_figures/fig4_balance.csv,
@@ -187,7 +187,7 @@ for (pass in 1:5) {
 }
 stopifnot(abs(measured - mm_per_degree) < 0.01) # the ring key matches the rings on the page
 
-# ---- Fig 8: what the models find, residents beside colonizers --------------------------
+# ---- Fig 7: what the models find, residents beside colonizers (Fig 8 until 8 Nov) --------------------------
 # Background climate, Height and LDMC models (Bills, 2 Nov; without abundance, 7 Nov). Both
 # responses are relative cover and W, T, P and the traits share one scale (steps 02, 07c), so
 # every term sits on one axis
@@ -200,12 +200,12 @@ climate_terms <- c(W = "Warming", T = "Temperature", P = "Precipitation", `W:T` 
 trait_terms <- function(z, name) setNames(paste(name, c("", "× warming", "× temperature", "× precipitation", "× temperature × precipitation")),
                                          paste0(c("", "W:", "T:", "P:", ""), z, c("", "", "", "", ":TP")))
 prop_terms <- c(trait_terms("height_z", "Height"), trait_terms("ldmc_z", "LDMC"))
-f8_clim <- filter(coefs, model == "Background climate", term %in% names(climate_terms)) |> mutate(name = factor(climate_terms[term], levels = rev(climate_terms)))
-f8_prop <- filter(coefs, model %in% c("Height", "LDMC"), term %in% names(prop_terms)) |> mutate(name = factor(trimws(prop_terms[term]), levels = rev(trimws(prop_terms))))
-stopifnot(nrow(f8_clim) == 14, nrow(f8_prop) == 20, !any(grepl("A0", coefs$term))) # 7 climate terms and 5 terms per trait in each pool; no abundance term
+f7_clim <- filter(coefs, model == "Background climate", term %in% names(climate_terms)) |> mutate(name = factor(climate_terms[term], levels = rev(climate_terms)))
+f7_prop <- filter(coefs, model %in% c("Height", "LDMC"), term %in% names(prop_terms)) |> mutate(name = factor(trimws(prop_terms[term]), levels = rev(trimws(prop_terms))))
+stopifnot(nrow(f7_clim) == 14, nrow(f7_prop) == 20, !any(grepl("A0", coefs$term))) # 7 climate terms and 5 terms per trait in each pool; no abundance term
 pool_cols <- c(Residents = "#3D3D3D", Colonizers = "#5E3C99")
-x_shared <- range(c(f8_clim$ci_lower, f8_clim$ci_upper, f8_prop$ci_lower, f8_prop$ci_upper)) # every panel on one axis
-f8_model <- f8_clim # a) and b): the Background climate model, one graph per pool, the same rows in both
+x_shared <- range(c(f7_clim$ci_lower, f7_clim$ci_upper, f7_prop$ci_lower, f7_prop$ci_upper)) # every panel on one axis
+f7_model <- f7_clim # a) and b): the Background climate model, one graph per pool, the same rows in both
 coef_panel <- function(d, tag, xlim = NULL) {
   ggplot(d, aes(estimate, name, colour = pool, group = pool)) + geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
     geom_linerange(aes(xmin = ci_lower, xmax = ci_upper), linewidth = 1.6, position = position_dodge(width = 0.6)) +
@@ -218,11 +218,11 @@ coef_panel <- function(d, tag, xlim = NULL) {
           axis.text = element_text(size = 44), axis.title.x = element_text(size = 46, face = "bold"),
           panel.grid.major.y = element_line(colour = "grey45", linewidth = 1.4, linetype = "dotted")) # row guides from name to estimate (Bills)
 }
-fig8 <- patchwork::wrap_plots(
-  coef_panel(filter(f8_model, pool == "Residents"), "a) Residents: background climate", x_shared) + guides(colour = "none"), # the title names the pool
-  coef_panel(filter(f8_model, pool == "Colonizers"), "b) Colonizers: background climate", x_shared) + guides(colour = "none"),
-  coef_panel(filter(f8_prop, model == "Height"), "c) Height model", x_shared),
-  coef_panel(filter(f8_prop, model == "LDMC"), "d) LDMC model", x_shared),
+fig7 <- patchwork::wrap_plots(
+  coef_panel(filter(f7_model, pool == "Residents"), "a) Residents: background climate", x_shared) + guides(colour = "none"), # the title names the pool
+  coef_panel(filter(f7_model, pool == "Colonizers"), "b) Colonizers: background climate", x_shared) + guides(colour = "none"),
+  coef_panel(filter(f7_prop, model == "Height"), "c) Height model", x_shared),
+  coef_panel(filter(f7_prop, model == "LDMC"), "d) LDMC model", x_shared),
   ncol = 2, guides = "collect") & theme(legend.position = "bottom", plot.title = element_text(size = 54))
 
 # ---- Fig S1: data flow ------------------------------------------------------------------
@@ -248,7 +248,7 @@ nodes <- tibble::tribble(
   8, -1, 2, "Residents: model comparison (Fig 6)", box(h05$n_experiments, h05$n_species, h05$n_effects),
   9, 1, 4, "Colonizers: warmed cover from year 3", box(n_distinct(col$experiment_id), n_distinct(col$species), nrow(col)),
   10, 1, 3, "Colonizers: classification (Fig 3)", box(NA_integer_, nrow(s07b), sum(s07b$n_experiments)),
-  11, 1, 2, "Colonizers: model comparison (Fig S18)", box(n_distinct(lad_col$experiment_id), n_distinct(lad_col$species), nrow(lad_col))) |>
+  11, 1, 2, "Colonizers: model comparison (Fig S19)", box(n_distinct(lad_col$experiment_id), n_distinct(lad_col$species), nrow(lad_col))) |>
   mutate(counts = sub("NA experiments · ", "", counts))
 edges <- tibble::tribble(
   ~from, ~to, ~rule,
@@ -411,18 +411,18 @@ tableS5 <- bind_rows(mutate(res_t4, pool = "residents"),
          model = model_label(model, pool)) # the names of Figs 6, 7, S18 and S19
 tableS6 <- bind_rows(mutate(read.csv("data/derived/05_ladder_fit/tableS6.csv"), pool = "residents"),
                      mutate(read.csv("data/derived/07c_ladder_fit/coefficients.csv"), pool = "colonizers")) |> relocate(pool) |>
-  mutate(model = model_label(model, pool), term = term_label(term, pool)) # words, as Fig 8
+  mutate(model = model_label(model, pool), term = term_label(term, pool)) # words, as Fig 7
 for (t in paste0("S", 1:6)) write.csv(get(paste0("table", t)), sprintf("tables/table%s.csv", t), row.names = FALSE)
 
 # ---- Write the new figures; copy the reviewed ones under their final numbers ------------
 ggsave("figures/main/fig4.png", fig4, width = 38, height = 28, dpi = 100, bg = "white")
-ggsave("figures/main/fig8.png", fig8, width = 49, height = 31, dpi = 100, bg = "white")
+ggsave("figures/main/fig7.png", fig7, width = 49, height = 31, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS1.png", figS1, width = 34, height = 22, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS3.png", figS3, width = 40, height = 14, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS4.png", figS4, width = 40, height = 26, dpi = 100, bg = "white")
 ggsave("figures/appendix/figS10.png", figS10, width = 38, height = 28, dpi = 100, bg = "white")
 # the appendix follows the order of the analysis (Bills, 2 Nov); every other appendix figure is
-# written under its number by the step that makes it (S2 by prep P2, S5 to S19 by steps 01 to 07e);
+# written under its number by the step that makes it (S2 by prep P2, S5 to S22 by steps 01 to 07e);
 # S11, the variance box, is drawn by hand and committed as it is (Bills, 3 Nov)
 fig_index <- tibble::tribble(
   ~figure, ~file, ~content, ~from,
@@ -431,9 +431,8 @@ fig_index <- tibble::tribble(
   "Fig 3", "figures/main/fig3.png", "Colonizers' classification (Step C)", "step 07b",
   "Fig 4", "figures/main/fig4.png", "The experiments in climate space: residents' net change and colonizers' gain, modelled effects", "this step",
   "Fig 5", "figures/main/fig5.png", "Traits of losers, winners and colonizers (pathways)", "step 07f",
-  "Fig 6", "figures/main/fig6.png", "Performance of the residents' models against the Null, explanatory and predictive", "step 06",
-  "Fig 7", "figures/main/fig7.png", "Change in unexplained variation at each model comparison, residents", "step 05",
-  "Fig 8", "figures/main/fig8.png", "Coefficients of the background climate, Height and LDMC models, residents beside colonizers", "this step",
+  "Fig 6", "figures/main/fig6.png", "R² of the residents' models against the Null, explanatory and predictive, and their raw heterogeneity", "steps 05, 06",
+  "Fig 7", "figures/main/fig7.png", "Coefficients of the background climate, Height and LDMC models, residents beside colonizers", "this step",
   "Fig S1", "figures/appendix/figS1.png", "Data flow", "this step",
   "Fig S2", "figures/appendix/figS2.png", "TRY trait screening", "prep P2",
   "Fig S3", "figures/appendix/figS3.png", "Phylogenetic axes (with Table S4)", "this step (prep P3)",
@@ -445,19 +444,19 @@ fig_index <- tibble::tribble(
   "Fig S9", "figures/appendix/figS9.png", "Strength from year 3 against all years", "step 03b",
   "Fig S10", "figures/appendix/figS10.png", "The experiments in climate space: pies counting losers, winners and colonizers, all effects", "this step",
   "Fig S11", "figures/appendix/figS11.png", "Where each variance component of the ladder comes from (toy table)", "drawn by hand",
-  "Fig S12", "figures/appendix/figS12.png", "Raw heterogeneity per model, residents", "step 05",
-  "Fig S13", "figures/appendix/figS13.png", "Coefficients, residents", "step 05",
-  "Fig S14", "figures/appendix/figS14.png", "Metrics per gradient, residents", "step 06",
-  "Fig S15", "figures/appendix/figS15.png", "Random forest beside metafor, residents", "step 06b",
-  "Fig S16", "figures/appendix/figS16.png", "Colonizer strength from year 3 against all years", "step 07a",
-  "Fig S17", "figures/appendix/figS17.png", "Coefficients, colonizers", "step 07c",
-  "Fig S18", "figures/appendix/figS18.png", "Performance of the colonizers' models against the Null", "step 07d",
-  "Fig S19", "figures/appendix/figS19.png", "Change in unexplained variation at each model comparison, colonizers", "step 07c",
-  "Fig S20", "figures/appendix/figS20.png", "Raw heterogeneity per model, colonizers", "step 07c",
+  "Fig S12", "figures/appendix/figS12.png", "Spearman and loser/winner skill of the residents' models", "step 06",
+  "Fig S13", "figures/appendix/figS13.png", "Change in unexplained variation at each model comparison, residents", "step 05",
+  "Fig S14", "figures/appendix/figS14.png", "Coefficients, residents", "step 05",
+  "Fig S15", "figures/appendix/figS15.png", "Metrics per gradient, residents", "step 06",
+  "Fig S16", "figures/appendix/figS16.png", "Random forest beside metafor, residents", "step 06b",
+  "Fig S17", "figures/appendix/figS17.png", "Colonizer strength from year 3 against all years", "step 07a",
+  "Fig S18", "figures/appendix/figS18.png", "Coefficients, colonizers", "step 07c",
+  "Fig S19", "figures/appendix/figS19.png", "R², raw heterogeneity and Spearman of the colonizers' models", "steps 07c, 07d",
+  "Fig S20", "figures/appendix/figS20.png", "Change in unexplained variation at each model comparison, colonizers", "step 07c",
   "Fig S21", "figures/appendix/figS21.png", "Metrics per gradient, colonizers", "step 07d",
   "Fig S22", "figures/appendix/figS22.png", "Random forest beside metafor, colonizers", "step 07e")
 main_files <- sort(list.files("figures/main", pattern = "^fig[0-9]+\\.png$"))
-stopifnot(identical(sort(main_files), sort(paste0("fig", 1:8, ".png")))) # eight main figures, each exactly once (Bills, 7 Nov)
+stopifnot(identical(sort(main_files), sort(paste0("fig", 1:7, ".png")))) # seven main figures, each exactly once (Bills, 8 Nov)
 app_files <- list.files("figures/appendix", pattern = "^figS[0-9]+\\.png$")
 stopifnot(all(file.exists(fig_index$file)), setequal(app_files, paste0("figS", 1:22, ".png"))) # S1 to S22, each exactly once
 
@@ -477,7 +476,7 @@ report <- c(
          "its purple ring the colonizers' total warmed cover, both in percentage points of the warmed turf from year 3 on (Bills, 3 Nov); ",
          "Fig S10 the same map with pies counting resident losers and winners (by the sign of their net strength from year 3 on) and colonizers (net warmed cover above zero), all classified effects; Fig S1 the data flow; Fig S3 and Table S4 the phylogenetic axes; Fig S4 the predictors before ",
          "standardisation with the niche checks; Tables S1, S2, S3, S5 and S6. Copies the reviewed figures of steps 03 to 07f under their final numbers ",
-         "(eight main figures, Bills 7 Nov; Fig 8 the coefficients of the background climate, Height and LDMC models, residents beside colonizers). Pies and discs sit at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
+         "(seven main figures, Bills 8 Nov; Fig 7 the coefficients of the background climate, Height and LDMC models, residents beside colonizers). Pies and discs sit at their destination climate; the ", sum(pies$n_shared > 1), " experiments that share a destination climate ",
          "(", n_distinct(paste(pies$x0, pies$y0)[pies$n_shared > 1]), " points) fan out around a black dot at that climate on short lines; no two pies or discs overlap (", sum(pies$moved & pies$n_shared == 1), " pies of different climates had to be pushed apart). ",
          "Each pie is named by its gradient (with a letter where a gradient has several experiments), coloured by warming; the key beside the figure gives each one's origin and destination elevation. ",
          "The ring key is drawn in millimetres and matched to the rings through the drawn panel's scale (", sprintf("%.2f", mm_per_degree), " mm per °C)."),
@@ -491,7 +490,7 @@ report <- c(
   "", paste0("Median over the experiments with modelled residents: net change ", sprintf("%.1f", median(balance$net, na.rm = TRUE)),
              " points; median colonizers' gain where colonizers are modelled ", sprintf("%.1f", median(balance$gain[balance$experiment_id %in% col_lad$experiment_id])), " points."),
   "", "## Figures", "", md_table(fig_index), "",
-  "![Fig 4](../figures/main/fig4.png)", "", "![Fig 8](../figures/main/fig8.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S3](../figures/appendix/figS3.png)", "",
+  "![Fig 4](../figures/main/fig4.png)", "", "![Fig 7](../figures/main/fig7.png)", "", "![Fig S1](../figures/appendix/figS1.png)", "", "![Fig S3](../figures/appendix/figS3.png)", "",
   "![Fig S4](../figures/appendix/figS4.png)", "", "![Fig S10](../figures/appendix/figS10.png)",
   "", "## Tables", "",
   md_table(tibble::tibble(table = paste("Table", paste0("S", 1:6)), file = sprintf("tables/table%s.csv", paste0("S", 1:6)),
@@ -502,7 +501,7 @@ report <- c(
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
   "- One script for the whole step (Bills, 2 Nov).",
-  "- Eight main figures (Bills, 2 and 7 Nov): the colonizers' classification Fig 3, the climate space Fig 4, the pathways Fig 5, the models' performance Fig 6, the change in unexplained variation Fig 7, the coefficients of three models Fig 8; the results-dependent Fig 6 and the old Fig S8 dropped; appendix S1 to S22 in the order of the analysis; the main figures are written by their own steps.",
+  "- Seven main figures (Bills, 2, 7 and 8 Nov): the colonizers' classification Fig 3, the climate space Fig 4, the pathways Fig 5, the models' R² and raw heterogeneity Fig 6, the coefficients of three models Fig 7 (Spearman and skill Fig S12, the change in unexplained variation Fig S13); the results-dependent Fig 6 and the old Fig S8 dropped; appendix S1 to S22 in the order of the analysis; the main figures are written by their own steps.",
   "- Without abundance (Bills, 7 Nov): no model carries an initial-abundance term; Fig S4 still shows the abundances, which are computed but not modelled.",
   "- Fig 4 shows the modelled effects as discs, the residents' net change and the colonizers' gain (Bills, 3 Nov; the cover pies of 2 Nov replaced); Fig S10's pies count Fig 5's classes per experiment, not last-year significance classes; no purple in the experiments below the colonizer pool-size rule (Bills, 2 Nov).",
   "- Coefficients, per-gradient metrics and the random forest stay as residents (a) and colonizers (b) files.",
