@@ -139,7 +139,7 @@ ladder_change <- function(het, file) {
                H_slope = "species differ in response to climate")
   cols <- ladder_columns[-1]
   xpos <- setNames(c(1:3, 4.5 + 0:6) * 1.8, cols) # a gap before the properties, as Table 2
-  band_h <- 1; gap <- 0.75 # room above each row for its name
+  band_h <- 1.5; gap <- 0.8 # room above each row for its name
   d <- ch %>% dplyr::mutate(v = 1e4 * change, x = xpos[column], r = match(component, comps))
   bands <- dplyr::bind_rows(lapply(seq_along(comps), function(i) {
     v <- d$v[d$r == i]; lo <- min(0, v); hi <- max(0, v); span <- max(hi - lo, 1e-3)
@@ -162,6 +162,9 @@ ladder_change <- function(het, file) {
                   colour = ifelse(v < 0, green, rust), up = v >= 0,
                   yl = ifelse(up, y1 + 0.04, y1 - 0.04))
   x_left <- 0.45; x_right <- max(xpos) + 0.8; x_tag <- -0.9
+  # the narrow figure (Bills, 8 Nov) has no room for "Experimental" and "Background" side by side
+  col_labs <- ladder_labels[-1]
+  col_labs[1:2] <- c("Experi-\nmental\nwarming", "Back-\nground\nclimate")
   p <- ggplot() +
     geom_segment(data = ticks, aes(x = x_left, xend = x_right, y = y, yend = y), colour = "grey92", linewidth = 0.5) +
     geom_segment(data = bands, aes(x = x_left, xend = x_right, y = ymap(0, r), yend = ymap(0, r)), colour = "grey50", linewidth = 0.7) +
@@ -177,10 +180,7 @@ ladder_change <- function(het, file) {
               vjust = 0, size = 13.5, fontface = "bold", lineheight = 0.85) +
     geom_text(data = dplyr::filter(labs_d, !up), aes(x, yl, label = lab), colour = dplyr::filter(labs_d, !up)$colour,
               vjust = 1, size = 13.5, fontface = "bold", lineheight = 0.85) +
-    # each row named on its tag line, above the row (Bills, 8 Nov: larger text)
-    geom_text(data = bands, aes(x = x_tag, y = base + band_h + 0.22, label = paste0(letters[r], ") ", row_lab[component])),
-              hjust = 0, vjust = 0, size = 17, fontface = "bold") +
-    geom_text(data = data.frame(x = xpos, lab = ladder_labels[-1]), aes(x, -0.3, label = lab),
+    geom_text(data = data.frame(x = xpos, lab = col_labs), aes(x, -0.3, label = lab),
               vjust = 1, size = 15.5, fontface = "bold", lineheight = 0.9)
   # the reassignment by design: τ² and the intercept piece fall, the slope piece is new
   sx <- xpos[["Species-specific responses"]]
@@ -195,12 +195,17 @@ ladder_change <- function(het, file) {
       p <- p + geom_curve(data = arrows, aes(x = x, y = y, xend = xend, yend = yend, linewidth = I(w)), colour = purple,
                           curvature = -0.15, arrow = arrow(length = unit(0.55, "cm"), type = "closed")) # no "moved" label (Bills, 8 Nov)
   }
+  # each row named on its tag line, above the row (Bills, 8 Nov: larger text); drawn after the
+  # arrows on white so that the arrows pass behind the names
+  p <- p + geom_label(data = bands, aes(x = x_tag, y = base + band_h + 0.22, label = paste0(letters[r], ") ", row_lab[component])),
+                      hjust = 0, vjust = 0, size = 17, fontface = "bold", fill = "white", border.colour = NA,
+                      label.padding = unit(0.1, "lines"))
   p <- p + scale_fill_manual(values = ladder_fills, guide = "none") + scale_colour_manual(values = ladder_fills, guide = "none") +
     annotate("text", x = x_right, y = max(bands$base) + band_h + 0.9, hjust = 1, size = 14, colour = "grey35",
              label = "change against the model compared with (×10⁻⁴); green: reduced, rust: increased") +
     coord_cartesian(xlim = c(x_tag - 0.05, x_right + 0.05), ylim = c(-1.45, max(bands$base) + band_h + 1.05), expand = FALSE, clip = "off") +
     theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA), plot.margin = margin(20, 30, 20, 20))
-  ggsave(file, p, width = 46, height = 38, dpi = 100, bg = "white")
+  ggsave(file, p, width = 34, height = 48, dpi = 100, bg = "white")
   invisible(ch)
 }
 
