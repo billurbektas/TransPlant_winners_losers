@@ -22,8 +22,8 @@ ladder_compared_with <- c(`Experimental warming` = "Null", `Background climate` 
 ladder_fills <- c(total = "#2B2E35", sigma2_experiment = "#B9BCC6", tau2 = "#6E7380", H_intercept = "#DDB54F", H_slope = "#8C6D1F")
 
 ladder_base <- function() ggplot2::theme_classic(base_size = 38) +
-  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = 54), # text enlarged (Bills, 8 Nov)
-                 axis.title.y = ggplot2::element_text(face = "bold", size = 46), axis.text = ggplot2::element_text(size = 40),
+  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = 64), # text enlarged twice (Bills, 8 Nov)
+                 axis.title.y = ggplot2::element_text(face = "bold", size = 56), axis.text = ggplot2::element_text(size = 48),
                  panel.grid.major.y = ggplot2::element_line(colour = "grey90"),
                  plot.background = ggplot2::element_rect(fill = "white", colour = NA))
 ladder_no_x <- function() ggplot2::theme(axis.text.x = ggplot2::element_blank(), axis.ticks.x = ggplot2::element_blank(),
@@ -42,9 +42,9 @@ ladder_brackets <- function() {
                        lab = c("Trait", "Growth form", "Phylogeny", "Niche"))
   ggplot() +
     geom_segment(data = top_br, aes(x = x, xend = xend, y = y, yend = y), colour = "grey40", linewidth = 0.9) +
-    geom_text(data = top_br, aes(x = (x + xend) / 2, y = y + 0.4, label = lab), size = 17, colour = "grey25") +
+    geom_text(data = top_br, aes(x = (x + xend) / 2, y = y + 0.42, label = lab), size = 21, colour = "grey25") +
     geom_segment(data = sub_br, aes(x = x, xend = xend, y = y, yend = y), colour = "grey60", linewidth = 0.7) +
-    geom_text(data = sub_br, aes(x = (x + xend) / 2, y = y + 0.3, label = lab), size = 15, colour = "grey35") +
+    geom_text(data = sub_br, aes(x = (x + xend) / 2, y = y + 0.32, label = lab), size = 18, colour = "grey35") +
     ladder_x() + scale_y_continuous(limits = c(0.2, 2.1)) +
     theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA))
 }
@@ -77,7 +77,7 @@ ladder_performance <- function(gradients, file, skill = TRUE) {
     s$xm <- s$x + ifelse(s$type == "fit", -0.06, 0.06)
     sw <- tidyr::pivot_wider(s, id_cols = c(column, x), names_from = type, values_from = med)
     top <- dplyr::summarise(g, top = max(value), .by = x)
-    lab_xy <- dplyr::left_join(s, top, by = "x") %>% dplyr::mutate(xl = x + ifelse(type == "fit", -0.22, 0.22), yl = top + 0.07 * diff(lims))
+    lab_xy <- dplyr::left_join(s, top, by = "x") %>% dplyr::mutate(xl = x + ifelse(type == "fit", -0.24, 0.24), yl = top + 0.08 * diff(lims))
     p <- ggplot() + geom_hline(yintercept = 0, colour = "grey60")
     ceil <- dplyr::filter(s, column == sp)
     if (nrow(ceil)) p <- p + geom_segment(data = ceil, aes(x = sp_x - 0.45, xend = n + 0.45, y = med, yend = med, colour = type),
@@ -86,21 +86,24 @@ ladder_performance <- function(gradients, file, skill = TRUE) {
       geom_point(data = g, aes(xj, value, colour = type), size = 2.4, alpha = 0.25, show.legend = FALSE) +
       geom_segment(data = sw, aes(x = x - 0.06, xend = x + 0.06, y = fit, yend = pred), colour = "grey40", linewidth = 1.2) +
       geom_point(data = dplyr::filter(s, type == "fit"), aes(xm, med), colour = "#7D8894", size = 6) +
-      geom_text(data = lab_xy, aes(xl, yl, label = sprintf("%.2f", round(med, 2) + 0), colour = type), size = 14, fontface = "bold", show.legend = FALSE) +
+      geom_text(data = lab_xy, aes(xl, yl, label = sprintf("%.2f", round(med, 2) + 0), colour = type), size = 16.5, fontface = "bold", show.legend = FALSE) +
       scale_colour_manual(values = c(fit = "#7D8894", pred = "#2F80D8"), guide = "none") +
       geom_point(data = dplyr::filter(s, type == "pred"), aes(xm, med), colour = "#2F80D8", size = 6) +
       scale_fill_manual(values = c(fit = "#C9D3DE", pred = "#8DB8EA"),
                         labels = c(fit = "Explanatory\n(in sample)", pred = "Predictive\n(held-out gradient)"), name = NULL)
     p + ladder_x() + scale_y_continuous(limits = lims) + labs(title = tag, x = NULL, y = ylab) + ladder_base() +
-      theme(legend.position = if (key == "R2") "right" else "none", legend.justification = c(0, 0.5), legend.key.spacing.y = unit(0.4, "cm"),
-            legend.text = element_text(size = 40), legend.key.size = unit(2, "cm")) +
-      if (last) theme(axis.text.x = element_text(size = 36, face = "bold", colour = "black")) else ladder_no_x()
+      # the legend sits inside the Spearman panel, top left, where the first three columns have no values, so the
+      # columns get the full width (Bills, 8 Nov: larger text)
+      theme(legend.position = if (key == "Spearman") "inside" else "none", legend.position.inside = c(0.005, 0.99), legend.justification = c(0, 1),
+            legend.key.spacing.y = unit(0.4, "cm"), legend.text = element_text(size = 46), legend.key.size = unit(2.4, "cm"),
+            legend.background = element_rect(fill = alpha("white", 0.9), colour = NA)) +
+      if (last) theme(axis.text.x = element_text(size = 42, face = "bold", colour = "black")) else ladder_no_x()
   }
   rows <- list(ladder_brackets(), metric_row("R2", "a)", "R²", c(-0.2, 0.8), FALSE),
                metric_row("Spearman", "b)", "Spearman ρ", c(-0.2, 0.6), !skill))
   if (skill) rows <- c(rows, list(metric_row("Skill", "c)", "Loser/winner skill", c(-0.2, 0.6), TRUE)))
   fig <- patchwork::wrap_plots(rows, ncol = 1, heights = c(0.55, rep(1, length(rows) - 1)))
-  ggsave(file, fig, width = 46, height = if (skill) 34 else 25, dpi = 100, bg = "white")
+  ggsave(file, fig, width = 48, height = if (skill) 38 else 28, dpi = 100, bg = "white")
   invisible(fig)
 }
 
@@ -131,16 +134,16 @@ ladder_change <- function(het, file) {
   stopifnot(setequal(het$column, ladder_columns))
   ch <- ladder_change_table(het)
   comps <- c("total", "sigma2_experiment", "tau2", "H_intercept", "H_slope")
-  row_lab <- c(total = "total unexplained\nvariation", sigma2_experiment = "context dependency\nshared by an experiment\n(σ² experiment)",
-               tau2 = "context dependency,\nspecies × experiment (τ²)", H_intercept = "species differ in\naverage response",
-               H_slope = "species differ in\nresponse to climate")
+  row_lab <- c(total = "total unexplained variation", sigma2_experiment = "context dependency shared by an experiment (σ² experiment)",
+               tau2 = "context dependency, species × experiment (τ²)", H_intercept = "species differ in average response",
+               H_slope = "species differ in response to climate")
   cols <- ladder_columns[-1]
-  xpos <- setNames(c(1:3, 4.5 + 0:6) * 1.6, cols) # a gap before the properties, as Table 2
-  band_h <- 1; gap <- 0.55
+  xpos <- setNames(c(1:3, 4.5 + 0:6) * 1.8, cols) # a gap before the properties, as Table 2
+  band_h <- 1; gap <- 0.75 # room above each row for its name
   d <- ch %>% dplyr::mutate(v = 1e4 * change, x = xpos[column], r = match(component, comps))
   bands <- dplyr::bind_rows(lapply(seq_along(comps), function(i) {
     v <- d$v[d$r == i]; lo <- min(0, v); hi <- max(0, v); span <- max(hi - lo, 1e-3)
-    data.frame(r = i, component = comps[i], lo = lo - 0.32 * span, hi = hi + 0.32 * span,
+    data.frame(r = i, component = comps[i], lo = lo - 0.45 * span, hi = hi + 0.45 * span, # room for the labels
                base = (length(comps) - i) * (band_h + gap))
   }))
   ymap <- function(v, r) { b <- bands[match(r, bands$r), ]; b$base + (v - b$lo) / (b$hi - b$lo) * band_h }
@@ -158,26 +161,27 @@ ladder_change <- function(het, file) {
                                ifelse(state == "new", "new", sprintf("%+.0f%%", round(percent) + 0))),
                   colour = ifelse(v < 0, green, rust), up = v >= 0,
                   yl = ifelse(up, y1 + 0.04, y1 - 0.04))
-  x_left <- 0.45; x_right <- max(xpos) + 0.7; x_lab <- -1.75; x_tag <- -3.8
+  x_left <- 0.45; x_right <- max(xpos) + 0.8; x_tag <- -0.9
   p <- ggplot() +
     geom_segment(data = ticks, aes(x = x_left, xend = x_right, y = y, yend = y), colour = "grey92", linewidth = 0.5) +
     geom_segment(data = bands, aes(x = x_left, xend = x_right, y = ymap(0, r), yend = ymap(0, r)), colour = "grey50", linewidth = 0.7) +
     geom_segment(data = bands, aes(x = x_left, xend = x_left, y = base, yend = base + band_h), colour = "black", linewidth = 0.8) +
     geom_segment(data = ticks, aes(x = x_left - 0.06, xend = x_left, y = y, yend = y), colour = "black", linewidth = 0.6) +
-    geom_text(data = ticks, aes(x = x_left - 0.1, y = y, label = format(t, trim = TRUE)), hjust = 1, size = 11, colour = "grey30") +
-    geom_segment(aes(x = 3.75 * 1.6, xend = 3.75 * 1.6, y = 0, yend = max(bands$base) + band_h), colour = "grey80", linewidth = 0.8) +
+    geom_text(data = ticks, aes(x = x_left - 0.1, y = y, label = format(t, trim = TRUE)), hjust = 1, size = 14, colour = "grey30") +
+    geom_segment(aes(x = 3.75 * 1.8, xend = 3.75 * 1.8, y = 0, yend = max(bands$base) + band_h), colour = "grey80", linewidth = 0.8) +
     geom_rect(data = dplyr::filter(d, state != "zero"),
               aes(xmin = x - 0.32, xmax = x + 0.32, ymin = pmin(y0, y1), ymax = pmax(y0, y1), fill = component)) +
     geom_segment(data = dplyr::filter(d, state == "zero"), aes(x = x - 0.32, xend = x + 0.32, y = y0, yend = y0, colour = component),
                  linewidth = 2.2, show.legend = FALSE) +
     geom_text(data = dplyr::filter(labs_d, up), aes(x, yl, label = lab), colour = dplyr::filter(labs_d, up)$colour,
-              vjust = 0, size = 10.5, fontface = "bold", lineheight = 0.85) +
+              vjust = 0, size = 13.5, fontface = "bold", lineheight = 0.85) +
     geom_text(data = dplyr::filter(labs_d, !up), aes(x, yl, label = lab), colour = dplyr::filter(labs_d, !up)$colour,
-              vjust = 1, size = 10.5, fontface = "bold", lineheight = 0.85) +
-    geom_text(data = bands, aes(x = x_lab, y = base + band_h / 2, label = row_lab[component]), hjust = 0.5, size = 13, lineheight = 0.9) +
-    geom_text(data = bands, aes(x = x_tag, y = base + band_h + 0.12, label = paste0(letters[r], ")")), hjust = 0, size = 18, fontface = "bold") +
-    geom_text(data = data.frame(x = xpos, lab = ladder_labels[-1]), aes(x, -0.12, label = lab),
-              vjust = 1, size = 13, fontface = "bold", lineheight = 0.9)
+              vjust = 1, size = 13.5, fontface = "bold", lineheight = 0.85) +
+    # each row named on its tag line, above the row (Bills, 8 Nov: larger text)
+    geom_text(data = bands, aes(x = x_tag, y = base + band_h + 0.22, label = paste0(letters[r], ") ", row_lab[component])),
+              hjust = 0, vjust = 0, size = 17, fontface = "bold") +
+    geom_text(data = data.frame(x = xpos, lab = ladder_labels[-1]), aes(x, -0.3, label = lab),
+              vjust = 1, size = 15.5, fontface = "bold", lineheight = 0.9)
   # the reassignment by design: τ² and the intercept piece fall, the slope piece is new
   sx <- xpos[["Species-specific responses"]]
   at <- function(comp) dplyr::filter(d, column == "Species-specific responses", component == comp)
@@ -192,11 +196,11 @@ ladder_change <- function(het, file) {
                           curvature = -0.15, arrow = arrow(length = unit(0.55, "cm"), type = "closed")) # no "moved" label (Bills, 8 Nov)
   }
   p <- p + scale_fill_manual(values = ladder_fills, guide = "none") + scale_colour_manual(values = ladder_fills, guide = "none") +
-    annotate("text", x = x_right, y = max(bands$base) + band_h + 0.32, hjust = 1, size = 12, colour = "grey35",
+    annotate("text", x = x_right, y = max(bands$base) + band_h + 0.9, hjust = 1, size = 14, colour = "grey35",
              label = "change against the model compared with (×10⁻⁴); green: reduced, rust: increased") +
-    coord_cartesian(xlim = c(x_tag - 0.05, x_right + 0.05), ylim = c(-1.05, max(bands$base) + band_h + 0.45), expand = FALSE, clip = "off") +
+    coord_cartesian(xlim = c(x_tag - 0.05, x_right + 0.05), ylim = c(-1.45, max(bands$base) + band_h + 1.05), expand = FALSE, clip = "off") +
     theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA), plot.margin = margin(20, 30, 20, 20))
-  ggsave(file, p, width = 44, height = 34, dpi = 100, bg = "white")
+  ggsave(file, p, width = 46, height = 38, dpi = 100, bg = "white")
   invisible(ch)
 }
 
@@ -231,14 +235,14 @@ ladder_heterogeneity <- function(het, file) {
     geom_rect(data = bars, aes(xmin = xb - 0.15, xmax = xb + 0.15, ymin = ymin, ymax = ymax, fill = piece)) +
     geom_segment(data = refs, aes(x = xb + 0.15, xend = xend, y = value, yend = value, linetype = mark),
                  colour = ref_cols[refs$piece], linewidth = 1) +
-    geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 12, fontface = "bold") +
+    geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 14, fontface = "bold") +
     scale_fill_manual(values = ladder_fills[names(fill_labs)], labels = fill_labs, name = NULL, guide = guide_legend(order = 1)) +
     scale_linetype_manual(values = "dashed", name = NULL, guide = guide_legend(order = 2)) + ladder_x() +
     scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
     labs(x = NULL, y = "Heterogeneity (×10⁻⁴)") +
-    ladder_base() + theme(axis.text.x = element_text(size = 36, face = "bold", colour = "black"),
+    ladder_base() + theme(axis.text.x = element_text(size = 40, face = "bold", colour = "black"),
                           legend.position = "right", legend.justification = c(0, 0.5), legend.key.spacing.y = unit(0.4, "cm"),
-                          legend.text = element_text(size = 38), legend.key.size = unit(2, "cm"), legend.spacing.y = unit(0, "cm"),
+                          legend.text = element_text(size = 44), legend.key.size = unit(2.4, "cm"), legend.spacing.y = unit(0, "cm"),
                           legend.background = element_rect(fill = alpha("white", 0.85), colour = NA))
   fig <- patchwork::wrap_plots(ladder_brackets(), pa, ncol = 1, heights = c(0.35, 1))
   ggsave(file, fig, width = 48, height = 22, dpi = 100, bg = "white")
