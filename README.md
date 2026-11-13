@@ -325,7 +325,7 @@ strength <- emmeans::emmeans(m, ~ species, at = list(year = years_3_on), df = df
 
 ![Figure S19](figures/appendix/figS19.png)
 
-**Figure S19.** How well each colonizer model explains colonizer strength, and how well it predicts it for an unseen gradient. As Figure 6 and Figure S12, for the 110 colonizer effects of 27 species: (a) R² against the Null model on the same gradient, (b) the heterogeneity left unexplained by each model (×10⁻⁴) and (c) Spearman's rank correlation, (a, c) on the 8 gradients with at least five effects, in sample (grey) and held out (blue). There is no loser/winner skill, since colonizers have no losers. An R² below −100 (Woody at CH_Lavey) is left out of panel a; any fold that did not converge would be missing and is listed in the 07d report.
+**Figure S19.** How well each colonizer model explains colonizer strength, and how well it predicts it for an unseen gradient. As Figure 6, for the 110 colonizer effects of 27 species: (a) R² against the Null model on the same gradient, on the 8 gradients with at least five effects, in sample (grey) and held out (blue), and (b) the heterogeneity left unexplained by each model (×10⁻⁴). Spearman's rank correlation is in Figure S21; there is no loser/winner skill, since colonizers have no losers. An R² below −100 (Woody at CH_Lavey) is left out of panel a; any fold that did not converge would be missing and is listed in the 07d report.
 
 ![Figure S20](figures/appendix/figS20.png)
 

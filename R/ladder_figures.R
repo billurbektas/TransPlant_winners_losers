@@ -2,7 +2,7 @@
 # the raw heterogeneity, Spearman and skill and the change in unexplained variation go to the appendix).
 #   ladder_performance()   Fig 6 (residents, step 06: a) R², b) raw heterogeneity), Fig S12
 #                          (residents, step 06: a) Spearman, b) loser/winner skill) and Fig S19
-#                          (colonizers, step 07d: a) R², b) raw heterogeneity, c) Spearman)
+#                          (colonizers, step 07d: a) R², b) raw heterogeneity; no Spearman, 13 Nov)
 #   ladder_change()        Fig S13 (step 05) and Fig S20 (step 07c): the change in each
 #                          kind of unexplained variation at each comparison of Table 2
 #

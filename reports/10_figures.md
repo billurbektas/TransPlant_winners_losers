@@ -101,7 +101,7 @@ Median over the experiments with modelled residents: net change -6.1 points; med
 | Fig S16 | figures/appendix/figS16.png | Random forest beside metafor, residents | step 06b |
 | Fig S17 | figures/appendix/figS17.png | Colonizer strength from year 3 against all years | step 07a |
 | Fig S18 | figures/appendix/figS18.png | Coefficients, colonizers | step 07c |
-| Fig S19 | figures/appendix/figS19.png | R², raw heterogeneity and Spearman of the colonizers' models | steps 07c, 07d |
+| Fig S19 | figures/appendix/figS19.png | R² and raw heterogeneity of the colonizers' models | steps 07c, 07d |
 | Fig S20 | figures/appendix/figS20.png | Change in unexplained variation at each model comparison, colonizers | step 07c |
 | Fig S21 | figures/appendix/figS21.png | Metrics per gradient, colonizers | step 07d |
 | Fig S22 | figures/appendix/figS22.png | Random forest beside metafor, colonizers | step 07e |
