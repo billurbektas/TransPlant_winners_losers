@@ -60,4 +60,4 @@ Fig 2 a): point = pooled strength, filled by class; line = 95% interval includin
 
 ## Deviations from PLAN.md
 
-None: PLAN.md Step C was revised on 30 Oct (Bills) to fixed species means with predict() intervals, and Fig 2 was redesigned on 1 Nov (Bills: species overview with two species panels; PLAN.md updated). Decision approved with the plan: se_mu added to species_summary.
+None: PLAN.md Step C was revised on 30 Oct to fixed species means with predict() intervals, and Fig 2 was redesigned on 1 Nov (decided: species overview with two species panels; PLAN.md updated). Decision approved with the plan: se_mu added to species_summary.

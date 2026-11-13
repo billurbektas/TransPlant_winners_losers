@@ -12,14 +12,14 @@
 #         zero (07b); every species has growth form; group sizes in the labels;
 #         3 pairwise tests for each of the 7 properties (21).
 #
-# Decided 2 Nov (Bills): PLAN.md's fallback, since Step C found almost nothing
+# Decided 2 Nov: PLAN.md's fallback, since Step C found almost nothing
 # consistent: residents grouped by the sign of their pooled net strength mu (Fig 2),
 # losers and winners, against colonizers with pooled net warmed cover above zero
 # (Fig S2), one point per species; Fig 2's loser and winner colours, Fig S2's purple.
-# Main Fig 5 (final numbering, Bills 2 Nov). Raw property values
+# Main Fig 5 (final numbering, decided 2 Nov). Raw property values
 # in their units, on log axes except the thermal optimum; niche optima only where
 # n_obs_sub >= 30, as in the models. Descriptive, no model.
-# Group comparisons (Bills, 7 Nov): each pair of groups, Wilcoxon rank-sum for the five
+# Group comparisons (decided 7 Nov): each pair of groups, Wilcoxon rank-sum for the five
 # continuous properties and Fisher's exact test for the graminoid and woody shares,
 # Holm-corrected over the three pairs of each property; panel b smaller.
 
@@ -64,7 +64,7 @@ shares <- summarise(props, `graminoid share` = mean(graminoid), `woody share` = 
 write.csv(left_join(shares, tidyr::pivot_wider(select(meds, -n), names_from = property, values_from = median), by = "group"),
           file.path(out_dir, "group_summary.csv"), row.names = FALSE)
 
-# ---- Group comparisons: every pair, Holm over the three pairs of a property (Bills, 7 Nov) --
+# ---- Group comparisons: every pair, Holm over the three pairs of a property (decided 7 Nov) --
 # 15 species sit in a resident group and among the colonizers, so those pairs are not
 # independent sets; phylogeny is not accounted for (both stated in the report)
 pairs <- list(c("Resident losers", "Resident winners"), c("Resident winners", "Colonizers"), c("Resident losers", "Colonizers"))
@@ -82,7 +82,7 @@ share_tests <- bind_rows(lapply(c("graminoid", "woody"), function(v) bind_rows(l
 tests <- bind_rows(cont_tests, share_tests) |> mutate(p_holm = p.adjust(p, "holm"), .by = property)
 stopifnot(nrow(tests) == 7 * 3) # 3 pairs x 7 properties
 write.csv(tests, file.path(out_dir, "group_tests.csv"), row.names = FALSE)
-# the figure shows stars (Bills, 7 Nov); the exact p-values are in group_tests.csv and the report
+# the figure shows stars (decided 7 Nov); the exact p-values are in group_tests.csv and the report
 fmt_p <- function(p) ifelse(p < 0.001, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "ns")))
 
 # ---- Figure: dot strips with group medians, growth-form shares below ------------------
@@ -128,13 +128,13 @@ bottom <- ggplot(share_long, aes(y = 1)) +
         plot.caption = element_text(size = 22, colour = "grey25", hjust = 0, lineheight = 1.1, margin = margin(t = 12)),
         strip.text.x = element_text(face = "bold", size = 25, lineheight = 0.9, margin = margin(b = 10)),
         strip.placement = "outside", plot.background = element_rect(fill = "white", colour = NA))
-# panel b given less room (Bills, 7 Nov: the bars were too big)
+# panel b given less room (decided 7 Nov: the bars were too big)
 ggsave("figures/main/fig5.png", patchwork::wrap_plots(top, bottom, ncol = 1, heights = c(3.6, 1)), width = 32, height = 18, dpi = 100, bg = "white")
 
 # ---- Report --------------------------------------------------------------------------
 report <- c(
   "# Step 07f: The pathways (Q4), Fig 5", "",
-  paste0("PLAN.md's fallback for the pathways figure (Bills, 2 Nov), since Step C found almost nothing consistent: resident species grouped by the sign of ",
+  paste0("PLAN.md's fallback for the pathways figure (decided 2 Nov), since Step C found almost nothing consistent: resident species grouped by the sign of ",
          "their pooled net strength from step 04 (Fig 2), losers below zero and winners above, against colonizer species whose pooled net warmed cover ",
          "from 07b (Fig S2) is above zero; one point per species. As the agreed mock: LDMC, LMA, vegetative height, and the thermal and precipitation ",
          "optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species ",
@@ -148,7 +148,7 @@ report <- c(
                      tidyr::pivot_wider(transmute(meds, group = as.character(group), property, median = paste0(signif(median, 3), " (", n, ")")),
                                         names_from = property, values_from = median), by = "group")),
   "", "Medians with the number of species that have the property in brackets.",
-  "", "## Group comparisons (Bills, 7 Nov)", "",
+  "", "## Group comparisons (decided 7 Nov)", "",
   paste0("Each pair of groups, for each property: Wilcoxon rank-sum test (`wilcox.test`, R's defaults) for the five continuous properties and ",
          "Fisher's exact test for the graminoid and woody shares; p-values Holm-corrected over the three pairs of each property. ",
          "Estimate: ratio of the second group's median to the first's (continuous) or difference in share (second minus first). ",
@@ -162,8 +162,8 @@ report <- c(
   "", "## Figure", "", "![Fig 5, pathways](../figures/main/fig5.png)",
   "", "## Warnings captured", "", if (length(warns)) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
-  "- PLAN.md's fallback, with resident losers added beside the winners (Bills, 2 Nov): groups by the sign of the net effect, not Step C classes.",
-  "- The figure is main Fig 5 (final numbering, Bills 2 Nov); written to `figures/main/fig5.png`.",
-  "- Group comparisons added to the descriptive figure (Bills, 7 Nov): pairwise Wilcoxon and Fisher tests, Holm within each property.")
+  "- PLAN.md's fallback, with resident losers added beside the winners (decided 2 Nov): groups by the sign of the net effect, not Step C classes.",
+  "- The figure is main Fig 5 (final numbering, decided 2 Nov); written to `figures/main/fig5.png`.",
+  "- Group comparisons added to the descriptive figure (decided 7 Nov): pairwise Wilcoxon and Fisher tests, Holm within each property.")
 writeLines(report, "reports/07f_pathways.md")
 message("Step 07f written: ", paste(sprintf("%s %d", sizes$group, sizes$n), collapse = "; "))

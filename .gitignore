@@ -85,10 +85,10 @@ data/derived/**
 !data/derived/**/
 !data/derived/**/*.csv
 # the GBIF niche table is a pipeline input written outside the pipeline (P6): tracked so a
-# fresh clone runs the prep pipeline (Bills, 3 Nov)
+# fresh clone runs the prep pipeline (decided 3 Nov)
 !data/derived/prep/gbif_niche.rds
 
-# local working files for Claude Code, never pushed
+# local working files, never pushed
 CLAUDE.md
 MILESTONES.md
 PLAN.md

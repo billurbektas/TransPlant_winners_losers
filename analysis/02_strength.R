@@ -17,7 +17,7 @@
 #         T, P standardised across the 42 experiments, A0 across the 1,004
 #         effects; every join keeps the 1,004 rows; 20 gradients (2 Nov pool rule).
 #
-# Decided 30 Oct (Bills): one residual variance per species (glmmTMB,
+# Decided 30 Oct: one residual variance per species (glmmTMB,
 # dispformula = ~ species, in R/fit_experiment.R), so each species gets its own
 # strength_se; degrees of freedom = origin-control plots + warmed plots - 2
 # per experiment; the plot x species variance stays one per experiment;
@@ -264,8 +264,8 @@ report <- c(
   "", "## Warnings captured", "",
   if (length(fit_warnings) + length(warns)) paste("-", c(fit_warnings, unique(warns))) else "None.",
   "", "## Deviations from PLAN.md", "",
-  paste("None in the model: PLAN.md Step A was revised on 30 Oct (Bills) to one residual variance per species",
-        "(`glmmTMB`, `dispformula = ~ species`). Decisions taken where PLAN.md is silent (30 Oct, Bills): degrees",
+  paste("None in the model: PLAN.md Step A was revised on 30 Oct to one residual variance per species",
+        "(`glmmTMB`, `dispformula = ~ species`). Decisions taken where PLAN.md is silent (30 Oct): degrees",
         "of freedom = origin-control plots + warmed plots - 2 per experiment; the plot x species variance kept shared",
         "(see Model as fitted); PEV1 to PEV3 carried; properties standardised across the residents that have them, traits",
         "logged first; graminoid and woody as 0/1. Pools from step 01 under the 2 Nov pool rule, with US_Arizona out by",

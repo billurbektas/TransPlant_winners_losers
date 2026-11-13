@@ -93,7 +93,7 @@ Gradients (`gradient_id` = region) after the rule: 20.
 
 ## Survey years left out by the year rule (0 experiment-years)
 
-A year enters the residents' table only if both origin controls and warmed plots were surveyed in it, and the destination pool's table if the warmed plots were (Bills, 3 Nov: the colonizer model uses the warmed plots only).
+A year enters the residents' table only if both origin controls and warmed plots were surveyed in it, and the destination pool's table if the warmed plots were (decided 3 Nov: the colonizer model uses the warmed plots only).
 
 | experiment_id | species_pool | year | n_groups | groups |
 | --- | --- | --- | --- | --- |

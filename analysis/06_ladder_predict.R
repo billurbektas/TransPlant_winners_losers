@@ -19,26 +19,26 @@
 #         every scored gradient, in sample and held out; every slope fold with
 #         the diagonal T, P, TP block.
 #
-# Decided 2 Nov (Bills): the ladder rows of step 05 (residents in at least 3
+# Decided 2 Nov: the ladder rows of step 05 (residents in at least 3
 # gradients that carry every property); every gradient trains, but only the 16
 # with at least 5 effects are held out and scored; one fold each; species deviations
 # from hand BLUPs (R/species_deviation.R), metafor giving none for a GDIAG slope
 # block; a fold that fails is refitted once with bobyqa, then NA for that level x
 # gradient, named in the report; Climate's Spearman and skill NA in every
 # gradient (climate cannot order species within a gradient; Experimental warming
-# too, Bills 7 Nov); supplement levels
+# too, decided 7 Nov); supplement levels
 # <property>+species from the property fold models; no all-years sensitivity;
 # per fold the predictions and a one-row summary, no model objects.
-# Reopened 2 Nov (Bills): R2 per gradient against the Null model on the same
+# Reopened 2 Nov: R2 per gradient against the Null model on the same
 # gradient, 1 - MSE(level) / MSE(Null), replacing the shared yardstick V; every
 # metric summarised by its median over the scored gradients; Fig 6 rows b) to d)
 # as half violins; display label "Loser/winner skill".
-# Without abundance (Bills, 7 Nov): levels Null, Experimental warming, Background
+# Without abundance (decided 7 Nov): levels Null, Experimental warming, Background
 # climate, Species-specific responses and one per property on Background climate;
 # Fig 6 shows only the performance rows (the variance rows are Fig 7, step 05).
-# 8 Nov (Bills): Fig 6 is a) R² and b) the raw heterogeneity of step 05; Spearman and
+# 8 Nov: Fig 6 is a) R² and b) the raw heterogeneity of step 05; Spearman and
 # skill are appendix Fig S12; the change in unexplained variation is Fig S13 (step 05).
-# Warm start (Bills, 7 Nov), as step 05: every property fold starts its variance
+# Warm start (decided 7 Nov), as step 05: every property fold starts its variance
 # components at those of the same fold's Species-specific responses fit and is fitted
 # with optim BFGS; a property fold that fails then falls back to the 2 Nov rule
 # (nlminb from metafor's default start, then bobyqa, then NA).
@@ -56,7 +56,7 @@ t_start <- Sys.time()
 out_dir <- "data/derived/06_ladder_predict"
 fold_dir <- file.path(out_dir, "folds")
 dir.create(fold_dir, recursive = TRUE, showWarnings = FALSE)
-cores <- 4L # of 11; 7 choked the machine (Bills, 7 Nov); results do not depend on it
+cores <- 4L # of 11; 7 choked the machine (decided 7 Nov); results do not depend on it
 
 strength_df <- readRDS("data/derived/03b_strength_y3/strength_df.rds")
 stopifnot(nrow(strength_df) == 1004) # step 03b
@@ -78,7 +78,7 @@ rows <- list(all         = strength_df,
              niche       = filter(strength_df, !is.na(T_opt), !is.na(P_opt)))
 stopifnot(all(sapply(rows, function(r) identical(r$effect_id, rows$all$effect_id)))) # one set of rows (step 05)
 gradients <- sort(unique(strength_df$gradient_id)) # all 20 train
-# held out and scored: gradients with at least 5 effects (Bills, 2 Nov); the others train only
+# held out and scored: gradients with at least 5 effects (decided 2 Nov); the others train only
 n_eff <- count(strength_df, gradient_id)
 scored <- sort(n_eff$gradient_id[n_eff$n >= 5]); unscored <- filter(n_eff, n < 5)
 stopifnot(length(gradients) == 20, length(scored) == 16,
@@ -105,7 +105,7 @@ stopifnot(identical(unname(levels_fit$column), ladder_columns))
 level_mods <- c(list(null = ~ 1, warming = f_warm, climate = f_env, species = f_env), f_prop)
 supp <- paste0(names(prop_vars), "+species") # supplement: property model plus species deviations
 level_label <- c(setNames(levels_fit$column, levels_fit$level), setNames(paste(prop_label, "+ species"), supp))
-level_display <- level_label # the model names are the display names (Bills, 7 Nov)
+level_display <- level_label # the model names are the display names (decided 7 Nov)
 one_per_experiment <- c("warming", "climate") # predictions vary only between experiments
 
 fixed_part <- function(m, mods, d) { # experiment term silent at prediction: its expected value, 0
@@ -122,7 +122,7 @@ m05_int <- m05; m05_int$withG <- FALSE; m05_int$withH <- FALSE # ranef() then re
 rf05 <- ranef(m05_int)
 blup_diff <- c(species = max(abs(b05$species[rownames(rf05$species)] - rf05$species$intrcpt)),
                experiment = max(abs(b05$experiment[rownames(rf05$experiment_id)] - rf05$experiment_id$intrcpt)))
-stopifnot(all(blup_diff < 1e-8)) # Bills, 2 Nov
+stopifnot(all(blup_diff < 1e-8)) # decided 2 Nov
 blup_sd <- c(intercept = sd(b05$species), W = sd(b05$W), T = sd(b05$TPTP[, 1]), P = sd(b05$TPTP[, 2]), TP = sd(b05$TPTP[, 3]))
 
 # ---- One fold, cached: fit on the other gradients, predict the held-out one ----
@@ -130,7 +130,7 @@ fit_fold <- function(task) {
   path <- file.path(fold_dir, paste0(task$level, "_", task$gradient_id, ".rds"))
   lv <- filter(levels_fit, level == task$level); mods <- level_mods[[task$level]]; g <- task$gradient_id
   control <- list()
-  if (task$level %in% names(prop_vars)) { # warm start from this fold's Species-specific responses fit (Bills, 7 Nov)
+  if (task$level %in% names(prop_vars)) { # warm start from this fold's Species-specific responses fit (decided 7 Nov)
     sp <- readRDS(file.path(fold_dir, paste0("species_", g, ".rds")))$summary
     stopifnot(sp$status == "converged")
     control <- list(optimizer = "optim", optmethod = "BFGS", # boundary values lifted to 1e-8 so that the optimiser can leave them
@@ -151,7 +151,7 @@ fit_fold <- function(task) {
   if (length(control)) { m <- try_fit(control); optimizer <- "optim BFGS, warm start"
     if (is.character(m)) { first_error <- m; m <- try_fit(list()); optimizer <- "nlminb" } # the 2 Nov rule as fallback
   } else { m <- try_fit(list()); optimizer <- "nlminb" }
-  if (is.character(m)) { # retry once from the default start with bobyqa (Bills, 2 Nov)
+  if (is.character(m)) { # retry once from the default start with bobyqa (decided 2 Nov)
     if (is.na(first_error)) first_error <- m; m <- try_fit(list(optimizer = "bobyqa")); optimizer <- "bobyqa" }
   ok <- !is.character(m)
   if (ok && lv$slopes) stopifnot(identical(m$struct, slope_struct)) # T, P, TP block diagonal
@@ -175,7 +175,7 @@ fit_fold <- function(task) {
 }
 
 # Species-specific responses first, then the three levels without species slopes, then
-# the properties, so that the floor and ceiling of the ladder are done first (Bills, 2 Nov)
+# the properties, so that the floor and ceiling of the ladder are done first (decided 2 Nov)
 # two phases: the property folds start from the Species-specific responses folds
 run_folds <- function(levels) {
   tasks <- tidyr::expand_grid(level = levels, gradient_id = scored)
@@ -211,19 +211,19 @@ fit_long <- bind_rows(lapply(seq_len(nrow(levels_fit)), function(i) {
 }))
 
 # ---- Metrics per level x gradient ---------------------------------------------------
-# R2 against the Null on the same gradient (Bills, 2 Nov): V is the Null's error on
+# R2 against the Null on the same gradient (decided 2 Nov): V is the Null's error on
 # the same effects, its held-out fold for pred and its full-data fit for fit
 score <- function(d) {
   d <- inner_join(d, filter(d, level == "null") |> select(effect_id, null_pred = predicted), by = "effect_id")
   bind_rows(lapply(split(d, list(d$level, d$gradient_id), drop = TRUE), function(x) {
     if (anyNA(x$predicted)) met <- tibble::tibble(r2 = NA_real_, spearman = NA_real_, skill = NA_real_)
     else met <- metrics_gradient(x$observed, x$predicted, mean((x$observed - x$null_pred)^2))
-    if (x$level[1] %in% one_per_experiment) met$spearman <- met$skill <- NA_real_ # cannot order species within a gradient (Bills, 2 and 7 Nov)
+    if (x$level[1] %in% one_per_experiment) met$spearman <- met$skill <- NA_real_ # cannot order species within a gradient (decided 2 and 7 Nov)
     tibble::tibble(level = x$level[1], gradient_id = x$gradient_id[1], met, n = nrow(x))
   }))
 }
 pred_metrics <- score(pred_long)
-fit_metrics  <- score(filter(fit_long, gradient_id %in% scored)) # the same 16 gradients as held out (Bills, 2 Nov)
+fit_metrics  <- score(filter(fit_long, gradient_id %in% scored)) # the same 16 gradients as held out (decided 2 Nov)
 stopifnot(setequal(pred_metrics$gradient_id, scored), setequal(fit_metrics$gradient_id, scored),
           all(filter(pred_metrics, level == "null")$r2 == 0), all(filter(fit_metrics, level == "null")$r2 == 0)) # Null is the reference
 write.csv(pred_metrics, file.path(out_dir, "pred_metrics.csv"), row.names = FALSE)
@@ -260,17 +260,17 @@ fig6_grad <- bind_rows(mutate(fit_metrics, type = "fit"), mutate(pred_metrics, t
   filter(level %in% levels_fit$level, level != "null") |>
   tidyr::pivot_longer(c(r2, spearman, skill), names_to = "metric") |>
   transmute(column = level_label[level], metric = met_name[metric], type, value) |> filter(!is.na(value))
-# no caption on the figure (Bills, 2 Nov): the report says what each row shows
+# no caption on the figure (decided 2 Nov): the report says what each row shows
 # Fig 6 b: the step 05 variance components, the ladder models from `all` and each property
 # model from its own rowset (every rowset holds the same rows), as step 05 draws Fig S13
 het05 <- read.csv("data/derived/05_ladder_fit/heterogeneity.csv")
 het_fig <- bind_rows(filter(het05, rowset == "all", model %in% ladder_columns[1:4]),
                      filter(het05, fitted_on == rowset, model %in% ladder_columns[5:11])) |> mutate(column = model)
 stopifnot(nrow(het_fig) == 11, setequal(het_fig$column, ladder_columns))
-ladder_performance(fig6_grad, "figures/main/fig6.png", c("R2", "het"), het = het_fig, height = 38) # main Fig 6 (Bills, 8 Nov)
-ladder_performance(fig6_grad, "figures/appendix/figS12.png", c("Spearman", "Skill"), height = 24) # Fig S12 (Bills, 8 Nov)
+ladder_performance(fig6_grad, "figures/main/fig6.png", c("R2", "het"), het = het_fig, height = 38) # main Fig 6 (decided 8 Nov)
+ladder_performance(fig6_grad, "figures/appendix/figS12.png", c("Spearman", "Skill"), height = 24) # Fig S12 (decided 8 Nov)
 
-# Fig S15 rows: gradients ordered by destination summer temperature (Fig 5 dropped, Bills, 2 Nov)
+# Fig S15 rows: gradients ordered by destination summer temperature (Fig 5 dropped, decided 2 Nov)
 grad_info <- filter(strength_df, gradient_id %in% scored) |> group_by(gradient_id) |>
   summarise(T_dest = mean(T), spread = sd(strength), .groups = "drop") |> arrange(T_dest)
 
@@ -283,7 +283,7 @@ s7 <- bind_rows(mutate(fit_metrics, version = "In sample"), mutate(pred_metrics,
 s7_panel <- function(k, title, tags) lapply(seq_along(levels(s7$version)), function(j) {
   v <- levels(s7$version)[j]; d <- filter(s7, metric == k, version == v)
   ggplot(d, aes(level, gradient_id, fill = pmax(pmin(value, 1), -1))) + geom_tile(colour = "white") +
-    geom_text(aes(label = ifelse(is.na(value), "", ifelse(value < -10, "< -10", sprintf("%.2f", value)))), size = 7) + # readable at print size (Bills, 2 Nov)
+    geom_text(aes(label = ifelse(is.na(value), "", ifelse(value < -10, "< -10", sprintf("%.2f", value)))), size = 7) + # readable at print size (decided 2 Nov)
     scale_fill_gradient2(low = "#B2182B", mid = "white", high = "#2166AC", limits = c(-1, 1), na.value = "grey85", name = title) +
     labs(title = tags[j], subtitle = paste0(title, ", ", tolower(v)), x = NULL, y = NULL) +
     theme_minimal(base_size = 30) +
@@ -308,21 +308,21 @@ fold_tab <- fold_summary |> group_by(level = level_display[level]) |>
 grad_counts <- n_eff |> transmute(gradient_id, effects = n, species = sapply(gradient_id, function(g) n_distinct(strength_df$species[strength_df$gradient_id == g])),
   held_out = ifelse(gradient_id %in% scored, "yes", "no (fewer than 5 effects; trains only)"))
 fold_warn <- unique(unlist(lapply(out, function(x) if (length(x$warnings)) paste0(x$summary$level, " / ", x$summary$gradient_id, ": ", x$warnings))))
-# metafor's "struct disregarded" note is listed once with its count (CLAUDE.md: warnings are reported, never dropped)
+# metafor's "struct disregarded" note is listed once with its count (warnings are reported, never dropped)
 n_struct <- sum(grepl("struct' argument is disregaded", fold_warn))
 fold_warn <- c(fold_warn[!grepl("struct' argument is disregaded", fold_warn)],
                if (n_struct) paste0("metafor: \"'struct' argument is disregaded since no ~ inner | outer term\" (", n_struct, " fold fits without slopes)"))
 report <- c(
   "# Step 06: The ladder, predicted (Step D, route 2, residents)", "",
   paste0("Every level of the ladder was refitted ", length(scored), " times on the ", nrow(strength_df), " ladder rows of step 05, each time without one of the ", length(scored), " gradients that have at least 5 effects, and asked to predict ",
-         "the strengths of the gradient left out: Null, Experimental warming, Background climate, Species-specific responses and one level per property (without abundance, Bills 7 Nov), ",
+         "the strengths of the gradient left out: Null, Experimental warming, Background climate, Species-specific responses and one level per property (without abundance, decided 7 Nov), ",
          nrow(fold_summary), " fold fits on ", cores, " cores (", sprintf("%.0f", sum(fold_summary$minutes)), " fit-minutes). ",
          "Predictions are fixed effects only, the experiment term at its expected value zero; Species-specific responses adds each species' ",
          "intercept and slope deviations learnt from the training gradients (zero for a species not seen there), and the seven ",
          "supplement levels add the same to each property model. Each level is scored per gradient by R² against the Null model on the same gradient ",
          "(1 − its error / the Null's error, so Null is 0), Spearman ρ within the gradient and loser/winner skill, held out and in sample ",
-         "(step 05 full-data fits, the same rule), then summarised by the median over gradients (Bills, 2 Nov)."),
-  "", "## Counts", "", paste0(length(gradients), " gradients train; the ", length(scored), " with at least 5 effects are held out and scored, each in one fold (Bills, 2 Nov). Effects and species per gradient:"), "", md_table(grad_counts),
+         "(step 05 full-data fits, the same rule), then summarised by the median over gradients (decided 2 Nov)."),
+  "", "## Counts", "", paste0(length(gradients), " gradients train; the ", length(scored), " with at least 5 effects are held out and scored, each in one fold (decided 2 Nov). Effects and species per gradient:"), "", md_table(grad_counts),
   "", "## Fold fits", "", md_table(fold_tab),
   "", if (nrow(failed)) md_table(transmute(failed, level, gradient_id, `nlminb error` = first_error, `bobyqa error` = status))
       else "Every fold fit converged.",
@@ -355,10 +355,10 @@ report <- c(
   "", "## Warnings captured", "",
   { w <- unique(c(fold_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
-  "- Species deviations from hand BLUPs (`R/species_deviation.R`), not `ranef(m)`: metafor 5.0.1 gives none for the GDIAG slope block (Bills, 2 Nov).",
-  "- Experimental warming's and Background climate's Spearman and skill are NA in every gradient (Bills, 2 and 7 Nov): with several experiments in a gradient they would rank experiments, not species.",
-  "- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (Bills, 2 Nov); PLAN.md names no fallback.",
-  "- Property folds warm-started from the same fold's Species-specific responses fit and fitted with optim BFGS (Bills, 7 Nov, as step 05); a failing one falls back to the 2 Nov rule.",
+  "- Species deviations from hand BLUPs (`R/species_deviation.R`), not `ranef(m)`: metafor 5.0.1 gives none for the GDIAG slope block (decided 2 Nov).",
+  "- Experimental warming's and Background climate's Spearman and skill are NA in every gradient (decided 2 and 7 Nov): with several experiments in a gradient they would rank experiments, not species.",
+  "- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (decided 2 Nov); PLAN.md names no fallback.",
+  "- Property folds warm-started from the same fold's Species-specific responses fit and fitted with optim BFGS (decided 7 Nov, as step 05); a failing one falls back to the 2 Nov rule.",
   "- Spearman is also NA where every prediction in the gradient is the same (MILESTONES), beside PLAN.md's fewer than 5 effects.",
   "- Fig 6 (R², raw heterogeneity) is written to `figures/main/fig6.png`, Spearman and skill to `figures/appendix/figS12.png`, the per-gradient view to `figures/appendix/figS15.png`; the prediction rows widen their y range to the data.")
 writeLines(report, "reports/06_ladder_predict.md")

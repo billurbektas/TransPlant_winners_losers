@@ -21,11 +21,11 @@
 #         from raw warmed cover; no A0_origin anywhere;
 #         class counts per anchor sum to the combinations surveyed there.
 #
-# Decided 2 Nov (Bills): step 07 split into 07a, 07b, 07c; colonizer strength from
+# Decided 2 Nov: step 07 split into 07a, 07b, 07c; colonizer strength from
 # a glmmTMB model of the warmed plots only (one residual variance per species, as
 # the residents' model), A0_dest the destination-control cover averaged over
 # years, log(100 x cover + 1) as the residents' A0 (reopened 2 Nov; log from 3 Nov); strength averaged over all years and over
-# years 3 and later, both kept until Bills reads the stability; Fig 1 panel b
+# years 3 and later, both kept until the stability is reviewed; Fig 1 panel b
 # below panel a, three classes (absent, present (ns), present); the 44 species
 # never present in a warmed plot reported as a count; the residents' pool-size rule
 # applied to colonizers too, at least 5 colonizer species per experiment (consistency).
@@ -61,14 +61,14 @@ stopifnot(nrow(effects) == 379, n_distinct(effects$species) == 229, n_distinct(e
 
 # ---- Step A: one model per experiment, warmed plots only ------------------------
 # No contrast is read for colonizers, so the destination controls stay out of the
-# fit (Bills, 2 Nov): warmed cover by year and species, plot x species intercept,
+# fit (decided 2 Nov): warmed cover by year and species, plot x species intercept,
 # one residual variance per species (as the residents' model). df = warmed plots - 1,
 # the one-group form of the residents' plot rule. A species with zero cover in every
 # warmed plot of the experiment is a measured absence: strength 0 and SE 0, taken from
-# the data, not the model, which cannot fit a variance of zero (Bills, 2 Nov). Where a
+# the data, not the model, which cannot fit a variance of zero (decided 2 Nov). Where a
 # species' variance cannot be told apart from its plot variance (a few records only),
 # its estimates and SEs come from the same model with one residual variance for the
-# experiment, the experiment's error (Bills, 2 Nov; CH_Calanda2::Cal::Nes).
+# experiment, the experiment's error (decided 2 Nov; CH_Calanda2::Cal::Nes).
 fit_warmed <- function(d) {
   zero <- summarise(d, zero = all(relative_cover == 0), .by = species) |> filter(zero) |> pull(species)
   d <- droplevels(filter(d, !species %in% zero)); notes <- character()
@@ -108,8 +108,8 @@ fits <- lapply(experiment_ids, function(e) {
 names(fits) <- experiment_ids
 
 # propagule pressure, A0_dest: the species' destination-control relative cover
-# averaged over every plot and survey year, from the raw data (Bills, 2 Nov), on the
-# residents' A0 scale, log(100 x mean cover + 1) (Bills, 3 Nov: the plain mean was
+# averaged over every plot and survey year, from the raw data (decided 2 Nov), on the
+# residents' A0 scale, log(100 x mean cover + 1) (decided 3 Nov: the plain mean was
 # skewed, a few dominant species far out on the axis); the residents' A0 are the first
 # control survey (a0.rds)
 a0_dest <- colonizers |> filter(treatment == "destination_control") |>
@@ -156,7 +156,7 @@ by_year <- bind_rows(lapply(experiment_ids, function(e) {
 stopifnot(!anyDuplicated(by_year[c("experiment_id", "species", "year")]))
 present <- colonizers |> filter(treatment == "warmed") |> mutate(year = as.integer(as.character(year))) |>
   summarise(present = any(relative_cover > 0), .by = c(experiment_id, species, year))
-class_levels <- c("Present", "Present (ns)", "Absent") # top down in Fig 1b (Bills, 2 Nov)
+class_levels <- c("Present", "Present (ns)", "Absent") # top down in Fig 1b (decided 2 Nov)
 classes <- by_year |> filter(year %in% anchors) |>
   left_join(present, by = c("experiment_id", "species", "year")) |>
   mutate(class = factor(case_when(!present ~ "Absent", # read from the raw warmed cover (PLAN.md)
@@ -182,7 +182,7 @@ never <- colonizers |> filter(treatment == "warmed") |>
   summarise(any = any(relative_cover > 0), .by = c(experiment_id, gradient_id, species)) |>
   summarise(never = all(!any), n_gradients = n_distinct(gradient_id), gradients = paste(sort(unique(gradient_id)), collapse = ", "),
             n_experiments = n(), .by = species) |> filter(never) |> select(-never) |> arrange(desc(n_gradients), species)
-stopifnot(nrow(never) == 44, all(never$n_gradients < 3)) # none reaches the Step C rule (Bills, 2 Nov); 46 until 3 Nov: Viola hirta and Echium vulgare appear in CH_Calanda2's year 4
+stopifnot(nrow(never) == 44, all(never$n_gradients < 3)) # none reaches the Step C rule (decided 2 Nov); 46 until 3 Nov: Viola hirta and Echium vulgare appear in CH_Calanda2's year 4
 
 # ---- Write ----------------------------------------------------------------------
 saveRDS(by_year, file.path(out_dir, "by_year.rds"))
@@ -258,7 +258,7 @@ pb <- draw_panel(classes, stability, class_levels,
 ggsave("figures/main/fig1.png", patchwork::wrap_plots(pa, pb, ncol = 1), width = 14, height = 17, dpi = 150, bg = "white")
 
 # ---- Diagnostic: all years against years >= 3, and the strength used downstream -------
-# mirrors the residents' figure of step 03b (Bills, 2 Nov): agreement between anchors is in Fig 1
+# mirrors the residents' figure of step 03b (decided 2 Nov): agreement between anchors is in Fig 1
 cmp <- inner_join(select(strength_df, effect_id, all_years = strength), select(strength_df_y3, effect_id, from_year_3 = strength), by = "effect_id")
 lim <- range(c(cmp$all_years, cmp$from_year_3))
 d1 <- ggplot(cmp, aes(all_years, from_year_3)) + geom_abline(colour = "grey60") + geom_point(alpha = 0.5, size = 2, colour = "#5E3C99") +
@@ -284,10 +284,10 @@ fit_warn <- unique(unlist(lapply(experiment_ids, function(e) if (length(fits[[e]
 report <- c(
   "# Step 07a: Colonizer strength and presence flows (Steps A and B, colonizers)", "",
   paste0("Each of the ", length(experiment_ids), " experiments with destination-pool species got one mixed model of relative cover on its ",
-         "warmed plots only (Bills, 2 Nov), with the residents' model terms for one group: glmmTMB, warmed cover by year and species, plot x species random ",
+         "warmed plots only (decided 2 Nov), with the residents' model terms for one group: glmmTMB, warmed cover by year and species, plot x species random ",
          "intercept, one residual variance per species, degrees of freedom warmed plots - 1. Colonizer strength is the warmed marginal mean, zeros kept, ",
-         "averaged over all years and, separately, over years 3 and later; A0_dest, the propagule pressure, is the species' destination-control cover averaged over every plot and year (no model), as log(100 x cover + 1) like the residents' A0 (Bills, 3 Nov). Both strength windows are kept ",
-         "until the choice is made (Bills, 2 Nov). Each colonizer was classified at years 2, 3, 4 and 6 as absent (no cover ",
+         "averaged over all years and, separately, over years 3 and later; A0_dest, the propagule pressure, is the species' destination-control cover averaged over every plot and year (no model), as log(100 x cover + 1) like the residents' A0 (decided 3 Nov). Both strength windows are kept ",
+         "until the choice is made (decided 2 Nov). Each colonizer was classified at years 2, 3, 4 and 6 as absent (no cover ",
          "in any warmed plot that year, from the raw data), present (warmed mean above zero at one-sided p < 0.05) or present (ns), and ",
          "presence agreement and the concordance correlation of warmed cover were computed between adjacent anchors."),
   "", "## Counts", "",
@@ -297,7 +297,7 @@ report <- c(
                                    "effects with a strength from years 3 and later", "species never present in a warmed plot (any gradient)"),
                           n = c(402, nrow(dropped_k), sum(dropped_k$species), nrow(strength_df), n_distinct(strength_df$species),
                                 length(experiment_ids), n_distinct(strength_df$gradient_id), nrow(strength_df_y3), nrow(never)))),
-  "", paste0("Dropped by the pool-size rule, as for residents (Bills, 2 Nov): ",
+  "", paste0("Dropped by the pool-size rule, as for residents (decided 2 Nov): ",
              paste(sprintf("%s (%d)", dropped_k$experiment_id, dropped_k$species), collapse = ", "),
              "; CN_Damxung leaves with its only experiment."),
   "", paste0("Where each colonizer's strength SE comes from (all years): ",
@@ -316,7 +316,7 @@ report <- c(
              ", concordance correlation ", f3(DescTools::CCC(cmp$all_years, cmp$from_year_3)$rho.c$est), "."),
   "", "![Stability](../figures/appendix/figS17.png)",
   "", "## Fig 1", "", "![Fig 1](../figures/main/fig1.png)", "",
-  paste0("Panel a is step 03's, redrawn from its saved classes and flows with the same code; panel b the colonizers below it (Bills, 2 Nov). ",
+  paste0("Panel a is step 03's, redrawn from its saved classes and flows with the same code; panel b the colonizers below it (decided 2 Nov). ",
          "Ribbons between absent and present are labelled where they enter the next anchor, with their count and their share of the class they started from; ",
          "those that start or end in Present are drawn darker."),
   "", "## Never present", "",
@@ -324,9 +324,9 @@ report <- c(
          sum(never$n_gradients == 1), " of them occur in one gradient and none in three or more, so none enters Step C (`never_present.csv`)."),
   "", "## Warnings captured", "", { w <- unique(c(fit_warn, warns)); if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
-  "- Strength from a model of the warmed plots only, and A0_dest the raw destination-control cover averaged over years, not the destination-control mean of a joint fit; species never recorded in a warmed plot are measured absences (strength 0, SE 0), and species whose variance the model cannot separate from their plot variance take the experiment's error (Bills, 2 Nov; PLAN.md updated).",
-  "- The pool-size rule applied to colonizers too, at least 5 colonizer species per experiment (Bills, 2 Nov; PLAN.md updated).",
-  "- Strength kept twice, all years and years 3 and later, until the stability is read (Bills, 2 Nov).",
+  "- Strength from a model of the warmed plots only, and A0_dest the raw destination-control cover averaged over years, not the destination-control mean of a joint fit; species never recorded in a warmed plot are measured absences (strength 0, SE 0), and species whose variance the model cannot separate from their plot variance take the experiment's error (decided 2 Nov; PLAN.md updated).",
+  "- The pool-size rule applied to colonizers too, at least 5 colonizer species per experiment (decided 2 Nov; PLAN.md updated).",
+  "- Strength kept twice, all years and years 3 and later, until the stability is read (decided 2 Nov).",
   "- Presence is tested one-sided (warmed mean above zero), as PLAN.md's colonizer code now writes it.",
   "- Figures written to `figures/main/` and `figures/appendix/` so that the report can link them.")
 writeLines(report, "reports/07a_colonizers.md")

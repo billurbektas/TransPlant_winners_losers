@@ -1,6 +1,6 @@
 # P7: Trait checks
 
-Checks of the 73,809 TRY records behind P2's medians after P2's screening (666 species; LDMC, LMA, height), within TRY only and on the log scale. Nothing is changed here. The rules Bills accepted on 29-30 Oct (trees, two reviewed values, record outliers and unit slips) are P2 cleaning targets, so this report shows what remains after them; new record flags can appear because the species medians moved. Thresholds: robust z 3.5; datasets off by 1.5x on at least 3 shared species; unit signatures at 10, 100 and 1000x within 15%. Full lists in `reports/P7_trait_checks/`.
+Checks of the 73,809 TRY records behind P2's medians after P2's screening (666 species; LDMC, LMA, height), within TRY only and on the log scale. Nothing is changed here. The rules accepted on 29-30 Oct (trees, two reviewed values, record outliers and unit slips) are P2 cleaning targets, so this report shows what remains after them; new record flags can appear because the species medians moved. Thresholds: robust z 3.5; datasets off by 1.5x on at least 3 shared species; unit signatures at 10, 100 and 1000x within 15%. Full lists in `reports/P7_trait_checks/`.
 
 ## Counts
 

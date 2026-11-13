@@ -68,7 +68,7 @@ Every fold fit converged.
 | Niche + species | R² against Null | -0.021 | -1.581 | 8 / 8 | 1 of 8 |
 | Niche + species | Spearman ρ | 0.461 | -0.161 | 8 / 8 |  |
 
-Taken out of the R² row and the medians (R² below −100, Bills, 2 Nov): Woody, held out at CH_Lavey (-140.8); Woody + species, held out at CH_Lavey (-141.3).
+Taken out of the R² row and the medians (R² below −100, decided 2 Nov): Woody, held out at CH_Lavey (-140.8); Woody + species, held out at CH_Lavey (-141.3).
 
 Every held-out species had training data: TRUE.
 
@@ -76,7 +76,7 @@ Every held-out species had training data: TRUE.
 
 ![Fig S19, colonizer performance and raw heterogeneity](../figures/appendix/figS19.png)
 
-Fig S19 a) as Fig 6 a): half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No Spearman row (Bills, 13 Nov; the colonizers' Spearman is in Fig S21 and the table above) and no skill row. Fig S19 b) is the raw heterogeneity of each model fitted in step 07c (×10⁻⁴), as Fig 6 b).
+Fig S19 a) as Fig 6 a): half violins of the 8 scored gradients, explanatory (grey) beside predictive (blue), medians written in; R² against the Null on that gradient. No Spearman row (decided 13 Nov; the colonizers' Spearman is in Fig S21 and the table above) and no skill row. Fig S19 b) is the raw heterogeneity of each model fitted in step 07c (×10⁻⁴), as Fig 6 b).
 
 ![Fig S21, colonizers per gradient](../figures/appendix/figS21.png)
 
@@ -270,7 +270,7 @@ Fig S19 a) as Fig 6 a): half violins of the 8 scored gradients, explanatory (gre
 
 ## Deviations from PLAN.md
 
-- The colonizer ladder predicted on the residents' reduction (Bills, 2 Nov).
-- Property folds warm-started from the same fold's Species-specific responses fit with optim BFGS (Bills, 7 Nov, as steps 05 and 06).
-- An R² below −100 is taken out of the R² row and the medians and listed (Bills, 2 Nov).
-- Without abundance (Bills, 7, 8 and 13 Nov): Fig S19 shows R² and the raw heterogeneity of step 07c, as Fig 6, without Spearman; the change in unexplained variation is Fig S20 (step 07c).
+- The colonizer ladder predicted on the residents' reduction (decided 2 Nov).
+- Property folds warm-started from the same fold's Species-specific responses fit with optim BFGS (decided 7 Nov, as steps 05 and 06).
+- An R² below −100 is taken out of the R² row and the medians and listed (decided 2 Nov).
+- Without abundance (decided 7, 8 and 13 Nov): Fig S19 shows R² and the raw heterogeneity of step 07c, as Fig 6, without Spearman; the change in unexplained variation is Fig S20 (step 07c).

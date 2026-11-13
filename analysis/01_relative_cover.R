@@ -17,7 +17,7 @@
 #         species); no duplicate experiment x plot x year x species x treatment;
 #         every pool species has both A0 values.
 #
-# Pool rule (decided 2 Nov, Bills; PLAN.md Data rules): a species is resident
+# Pool rule (decided 2 Nov; PLAN.md Data rules): a species is resident
 # if, in the origin controls, it was recorded in >= 2 plots in at least half of
 # the survey years (A) or in at least half of the plots in >= 2 survey years
 # (B), halves rounded up, plots counted among those surveyed that year, years
@@ -94,7 +94,7 @@ records <- inner_join(plots, select(analysis, plot_year_id, species, relative_co
 # ---- Year rule: a year enters a pool's table only if the groups its model compares were
 # surveyed. Residents: origin controls and warmed plots (their contrast needs both).
 # Destination pool: the warmed plots, since the colonizer model is fitted to the warmed plots
-# only (Bills, 3 Nov; it was both groups until then); destination-control rows exist only
+# only (decided 3 Nov; it was both groups until then); destination-control rows exist only
 # where they were surveyed, so the mean destination abundance is unchanged
 years <- distinct(plots, experiment_id, group, year)
 pool_groups <- tibble::tibble(species_pool = c("resident", "resident", "destination_pool", "destination_pool"),
@@ -291,7 +291,7 @@ pb <- ggplot(pb_dat, aes(status, n, fill = status)) + geom_col(width = 0.7) +
   labs(title = "b)", subtitle = paste0("Kept: ", n_distinct(pools$species[pools$species_pool == "resident"]), " resident and ",
                                        n_distinct(pools$species[pools$species_pool == "destination_pool"]), " colonizer species"),
        x = NULL, y = "Species x experiment") + big + theme(axis.text.x = element_text(size = 15))
-# experiments labelled by gradient and the elevation shift, origin -> destination (Bills, 2 Nov)
+# experiments labelled by gradient and the elevation shift, origin -> destination (decided 2 Nov)
 site_elev <- readRDS("data/derived/prep/sites.rds") |> select(region, site_id, elevation)
 exp_label <- included |>
   left_join(transmute(site_elev, region, origin_site = site_id, elev_origin = elevation), by = c("region", "origin_site")) |>
@@ -314,7 +314,7 @@ pd <- ggplot(kept_grad, aes(gradients, fill = pool, alpha = gradients >= 3)) +
   geom_bar(position = position_dodge(preserve = "single"), width = 0.8) +
   geom_text(stat = "count", aes(label = after_stat(count)), position = position_dodge(width = 0.8), vjust = -0.3, size = 5.6,
             fontface = "bold", alpha = 1) +
-  # the cut-off used downstream (Bills, 2 Nov): classification and ladder on species in at least 3 gradients
+  # the cut-off used downstream (decided 2 Nov): classification and ladder on species in at least 3 gradients
   geom_vline(xintercept = 2.5, colour = "#D95F2B", linetype = "dashed", linewidth = 0.9) +
   annotate("text", x = 2.6, y = Inf, label = "classification and ladder (steps 04, 05): at least 3",
            hjust = 0, vjust = 1.5, size = 6, fontface = "bold", colour = "#D95F2B") +
@@ -324,7 +324,7 @@ pd <- ggplot(kept_grad, aes(gradients, fill = pool, alpha = gradients >= 3)) +
   labs(title = "d)", subtitle = "Kept species by the number of gradients they occur in\n(dashed: the cut-off of steps 04 and 05; pale: left out there)",
        x = "Gradients", y = "Species") + big
 ggsave("figures/appendix/figS5.png",
-       # each panel drawn on its own, so its axis titles sit close instead of aligning to c)'s long labels (Bills, 2 Nov)
+       # each panel drawn on its own, so its axis titles sit close instead of aligning to c)'s long labels (decided 2 Nov)
        patchwork::wrap_plots(lapply(list(pa, pb, pc, pd), function(p) patchwork::wrap_elements(full = p)),
                              design = "AB\nCD", widths = c(1.3, 1), heights = c(1, 1.3)),
        width = 24, height = 24, dpi = 110, bg = "white")
@@ -377,7 +377,7 @@ report <- c(
   "", "![Resident pool size per experiment](../figures/appendix/figS6.png)", "",
   md_table(head(pool_sizes, 10)),
   "", sprintf("## Survey years left out by the year rule (%d experiment-years)", nrow(year_fails)), "",
-  "A year enters the residents' table only if both origin controls and warmed plots were surveyed in it, and the destination pool's table if the warmed plots were (Bills, 3 Nov: the colonizer model uses the warmed plots only).", "",
+  "A year enters the residents' table only if both origin controls and warmed plots were surveyed in it, and the destination pool's table if the warmed plots were (decided 3 Nov: the colonizer model uses the warmed plots only).", "",
   md_table(year_fails),
   "", sprintf("Warmed years regained for the destination pool by the 3 Nov rule (%d): %s.", nrow(year_regained),
               if (nrow(year_regained)) paste(sprintf("%s year %d", year_regained$experiment_id, year_regained$year), collapse = "; ") else "none"),

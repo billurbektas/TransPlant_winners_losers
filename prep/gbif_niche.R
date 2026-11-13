@@ -3,7 +3,7 @@
 # target that reruns when a ledger changes. The pipeline (P4) reads its result.
 #
 # Method: Lynn's SpeciesClimate&RangeAreaDet_TransPlant.R (MacroContext_Transplant,
-# 2024; lines cited below), with the changes decided 28 Oct (Bills):
+# 2024; lines cited below), with the changes decided 28 Oct:
 #   - GBIF keys chosen from the P1 species with their WCVP author and the
 #     reviewed ledger prep/config/gbif_keys.csv (Lynn: names from the Global
 #     Names Resolver), and records grouped by our species (Lynn: GBIF's
@@ -38,7 +38,7 @@ backbone <- "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c" # GBIF Backbone, as Lynn's do
 cache <- "data/cache/gbif"
 dir.create(cache, recursive = TRUE, showWarnings = FALSE)
 warns <- character()
-# every warning anywhere in the run goes to the report (CLAUDE.md), not only
+# every warning anywhere in the run goes to the report, not only
 # those of the calls wrapped in capture()
 globalCallingHandlers(warning = function(w) {
   warns <<- c(warns, conditionMessage(w)); invokeRestart("muffleWarning")

@@ -14,7 +14,7 @@
 #         counts per anchor sum to the combinations at that anchor; n per pair
 #         equals the combinations present at both anchors, counted separately.
 #
-# Decided 30 Oct (Bills): a resident with no cover in any origin-control or
+# Decided 30 Oct: a resident with no cover in any origin-control or
 # warmed plot in an anchor year is not classified at that anchor (no stratum,
 # no ribbon, not in sign agreement or CCC); absence is read from the raw cover,
 # not from estimate == 0, as PLAN.md does for colonizers. Anchor labels
@@ -93,12 +93,12 @@ saveRDS(select(classes, species, experiment_id, year, estimate, class), file.pat
 utils::write.csv(select(stability, pair, n, sign_agreement, ccc), file.path(out_dir, "stability.csv"), row.names = FALSE)
 saveRDS(setNames(stability$flows, stability$pair), file.path(out_dir, "flows.rds"))
 
-# ---- Fig 1 panel a (main figure, anchored 2 Nov, Bills) -------------------------
+# ---- Fig 1 panel a (main figure, anchored 2 Nov) -------------------------
 # Strata are stacked bars on one absolute count scale (top down: Loser to
 # Winner); a ribbon joins the combinations present at two adjacent anchors.
 # Drawn by hand: a stratum also holds combinations without a ribbon.
 cols <- c("Loser" = "#D95F2B", "Loser (ns)" = "#F0A07A", "Winner (ns)" = "#8FD3B6", "Winner" = "#1B9E77")
-# drawn twice (Bills, 2 Nov): all residents (main Fig 1a) and the residents in at
+# drawn twice (decided 2 Nov): all residents (main Fig 1a) and the residents in at
 # least 3 gradients that the classification and the ladder use (appendix)
 draw_fig1 <- function(classes, stability, file) {
 gap <- 0.025 * max(table(classes$year)); w <- 0.08; xpos <- setNames(seq_along(anchors), anchors)
@@ -167,8 +167,8 @@ switches
 }
 switches <- draw_fig1(classes, stability, "figures/main/fig1.png")
 
-# appendix: the same figure on the residents in at least 3 gradients (2 Nov,
-# Bills), the species that steps 04 and 05 use
+# appendix: the same figure on the residents in at least 3 gradients (decided
+# 2 Nov), the species that steps 04 and 05 use
 grad3 <- readRDS("data/derived/01_relative_cover/cover_long.rds") |>
   filter(species_pool == "resident") |>
   summarise(n_gradients = n_distinct(gradient_id), .by = species) |>
@@ -225,7 +225,7 @@ report <- c(
   paste("Combinations absent from both groups in an anchor year (", sum(absent_counts$absent), " of ", fmt(nrow(at_anchor)),
         " anchor contrasts) are not classified there, where PLAN.md's rule would have put their zero contrast in",
         "Loser (ns) (decided 30 Oct). Anchors are years 2, 3, 4 and 6 rather than 2, 4 and 6 (decided 30 Oct: agreement between consecutive years rises from year 3 on; PLAN.md updated), labelled Year 2, 3, 4, 6 rather than the mock's First 2, 4, 6 years.",
-        "Fig 1a is written to figures/main/fig1.png (anchored 2 Nov, Bills) and the appendix version to figures/appendix/, not to",
+        "Fig 1a is written to figures/main/fig1.png (anchored 2 Nov) and the appendix version to figures/appendix/, not to",
         "data/derived/03_temporal/, so that they are committed with the report.")
 )
 writeLines(report, "reports/03_temporal.md")

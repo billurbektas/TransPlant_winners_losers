@@ -45,7 +45,7 @@ Rows per region: SQLite 64876, RData `dat` 61430. Region-years where the two dif
 Every community name gets one of three origins (`decided_by`) and one identification level.
 
 - **rule**: chosen automatically by `tidyTRY::resolve_species()` (v 0.2.1 ) from all TNRS candidates: only legitimate names (taxonomic status Accepted or Synonym, never Illegitimate, Invalid or No opinion); the highest match score; WCVP before WFO; Accepted before Synonym. A match into another genus is never chosen, and a name is flagged for review (not chosen automatically) when it comes only from WFO, matches with a score below 0.9, ties between different accepted names, or has no legitimate candidate.
-- **decision**: set by Bills in `prep/config/taxonomy_decisions.csv`, for every community name the rule flagged and for names the rule resolved to a plant from the wrong region (with the reason in the ledger).
+- **decision**: set in `prep/config/taxonomy_decisions.csv`, for every community name the rule flagged and for names the rule resolved to a plant from the wrong region (with the reason in the ledger).
 - **unidentified**: an unidentified field morphotaxon (`prep/config/unidentified_taxa.csv`, from the legacy overrides); its records stay as vegetation but never enter the analysis.
 
 Identification level (rule of the earlier pipeline, `legacy/R/data/community.R:252-285` at commit 7fed5b1): **species_or_lower** when the recorded and the accepted name both have at least two words; **genus_only** when either has one word or the recorded name ends in sp./spp./spec./indet.; **family_only** when the name ends in -aceae and has one word. Only species_or_lower names enter the analysis; the others keep their records with a `drop_reason`.

@@ -10,12 +10,12 @@
 #         of every fold equal 07d's; the held-out gradient absent from training; 8
 #         gradients per level.
 #
-# Decided 2 Nov (Bills): step 06b on the colonizer ladder rows (forests without case
+# Decided 2 Nov: step 06b on the colonizer ladder rows (forests without case
 # weights, one setting chosen by out-of-bag R² over the levels, 3000 trees, a
 # second-seed check, species also in the property forests); A0_origin drops; no
 # loser/winner skill (no loser class); an R² below -100 is taken out of the R² row and
 # the medians and listed, as 07d; the half-violin code copied from step 06b.
-# Without abundance (Bills, 7 Nov): step 06b's new levels; A0_dest enters no forest.
+# Without abundance (decided 7 Nov): step 06b's new levels; A0_dest enters no forest.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 source("R/metrics_gradient.R"); source("R/md_table.R"); source("R/cache.R")
@@ -29,7 +29,7 @@ t_start <- Sys.time()
 out_dir <- "data/derived/07e_forest"
 fold_dir <- file.path(out_dir, "folds")
 dir.create(fold_dir, recursive = TRUE, showWarnings = FALSE)
-cores <- 4L # of 11; 7 choked the machine (Bills, 7 Nov); results do not depend on it
+cores <- 4L # of 11; 7 choked the machine (decided 7 Nov); results do not depend on it
 
 strength_df <- readRDS("data/derived/07c_ladder_fit/ladder_rows.rds") |> mutate(species = factor(species))
 stopifnot(nrow(strength_df) == 110, n_distinct(strength_df$species) == 27, n_distinct(strength_df$experiment_id) == 24,
@@ -57,7 +57,7 @@ all_levels <- c("null", names(level_vars))
 one_per_experiment <- c("warming", "climate") # predictions vary only between experiments
 seeds <- c(main = 20261102L, check = 77L)
 n_trees <- 3000L # medians steadier between seeds than with 1000 (scratchpad check, 2 Nov)
-# one parameter set for every level and fold, chosen from this grid (Bills, 2 Nov)
+# one parameter set for every level and fold, chosen from this grid (decided 2 Nov)
 grid <- tidyr::expand_grid(node = c(5L, 10L, 20L, 40L, 80L), mtry = c("sqrt", "half")) |>
   mutate(setting = paste0("node", node, "_", mtry))
 
@@ -74,7 +74,7 @@ fit_fold <- function(task, set, seed, cache) {
   w <- character()
   catch <- function(expr) withCallingHandlers(expr, warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
   mtry <- if (set$mtry == "sqrt") floor(sqrt(length(vars))) else ceiling(length(vars) / 2)
-  rf <- catch(ranger::ranger(x = train[vars], y = train$strength, num.trees = n_trees, # no case weights (Bills, 2 Nov)
+  rf <- catch(ranger::ranger(x = train[vars], y = train$strength, num.trees = n_trees, # no case weights (decided 2 Nov)
                        mtry = max(1L, mtry), min.node.size = set$node, replace = TRUE,
                        respect.unordered.factors = "order", seed = seed + match(g, scored), num.threads = 1L))
   pred <- tibble::tibble(level = task$level, gradient_id = g, effect_id = test$effect_id, species = as.character(test$species),
@@ -97,12 +97,12 @@ run <- function(set, seed, cache) {
 # ---- Metrics: R² against the metafor Null on the same gradient, as step 06 ------
 score <- function(d) bind_rows(lapply(split(d, list(d$level, d$gradient_id), drop = TRUE), function(x) {
   met <- select(metrics_gradient(x$observed, x$predicted, mean((x$observed - x$null_metafor)^2)), r2, spearman) # no skill: no loser class
-  if (x$level[1] %in% one_per_experiment) met$spearman <- NA_real_ # cannot order species within a gradient (Bills, 2 and 7 Nov)
+  if (x$level[1] %in% one_per_experiment) met$spearman <- NA_real_ # cannot order species within a gradient (decided 2 and 7 Nov)
   tibble::tibble(level = x$level[1], gradient_id = x$gradient_id[1], met, n = nrow(x))
 }))
 
 # ---- Tuning: one setting for every level and fold, the one with the highest median
-# out-of-bag R² over the 17 levels, each forest fitted once on all 110 rows (Bills,
+# out-of-bag R² over the 17 levels, each forest fitted once on all 110 rows (decided
 # 2 Nov). Out-of-bag uses none of the held-out scores, so they stay unbiased.
 oob_out <- parallel::mclapply(seq_len(nrow(grid)), function(i) { w <- character(); tab <- withCallingHandlers(bind_rows(lapply(names(level_vars), function(l) {
   vars <- level_vars[[l]]
@@ -141,11 +141,11 @@ seed_med <- summarise(seed_diff, d = abs(median(value) - median(value2)), .by = 
 # ---- Forest beside metafor, per gradient and as medians ---------------------------
 long <- function(d, model) tidyr::pivot_longer(d, c(r2, spearman), names_to = "metric", values_to = model) |>
   select(level, gradient_id, metric, all_of(model))
-# an R² below -100 is taken out of the R² row and the medians and listed (Bills, 2 Nov; as 07d)
+# an R² below -100 is taken out of the R² row and the medians and listed (decided 2 Nov; as 07d)
 outliers <- bind_rows(transmute(filter(pred06, r2 < -100), model = "meta-regression", level, gradient_id, r2),
                       transmute(filter(forest_metrics, r2 < -100), model = "forest", level, gradient_id, r2))
 # a gradient taken out on either side is taken out of both, so the two medians of a level are
-# over the same gradients (Bills, 3 Nov)
+# over the same gradients (decided 3 Nov)
 out_pairs <- paste(outliers$level, outliers$gradient_id)
 trim <- function(m) mutate(m, r2 = ifelse(paste(level, gradient_id) %in% out_pairs, NA_real_, r2))
 vs <- inner_join(long(trim(pred06), "metafor"), long(trim(forest_metrics), "forest"), by = c("level", "gradient_id", "metric")) |>
@@ -165,7 +165,7 @@ spread <- filter(folds, level != "null") |>
 # ---- Fig S22: metafor (left) beside forest (right), held out ---------------------
 cols <- c(metafor = "#2F80D8", forest = "#E69F00") # blue as Fig 6; Okabe-Ito orange
 fills <- c(metafor = "#8DB8EA", forest = "#F3C766")
-col_levels <- setdiff(all_levels, "null"); n <- length(col_levels) # Null is the R² reference, not drawn (Bills, 2 Nov)
+col_levels <- setdiff(all_levels, "null"); n <- length(col_levels) # Null is the R² reference, not drawn (decided 2 Nov)
 xlabs <- sub(" \\+ species$", "\n+ species", sub("Experimental warming", "Experimental\nwarming",
              sub("Background climate", "Background\nclimate", sub("Species-specific responses", "Species-\nspecific\nresponses", level_display[col_levels]))))
 xs <- scale_x_continuous(limits = c(0.4, n + 0.6), breaks = seq_len(n), labels = xlabs, expand = c(0, 0))
@@ -194,7 +194,7 @@ metric_row <- function(key, tag, ylab, lims, last) {
   sw <- tidyr::pivot_wider(s, id_cols = x, names_from = model, values_from = med)
   lab <- left_join(s, summarise(g, top = max(value), .by = x), by = "x") |>
     mutate(xl = x + ifelse(model == "metafor", -0.24, 0.24), yl = top + 0.07 * diff(lims))
-  # empty columns stay empty, no "NA" (as Fig 4, Bills, 2 Nov)
+  # empty columns stay empty, no "NA" (as Fig 4, decided 2 Nov)
   ggplot() + geom_hline(yintercept = 0, colour = "grey60") + geom_polygon(data = vio, aes(x, y, group = id, fill = model), colour = NA, alpha = 0.4) +
     geom_point(data = g, aes(xj, value, colour = model), size = 2.4, alpha = 0.25, show.legend = FALSE) +
     geom_segment(data = sw, aes(x = x - 0.06, xend = x + 0.06, y = metafor, yend = forest), colour = "grey40", linewidth = 1.2) +
@@ -215,7 +215,7 @@ p_top <- ggplot(br) + geom_segment(aes(x = x, xend = xend, y = y, yend = y), col
   xs + scale_y_continuous(limits = c(0.5, 2)) + theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA))
 figS22 <- patchwork::wrap_plots(p_top, metric_row("r2", "a)", "R² against Null", c(-0.2, 0.6), FALSE),
                                 metric_row("spearman", "b)", "Spearman ρ", c(-0.2, 0.6), TRUE), ncol = 1, heights = c(0.35, 1, 1)) +
-  patchwork::plot_annotation( # no footnote: the caption says it (Bills, 4 Nov)
+  patchwork::plot_annotation( # no footnote: the caption says it (decided 4 Nov)
     theme = theme(plot.background = element_rect(fill = "white", colour = NA)))
 ggsave("figures/appendix/figS22.png", figS22, width = 48, height = 22, dpi = 100, bg = "white")
 
@@ -232,11 +232,11 @@ r2_main <- filter(med, metric == "r2")
 report <- c(
   "# Step 07e: Sensitivity, random forest, colonizers (held out)", "",
   paste0("Every level of the ladder except Null was refitted as a random forest (ranger ", as.character(packageVersion("ranger")), ") on the ", nrow(strength_df),
-         " colonizer ladder rows of step 07c, with the variables of the step 07d formulas (without abundance, Bills 7 Nov) as predictors and species as a factor in the Species-specific responses and the seven ",
+         " colonizer ladder rows of step 07c, with the variables of the step 07d formulas (without abundance, decided 7 Nov) as predictors and species as a factor in the Species-specific responses and the seven ",
          "property + species forests. Each forest was fitted ", length(scored), " times, once without each scored gradient, and asked to predict it, ",
          "with ", n_trees, " trees, no case weights and one parameter set for every level and fold: minimum node size ", best$node, " and mtry ",
          c(sqrt = "the square root of", half = "half")[[best$mtry]], " the number of predictors, chosen from ", nrow(grid), " settings as the one with the highest ",
-         "median out-of-bag R² over the ", length(level_vars), " levels (Bills, 2 Nov). Only held-out predictions are read. ",
+         "median out-of-bag R² over the ", length(level_vars), " levels (decided 2 Nov). Only held-out predictions are read. ",
          "They are scored as in step 07d: R² against the metafor Null on the same gradient and Spearman ρ within the gradient (no skill: colonizers have no loser class), ",
          "and set beside 07d's held-out values per gradient and as medians. The forest Null is the mean of the training effects."),
   "", "## Counts", "", md_table(count_tab),
@@ -263,8 +263,8 @@ report <- c(
   "", "## Figures", "", "![Fig S22, colonizers: forest beside meta-regression](../figures/appendix/figS22.png)",
   "", "## Warnings captured", "", if (length(unique(warns))) paste("-", unique(warns)) else "None.",
   "", "## Deviations from PLAN.md", "",
-  "- Step 06b on the colonizer ladder rows (Bills, 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.",
-  "- No loser/winner skill (no loser class); R² below −100 taken out and listed (Bills, 2 Nov), from both meta-regression and forest for that level and gradient (3 Nov).")
+  "- Step 06b on the colonizer ladder rows (decided 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.",
+  "- No loser/winner skill (no loser class); R² below −100 taken out and listed (decided 2 Nov), from both meta-regression and forest for that level and gradient (3 Nov).")
 writeLines(report, "reports/07e_forest.md")
 message("Step 07e written: ", length(tasks), " forests (and ", length(tasks), " for the seed check); ",
         sprintf("%.1f", as.numeric(difftime(Sys.time(), t_start, units = "mins"))), " min")

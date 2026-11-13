@@ -1,10 +1,10 @@
 # Step 06: The ladder, predicted (Step D, route 2, residents)
 
-Every level of the ladder was refitted 16 times on the 512 ladder rows of step 05, each time without one of the 16 gradients that have at least 5 effects, and asked to predict the strengths of the gradient left out: Null, Experimental warming, Background climate, Species-specific responses and one level per property (without abundance, Bills 7 Nov), 176 fold fits on 4 cores (70 fit-minutes). Predictions are fixed effects only, the experiment term at its expected value zero; Species-specific responses adds each species' intercept and slope deviations learnt from the training gradients (zero for a species not seen there), and the seven supplement levels add the same to each property model. Each level is scored per gradient by R² against the Null model on the same gradient (1 − its error / the Null's error, so Null is 0), Spearman ρ within the gradient and loser/winner skill, held out and in sample (step 05 full-data fits, the same rule), then summarised by the median over gradients (Bills, 2 Nov).
+Every level of the ladder was refitted 16 times on the 512 ladder rows of step 05, each time without one of the 16 gradients that have at least 5 effects, and asked to predict the strengths of the gradient left out: Null, Experimental warming, Background climate, Species-specific responses and one level per property (without abundance, decided 7 Nov), 176 fold fits on 4 cores (70 fit-minutes). Predictions are fixed effects only, the experiment term at its expected value zero; Species-specific responses adds each species' intercept and slope deviations learnt from the training gradients (zero for a species not seen there), and the seven supplement levels add the same to each property model. Each level is scored per gradient by R² against the Null model on the same gradient (1 − its error / the Null's error, so Null is 0), Spearman ρ within the gradient and loser/winner skill, held out and in sample (step 05 full-data fits, the same rule), then summarised by the median over gradients (decided 2 Nov).
 
 ## Counts
 
-20 gradients train; the 16 with at least 5 effects are held out and scored, each in one fold (Bills, 2 Nov). Effects and species per gradient:
+20 gradients train; the 16 with at least 5 effects are held out and scored, each in one fold (decided 2 Nov). Effects and species per gradient:
 
 | gradient_id | effects | species | held_out |
 | --- | --- | --- | --- |
@@ -142,9 +142,9 @@ Fig 6 a) and Fig S12. Each half violin is the 16 scored gradients (at least 5 ef
 
 ## Deviations from PLAN.md
 
-- Species deviations from hand BLUPs (`R/species_deviation.R`), not `ranef(m)`: metafor 5.0.1 gives none for the GDIAG slope block (Bills, 2 Nov).
-- Experimental warming's and Background climate's Spearman and skill are NA in every gradient (Bills, 2 and 7 Nov): with several experiments in a gradient they would rank experiments, not species.
-- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (Bills, 2 Nov); PLAN.md names no fallback.
-- Property folds warm-started from the same fold's Species-specific responses fit and fitted with optim BFGS (Bills, 7 Nov, as step 05); a failing one falls back to the 2 Nov rule.
+- Species deviations from hand BLUPs (`R/species_deviation.R`), not `ranef(m)`: metafor 5.0.1 gives none for the GDIAG slope block (decided 2 Nov).
+- Experimental warming's and Background climate's Spearman and skill are NA in every gradient (decided 2 and 7 Nov): with several experiments in a gradient they would rank experiments, not species.
+- A fold that does not converge is refitted once with bobyqa, then NA for that level and gradient (decided 2 Nov); PLAN.md names no fallback.
+- Property folds warm-started from the same fold's Species-specific responses fit and fitted with optim BFGS (decided 7 Nov, as step 05); a failing one falls back to the 2 Nov rule.
 - Spearman is also NA where every prediction in the gradient is the same (MILESTONES), beside PLAN.md's fewer than 5 effects.
 - Fig 6 (R², raw heterogeneity) is written to `figures/main/fig6.png`, Spearman and skill to `figures/appendix/figS12.png`, the per-gradient view to `figures/appendix/figS15.png`; the prediction rows widen their y range to the data.

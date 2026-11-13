@@ -1,10 +1,10 @@
 # Step 05 side check: the 12 slope fits under GEN, against the diagonal ladder.
 #
-# Asked by Bills (1 Nov): after the diagonal ladder of analysis/05_ladder_fit.R,
+# Decided 1 Nov: after the diagonal ladder of analysis/05_ladder_fit.R,
 # refit every slope fit with the T, P, TP block GEN, store it apart, and compare
 # the slope variances, the fixed effects and what changes in the ladder's reading.
 # Not a step of MILESTONES.md; it does not feed any later step. Moved to
-# analysis/additional_checks/ (Bills, 2 Nov); run from the repository root. Paused on
+# analysis/additional_checks/ (decided 2 Nov); run from the repository root. Paused on
 # 2 Nov with 6 of 12 GEN fits cached; rerunning resumes from them. Written for the
 # 1,655 rows of the 28 Oct pools, and its cached fits are on those rows: it stops at
 # the first count check now and needs the 2 Nov ladder rows (512) before a rerun.
@@ -92,7 +92,7 @@ pair <- vc |> select(rowset, model, struct, any_of(c("logLik_REML", "var_T", "va
   tidyr::pivot_wider(names_from = struct, values_from = -c(rowset, model, struct))
 both_ok <- vapply(seq_along(tasks), function(i) ok(gen[[i]]) && ok(diag[[i]]), logical(1))
 gen_ok <- vapply(gen, ok, logical(1))
-rho_one <- vapply(gen, function(f) ok(f) && max(abs(f$m$phi)) >= 0.999, logical(1)) # rho = 1 (Bills, 1 Nov)
+rho_one <- vapply(gen, function(f) ok(f) && max(abs(f$m$phi)) >= 0.999, logical(1)) # rho = 1 (decided 1 Nov)
 
 # ---- Fixed effects with CR1, side by side ---------------------------------------
 cr1 <- function(m, d) { r <- robust(m, cluster = d$experiment_id, adjust = TRUE)
@@ -178,7 +178,7 @@ ft <- filter(fe, term != "intrcpt")
 report <- c(
   "# Step 05 side check: GEN against the diagonal T, P, TP block", "",
   paste0("Every slope fit of the step 05 ladder (Species-dependent on the five rowsets and the seven property models) was refitted with ",
-         "the T, P, TP slope block GEN, from metafor's default start, and set beside its diagonal fit (asked by Bills, 1 Nov). ",
+         "the T, P, TP slope block GEN, from metafor's default start, and set beside its diagonal fit (decided 1 Nov). ",
          "GEN converged in ", sum(gen_ok), " of ", length(gen), " fits; ", sum(rho_one), " of those have a correlation at |ρ| ≥ 0.999 ",
          "(the ρ = 1 rule). Over the ", nrow(ft), " fixed effects of the ", sum(both_ok), " pairs where both converged, the median absolute ",
          "shift is ", if (nrow(ft)) sprintf("%.2f", median(abs(ft$shift_in_SE))) else "NA", " diagonal CR1 standard errors, the largest ",

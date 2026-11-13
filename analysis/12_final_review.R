@@ -1,12 +1,12 @@
 # Step 12: final review of code, runs, documentation, open issues and statistics.
 #
-# PLAN.md: the whole document (consistency); CLAUDE.md (rules).
+# PLAN.md: the whole document (consistency) and the working rules.
 # Reads:  data/derived/ (every step's outputs and cached fits, read only, nothing refitted);
 #         data/derived/prep/ (prep outputs); prep/_targets (store, for the TRY name map)
 # Writes: reports/12_final_review.md
 # Checks: none that stop; every number in the report is computed here from the saved outputs.
 #
-# Decided 3 Nov (Bills): a critical final pass; statistical choices are not changed, only
+# Decided 3 Nov: a critical final pass; statistical choices are not changed, only
 # reported. The code findings come from a line-by-line read of every script (three read-only
 # reviews, each finding re-checked before it was kept); the quantities below are the
 # evidence. Runs that cannot be repeated inside one script (the fresh prep rebuild and the
@@ -91,7 +91,7 @@ col_clim <- readRDS("data/derived/07c_ladder_fit/ladder_rows.rds")
 # ---- Report ---------------------------------------------------------------------------------
 report <- c(
   "# Step 12: Final review", "",
-  "A critical final pass over the whole repository (Bills, 3 Nov): every script of the prep pipeline and the analysis read line by line; everything run that does not fit a model or download data; the documentation checked against the code; every open item re-classified; and statistical weak points reported without changing any choice. `legacy/` was retired. What was fixed changes no result; what would change a result is listed for Bills under *Decisions*.",
+  "A critical final pass over the whole repository (decided 3 Nov): every script of the prep pipeline and the analysis read line by line; everything run that does not fit a model or download data; the documentation checked against the code; every open item re-classified; and statistical weak points reported without changing any choice. `legacy/` was retired. What was fixed changes no result; what would change a result is listed under *Decisions*.",
   "", "## Runs", "",
   md_table(tibble::tribble(
     ~check, ~outcome,
@@ -104,14 +104,14 @@ report <- c(
   "", "## Fixed in this step (no result changes)", "",
   "- **Nondeterministic figures.** Figs 2, 3, 4 and S10 swapped the order of their two legends between runs (ggplot2 orders them arbitrarily); the order is now fixed to the one in the reviewed figures. Label placement in Figs 4 and S3 now ends on an iteration count, not on ggrepel's half-second clock.",
   "- **Table S5.** 30 resident rows were the five floor and ceiling fits repeated under each property's row set (all row sets are the ladder rows since 2 Nov); dropped, so Table S4 has one row per model and pool. The slope structure is labelled the same way for both pools.",
-  "- **Reports.** The 07a fit table showed 0 species for every experiment (`nlevels` on a character column). Steps 05 and 06 said the P and TP slope variances sit at the boundary; only P does (TP is of the size of T). Steps 06 and 07d dropped metafor's 'struct disregarded' warning from their reports, against CLAUDE.md; it is now listed with its count. Old figure numbers (Fig 4, S4, S7, S9, S11, S2) replaced by the final ones in headers, comments and report text. Step 03's report said step 10 draws Fig 1b; step 07a does.",
+  "- **Reports.** The 07a fit table showed 0 species for every experiment (`nlevels` on a character column). Steps 05 and 06 said the P and TP slope variances sit at the boundary; only P does (TP is of the size of T). Steps 06 and 07d dropped metafor's 'struct disregarded' warning from their reports, against the rule that warnings are reported; it is now listed with its count. Old figure numbers (Fig 4, S4, S7, S9, S11, S2) replaced by the final ones in headers, comments and report text. Step 03's report said step 10 draws Fig 1b; step 07a does.",
   "- **README.** The forest sentence compared medians over 19 levels including the Null (the forest's Null is the training mean) and disagreed with the 06b report; it now uses the 06b definition over the 18 model levels. A sentence now states that the colonizer Null is a weak reference (see Statistics). The Fig S13 caption, the ranger snippet and the repository tree were corrected.",
   "- **Prep text.** P2 said 'ErrorRisk >= 4' (the pipeline uses 3, written now from the counts table); P4 called experiments 'destination sites'; the `clean_try()` default threshold and the `gbif_niche.R` header count now match the pipeline. Rerunning the pipeline changed only the reports.",
   "- **Dead code.** `R/yardstick.R` (the shared R² yardstick, replaced 2 Nov) removed.",
   "- **`legacy/` retired.** Nothing read from it: the clean clone ran without it. Every comment citing `legacy/<file>:<lines>` now points to commit 7fed5b1, the last commit holding it; the old pipeline at its original paths is the tag `targets-pipeline-2026-10`. The four provenance files `data/README.md` and `data/source_manifest.csv` refer to moved to `prep/provenance/`. The `.gitignore` lines and the README tree entry removed. 67 git-ignored legacy figures remain on disk (see Decisions).",
-  "", "## Decisions for Bills (would change a result)", "",
-  "Bills' answers (3 Nov) were carried out in step 13: 1 and 4 kept as they are; 2, 3, 5, 6, 7 and 8 fixed; 10: renv activated, the data README and manifest corrected; and the colonizer destination abundance put on the residents' log scale. The items below describe the state the review found; step 13's notes give the effect of each fix.", "",
-  paste0("1. **Colonizer Step C with measured absences (kept, Bills 3 Nov).** Effects with strength 0 and SE 0 enter `rma.mv` with V = 0. The likelihood then has a spike at τ² = 0 (table below), an artefact of declaring a value exactly known; the reported fits are the proper interior optimum, the one any small SE floor gives too (checked 3 Nov). What remains is that a precisely measured absence outweighs a noisy presence: ",
+  "", "## Open decisions (would change a result)", "",
+  "The decisions of 3 Nov were carried out in step 13: 1 and 4 kept as they are; 2, 3, 5, 6, 7 and 8 fixed; 10: renv activated, the data README and manifest corrected; and the colonizer destination abundance put on the residents' log scale. The items below describe the state the review found; step 13's notes give the effect of each fix.", "",
+  paste0("1. **Colonizer Step C with measured absences (kept, decided 3 Nov).** Effects with strength 0 and SE 0 enter `rma.mv` with V = 0. The likelihood then has a spike at τ² = 0 (table below), an artefact of declaring a value exactly known; the reported fits are the proper interior optimum, the one any small SE floor gives too (checked 3 Nov). What remains is that a precisely measured absence outweighs a noisy presence: ",
          sum(zero_se$n_zero >= 2), " of ", nrow(zero_se), " modelled colonizers have two or more absences, and ", nrow(tiny_mu), " species (", paste(tiny_mu$species, collapse = ", "), ") have pooled means below 1e-6 although they arrived somewhere; Fig 5 counts them as colonizers (", sum(s07b$mu > 0, na.rm = TRUE), "; ", sum(s07b$mu > 1e-6, na.rm = TRUE), " with a tolerance), which matches 'present once is present'."),
   "", md_table(rename(reml_gap, `REML log-lik at the spike, tau2 = 1e-12` = `REML log-lik at tau2 = 1e-12`)), "",
   paste0("2. **CH_Calanda2 colonizer years.** Step 01 dropped a year when one of the two compared groups was not surveyed, which made sense for the destination-control contrast but not for the warmed-only colonizer model (2 Nov): the colonizers of CH_Calanda2::Cal::Nes lost year 4. Fixed in step 13: the colonizer rows there now have years ", cal2$years[cal2$species_pool == "destination_pool"], ", as the residents' (", cal2$years[cal2$species_pool == "resident"], ")."),
@@ -123,7 +123,7 @@ report <- c(
   paste0("7. **R² trimming in medians (fixed in step 13).** Taking out an R² below −100 moves the colonizer Woody held-out median from ", fmt(median(woody7)), " to ", fmt(median(woody7[woody7 > -100])), "; 07e now takes the same gradient out of the forest's median too, so both are over the same gradients."),
   "8. **Caches keyed by file existence (fixed in step 13).** Every cache now stores a key of its inputs (`R/cache.R`) and is redone when an upstream change alters them; every fit was redone once under the keys and reproduced every result.",
   "9. **Smaller points.** Fig 2's panels b and c show plain mean cover, which differs in sign from the model strength for a few effects; 30 morphotaxon codes (`*_NID_*`) are labelled genus-level instead of unidentified (same treatment, different label); the IN_Kashmir exclusion is a region name, not a stated rule; Step C reports name the first optimizer's failure cause without reading the error.",
-  "10. **Environment and files (step 13).** renv is activated, its project library linked from the installed packages (versions as in the lock; ragg declared in `_dependencies.R` so figures keep their device); 61 locked packages that no code uses are not installed, nine of them used only by the old pipeline (clubSandwich, crew, geometry, ggalluvial, here, mclogit, tarchetypes, testthat, TNRS): a `renv::snapshot()` would drop them. Corrected `data/README.md` and `data/source_manifest.csv` are ready to copy in (a permission rule protects `data/`). CLAUDE.md still states rules about `legacy/` and `figures/diagnostics/`. Remove the leftover ignored files with `rm -rf legacy`.",
+  "10. **Environment and files (step 13).** renv is activated, its project library linked from the installed packages (versions as in the lock; ragg declared in `_dependencies.R` so figures keep their device); 61 locked packages that no code uses are not installed, nine of them used only by the old pipeline (clubSandwich, crew, geometry, ggalluvial, here, mclogit, tarchetypes, testthat, TNRS): a `renv::snapshot()` would drop them. Corrected `data/README.md` and `data/source_manifest.csv` are ready to copy in (`data/` is read only). The working rules still mention `legacy/` and `figures/diagnostics/`. Remove the leftover ignored files with `rm -rf legacy`.",
   "", "## Open items", "",
   md_table(tibble::tribble(
     ~item, ~status,

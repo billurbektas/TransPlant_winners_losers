@@ -10,7 +10,7 @@
 #         strength equals the mean of step 02's yearly contrasts over years >= 3;
 #         every column other than strength and strength_se identical to step 02.
 #
-# Decided 30 Oct (Bills): step 03 found that the yearly contrasts settle from
+# Decided 30 Oct: step 03 found that the yearly contrasts settle from
 # year 3, so the main strength of steps 04 to 09 averages years 3 and later,
 # from the same fits (no refit, same df rule, all-zero years kept as in step
 # 02); step 02's all-years strength is the sensitivity run.

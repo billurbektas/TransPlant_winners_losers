@@ -2,7 +2,7 @@
 # by steps 06 and 07. PLAN.md writes species_deviation(ranef(m), test), but
 # metafor 5.0.1 gives no BLUPs for a GEN or GDIAG slope block, so the BLUPs are
 # computed by hand, jointly for every random term, from the fitted variance
-# components, V and beta (Bills, 2 Nov): b = D Z' M^-1 (y - X beta), with M the
+# components, V and beta (decided 2 Nov): b = D Z' M^-1 (y - X beta), with M the
 # fit's marginal covariance.
 blup <- function(m, data) {
   r <- as.vector(Matrix::solve(m$M, m$yi - m$X %*% m$beta))

@@ -1,4 +1,4 @@
-# The ladder figures (Bills, 7 Nov: the ladder without abundance; 8 Nov: Fig 6 is R² beside
+# The ladder figures (decided 7 Nov: the ladder without abundance; 8 Nov: Fig 6 is R² beside
 # the raw heterogeneity, Spearman and skill and the change in unexplained variation go to the appendix).
 #   ladder_performance()   Fig 6 (residents, step 06: a) R², b) raw heterogeneity), Fig S12
 #                          (residents, step 06: a) Spearman, b) loser/winner skill) and Fig S19
@@ -22,7 +22,7 @@ ladder_compared_with <- c(`Experimental warming` = "Null", `Background climate` 
 ladder_fills <- c(total = "#2B2E35", sigma2_experiment = "#B9BCC6", tau2 = "#6E7380", H_intercept = "#DDB54F", H_slope = "#8C6D1F")
 
 ladder_base <- function() ggplot2::theme_classic(base_size = 38) +
-  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = 68), # text enlarged three times (Bills, 8 Nov)
+  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = 68), # text enlarged three times (decided 8 Nov)
                  axis.title.y = ggplot2::element_text(face = "bold", size = 60), axis.text = ggplot2::element_text(size = 52),
                  panel.grid.major.y = ggplot2::element_line(colour = "grey90"),
                  plot.background = ggplot2::element_rect(fill = "white", colour = NA))
@@ -34,7 +34,7 @@ ladder_x <- function() ggplot2::scale_x_continuous(limits = c(0.4, length(ladder
 # ---- the violin panel: one metric against the Null --------------------------------
 # half violins per column, left = explanatory (in sample), right = predictive (held
 # out), medians drawn and written; R² is against the Null, so Null is not drawn;
-# the Species-specific medians run as dashed lines to the right (Bills, 2 Nov)
+# the Species-specific medians run as dashed lines to the right (decided 2 Nov)
 ladder_metric_panel <- function(gradients, key, tag, ylab, lims, last, legend) {
   `%>%` <- dplyr::`%>%`
   library(ggplot2)
@@ -74,7 +74,7 @@ ladder_metric_panel <- function(gradients, key, tag, ylab, lims, last, legend) {
                       guide = if (legend) "legend" else "none") # one key per figure, also when the keys are collected
   p + ladder_x() + scale_y_continuous(limits = lims) + labs(title = tag, x = NULL, y = ylab) + ladder_base() +
     # the legend goes with the first violin panel: inside Spearman, top left, where the floor has no
-    # values; under R² it sits right below that panel (Bills, 8 Nov)
+    # values; under R² it sits right below that panel (decided 8 Nov)
     theme(legend.position = if (!legend) "none" else if (key == "Spearman") "inside" else "bottom",
           legend.position.inside = c(0.005, 0.99), legend.justification = if (key == "Spearman") c(0, 1) else "left",
           legend.direction = if (key == "Spearman") "vertical" else "horizontal",
@@ -119,7 +119,7 @@ ladder_het_panel <- function(het, tag, last) {
     geom_text(data = totals, aes(xb, value, label = sprintf("%.2f", value)), vjust = -0.5, size = 15, fontface = "bold") +
     scale_fill_manual(values = ladder_fills[names(fill_labs)], labels = fill_labs, name = NULL,
                       guide = guide_legend(order = 1, nrow = 1)) +
-    scale_linetype_manual(values = "dashed", guide = "none") + ladder_x() + # the dashed lines are named in the caption (Bills, 8 Nov)
+    scale_linetype_manual(values = "dashed", guide = "none") + ladder_x() + # the dashed lines are named in the caption (decided 8 Nov)
     scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
     labs(title = tag, x = NULL, y = "Heterogeneity\n(unexplained variance, ×10⁻⁴)") +
     ladder_base() + theme(legend.position = "bottom", legend.justification = "center",
@@ -130,7 +130,7 @@ ladder_het_panel <- function(het, tag, last) {
 
 # ---- Fig 6 / S12 / S19: the panels in the order given ---------------------------------
 # panels: from "R2", "het", "Spearman", "Skill"; tagged a), b), ... in that order, the
-# column names under the last panel only; no brackets on top (Bills, 8 Nov)
+# column names under the last panel only; no brackets on top (decided 8 Nov)
 ladder_performance <- function(gradients, file, panels, het = NULL, height) {
   library(ggplot2)
   stopifnot(all(gradients$column %in% ladder_columns), all(panels %in% c("R2", "het", "Spearman", "Skill")),
@@ -230,9 +230,9 @@ ladder_change <- function(het, file) {
     }))
     if (!is.null(arrows) && nrow(arrows))
       p <- p + geom_curve(data = arrows, aes(x = x, y = y, xend = xend, yend = yend, linewidth = I(w)), colour = purple,
-                          curvature = -0.15, arrow = arrow(length = unit(0.55, "cm"), type = "closed")) # no "moved" label (Bills, 8 Nov)
+                          curvature = -0.15, arrow = arrow(length = unit(0.55, "cm"), type = "closed")) # no "moved" label (decided 8 Nov)
   }
-  # each row named on its tag line, above the row (Bills, 8 Nov: larger text); drawn after the
+  # each row named on its tag line, above the row (decided 8 Nov: larger text); drawn after the
   # arrows on white so that the arrows pass behind the names
   p <- p + geom_label(data = bands, aes(x = x_tag, y = base + band_h + 0.22, label = paste0(letters[r], ") ", row_lab[component])),
                       hjust = 0, vjust = 0, size = 17, fontface = "bold", fill = "white", border.colour = NA,

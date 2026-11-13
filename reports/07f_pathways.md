@@ -1,6 +1,6 @@
 # Step 07f: The pathways (Q4), Fig 5
 
-PLAN.md's fallback for the pathways figure (Bills, 2 Nov), since Step C found almost nothing consistent: resident species grouped by the sign of their pooled net strength from step 04 (Fig 2), losers below zero and winners above, against colonizer species whose pooled net warmed cover from 07b (Fig S2) is above zero; one point per species. As the agreed mock: LDMC, LMA, vegetative height, and the thermal and precipitation optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species per group. 15 species are residents at some sites and colonizers at others, and appear in both pools. Descriptive; no model.
+PLAN.md's fallback for the pathways figure (decided 2 Nov), since Step C found almost nothing consistent: resident species grouped by the sign of their pooled net strength from step 04 (Fig 2), losers below zero and winners above, against colonizer species whose pooled net warmed cover from 07b (Fig S2) is above zero; one point per species. As the agreed mock: LDMC, LMA, vegetative height, and the thermal and precipitation optima in their units (log axes except the thermal optimum) as dot strips with the group median, and the share of graminoids and woody species per group. 15 species are residents at some sites and colonizers at others, and appear in both pools. Descriptive; no model.
 
 ## Groups
 
@@ -23,7 +23,7 @@ PLAN.md's fallback for the pathways figure (Bills, 2 Nov), since Step C found al
 
 Medians with the number of species that have the property in brackets.
 
-## Group comparisons (Bills, 7 Nov)
+## Group comparisons (decided 7 Nov)
 
 Each pair of groups, for each property: Wilcoxon rank-sum test (`wilcox.test`, R's defaults) for the five continuous properties and Fisher's exact test for the graminoid and woody shares; p-values Holm-corrected over the three pairs of each property. Estimate: ratio of the second group's median to the first's (continuous) or difference in share (second minus first). Read with two cautions: the 15 species in both pools are counted in a resident group and among the colonizers, so the resident-colonizer comparisons are not between independent sets; and related species are counted as independent (no phylogenetic correction).
 
@@ -65,6 +65,6 @@ None.
 
 ## Deviations from PLAN.md
 
-- PLAN.md's fallback, with resident losers added beside the winners (Bills, 2 Nov): groups by the sign of the net effect, not Step C classes.
-- The figure is main Fig 5 (final numbering, Bills 2 Nov); written to `figures/main/fig5.png`.
-- Group comparisons added to the descriptive figure (Bills, 7 Nov): pairwise Wilcoxon and Fisher tests, Holm within each property.
+- PLAN.md's fallback, with resident losers added beside the winners (decided 2 Nov): groups by the sign of the net effect, not Step C classes.
+- The figure is main Fig 5 (final numbering, decided 2 Nov); written to `figures/main/fig5.png`.
+- Group comparisons added to the descriptive figure (decided 7 Nov): pairwise Wilcoxon and Fisher tests, Holm within each property.

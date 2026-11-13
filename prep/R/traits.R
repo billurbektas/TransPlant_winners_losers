@@ -61,7 +61,7 @@ read_try_ids <- function(try_file, ids) {
 # the same UTF-8 repair and spacing as in P1). The fallback is taken only when
 # the contributor's name was never resolved, or when our own resolution of it
 # gives the same species: a name we resolved and rejected is not overridden by
-# TRY's merge (Bills, 3 Nov; step 15 finding 3). The species that trusting
+# TRY's merge (decided 3 Nov; step 15 finding 3). The species that trusting
 # TRY's AccSpeciesName would give is kept for the report.
 attach_try_names <- function(try_raw, try_name_map) {
   from_species <- lookup_species(try_raw$SpeciesName, try_name_map)

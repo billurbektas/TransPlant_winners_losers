@@ -1,6 +1,6 @@
 # Step 07c: The colonizer ladder, fitted (Step D route 1, colonizers)
 
-The residents' ladder (step 05) was fitted to the colonizers (Bills, 2 Nov): warmed cover from years 3 and later (step 07a) for the 110 effects of the 27 colonizer species found in at least 3 gradients that carry every property (24 experiments, 18 gradients). The same 11 models, without abundance (Bills, 7 Nov): Null, Experimental warming, Background climate, Species-specific responses and one model per property. Properties are on the residents' step 02 scale (checked); A0_dest (log(100 x mean destination-control cover + 1)) is still standardised across all 379 colonizer effects of 07a but enters no model. 24 effects are measured absences (SE 0).
+The residents' ladder (step 05) was fitted to the colonizers (decided 2 Nov): warmed cover from years 3 and later (step 07a) for the 110 effects of the 27 colonizer species found in at least 3 gradients that carry every property (24 experiments, 18 gradients). The same 11 models, without abundance (decided 7 Nov): Null, Experimental warming, Background climate, Species-specific responses and one model per property. Properties are on the residents' step 02 scale (checked); A0_dest (log(100 x mean destination-control cover + 1)) is still standardised across all 379 colonizer effects of 07a but enters no model. 24 effects are measured absences (SE 0).
 
 ## Counts
 
@@ -51,7 +51,7 @@ Property moves against Species-specific responses, as a share of its τ² + σ²
 | Phylogeny | -0.5% | +7.5% |
 | Niche | -1.7% | +19.4% |
 
-Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components are not pinned down well enough for that check to hold; they are reported, not enforced (Bills, 2 Nov).
+Moves beyond step 05's 5% limit: 6 of 14. On 110 effects the variance components are not pinned down well enough for that check to hold; they are reported, not enforced (decided 2 Nov).
 
 ## Coefficients whose 95% interval excludes zero
 
@@ -161,7 +161,7 @@ The raw heterogeneity of these fits is Fig S19 b) (step 07d).
 
 ## Deviations from PLAN.md
 
-- The colonizer ladder on the residents' reduction and models (Bills, 2 Nov); properties on the residents' scale.
-- Property models warm-started from Species-specific responses with optim BFGS (Bills, 7 Nov, as step 05); the optimizer column above says which fits needed a fallback.
-- Step 05's tau2 and property checks are reported, not enforced (Bills, 2 Nov: run without stopping).
-- The colonizer coefficients are their own appendix figure (Fig S18), beside the residents' Fig S14; Fig S20 mirrors Fig S13 (Bills, 7 Nov; 8 Nov numbering).
+- The colonizer ladder on the residents' reduction and models (decided 2 Nov); properties on the residents' scale.
+- Property models warm-started from Species-specific responses with optim BFGS (decided 7 Nov, as step 05); the optimizer column above says which fits needed a fallback.
+- Step 05's tau2 and property checks are reported, not enforced (decided 2 Nov: run without stopping).
+- The colonizer coefficients are their own appendix figure (Fig S18), beside the residents' Fig S14; Fig S20 mirrors Fig S13 (decided 7 Nov; 8 Nov numbering).

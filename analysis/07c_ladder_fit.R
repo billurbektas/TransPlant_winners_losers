@@ -15,17 +15,17 @@
 #         X:P, X:TP; slope fits with the diagonal T, P, TP block. Step 05's tau2
 #         and property checks are computed and reported.
 #
-# Decided 2 Nov (Bills): the residents' ladder (step 05) on colonizers, the same
+# Decided 2 Nov: the residents' ladder (step 05) on colonizers, the same
 # reduction (species in at least 3 gradients that carry every property) and the
 # same 12 models with A0_origin dropped (PLAN.md); properties on the residents'
 # step 02 scale (means and SDs across the 346 residents, traits logged), so both
 # pools share one scale; A0_dest (destination-control cover averaged over years,
 # log(100 x cover + 1), step 07a) standardised across all colonizer effects of 07a;
 # model-based coefficient intervals as step 05; run 07c to 07f without stopping.
-# Without abundance (Bills, 7 Nov): step 05's new ladder (Null, Experimental warming,
+# Without abundance (decided 7 Nov): step 05's new ladder (Null, Experimental warming,
 # Background climate, Species-specific responses, properties); A0_dest is still
 # computed and standardised but enters no model. Property models warm-started from the
-# Species-specific responses fit with optim BFGS, as step 05 (Bills, 7 Nov).
+# Species-specific responses fit with optim BFGS, as step 05 (decided 7 Nov).
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
 source("R/fit_model.R"); source("R/h_species.R"); source("R/md_table.R"); source("R/cache.R"); source("R/term_labels.R")
@@ -38,7 +38,7 @@ globalCallingHandlers(warning = function(w) {
 })
 out_dir <- "data/derived/07c_ladder_fit"
 dir.create(file.path(out_dir, "models"), recursive = TRUE, showWarnings = FALSE)
-cores <- 4L # of 11; 7 choked the machine (Bills, 7 Nov); results do not depend on it
+cores <- 4L # of 11; 7 choked the machine (decided 7 Nov); results do not depend on it
 
 d <- readRDS("data/derived/07a_colonizers/strength_df_y3.rds")
 stopifnot(nrow(d) == 379, !"A0_origin" %in% names(d)) # step 07a
@@ -70,7 +70,7 @@ stopifnot(nrow(g3) == 29, nrow(rows) == 110, n_distinct(rows$species) == 27, n_d
           n_distinct(rows$gradient_id) == 18) # at least 3 gradients, every property
 saveRDS(rows, file.path(out_dir, "ladder_rows.rds"))
 
-# ---- Formulas: step 05's, without abundance (Bills, 7 Nov) ------------------------
+# ---- Formulas: step 05's, without abundance (decided 7 Nov) ------------------------
 f_warm  <- ~ W
 f_env   <- ~ W * T * P
 prop_vars <- list(ldmc = "ldmc_z", lma = "lma_z", height = "height_z", graminoid = "graminoid", woody = "woody",
@@ -103,7 +103,7 @@ run_fit <- function(i, start = list()) {
   write_cache(res, path, key)
 }
 # two waves: the floor and Species-specific responses from metafor's default start, then the
-# property models warm-started from Species-specific responses (Bills, 7 Nov)
+# property models warm-started from Species-specific responses (decided 7 Nov)
 first <- which(!levels_fit$slug %in% names(prop_vars))
 fits <- parallel::mclapply(first, run_fit, mc.cores = cores, mc.preschedule = FALSE)
 if (any(sapply(fits, inherits, "try-error"))) stop("fits failed: ", paste(unlist(fits[sapply(fits, inherits, "try-error")]), collapse = "\n"))
@@ -131,14 +131,14 @@ for (f in fits) { # random structure exactly re_base / re_slopes
   if (f$slopes) stopifnot(identical(unname(f$m$g.names), c("W", "species")), identical(unname(f$m$h.names), c("T", "P", "TP", "species")),
                           identical(f$m$struct, slope_struct))
   else stopifnot(!isTRUE(f$m$withG), !isTRUE(f$m$withH))
-  stopifnot(!any(grepl("A0", colnames(f$m$X)))) # no abundance in any model (Bills, 7 Nov)
+  stopifnot(!any(grepl("A0", colnames(f$m$X)))) # no abundance in any model (decided 7 Nov)
 }
 canon <- function(x) vapply(strsplit(x, ":"), function(p) paste(sort(p), collapse = ":"), "")
 # property terms X, X:W, X:T, X:P, X:TP; metafor drops a term that is redundant on these rows (listed)
 dropped <- unlist(lapply(names(prop_vars), function(p) { added <- canon(setdiff(colnames(fits[[p]]$m$X), colnames(fits$species$m$X)))
   stopifnot(all(added %in% canon(prop_terms(prop_vars[[p]])))); setdiff(canon(prop_terms(prop_vars[[p]])), added) }))
 stopifnot(identical(dropped, "TP:woody")) # one woody species among the 27: woody:TP is redundant
-# step 05 stops on these two; for colonizers they are reported (Bills, 2 Nov: run without stopping)
+# step 05 stops on these two; for colonizers they are reported (decided 2 Nov: run without stopping)
 climate_change <- c(`Experimental warming` = tau2(fits$warming$m) / tau2(fits$null$m) - 1,
                     `Background climate` = tau2(fits$climate$m) / tau2(fits$null$m) - 1)
 prop_check <- bind_rows(lapply(names(prop_vars), function(p) { m4 <- fits[[p]]$m; m3 <- fits$species$m; denom <- tau2(m3) + sigma2_exp(m3)
@@ -161,7 +161,7 @@ coef_panel <- function(x, tag, ttl) { # as analysis/05_ladder_fit.R
     geom_point(aes(fill = excl), shape = 21, size = 4, stroke = 1) +
     scale_fill_manual(values = c(`TRUE` = "black", `FALSE` = "white"), labels = c(`TRUE` = "95% interval excludes zero", `FALSE` = "includes zero"), name = NULL) +
     labs(title = tag, subtitle = ttl, x = "Effect on colonizer strength (warmed cover)", y = NULL) +
-    theme_classic(base_size = 19) + theme(plot.title = element_text(face = "bold", size = 24), legend.position = "bottom", # larger text (Bills, 8 Nov)
+    theme_classic(base_size = 19) + theme(plot.title = element_text(face = "bold", size = 24), legend.position = "bottom", # larger text (decided 8 Nov)
                                           strip.text = element_text(face = "bold", size = 17), strip.background = element_blank())
 }
 s4b <- coef_panel(filter(coefs, model == "Background climate", term != "intrcpt"), "a)", "Colonizers, Background climate (model-based intervals)")
@@ -176,9 +176,9 @@ e4 <- function(x) ifelse(is.na(x), "", sprintf("%.3f", 1e4 * x))
 excl <- filter(coefs, ci_lower > 0 | ci_upper < 0, term != "intrcpt")
 report <- c(
   "# Step 07c: The colonizer ladder, fitted (Step D route 1, colonizers)", "",
-  paste0("The residents' ladder (step 05) was fitted to the colonizers (Bills, 2 Nov): warmed cover from years 3 and later (step 07a) for the ",
+  paste0("The residents' ladder (step 05) was fitted to the colonizers (decided 2 Nov): warmed cover from years 3 and later (step 07a) for the ",
          nrow(rows), " effects of the ", n_distinct(rows$species), " colonizer species found in at least 3 gradients that carry every property (",
-         n_distinct(rows$experiment_id), " experiments, ", n_distinct(rows$gradient_id), " gradients). The same 11 models, without abundance (Bills, 7 Nov): ",
+         n_distinct(rows$experiment_id), " experiments, ", n_distinct(rows$gradient_id), " gradients). The same 11 models, without abundance (decided 7 Nov): ",
          "Null, Experimental warming, Background climate, Species-specific responses and one model per property. Properties are on the residents' ",
          "step 02 scale (checked); A0_dest (log(100 x mean destination-control cover + 1)) is still standardised across all ", nrow(d),
          " colonizer effects of 07a but enters no model. ", sum(rows$strength_se == 0), " effects are measured absences (SE 0)."),
@@ -198,7 +198,7 @@ report <- c(
   "Property moves against Species-specific responses, as a share of its τ² + σ²_experiment:", "",
   md_table(transmute(prop_check, property, `τ² move` = sprintf("%+.1f%%", 100 * move_tau2), `σ²_experiment move` = sprintf("%+.1f%%", 100 * move_sigma2_experiment))),
   "", paste0("Moves beyond step 05's 5% limit: ", sum(abs(c(prop_check$move_tau2, prop_check$move_sigma2_experiment)) > 0.05), " of ", 2 * nrow(prop_check),
-             ". On ", nrow(rows), " effects the variance components are not pinned down well enough for that check to hold; they are reported, not enforced (Bills, 2 Nov)."),
+             ". On ", nrow(rows), " effects the variance components are not pinned down well enough for that check to hold; they are reported, not enforced (decided 2 Nov)."),
   "", "## Coefficients whose 95% interval excludes zero", "",
   if (nrow(excl)) md_table(transmute(excl, model, term, estimate = sprintf("%.4f", estimate), ci = sprintf("%.4f to %.4f", ci_lower, ci_upper))) else "None.",
   "", "## Change in unexplained variation at each comparison (Fig S20)", "",
@@ -210,9 +210,9 @@ report <- c(
   "", "## Warnings captured", "", { w <- unique(c(unlist(lapply(fits, function(f) if (length(f$warnings)) paste0(f$model, ": ", f$warnings))), warns))
     if (length(w)) paste("-", w) else "None." },
   "", "## Deviations from PLAN.md", "",
-  "- The colonizer ladder on the residents' reduction and models (Bills, 2 Nov); properties on the residents' scale.",
-  "- Property models warm-started from Species-specific responses with optim BFGS (Bills, 7 Nov, as step 05); the optimizer column above says which fits needed a fallback.",
-  "- Step 05's tau2 and property checks are reported, not enforced (Bills, 2 Nov: run without stopping).",
-  "- The colonizer coefficients are their own appendix figure (Fig S18), beside the residents' Fig S14; Fig S20 mirrors Fig S13 (Bills, 7 Nov; 8 Nov numbering).")
+  "- The colonizer ladder on the residents' reduction and models (decided 2 Nov); properties on the residents' scale.",
+  "- Property models warm-started from Species-specific responses with optim BFGS (decided 7 Nov, as step 05); the optimizer column above says which fits needed a fallback.",
+  "- Step 05's tau2 and property checks are reported, not enforced (decided 2 Nov: run without stopping).",
+  "- The colonizer coefficients are their own appendix figure (Fig S18), beside the residents' Fig S14; Fig S20 mirrors Fig S13 (decided 7 Nov; 8 Nov numbering).")
 writeLines(report, "reports/07c_ladder_fit.md")
 message("Step 07c written: ", nrow(rows), " effects, ", length(fits), " fits")

@@ -12,14 +12,14 @@
 #         interval equals mu +/- 1.96 sqrt(tau2 + se(mu)^2); class counts sum to
 #         the eligible count; no interval or whisker on tau anywhere.
 #
-# Decided 30 Oct (Bills): one fixed pooled mean per species (mods = ~ 0 +
+# Decided 30 Oct: one fixed pooled mean per species (mods = ~ 0 +
 # species) and one among-experiment variance per species (DIAG); the class
 # comes from the prediction interval of predict(), which carries tau2_s and the
 # uncertainty of mu_s (the species random intercept of the first version had
 # its variance estimated at about zero, pulling every mean onto the grand
 # mean). Approved with the plan: se_mu in species_summary. The all-years
-# sensitivity run was dropped on 30 Oct (Bills: not needed for now). On 1 Nov
-# (Bills) the species overview with two species panels became Fig 2, replacing
+# sensitivity run was dropped on 30 Oct (decided: not needed for now). On 1 Nov
+# the species overview with two species panels became Fig 2, replacing
 # the lower-vs-upper scatter with corner panels of the original plan.
 
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(metafor)})
@@ -40,7 +40,7 @@ stopifnot(nrow(strength_df) == 1004) # step 03b
 # ---- Eligible species (PLAN.md Step C) ------------------------------------
 eligible <- strength_df |>
   dplyr::summarise(n_gradients = dplyr::n_distinct(gradient_id), .by = species) |>
-  dplyr::filter(n_gradients >= 3) |>   # 2 Nov (Bills): at least 3 gradients
+  dplyr::filter(n_gradients >= 3) |>   # 2 Nov: at least 3 gradients
   dplyr::pull(species)
 d_c <- dplyr::filter(strength_df, species %in% eligible) |> mutate(species = factor(species))
 stopifnot(length(eligible) == 74, nrow(d_c) == 523) # at least 3 gradients
@@ -87,9 +87,9 @@ utils::write.csv(mutate(species_summary, class = as.character(class)), file.path
 
 named <- filter(species_summary, class != "Context-dependent")
 
-# ---- Fig 2 (main figure, Bills 1 Nov): a) species overview, b) c) two species --
+# ---- Fig 2 (main figure, decided 1 Nov): a) species overview, b) c) two species --
 # one row per species: pooled mean (point) and the model's prediction interval
-# for a new experiment (line), the interval that sets the class (Bills, 30 Oct)
+# for a new experiment (line), the interval that sets the class (decided 30 Oct)
 # species shown in panels b) and c), chosen here so that a) can mark them:
 # highest and lowest pooled strength among species in the most gradients
 # reached by at least two species
@@ -97,7 +97,7 @@ top_g <- sort(unique(species_summary$n_gradients), decreasing = TRUE)
 top_g <- top_g[sapply(top_g, function(g) sum(species_summary$n_gradients >= g) >= 2)][1]
 top <- filter(species_summary, n_gradients >= top_g)
 panel_species <- c(top$species[which.max(top$mu)], top$species[which.min(top$mu)])
-# readable version (Bills, 30 Oct): species with a pooled strength of at least
+# readable version (decided 30 Oct): species with a pooled strength of at least
 # half a percentage point of relative cover, plus every consistent species
 min_shown <- 0.005
 ranges <- species_summary |>
@@ -107,11 +107,11 @@ n_hidden <- nrow(species_summary) - nrow(ranges)
 x_lim <- range(c(ranges$lower, ranges$upper)) + c(-1, 1) * 0.03 * diff(range(c(ranges$lower, ranges$upper)))
 ranges$x_lab <- x_lim[1] - 0.01 * diff(x_lim)
 figS6 <- ggplot(ranges, aes(y = species)) +
-  # guide from each species name to its interval, in the class colour of the name (Bills, 2 Nov)
+  # guide from each species name to its interval, in the class colour of the name (decided 2 Nov)
   geom_segment(aes(x = x_lim[1], xend = lower, yend = species), colour = cols[as.character(ranges$class)],
                linewidth = 0.9, alpha = 0.45) +
   geom_vline(xintercept = 0, colour = "grey50") +
-  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 4) + # thicker (Bills, 2 Nov)
+  geom_segment(aes(x = lower, xend = upper, yend = species, colour = n_gradients), linewidth = 4) + # thicker (decided 2 Nov)
   geom_point(aes(x = mu, fill = class), shape = 21, colour = "black", size = 10, stroke = 0.8) +
   # gradients (experiments), right of each interval's upper end, never left of the zero line
   geom_label(aes(x = pmax(upper, 0) + 0.006 * diff(x_lim), label = paste0(n_gradients, " (", n_experiments, ")")), hjust = 0,
@@ -133,9 +133,9 @@ figS6 <- ggplot(ranges, aes(y = species)) +
         axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank(),
         plot.margin = margin(15, 40, 15, 565))
 # ---- Fig 2 panels b) and c): best winner and worst loser among the most widely sampled species
-# (Bills, 1 Nov): among species in the largest number of gradients reached by at least two
+# (decided 1 Nov): among species in the largest number of gradients reached by at least two
 # species (here 12), the highest and the lowest pooled strength; one row per experiment,
-# grouped by gradient, grey arrow from origin-control cover (hollow) to warmed cover (filled; no class colours, Bills),
+# grouped by gradient, grey arrow from origin-control cover (hollow) to warmed cover (filled; no class colours),
 # mean relative cover over years >= 3 as the strength
 sites <- utils::read.csv("data/derived/01_relative_cover/experiments_kept.csv")
 site_elev <- readRDS("data/derived/prep/sites.rds") |> select(region, site_id, elevation)
@@ -178,7 +178,7 @@ fig_s6 <- patchwork::wrap_plots(figS6, bc,
                                 ncol = 2, widths = c(2.2, 1)) +
   # all legends collected in one row under the whole figure
   patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical",
-    legend.text = element_text(size = 42, face = "bold"), legend.title = element_text(size = 42, face = "bold")) # one legend size (Bills, 2 Nov)
+    legend.text = element_text(size = 42, face = "bold"), legend.title = element_text(size = 42, face = "bold")) # one legend size (decided 2 Nov)
 dir.create("figures/main", recursive = TRUE, showWarnings = FALSE)
 ggsave("figures/main/fig2.png", fig_s6, width = 44, height = 40, dpi = 100, bg = "white")
 
@@ -228,8 +228,8 @@ report <- c(
                                paste(fallback, collapse = ", "), ".") else character(),
   if (length(warns)) paste("-", unique(warns)) else if (!length(fallback)) "None." else character(),
   "", "## Deviations from PLAN.md", "",
-  paste("None: PLAN.md Step C was revised on 30 Oct (Bills) to fixed species means with predict() intervals, and Fig 2",
-        "was redesigned on 1 Nov (Bills: species overview with two species panels; PLAN.md updated). Decision approved",
+  paste("None: PLAN.md Step C was revised on 30 Oct to fixed species means with predict() intervals, and Fig 2",
+        "was redesigned on 1 Nov (decided: species overview with two species panels; PLAN.md updated). Decision approved",
         "with the plan: se_mu added to species_summary.")
 )
 writeLines(report, "reports/04_classification.md")

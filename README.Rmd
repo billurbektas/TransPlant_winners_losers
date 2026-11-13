@@ -407,7 +407,7 @@ Code: [`10_figures.R`](analysis/10_figures.R) · tables [`tables/`](tables/) (S1
 ## Repository structure
 
 ```
-PLAN.md, MILESTONES.md, CLAUDE.md   the plan, the steps and their review status, the working rules
+PLAN.md, MILESTONES.md             the plan, and the steps with their review status
                                     (local files, not in git)
 prep/                               data preparation, a targets pipeline
   _targets.R                          one target per preparation step (P1 to P7)

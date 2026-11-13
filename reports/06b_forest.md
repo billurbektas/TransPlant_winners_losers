@@ -1,6 +1,6 @@
 # Step 06b: Sensitivity, random forest (held out)
 
-Every level of the ladder except Null was refitted as a random forest (ranger 0.18.0) on the 512 ladder rows of step 05, with the variables of the step 06 formulas as predictors (without abundance, Bills 7 Nov) and species as a factor in the Species-specific responses and the seven property + species forests. Each forest was fitted 16 times, once without each scored gradient, and asked to predict it, with 3000 trees, no case weights and one parameter set for every level and fold: minimum node size 40 and mtry the square root of the number of predictors, chosen from 10 settings as the one with the highest median out-of-bag R² over the 17 levels (Bills, 2 Nov). Only held-out predictions are read. They are scored as in step 06: R² against the metafor Null on the same gradient, Spearman ρ within the gradient and loser/winner skill, and set beside step 06's held-out values per gradient and as medians. The forest Null is the mean of the training effects.
+Every level of the ladder except Null was refitted as a random forest (ranger 0.18.0) on the 512 ladder rows of step 05, with the variables of the step 06 formulas as predictors (without abundance, decided 7 Nov) and species as a factor in the Species-specific responses and the seven property + species forests. Each forest was fitted 16 times, once without each scored gradient, and asked to predict it, with 3000 trees, no case weights and one parameter set for every level and fold: minimum node size 40 and mtry the square root of the number of predictors, chosen from 10 settings as the one with the highest median out-of-bag R² over the 17 levels (decided 2 Nov). Only held-out predictions are read. They are scored as in step 06: R² against the metafor Null on the same gradient, Spearman ρ within the gradient and loser/winner skill, and set beside step 06's held-out values per gradient and as medians. The forest Null is the mean of the training effects.
 
 ## Counts
 
@@ -34,7 +34,7 @@ Each setting was fitted once per level on all 512 rows, and scored by its out-of
 
 ## No case weights
 
-PLAN.md's case weights 1 / SE² were dropped (Bills, 2 Nov). Precision is tied to effect size here (Spearman ρ between |strength| and SE 0.65): the most precise effects are the near-zero ones. On the 512 rows the 1 / SE² weights span a factor of 56,834, their effective number of rows, (Σw)² / Σw², is 20.5, the 5 most precise effects carry 40% of the weight and the single most precise one (Crocus vernus at DE_TransAlps) 16%; ranger draws bootstrap rows in proportion to case weights, so the weighted forests predicted about zero everywhere (first run, 2 Nov). The meta-regressions do not weight by 1 / SE² either: rma.mv, given the sampling variances only, weights by the inverse of SE² plus the random-effect variances it estimates in the same fit, which is far more even.
+PLAN.md's case weights 1 / SE² were dropped (decided 2 Nov). Precision is tied to effect size here (Spearman ρ between |strength| and SE 0.65): the most precise effects are the near-zero ones. On the 512 rows the 1 / SE² weights span a factor of 56,834, their effective number of rows, (Σw)² / Σw², is 20.5, the 5 most precise effects carry 40% of the weight and the single most precise one (Crocus vernus at DE_TransAlps) 16%; ranger draws bootstrap rows in proportion to case weights, so the weighted forests predicted about zero everywhere (first run, 2 Nov). The meta-regressions do not weight by 1 / SE² either: rma.mv, given the sampling variances only, weights by the inverse of SE² plus the random-effect variances it estimates in the same fit, which is far more even.
 
 Spread of the forest predictions: within a held-out gradient their standard deviation is a median 31% of the observed one, and 77 of 272 forests predict one sign for every effect of the gradient (skill exactly 0 there).
 
@@ -113,8 +113,8 @@ None.
 
 ## Deviations from PLAN.md
 
-- No case weights, instead of 1 / SE² (Bills, 2 Nov; PLAN.md edited).
-- Held-out values only, no fit values (Bills, 2 Nov; PLAN.md edited).
-- No partial-dependence plots (Bills, 2 Nov; PLAN.md edited).
-- Forests also for the seven property + species levels (Bills, 2 Nov).
+- No case weights, instead of 1 / SE² (decided 2 Nov; PLAN.md edited).
+- Held-out values only, no fit values (decided 2 Nov; PLAN.md edited).
+- No partial-dependence plots (decided 2 Nov; PLAN.md edited).
+- Forests also for the seven property + species levels (decided 2 Nov).
 - The figure is appendix Fig S16 (8 Nov numbering), written to `figures/appendix/figS16.png`.

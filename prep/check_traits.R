@@ -1,6 +1,6 @@
 # P7: checks of the TRY trait records behind P2's medians, within TRY only.
 # A one-off script outside the targets pipeline: it reports and changes
-# nothing (CLAUDE.md: no audit-only targets in prep/). The rules Bills accepts
+# nothing (no audit-only targets in prep/). The rules accepted
 # after reading the report become P2 cleaning targets (decided 29 Oct).
 #
 # Run from the repository root:  Rscript prep/check_traits.R
@@ -17,7 +17,7 @@
 #      genus has < 3 others), |robust z| > 3.5; plausibility rules for woody
 #      height, graminoid LDMC and LMA-LDMC discordance
 #   4. fragile medians: < 3 records or a single dataset
-# Thresholds decided 29 Oct (Bills).
+# Thresholds decided 29 Oct.
 
 suppressPackageStartupMessages(library(dplyr))
 source("prep/R/report.R") # md_table()
@@ -163,7 +163,7 @@ counts <- tibble::tibble(
 report <- c(
   "# P7: Trait checks", "",
   paste0("Checks of the ", fmt(nrow(records)), " TRY records behind P2's medians after P2's screening (", n_distinct(records$species),
-         " species; LDMC, LMA, height), within TRY only and on the log scale. Nothing is changed here. The rules Bills accepted on 29-30 Oct ",
+         " species; LDMC, LMA, height), within TRY only and on the log scale. Nothing is changed here. The rules accepted on 29-30 Oct ",
          "(trees, two reviewed values, record outliers and unit slips) are P2 cleaning targets, so this report shows what remains after them; ",
          "new record flags can appear because the species medians moved. Thresholds: robust z ", z_cut, "; datasets off by ", dataset_factor,
          "x on at least ", dataset_min_species, " shared species; unit signatures at 10, 100 and 1000x within ",

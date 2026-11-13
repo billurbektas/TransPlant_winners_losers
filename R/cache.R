@@ -1,4 +1,4 @@
-# Caches keyed by their inputs (Bills, 3 Nov); used by steps 02, 05, 06, 06b, 07a, 07c,
+# Caches keyed by their inputs (decided 3 Nov); used by steps 02, 05, 06, 06b, 07a, 07c,
 # 07d and 07e. A cached fit is reused only when the key stored with it equals the key of
 # today's inputs: the rows it is fitted to (only the columns it uses), its model
 # specification and the script's cache version. When an upstream step changes those rows,

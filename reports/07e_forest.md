@@ -1,6 +1,6 @@
 # Step 07e: Sensitivity, random forest, colonizers (held out)
 
-Every level of the ladder except Null was refitted as a random forest (ranger 0.18.0) on the 110 colonizer ladder rows of step 07c, with the variables of the step 07d formulas (without abundance, Bills 7 Nov) as predictors and species as a factor in the Species-specific responses and the seven property + species forests. Each forest was fitted 8 times, once without each scored gradient, and asked to predict it, with 3000 trees, no case weights and one parameter set for every level and fold: minimum node size 5 and mtry half the number of predictors, chosen from 10 settings as the one with the highest median out-of-bag R² over the 17 levels (Bills, 2 Nov). Only held-out predictions are read. They are scored as in step 07d: R² against the metafor Null on the same gradient and Spearman ρ within the gradient (no skill: colonizers have no loser class), and set beside 07d's held-out values per gradient and as medians. The forest Null is the mean of the training effects.
+Every level of the ladder except Null was refitted as a random forest (ranger 0.18.0) on the 110 colonizer ladder rows of step 07c, with the variables of the step 07d formulas (without abundance, decided 7 Nov) as predictors and species as a factor in the Species-specific responses and the seven property + species forests. Each forest was fitted 8 times, once without each scored gradient, and asked to predict it, with 3000 trees, no case weights and one parameter set for every level and fold: minimum node size 5 and mtry half the number of predictors, chosen from 10 settings as the one with the highest median out-of-bag R² over the 17 levels (decided 2 Nov). Only held-out predictions are read. They are scored as in step 07d: R² against the metafor Null on the same gradient and Spearman ρ within the gradient (no skill: colonizers have no loser class), and set beside 07d's held-out values per gradient and as medians. The forest Null is the mean of the training effects.
 
 ## Counts
 
@@ -92,5 +92,5 @@ None.
 
 ## Deviations from PLAN.md
 
-- Step 06b on the colonizer ladder rows (Bills, 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.
-- No loser/winner skill (no loser class); R² below −100 taken out and listed (Bills, 2 Nov), from both meta-regression and forest for that level and gradient (3 Nov).
+- Step 06b on the colonizer ladder rows (decided 2 Nov): no case weights, held-out values only, out-of-bag tuning, property + species forests, as step 06b.
+- No loser/winner skill (no loser class); R² below −100 taken out and listed (decided 2 Nov), from both meta-regression and forest for that level and gradient (3 Nov).

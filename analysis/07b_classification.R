@@ -1,7 +1,7 @@
 # Step 07b: consistent colonizers (Step C, colonizers).
 #
 # PLAN.md: The colonizer story, "Consistent colonizers and context-dependent
-#   arrival"; Fig 3 (mirrors the anchored Fig 2, Bills 2 Nov).
+#   arrival"; Fig 3 (mirrors the anchored Fig 2, decided 2 Nov).
 # Reads:  data/derived/07a_colonizers/strength_df_y3.rds (warmed cover, years >= 3);
 #         data/derived/01_relative_cover/cover_long.rds, experiments_kept.csv and
 #         data/derived/prep/sites.rds (non-colonizers; Fig 3 b, c)
@@ -12,7 +12,7 @@
 #         tau2_s per modelled species; the prediction interval equals
 #         mu +/- 1.96 sqrt(tau2 + se(mu)^2); classes sum to the 29 eligible.
 #
-# Decided 2 Nov (Bills): strength from years 3 and later, as for residents; the
+# Decided 2 Nov: strength from years 3 and later, as for residents; the
 # residents' Step C model (one fixed mean and one among-experiment variance per
 # species, fitted per species, bobyqa where nlminb fails); a species with no warmed
 # cover in years >= 3 in any of its experiments is a consistent non-colonizer,
@@ -47,7 +47,7 @@ warmed_y3 <- cover_long |>
          paste(experiment_id, species) %in% paste(d_c$experiment_id, d_c$species)) |>
   summarise(arrived = any(relative_cover > 0), .by = species)
 non_colonizers <- warmed_y3$species[!warmed_y3$arrived]
-stopifnot(nrow(warmed_y3) == 29, identical(non_colonizers, "Ranunculus acris"), # Bills, 2 Nov
+stopifnot(nrow(warmed_y3) == 29, identical(non_colonizers, "Ranunculus acris"), # decided 2 Nov
           all(d_c$strength[d_c$species %in% non_colonizers] < 1e-12))
 d_m <- filter(d_c, !species %in% non_colonizers) |> mutate(species = factor(species))
 stopifnot(nlevels(d_m$species) == 28)
@@ -140,7 +140,7 @@ corner <- function(sp, tag) {
   info <- filter(species_summary, species == sp)
   ggplot(d, aes(y = row_id)) +
     geom_vline(xintercept = 0, colour = "grey50", linewidth = 0.8) +
-    geom_segment(aes(x = destination_control, xend = warmed, yend = row_id), colour = "grey40", linewidth = 1.2) + # no arrow: not a change (Bills, 2 Nov)
+    geom_segment(aes(x = destination_control, xend = warmed, yend = row_id), colour = "grey40", linewidth = 1.2) + # no arrow: not a change (decided 2 Nov)
     geom_point(aes(x = destination_control, shape = "Destination control"), fill = "white", colour = "grey20", size = 13, stroke = 2) +
     geom_point(aes(x = warmed, shape = "Warmed"), colour = "grey50", size = 13, alpha = 0.55) +
     scale_y_discrete(labels = setNames(d$row, d$row_id)) +
@@ -158,7 +158,7 @@ bc <- patchwork::wrap_plots(corner(panel_species[1], "b)"), corner(panel_species
 fig <- patchwork::wrap_plots(pa, bc, ncol = 2, widths = c(2.2, 1)) +
   patchwork::plot_layout(guides = "collect") & theme(legend.position = "bottom", legend.box = "vertical",
     legend.text = element_text(size = 42, face = "bold"), legend.title = element_text(size = 42, face = "bold"))
-ggsave("figures/main/fig3.png", fig, # main Fig 3, anchored (Bills, 2 Nov)
+ggsave("figures/main/fig3.png", fig, # main Fig 3, anchored (decided 2 Nov)
        width = 44, height = 30, dpi = 100, bg = "white")
 
 # ---- Report ----------------------------------------------------------------------
@@ -184,7 +184,7 @@ report <- c(
   md_table(arrange(species_summary, desc(mu)) |> transmute(species, class = as.character(class), n_gradients, n_experiments, n_measured_absences,
                                                            mu = f4(mu), se_mu = f4(se_mu), tau = f4(tau), lower = f4(lower), upper = f4(upper))),
   "", "## Fig 3", "", "![Fig 3](../figures/main/fig3.png)", "",
-  paste0("Fig 3 mirrors Fig 2 (Bills, 2 Nov). a): point = pooled warmed cover, filled by class; line = 95% prediction interval for a new ",
+  paste0("Fig 3 mirrors Fig 2 (decided 2 Nov). a): point = pooled warmed cover, filled by class; line = 95% prediction interval for a new ",
          "experiment, shaded by the number of gradients and labelled gradients (experiments); every modelled species is shown. b) and c): ",
          panel_species[1], " and ", panel_species[2], ", the highest and lowest pooled warmed cover among species in at least ", top_g,
          " gradients; one row per experiment, mean relative cover over years 3 and later in destination controls (hollow) and warmed plots (filled)."),
@@ -192,8 +192,8 @@ report <- c(
   if (length(fallback)) paste0("- Refitted with the bobyqa optimizer after nlminb did not declare convergence: ", paste(fallback, collapse = ", "), ".") else character(),
   if (length(warns)) paste("-", unique(warns)) else if (!length(fallback)) "None." else character(),
   "", "## Deviations from PLAN.md", "",
-  "- Fig 3 mirrors the anchored Fig 2 (two corner panels by Fig 2's rule, destination control to warmed), not PLAN.md's mock with three panels (Bills, 2 Nov; PLAN.md updated).",
-  "- Consistent non-colonizers are read in the years 3 and later window used for strength (Bills, 2 Nov).",
+  "- Fig 3 mirrors the anchored Fig 2 (two corner panels by Fig 2's rule, destination control to warmed), not PLAN.md's mock with three panels (decided 2 Nov; PLAN.md updated).",
+  "- Consistent non-colonizers are read in the years 3 and later window used for strength (decided 2 Nov).",
   "- Fig 2's rule hiding context-dependent species with |pooled strength| below 0.005 is not applied: almost every colonizer would be hidden.")
 writeLines(report, "reports/07b_classification.md")
 message("Step 07b written: ", paste(sprintf("%s %d", names(table(species_summary$class)), table(species_summary$class)), collapse = "; "))
